@@ -78,13 +78,13 @@ Valkyrja is being ported to five languages in priority order:
 
 | # | Language       | Status                                | Build tool                                     |
 |---|----------------|---------------------------------------|------------------------------------------------|
-| 1 | **PHP**        | Production — reference implementation | `valkyrja/build` (separate repo, formerly Bin) |
-| 2 | **Java**       | In progress                           | `io.valkyrja:build`                            |
-| 3 | **Go**         | Proof of concept                      | `io/valkyrja/build`                            |
-| 4 | **Python**     | Planned                               | `valkyrja-build`                               |
-| 5 | **TypeScript** | Planned                               | `@valkyrja/build`                              |
+| 1 | **PHP**        | Production — reference implementation | `valkyrja-forge` (separate repo, formerly Bin) |
+| 2 | **Java**       | In progress                           | `io.valkyrja:forge`                            |
+| 3 | **Go**         | Proof of concept                      | `io/valkyrja/forge`                            |
+| 4 | **Python**     | Planned                               | `valkyrja-forge`                               |
+| 5 | **TypeScript** | Planned                               | `@valkyrja/forge`                              |
 
-Future: Kotlin (nearly free from Java), Scala, Rust, Ruby, C#.
+Future: Kotlin (nearly free from Java), Scala, Rust, Ruby.
 
 ---
 
@@ -153,7 +153,7 @@ constants files are unaffected.
 ### Build Tool
 
 - Separate repository and package per language — dev dependency only, never production
-- PHP `Bin` component extracted to `valkyrja/build` — `nikic/php-parser` lives there, not in the framework
+- PHP `Bin` component extracted to `valkyrja-forge` — `nikic/php-parser` lives there, not in the framework
 - Build tool is itself a Valkyrja application — validates the cache-optional architecture
 - See `BUILD_TOOL.md`
 
@@ -168,7 +168,7 @@ for the full checklist. Priority items:
 2. Provider contract interfaces
 3. `publishers()` map migration
 4. `#[Handler]` and `#[Parameter]` attributes
-5. Bin extraction to `valkyrja/build` — **must happen before handler logic ships** (existing `cache:generate` will
+5. Bin extraction to `valkyrja-forge` — **must happen before handler logic ships** (existing `cache:generate` will
    break)
 
 ---
@@ -193,18 +193,18 @@ Read these files in order:
 ## Relationship to Framework Repositories
 
 ```
-valkyrja-forge          ← you are here — architecture and decisions
+valkyrja-architecture   ← you are here — architecture and decisions
         │
         ├── valkyrja/framework (PHP)     ← runtime, zero build dependencies
-        ├── valkyrja/build   (PHP)       ← build tool, nikic/php-parser
+        ├── valkyrja-forge   (PHP)       ← build tool, nikic/php-parser
         ├── io.valkyrja/framework (Java) ← runtime
-        ├── io.valkyrja/build    (Java)  ← build tool, annotation processor
+        ├── io.valkyrja-forge    (Java)  ← build tool, annotation processor
         ├── io/valkyrja (Go)             ← runtime
-        ├── io/valkyrja/build (Go)       ← build tool, go/analysis
+        ├── io/valkyrja-forge (Go)       ← build tool, go/analysis
         ├── valkyrja (Python)            ← runtime
-        ├── valkyrja-build (Python)      ← build tool, ast + inspect
+        ├── valkyrja-forge (Python)      ← build tool, ast + inspect
         ├── @valkyrja/framework (TS)     ← runtime
-        └── @valkyrja/build (TS)         ← build tool, TypeScript compiler API
+        └── @valkyrja-forge (TS)         ← build tool, TypeScript compiler API
 ```
 
 Each framework repository is runtime-only with zero AST or build tooling dependencies. Each build tool repository is a

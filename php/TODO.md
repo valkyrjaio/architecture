@@ -52,18 +52,6 @@
     - Only allow handler for routes and listener.
     - CacheableHandlerRoute|CacheableHandlerListener for cache writing of said
       closure.
-- Update Routes
-    - Current route and dynamic route (for http)
-        - abstract/Route|DynamicRoute
-    - HandlerRouteContract
-        - getHandler
-        - withHandler
-    - CacheableHandlerRouteContract extends HandlerRouteContract
-        - getHandlerString
-        - withHandlerString
-    - DispatchRouteContract
-        - getDispatch
-        - withDispatch
 
 ## Bin
 

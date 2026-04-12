@@ -1,18 +1,17 @@
-# Valkyrja Build Tool
+# Valkyrja Forge — Build Tool
 
 ## Overview
 
-`valkyrja-build` is a standalone tool that ships with the Valkyrja framework. It
-generates cache data files for production CGI and lambda deployments across all
-language ports. The framework itself has zero AST or build dependency — all
-source extraction, analysis, and code generation logic lives exclusively in the
-build tool.
+`valkyrja-forge` is a standalone tool that ships with the Valkyrja framework. It generates cache data files for
+production CGI and lambda deployments across all language ports. The framework itself has zero AST or build dependency —
+all source extraction, analysis, and code generation logic lives exclusively in the build tool.
 
-The build tool is itself a Valkyrja application. It ships without cache by
-default since it runs at deploy time rather than per-request. For environments
-where build tool startup time is a concern, `valkyrja-build` can generate its
-own cache and rebuild — the same two-pass process it performs for any other
-compiled language application.
+**valkyrja-forge** is itself a Valkyrja application. It ships without cache by default since it runs at deploy time
+rather than per-request. For environments where build tool startup time is a concern, valkyrja-forge can generate its
+own cache and rebuild — the same two-pass process it performs for any other compiled language application.
+
+The name fits: a forge is where raw materials are shaped into something useful. valkyrja-forge takes raw source files
+and shapes them into optimized cache artifacts ready for production.
 
 ---
 
@@ -23,30 +22,25 @@ The build tool:
 1. Reads the application config class to discover top-level component providers
 2. Walks the static provider tree via AST to discover all sub-providers
 3. Categorizes each leaf provider (container / http route / cli route / event)
-4. Extracts all bindings, routes, listeners, and commands across every provider
-   of each type
-5. For routes: constructs plain `ValkyrjaRoute` objects, runs
-   `ProcessorContract::route()` to compile regexes, pre-builds all dispatcher
-   indexes
+4. Extracts all bindings, routes, listeners, and commands across every provider of each type
+5. For routes: constructs plain `ValkyrjaRoute` objects, runs `ProcessorContract::route()` to compile regexes,
+   pre-builds all dispatcher indexes
 6. Resolves all type references to fully-qualified names
-7. Writes exactly **four** aggregated data classes for the entire application —
-   one per concern
+7. Writes exactly **four** aggregated data classes for the entire application — one per concern
 8. Generated files are compiled/included in the final deployment artifact
 
-The build tool is a **source code generator** — it writes strings that are valid
-source code. It does not need to instantiate, extend, or have access to
-application-defined custom classes at generation time. Class names from AST are
-written as text. The compiler/runtime resolves them when the generated files are
-compiled/loaded alongside the application.
+The build tool is a **source code generator** — it writes strings that are valid source code. It does not need to
+instantiate, extend, or have access to application-defined custom classes at generation time. Class names from AST are
+written as text. The compiler/runtime resolves them when the generated files are compiled/loaded alongside the
+application.
 
 ---
 
 ## Application Config — Build Tool Entry Point
 
-The build tool's entry point is the application config class — the same class
-the developer already uses to configure the application. No separate
-`valkyrja.yaml` file is needed. The config class is already the authoritative
-list of what the application uses.
+The build tool's entry point is the application config class — the same class the developer already uses to configure
+the application. No separate `valkyrja.yaml` file is needed. The config class is already the authoritative list of what
+the application uses.
 
 ```php
 // PHP — the config class IS the build tool entry point
@@ -63,10 +57,9 @@ $app = Application::create(
 );
 ```
 
-The build tool reads the config class's `providers` list from AST — the same way
-it reads any other provider list method. Class references must use `::class` /
-`.class` / class objects directly — **not constants from a constants class**.
-String constant references are not statically resolvable by the build tool.
+The build tool reads the config class's `providers` list from AST — the same way it reads any other provider list
+method. Class references must use `::class` / `.class` / class objects directly — **not constants from a constants class
+**. String constant references are not statically resolvable by the build tool.
 
 ```
 ✅ HttpComponentProvider::class     — direct ::class reference, readable
@@ -79,55 +72,51 @@ String constant references are not statically resolvable by the build tool.
 
 ### Component Provider Constants Class — Dropped
 
-A constants class for component provider class references was considered but
-dropped. It would allow developers to write:
+A constants class for component provider class references was considered but dropped. It would allow developers to
+write:
 
 ```php
 // this breaks the build tool — constant reference not resolvable from AST
 new AppConfig(providers: [HttpConstants::HTTP_COMPONENT_PROVIDER])
 ```
 
-Since the build tool cannot follow constant references without executing code,
-and since `::class` is already the canonical, IDE-supported, autoloader-verified
-way to reference a class in PHP and Java, the component provider constants class
-adds no value and introduces a failure mode. It is not part of the framework.
+Since the build tool cannot follow constant references without executing code, and since `::class` is already the
+canonical, IDE-supported, autoloader-verified way to reference a class in PHP and Java, the component provider constants
+class adds no value and introduces a failure mode. It is not part of the framework.
 
-**Binding key constants files are unaffected** — those exist for
-Go/TypeScript/Python where no `::class` equivalent exists, and for
-cross-language string identity. They are never used in provider lists.
+**Binding key constants files are unaffected** — those exist for Go/TypeScript/Python where no `::class` equivalent
+exists, and for cross-language string identity. They are never used in provider lists.
 
 ### Build Tool Invocation
 
 ```bash
 # PHP — auto-discovers AppConfig from conventional location
-valkyrja-build generate
+valkyrja-forge generate
 
 # or explicitly specify the config class
-valkyrja-build generate --config "App\Config\AppConfig"
+valkyrja-forge generate --config "App\Config\AppConfig"
 
 # Java
-valkyrja-build generate --config app.config.AppConfig
+valkyrja-forge generate --config app.config.AppConfig
 
 # Go
-valkyrja-build generate --config app/config.AppConfig
+valkyrja-forge generate --config app/config.AppConfig
 
 # Python
-valkyrja-build generate --config app.config.AppConfig
+valkyrja-forge generate --config app.config.AppConfig
 
 # TypeScript
-valkyrja-build generate --config src/config/AppConfig
+valkyrja-forge generate --config src/config/AppConfig
 ```
 
-The build tool reads provider list methods from AST without executing them. All
-provider list methods must return simple list/array/map literals with no
-conditional logic — this is a hard contract enforced by the build tool.
+The build tool reads provider list methods from AST without executing them. All provider list methods must return simple
+list/array/map literals with no conditional logic — this is a hard contract enforced by the build tool.
 
 ---
 
 ## The Four Output Classes
 
-The build tool always generates exactly four classes regardless of how many
-providers or routes the application has:
+The build tool always generates exactly four classes regardless of how many providers or routes the application has:
 
 | Output class         | Contains                                                                            |
 |----------------------|-------------------------------------------------------------------------------------|
@@ -140,8 +129,7 @@ providers or routes the application has:
 
 ## Build Tool Contract
 
-Any method the build tool reads must return a single flat literal with no logic.
-Applies to all languages:
+Any method the build tool reads must return a single flat literal with no logic. Applies to all languages:
 
 ```
 ✅ Simple list/array/slice literal
@@ -171,28 +159,26 @@ See: https://valkyrja.io/docs/providers#build-tool-compatibility
 
 ## The Build Tool Bootstrap Problem — And Why It Doesn't Matter
 
-The build tool is a Valkyrja application, which means it bootstraps via the
-provider tree like any other Valkyrja application. Since it ships without its
-own cache files, it pays the full bootstrap cost on every run. In practice this
-is irrelevant — the build tool runs once at deploy time in a CI pipeline, not
-per-request. A bootstrap that takes a second or two is acceptable.
+The build tool is a Valkyrja application, which means it bootstraps via the provider tree like any other Valkyrja
+application. Since it ships without its own cache files, it pays the full bootstrap cost on every run. In practice this
+is irrelevant — the build tool runs once at deploy time in a CI pipeline, not per-request. A bootstrap that takes a
+second or two is acceptable.
 
 For environments where this matters:
 
 ```bash
 # pass 1 — build the build tool without cache (slow first run)
-valkyrja-build build-self --output build-tool-bootstrap
+valkyrja-forge build-self --output build-tool-bootstrap
 
 # pass 2 — use the bootstrap to generate the build tool's own cache
 ./build-tool-bootstrap generate --self
 
 # pass 3 — rebuild the build tool with its own cache (fast)
-valkyrja-build build-self --with-cache --output valkyrja-build-optimized
+valkyrja-forge build-self --with-cache --output valkyrja-forge-optimized
 ```
 
-This is the same two-pass compile process the build tool applies to any compiled
-language application. The build tool eating its own dog food is a validation
-that the framework's cache-optional architecture is self-consistent.
+This is the same two-pass compile process the build tool applies to any compiled language application. The build tool
+eating its own dog food is a validation that the framework's cache-optional architecture is self-consistent.
 
 ---
 
@@ -202,9 +188,8 @@ that the framework's cache-optional architecture is self-consistent.
 
 **Dependencies:** `nikic/php-parser` (dev dependency), standard PHP autoloader
 
-**File resolution:** `ReflectionClass::getFileName()` — resolves any
-autoloadable class to its source file path. No environment assumptions beyond
-the class being autoloadable.
+**File resolution:** `ReflectionClass::getFileName()` — resolves any autoloadable class to its source file path. No
+environment assumptions beyond the class being autoloadable.
 
 **Provider tree walk:**
 
@@ -329,11 +314,11 @@ $compiledRegex  = $processedRoute->getCompiledRegex();
 
 ### Java
 
-**Dependencies:** Java annotation processor (`javax.annotation.processing`),
-Trees API (`com.sun.source.tree`), JavaPoet for code generation
+**Dependencies:** Java annotation processor (`javax.annotation.processing`), Trees API (`com.sun.source.tree`), JavaPoet
+for code generation
 
-**File resolution:** Annotation processor has direct access to source files
-during `javac` via the Trees API — no external file resolution needed.
+**File resolution:** Annotation processor has direct access to source files during `javac` via the Trees API — no
+external file resolution needed.
 
 **Annotation processor setup:**
 
@@ -375,8 +360,7 @@ private void processHandlerMethod(ExecutableElement method) {
 
     // find the @Handler annotation and extract lambda source text
     for (AnnotationMirror annotation : method.getAnnotationMirrors()) {
-        if (!annotation.getAnnotationType().toString().equals(Handler.class.getName()))
-            continue;
+        if (!annotation.getAnnotationType().toString().equals(Handler.class.getName())) continue;
 
         // get the lambda argument from the annotation
         for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry
@@ -462,11 +446,10 @@ writeTo(processingEnv.getFiler());
 
 ### Go
 
-**Dependencies:** `go/analysis`, `go/ast`, `go/parser`, `go/token`, `go/types` —
-all standard library
+**Dependencies:** `go/analysis`, `go/ast`, `go/parser`, `go/token`, `go/types` — all standard library
 
-**File resolution:** Go package paths map directly to directory paths.
-`go/packages.Load()` resolves package names to source files.
+**File resolution:** Go package paths map directly to directory paths. `go/packages.Load()` resolves package names to
+source files.
 
 **Package loading:**
 
@@ -555,7 +538,7 @@ import (
     "io/valkyrja/http/routing/data/contract"
 )
 
-// AppHttpRoutingData — generated by valkyrja-build, do not edit
+// AppHttpRoutingData — generated by valkyrja-forge, do not edit
 var AppHttpRoutingData = data.HttpRoutingData{
     Routes: map[string]contract.RouteContract{
         {{- range .Routes}}
@@ -590,9 +573,8 @@ os.WriteFile("app/cache/http_routing_data.go", formatted, 0644)
 
 **Dependencies:** `ast` (standard library), `inspect` (standard library)
 
-**File resolution:** `inspect.getfile(ClassName)` — equivalent of PHP's
-`ReflectionClass::getFileName()`. Works for any importable class including
-framework classes.
+**File resolution:** `inspect.getfile(ClassName)` — equivalent of PHP's `ReflectionClass::getFileName()`. Works for any
+importable class including framework classes.
 
 **Provider tree walk:**
 
@@ -708,7 +690,7 @@ def resolve_fqn(source: str, import_map: dict[str, str]) -> str:
 from string import Template
 
 ROUTING_DATA_TEMPLATE = '''
-# generated by valkyrja-build — do not edit
+# generated by valkyrja-forge — do not edit
 from valkyrja.http.routing.data import HttpRoutingData
 $imports
 
@@ -755,8 +737,8 @@ open('app/cache/app_http_routing_data.py', 'w').write(output)
 
 **Dependencies:** `typescript` npm package (compiler API), standard Node.js `fs`
 
-**File resolution:** TypeScript compiler API resolves module references to
-source files via `tsconfig.json` — no separate file resolution step needed.
+**File resolution:** TypeScript compiler API resolves module references to source files via `tsconfig.json` — no
+separate file resolution step needed.
 
 **Program setup:**
 
@@ -901,7 +883,7 @@ function generateRoutingData(collected: CollectedRouteData): string {
         })
         .join('\n')
 
-    return `// generated by valkyrja-build — do not edit
+    return `// generated by valkyrja-forge — do not edit
 import { HttpRoutingData } from '@valkyrja/http/routing/data'
 ${collected.imports.join('\n')}
 
@@ -932,7 +914,7 @@ fs.writeFileSync('app/cache/AppHttpRoutingData.ts', generateRoutingData(collecte
 php -S localhost:8000 public/index.php
 
 # production CGI/lambda — cache required
-valkyrja-build generate
+valkyrja-forge generate
 deploy
 
 # production worker — cache optional
@@ -943,17 +925,17 @@ deploy
 
 ```bash
 # Java
-valkyrja-build generate    # generates cache source files
+valkyrja-forge generate    # generates cache source files
 mvn compile                # single pass — compiles with generated files
 deploy target/app.jar
 
 # Go
-valkyrja-build generate    # generates cache source files
+valkyrja-forge generate    # generates cache source files
 go build -o app            # compiles with generated files
 deploy app
 
 # TypeScript
-valkyrja-build generate    # generates cache source files
+valkyrja-forge generate    # generates cache source files
 tsc                        # compiles with generated files
 deploy dist/
 ```
@@ -966,7 +948,7 @@ steps:
     run: # language-specific install
 
   - name: Generate cache data files
-    run: valkyrja-build generate
+    run: valkyrja-forge generate
 
   - name: Build (compiled languages only)
     run: # mvn compile / go build / tsc
@@ -979,26 +961,24 @@ steps:
 
 ## The Build Tool Bootstrapping Itself
 
-`valkyrja-build` is a Valkyrja application subject to the same rules as any
-other Valkyrja application. It ships without its own cache files because it runs
-at deploy time rather than per-request. For environments where build tool
-startup time is a concern, it can generate its own cache and rebuild:
+`valkyrja-forge` is a Valkyrja application subject to the same rules as any other Valkyrja application. It ships without
+its own cache files because it runs at deploy time rather than per-request. For environments where build tool startup
+time is a concern, it can generate its own cache and rebuild:
 
 ```bash
 # pass 1 — build without cache (slow, one-time)
-valkyrja-build build-self --output build-tool-bootstrap
+valkyrja-forge build-self --output build-tool-bootstrap
 
 # pass 2 — generate the build tool's own cache
 ./build-tool-bootstrap generate --self
 
 # pass 3 — rebuild with cache (fast all subsequent runs)
-valkyrja-build build-self --with-cache --output valkyrja-build
+valkyrja-forge build-self --with-cache --output valkyrja-forge
 ```
 
-This is the same two-pass process the build tool applies to compiled language
-applications. The build tool bootstrapping itself is a validation that the
-framework's cache-optional architecture is self-consistent — no special cases,
-no exemptions.
+This is the same two-pass process the build tool applies to compiled language applications. The build tool bootstrapping
+itself is a validation that the framework's cache-optional architecture is self-consistent — no special cases, no
+exemptions.
 
 ---
 
@@ -1006,24 +986,22 @@ no exemptions.
 
 | Language   | Without cache | Cache generation                                            | Notes                                                         |
 |------------|---------------|-------------------------------------------------------------|---------------------------------------------------------------|
-| PHP        | ✅ works       | ⚠️ CLI command exists — will break when handler logic ships | Migrate to valkyrja-build before handler logic implementation |
-| Java       | ✅ works       | ❌ not yet built                                             | valkyrja-build Java AST implementation pending                |
-| Go         | ✅ works       | ❌ not yet built                                             | valkyrja-build Go AST implementation pending                  |
-| Python     | ✅ works       | ❌ not yet built                                             | valkyrja-build Python AST implementation pending              |
-| TypeScript | ✅ works       | ❌ not yet built                                             | valkyrja-build TypeScript compiler API implementation pending |
+| PHP        | ✅ works       | ⚠️ CLI command exists — will break when handler logic ships | Migrate to valkyrja-forge before handler logic implementation |
+| Java       | ✅ works       | ❌ not yet built                                             | valkyrja-forge Java AST implementation pending                |
+| Go         | ✅ works       | ❌ not yet built                                             | valkyrja-forge Go AST implementation pending                  |
+| Python     | ✅ works       | ❌ not yet built                                             | valkyrja-forge Python AST implementation pending              |
+| TypeScript | ✅ works       | ❌ not yet built                                             | valkyrja-forge TypeScript compiler API implementation pending |
 
-The PHP CLI command is the most pressing TODO. It will stop working correctly
-once closure-based handler logic replaces the current dispatch-based routing —
-the existing serialization mechanism cannot handle closures. The migration to
-`valkyrja-build` and `#[Handler]` annotation extraction needs to happen before
-handler logic ships in PHP.
+The PHP CLI command is the most pressing TODO. It will stop working correctly once closure-based handler logic replaces
+the current dispatch-based routing — the existing serialization mechanism cannot handle closures. The migration to
+`valkyrja-forge` and `#[Handler]` annotation extraction needs to happen before handler logic ships in PHP.
 
 ---
 
 ## Framework Source Shipping Policy
 
-The build tool requires access to provider source files to extract bindings and
-handlers. Each language must ship source accordingly:
+The build tool requires access to provider source files to extract bindings and handlers. Each language must ship source
+accordingly:
 
 | Language   | Source shipping  | Requirement                                                              |
 |------------|------------------|--------------------------------------------------------------------------|
@@ -1033,18 +1011,16 @@ handlers. Each language must ship source accordingly:
 | Python     | pip package      | Always present on disk — no special requirement                          |
 | TypeScript | npm package      | Must ship `.ts` source files alongside compiled `.js` — not just `.d.ts` |
 
-Third-party packages built on Valkyrja must follow the same policy to support
-full cache generation for their bindings.
+Third-party packages built on Valkyrja must follow the same policy to support full cache generation for their bindings.
 
 ---
 
-## PHP Build Tool — valkyrja-build-php (formerly Bin)
+## PHP Build Tool — valkyrja-forge-php (formerly Bin)
 
-The PHP implementation of the build tool ships as its own standalone repository
-and Composer package — separate from the Valkyrja framework itself. It was
-previously part of the framework as the `Bin` component.
+The PHP implementation of the build tool ships as its own standalone repository and Composer package — separate from the
+Valkyrja framework itself. It was previously part of the framework as the `Bin` component.
 
-**Package:** `valkyrja/build` (or `valkyrja/build-php`)
+**Package:** `valkyrja-forge` (or `valkyrja-forge-php`)
 **Repository:** separate from `valkyrja/framework`
 **Composer dependency:** `nikic/php-parser`
 
@@ -1052,31 +1028,25 @@ previously part of the framework as the `Bin` component.
 
 ### Why Bin Leaves the Framework
 
-The `Bin` component was always conceptually a development and build-time
-concern — file generation, project scaffolding, cache generation. None of this
-is a runtime concern. Keeping it in the framework meant:
+The `Bin` component was always conceptually a development and build-time concern — file generation, project scaffolding,
+cache generation. None of this is a runtime concern. Keeping it in the framework meant:
 
-- `nikic/php-parser` was a framework dependency, pulled into every application
-  even in production
-- File generation scaffolding lived in runtime code where it had no business
-  being
+- `nikic/php-parser` was a framework dependency, pulled into every application even in production
+- File generation scaffolding lived in runtime code where it had no business being
 - The framework carried tooling weight that only mattered at build/dev time
-- No clean equivalent existed for other language ports — each language would
-  need its own bin component inside the framework
+- No clean equivalent existed for other language ports — each language would need its own bin component inside the
+  framework
 
 Moving it out:
 
-- `nikic/php-parser` becomes a `valkyrja/build` dependency, never present in
-  production applications
-- The framework base code is simplified — no file generation, no scaffolding, no
-  AST tooling
-- Each language port gets its own build tool repository following the same
-  pattern
+- `nikic/php-parser` becomes a `valkyrja-forge` dependency, never present in production applications
+- The framework base code is simplified — no file generation, no scaffolding, no AST tooling
+- Each language port gets its own build tool repository following the same pattern
 - The separation of runtime vs build-time concerns is clean and explicit
 
 ---
 
-### What valkyrja-build-php Provides
+### What valkyrja-forge-php Provides
 
 **Cache generation**
 
@@ -1084,16 +1054,13 @@ Moving it out:
 - Walks provider tree via AST
 - Extracts `#[Handler]` annotations and explicit route definitions
 - Runs `ProcessorContract::route()` for regex compilation
-- Generates `AppContainerData`, `AppEventData`, `AppHttpRoutingData`,
-  `AppCliRoutingData`
+- Generates `AppContainerData`, `AppEventData`, `AppHttpRoutingData`, `AppCliRoutingData`
 
 **Project scaffolding**
 
-- `valkyrja new project-name` — creates a blank Valkyrja application with the
-  correct directory structure
+- `valkyrja new project-name` — creates a blank Valkyrja application with the correct directory structure
 - `valkyrja make:provider ProviderName` — generates a blank service provider
-- `valkyrja make:controller ControllerName` — generates a blank controller with
-  example `#[Handler]`
+- `valkyrja make:controller ControllerName` — generates a blank controller with example `#[Handler]`
 - `valkyrja make:listener ListenerName` — generates a blank event listener
 - `valkyrja make:command CommandName` — generates a blank CLI command
 
@@ -1107,17 +1074,17 @@ Moving it out:
 
 ```bash
 # install as a dev dependency — never needed in production
-composer require --dev valkyrja/build
+composer require --dev valkyrja-forge
 ```
 
 ```json
 // composer.json
 {
-  "require"     : {
-    "valkyrja/framework" : "^26.0"
+  "require": {
+    "valkyrja/framework": "^26.0"
   },
-  "require-dev" : {
-    "valkyrja/build" : "^1.0"
+  "require-dev": {
+    "valkyrja-forge": "^1.0"
   }
 }
 ```
@@ -1144,88 +1111,68 @@ composer create-project valkyrja/project my-app
 
 ### The Build Tool Ecosystem
 
-Each language port ships its own build tool as a separate package following the
-same pattern:
+Each language port ships its own build tool as a separate package following the same pattern:
 
 | Language   | Build tool package                             | AST dependency                   |
 |------------|------------------------------------------------|----------------------------------|
-| PHP        | `valkyrja/build` (separate repo, formerly Bin) | `nikic/php-parser`               |
-| Java       | `io.valkyrja:build` (separate artifact)        | Trees API (built into javac)     |
-| Go         | `io/valkyrja/build` (separate module)          | `go/analysis`, `go/ast` (stdlib) |
-| Python     | `valkyrja-build` (separate PyPI package)       | `ast`, `inspect` (stdlib)        |
-| TypeScript | `@valkyrja/build` (separate npm package)       | `typescript` compiler API        |
+| PHP        | `valkyrja-forge` (separate repo, formerly Bin) | `nikic/php-parser`               |
+| Java       | `io.valkyrja:forge` (separate artifact)        | Trees API (built into javac)     |
+| Go         | `io/valkyrja/forge` (separate module)          | `go/analysis`, `go/ast` (stdlib) |
+| Python     | `valkyrja-forge` (separate PyPI package)       | `ast`, `inspect` (stdlib)        |
+| TypeScript | `@valkyrja/forge` (separate npm package)       | `typescript` compiler API        |
 
-In all cases the build tool is a dev/build dependency only — never present in
-production runtime. The framework packages have zero AST or build tooling
-dependencies.
+In all cases the build tool is a dev/build dependency only — never present in production runtime. The framework packages
+have zero AST or build tooling dependencies.
 
 ---
 
 ## Discussion Summary
 
-The build tool's design emerged from the need to generate cache data files for
-production CGI and lambda deployments across all five language ports. Several
-approaches were considered and rejected before arriving at the current design.
+The build tool's design emerged from the need to generate cache data files for production CGI and lambda deployments
+across all five language ports. Several approaches were considered and rejected before arriving at the current design.
 
-The first approach considered was the two-pass compile — build a bootstrap
-binary, run it to generate cache, compile again with the generated files. This
-works but adds a compile step and requires a bootstrap binary to exist before
-the cache can be generated.
+The first approach considered was the two-pass compile — build a bootstrap binary, run it to generate cache, compile
+again with the generated files. This works but adds a compile step and requires a bootstrap binary to exist before the
+cache can be generated.
 
-The key insight that eliminated the two-pass compile was recognizing that the
-application config class + AST analysis gives the build tool everything it needs
-without running the application. The config class already lists top-level
-providers — the same class the developer uses to create the application. The AST
-walker reads provider list method return values as static data — no execution
-required. The build tool can discover the complete provider tree, extract all
-handlers and bindings, run the framework's own `ProcessorContract` for regex
-compilation, and generate fully resolved cache data files in a single pass
-before the first compile.
+The key insight that eliminated the two-pass compile was recognizing that the application config class + AST analysis
+gives the build tool everything it needs without running the application. The config class already lists top-level
+providers — the same class the developer uses to create the application. The AST walker reads provider list method
+return values as static data — no execution required. The build tool can discover the complete provider tree, extract
+all handlers and bindings, run the framework's own `ProcessorContract` for regex compilation, and generate fully
+resolved cache data files in a single pass before the first compile.
 
-A separate `valkyrja.yaml` was considered as the build tool entry point but
-superseded by the config class approach — eliminating a duplicate source of
-truth. The component provider constants class was also dropped as it would allow
-constant references in provider lists that the build tool cannot resolve
-statically.
+A separate `valkyrja.yaml` was considered as the build tool entry point but superseded by the config class approach —
+eliminating a duplicate source of truth. The component provider constants class was also dropped as it would allow
+constant references in provider lists that the build tool cannot resolve statically.
 
-The build tool as a text generator insight resolved the custom route child class
-problem. The build tool doesn't need application classes compiled in to
-reference them by name in generated source — exactly like a developer writing
-`extends AuthenticatedRoute` in an editor. Class names from AST are strings.
-Generated files are strings. The compiler resolves them later.
+The build tool as a text generator insight resolved the custom route child class problem. The build tool doesn't need
+application classes compiled in to reference them by name in generated source — exactly like a developer writing
+`extends AuthenticatedRoute` in an editor. Class names from AST are strings. Generated files are strings. The compiler
+resolves them later.
 
-The four-output-class design emerged from recognizing that one class per
-provider would require the framework to merge N structures at boot. One class
-per concern for the entire application means the framework loads exactly four
-objects and the data is immediately ready to use. The build tool does the
-aggregation work once at generation time.
+The four-output-class design emerged from recognizing that one class per provider would require the framework to merge N
+structures at boot. One class per concern for the entire application means the framework loads exactly four objects and
+the data is immediately ready to use. The build tool does the aggregation work once at generation time.
 
-The self-bootstrapping property — the build tool running valkyrja-build on
-itself to generate its own cache — was identified as a validation of the
-architecture's self-consistency rather than a practical requirement. It
-demonstrates that no special cases exist in the framework design.
+The self-bootstrapping property — the build tool running valkyrja-forge on itself to generate its own cache — was
+identified as a validation of the architecture's self-consistency rather than a practical requirement. It demonstrates
+that no special cases exist in the framework design.
 
-The PHP CLI command breaking change was identified as the most pressing
-near-term issue. It is the only currently working cache generation mechanism,
-and it will stop working when closure-based handler logic replaces
-dispatch-based routing. This migration is documented as a TODO that must happen
-before handler logic ships in PHP.
+The PHP CLI command breaking change was identified as the most pressing near-term issue. It is the only currently
+working cache generation mechanism, and it will stop working when closure-based handler logic replaces dispatch-based
+routing. This migration is documented as a TODO that must happen before handler logic ships in PHP.
 
-The separation of `Bin` from the framework into its own `valkyrja/build`
-repository was decided when it became clear that the build tool needed
-`nikic/php-parser` as a dependency. Keeping this in the framework would mean a
-parser library — a purely development and build-time concern — would be a
-production dependency of every Valkyrja application. Moving it out keeps the
-framework clean and the separation of runtime vs build-time concerns explicit.
+The separation of `Bin` from the framework into its own `valkyrja-forge` repository was decided when it became clear
+that the build tool needed `nikic/php-parser` as a dependency. Keeping this in the framework would mean a parser
+library — a purely development and build-time concern — would be a production dependency of every Valkyrja application.
+Moving it out keeps the framework clean and the separation of runtime vs build-time concerns explicit.
 
-The move also revealed that `Bin`'s file generation and scaffolding features
-were always development tooling, not framework concerns. Every file generation
-feature that lived in the framework now lives in the build tool where it
-belongs. This simplifies the framework base code and makes the runtime package
-leaner.
+The move also revealed that `Bin`'s file generation and scaffolding features were always development tooling, not
+framework concerns. Every file generation feature that lived in the framework now lives in the build tool where it
+belongs. This simplifies the framework base code and makes the runtime package leaner.
 
-The pattern established for PHP — separate build tool repository, dev-only
-dependency, no AST tooling in the framework — is replicated across all five
-language ports. In all cases the framework ships with zero build or AST
-dependencies. The build tool for each language is an optional dev dependency
-that applications install during development but never ship to production.
+The pattern established for PHP — separate build tool repository, dev-only dependency, no AST tooling in the framework —
+is replicated across all five language ports. In all cases the framework ships with zero build or AST dependencies. The
+build tool for each language is an optional dev dependency that applications install during development but never ship
+to production.
