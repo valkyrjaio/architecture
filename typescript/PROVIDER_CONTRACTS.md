@@ -392,8 +392,8 @@ return [...this.getBaseRoutes(), ...this.getExtraRoutes()]
 All handler methods must be **static methods on the same class** as the provider or controller that defines the route or
 listener. This is the same pattern used by `publishers()` in service providers.
 
-**Why:** The forge tool reads exactly one file per provider or controller. All imports for handler bodies are in that
-one file — no cross-file import aggregation, no conflict detection, no registry needed.
+**Why:** Sindri reads exactly one file per provider or controller. All imports for handler bodies are in that one file —
+no cross-file import aggregation, no conflict detection, no registry needed.
 
 ```
 ✅ Method reference on the same class

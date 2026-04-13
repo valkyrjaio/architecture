@@ -222,10 +222,55 @@ Once `sindri` is implemented, remove the `cache:generate` command from the frame
 ```php
 interface ComponentProviderContract
 {
+    /**
+     * Declare this component's dependencies on other components.
+     * The framework ensures listed components are registered before this one.
+     * Sindri uses this during the dependency resolution pass (Step 1a) to build
+     * the full ordered, deduplicated component list before walking any providers.
+     */
+    public static function getComponentProviders(ApplicationContract $app): array;
     public static function getContainerProviders(ApplicationContract $app): array;
     public static function getEventProviders(ApplicationContract $app): array;
     public static function getCliProviders(ApplicationContract $app): array;
     public static function getHttpProviders(ApplicationContract $app): array;
+}
+```
+
+Example implementation:
+
+```php
+class HttpComponentProvider implements ComponentProviderContract
+{
+    public static function getComponentProviders(ApplicationContract $app): array
+    {
+        return [
+            ContainerComponentProvider::class,  // HTTP depends on Container
+            EventComponentProvider::class,       // HTTP depends on Event
+        ];
+    }
+
+    public static function getContainerProviders(ApplicationContract $app): array
+    {
+        return [
+            HttpServiceProvider::class,
+            HttpMiddlewareProvider::class,
+        ];
+    }
+
+    public static function getEventProviders(ApplicationContract $app): array
+    {
+        return [HttpListenersProvider::class];
+    }
+
+    public static function getCliProviders(ApplicationContract $app): array
+    {
+        return [];
+    }
+
+    public static function getHttpProviders(ApplicationContract $app): array
+    {
+        return [HttpRoutesProvider::class];
+    }
 }
 ```
 
@@ -283,8 +328,8 @@ Binding key constants files (for container bindings) are unaffected — they are
 
 ### Ensure all provider list methods use ::class directly
 
-Audit all provider list methods (`getContainerProviders`, `getHttpProviders` etc.) to ensure they return `::class`
-references directly — never constant references.
+Audit all provider list methods (`getComponentProviders`, `getContainerProviders`, `getHttpProviders` etc.) to ensure
+they return `::class` references directly — never constant references.
 
 ---
 

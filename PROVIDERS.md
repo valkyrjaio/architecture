@@ -12,6 +12,7 @@ There are five provider contract types, each with a distinct responsibility:
 
 ```
 ComponentProviderContract       — top-level aggregator per component
+  ├── getComponentProviders()   — declares dependencies on other components
   ├── ServiceProviderContract   — container bindings (publishers map)
   ├── HttpRouteProviderContract — HTTP routes and controllers
   ├── CliRouteProviderContract  — CLI commands and controllers
@@ -31,6 +32,7 @@ The top-level aggregator. One per component. Returns lists of the four leaf prov
 // PHP
 interface ComponentProviderContract
 {
+    public static function getComponentProviders(ApplicationContract $app): array;
     public static function getContainerProviders(ApplicationContract $app): array;
     public static function getEventProviders(ApplicationContract $app): array;
     public static function getHttpProviders(ApplicationContract $app): array;
@@ -38,10 +40,30 @@ interface ComponentProviderContract
 }
 ```
 
-All four methods must return simple list literals — no conditional logic, no variables, no loops. The build tool reads
-these from AST.
+All five methods must return simple list literals — no conditional logic, no variables, no loops. Sindri reads these
+from AST.
 
-**One ComponentProvider per component.** The application config lists only ComponentProviders:
+**`getComponentProviders()`** — declares this component's dependencies on other components. The framework uses the
+returned list to ensure dependent components are registered before this one. This removes the burden of manually
+ordering providers in the app config.
+
+```php
+class HttpComponentProvider implements ComponentProviderContract
+{
+    public static function getComponentProviders(ApplicationContract $app): array
+    {
+        return [
+            ContainerComponentProvider::class,  // HTTP depends on Container
+            EventComponentProvider::class,       // HTTP depends on Event
+        ];
+    }
+
+    // ... other methods
+}
+```
+
+**One ComponentProvider per component.** The application config lists only the ComponentProviders it directly uses —
+transitive dependencies are resolved automatically via `getComponentProviders()`:
 
 ```php
 class AppConfig implements ConfigContract
@@ -49,9 +71,7 @@ class AppConfig implements ConfigContract
     public static function getProviders(): array
     {
         return [
-            HttpComponentProvider::class,
-            ContainerComponentProvider::class,
-            EventComponentProvider::class,
+            HttpComponentProvider::class,   // Container and Event loaded automatically
             CliComponentProvider::class,
             AppComponentProvider::class,    // application-defined
         ];
@@ -399,7 +419,11 @@ runs without cache — the provider tree is traversed at runtime instead.
 
 ```
 AppConfig.getProviders()
-  → [HttpComponentProvider, ContainerComponentProvider, ...]
+  → [HttpComponentProvider, CliComponentProvider, ...]
+
+HttpComponentProvider.getComponentProviders()
+  → [ContainerComponentProvider, EventComponentProvider]
+  — framework ensures these are registered first
 
 HttpComponentProvider.getContainerProviders()
   → [HttpServiceProvider, HttpMiddlewareProvider]

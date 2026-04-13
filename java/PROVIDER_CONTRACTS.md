@@ -311,12 +311,12 @@ import java.util.Map;
 public class UserController {
 
     // Annotations on the implementation method.
-    // @Handler carries (class, method) — forge follows it to wherever the handler lives.
+    // @Handler carries (class, method) — Sindri follows it to wherever the handler lives.
     @Route(method = "GET", path = "/users/{id}")
     @Parameter(name = "id", pattern = "[0-9]+")
     @Handler(clazz = UserController.class, method = "showHandler")
     public ResponseContract show(String id) {
-        // actual implementation — not read by forge
+        // actual implementation — not read by Sindri
         return userService.findById(id).toResponse();
     }
 
@@ -343,7 +343,7 @@ public class UserController {
 ```java
 public class UserController {
 
-    // @Handler points to the route provider — forge follows the callable
+    // @Handler points to the route provider — Sindri follows the callable
     @Route(method = "GET", path = "/users/{id}")
     @Parameter(name = "id", pattern = "[0-9]+")
     @Handler(clazz = UserHttpRouteProvider.class, method = "showUser")
@@ -449,8 +449,8 @@ Any method the build tool reads must return a single flat literal with no logic:
 All handler methods must be **static methods on the same class** as the provider or controller that defines the route or
 listener. This is the same pattern used by `publishers()` in service providers.
 
-**Why:** The forge tool reads exactly one file per provider or controller. All imports for handler bodies are in that
-one file — no cross-file import aggregation, no conflict detection, no registry needed.
+**Why:** Sindri reads exactly one file per provider or controller. All imports for handler bodies are in that one file —
+no cross-file import aggregation, no conflict detection, no registry needed.
 
 ```
 ✅ Method reference on the same class

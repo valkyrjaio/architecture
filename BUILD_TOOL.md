@@ -789,8 +789,8 @@ import * as path from 'path'
 
 interface ParsedFile {
     sourceFile: ts.SourceFile
-    program: ts.Program
-    checker: ts.TypeChecker
+    program:    ts.Program
+    checker:    ts.TypeChecker
 }
 
 /**
@@ -819,7 +819,7 @@ function parseFile(
     // step 3: create the compiler program — parses all project files
     const program = ts.createProgram({
         rootNames: config.fileNames,
-        options: config.options,
+        options:   config.options,
     })
 
     // step 4: get the type checker
@@ -827,7 +827,7 @@ function parseFile(
 
     // step 5: get the SourceFile (AST) for the given path
     const absolutePath = path.resolve(filePath)
-    const sourceFile = program.getSourceFile(absolutePath)
+    const sourceFile   = program.getSourceFile(absolutePath)
 
     if (!sourceFile) {
         throw new Error(
@@ -836,7 +836,7 @@ function parseFile(
         )
     }
 
-    return {sourceFile, program, checker}
+    return { sourceFile, program, checker }
 }
 
 /**
@@ -869,7 +869,7 @@ function getFQN(node: ts.Node, checker: ts.TypeChecker): string | undefined {
 // entry point — file path passed directly as CLI argument
 const filePath = process.argv[2] // e.g. 'src/config/AppConfig.ts'
 
-const {sourceFile, checker} = parseFile(filePath)
+const { sourceFile, checker } = parseFile(filePath)
 console.log(`Parsed: ${sourceFile.fileName}`)
 
 walkAST(sourceFile, (node) => {
@@ -933,9 +933,9 @@ class ContainerConstants {
 ```java
 // io/valkyrja/container/ContainerConstants.java — shipped with framework
 public final class ContainerConstants {
-    public static final Class<ContainerContract> CONTAINER = ContainerContract.class;
+    public static final Class<ContainerContract>  CONTAINER  = ContainerContract.class;
     public static final Class<DispatcherContract> DISPATCHER = DispatcherContract.class;
-    public static final Class<RouterContract> ROUTER = RouterContract.class;
+    public static final Class<RouterContract>     ROUTER     = RouterContract.class;
 }
 ```
 
@@ -944,9 +944,9 @@ public final class ContainerConstants {
 ```go
 // io/valkyrja/container/container_constants.go — shipped with framework
 const (
-ContainerClass = "io.valkyrja.container.ContainerContract"
-DispatcherClass = "io.valkyrja.container.DispatcherContract"
-RouterClass = "io.valkyrja.http.routing.RouterContract"
+    ContainerClass  = "io.valkyrja.container.ContainerContract"
+    DispatcherClass = "io.valkyrja.container.DispatcherContract"
+    RouterClass     = "io.valkyrja.http.routing.RouterContract"
 )
 ```
 
@@ -955,9 +955,9 @@ RouterClass = "io.valkyrja.http.routing.RouterContract"
 ```python
 # valkyrja/container/container_constants.py — shipped with framework
 class ContainerConstants:
-    CONTAINER = "io.valkyrja.container.ContainerContract"
+    CONTAINER  = "io.valkyrja.container.ContainerContract"
     DISPATCHER = "io.valkyrja.container.DispatcherContract"
-    ROUTER = "io.valkyrja.http.routing.RouterContract"
+    ROUTER     = "io.valkyrja.http.routing.RouterContract"
 ```
 
 **TypeScript** — constants hold FQN string literals:
@@ -965,9 +965,9 @@ class ContainerConstants:
 ```typescript
 // valkyrja/container/container-constants.ts — shipped with framework
 export const ContainerConstants = {
-    CONTAINER: 'io.valkyrja.container.ContainerContract',
+    CONTAINER:  'io.valkyrja.container.ContainerContract',
     DISPATCHER: 'io.valkyrja.container.DispatcherContract',
-    ROUTER: 'io.valkyrja.http.routing.RouterContract',
+    ROUTER:     'io.valkyrja.http.routing.RouterContract',
 } as const
 ```
 
@@ -1037,14 +1037,14 @@ listener. No cross-file import aggregation is needed — each file is self-conta
 
 ### Step 1: Walk the Config File
 
-**Goal:** Extract the component providers list.
+**Goal:** Extract the initial component providers list.
 
 **What to collect:**
 
 ```
 imports         → map of simple name → FQN (collected as standard practice)
 providers list  → list of class references from the providers property/method
-                  e.g. [HttpComponentProvider, ContainerComponentProvider, AppProvider]
+                  e.g. [HttpComponentProvider, CliComponentProvider, AppComponentProvider]
 ```
 
 **Pattern:**
@@ -1054,7 +1054,7 @@ providers list  → list of class references from the providers property/method
 2. Collect all import statements → import map
 3. Find the providers list (array/slice/list literal on the config class)
 4. Extract each class reference as an identifier string
-5. For each identifier → resolve to file path → parse that file → Step 2
+5. For each identifier → resolve to file path → Step 1a (dependency resolution)
 ```
 
 The providers list must be a simple literal — no variables, no method calls, no conditional logic. If it isn't, Sindri
@@ -1062,9 +1062,78 @@ emits an error.
 
 ---
 
+### Step 1a: Resolve Component Dependencies
+
+**Goal:** Expand the initial providers list by following each component's `getComponentProviders()` declaration,
+recursively, until the full transitive dependency set is known. Deduplicate throughout so no component is walked twice.
+
+A component may declare that it depends on other components — e.g. `HttpComponentProvider` depends on
+`ContainerComponentProvider` and `EventComponentProvider`. Those dependencies must be registered before the component
+that declares them. Sindri resolves the full ordered list before beginning the provider walk.
+
+**Algorithm:**
+
+```
+resolved = []         // ordered list — final registration order
+seen     = {}         // set of already-visited class identifiers
+
+function resolve(identifier):
+    if identifier in seen:
+        return        // already resolved — skip, deduplication
+    seen.add(identifier)
+
+    file = resolve_to_file_path(identifier)
+    ast  = parse(file)
+
+    // read getComponentProviders() first — dependencies before self
+    deps = extract_list(ast, 'getComponentProviders')
+    for dep in deps:
+        resolve(dep)  // recurse — depth-first, dependencies load before dependents
+
+    resolved.append(identifier)  // append self after all dependencies
+
+// seed with config providers list
+for identifier in config_providers_list:
+    resolve(identifier)
+
+// resolved is now the full ordered, deduplicated component list
+```
+
+**Example:**
+
+```
+Config lists:     [HttpComponentProvider, CliComponentProvider, AppComponentProvider]
+
+HttpComponentProvider.getComponentProviders()
+  → [ContainerComponentProvider, EventComponentProvider]
+
+CliComponentProvider.getComponentProviders()
+  → [ContainerComponentProvider]          // already seen — skipped
+
+AppComponentProvider.getComponentProviders()
+  → [HttpComponentProvider]               // already seen — skipped
+
+Resolved order:
+  ContainerComponentProvider              // dependency of Http and Cli
+  EventComponentProvider                  // dependency of Http
+  HttpComponentProvider
+  CliComponentProvider
+  AppComponentProvider
+```
+
+Circular dependencies emit an error:
+
+```
+Error: Circular component dependency detected.
+  HttpComponentProvider → AppComponentProvider → HttpComponentProvider
+```
+
+---
+
 ### Step 2: Walk Each ComponentProvider File
 
 **Goal:** Categorize sub-providers by type so they can be handed to the correct walker.
+Uses the fully resolved and ordered list from Step 1a — no further dependency resolution needed here.
 
 **What to collect:**
 
@@ -1081,7 +1150,8 @@ cli_providers       → list of class identifiers (CliRouteProvider classes)
 ```
 1. Parse ComponentProvider file into AST
 2. Collect all import statements → import map
-3. Find each of the four list methods by name
+3. Find each of the four sub-provider list methods by name
+   (getContainerProviders, getEventProviders, getHttpProviders, getCliProviders)
 4. Extract return value — must be a simple list literal
 5. Extract each class reference as an identifier
 6. For each identifier → resolve to file path → dispatch to Step 3
@@ -1628,7 +1698,7 @@ private String resolveFQN(String source, ExecutableElement method) {
     // build import map: simple name → fully qualified name
     Map<String, String> importMap = new HashMap<>();
     for (ImportTree imp : unit.getImports()) {
-        String fqn = imp.getQualifiedIdentifier().toString();
+        String fqn       = imp.getQualifiedIdentifier().toString();
         String simpleName = fqn.substring(fqn.lastIndexOf('.') + 1);
         importMap.put(simpleName, fqn);
     }
@@ -1636,8 +1706,8 @@ private String resolveFQN(String source, ExecutableElement method) {
     // rewrite source replacing simple names with FQN
     for (Map.Entry<String, String> entry : importMap.entrySet()) {
         source = source.replaceAll(
-                "\\b" + Pattern.quote(entry.getKey()) + "\\b",
-                entry.getValue()
+            "\\b" + Pattern.quote(entry.getKey()) + "\\b",
+            entry.getValue()
         );
     }
     return source;
@@ -1649,34 +1719,28 @@ private String resolveFQN(String source, ExecutableElement method) {
 ```java
 // generate AppHttpRoutingData record using JavaPoet
 TypeSpec routingData = TypeSpec.recordBuilder("AppHttpRoutingData")
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .addSuperinterface(HttpRoutingDataContract.class)
-                .addRecordComponent(ParameterSpec.builder(
-                        ParameterizedTypeName.get(Map.class, String.class, RouteContract.class),
-                        "routes"
-                ).build())
-                .addRecordComponent(ParameterSpec.builder(
-                        ParameterizedTypeName.get(Map.class, String.class,
-                                ParameterizedTypeName.get(Map.class, String.class, String.class)),
-                        "paths"
-                ).build())
-                // ... dynamicPaths, regexes
-                .addMethod(MethodSpec.methodBuilder("create")
-                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                        .returns(ClassName.get("", "AppHttpRoutingData"))
-                        .addCode(generateCreateMethodBody(collectedRoutes))
-                        .build())
-                .build();
+    .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+    .addSuperinterface(HttpRoutingDataContract.class)
+    .addRecordComponent(ParameterSpec.builder(
+        ParameterizedTypeName.get(Map.class, String.class, RouteContract.class),
+        "routes"
+    ).build())
+    .addRecordComponent(ParameterSpec.builder(
+        ParameterizedTypeName.get(Map.class, String.class,
+            ParameterizedTypeName.get(Map.class, String.class, String.class)),
+        "paths"
+    ).build())
+    // ... dynamicPaths, regexes
+    .addMethod(MethodSpec.methodBuilder("create")
+        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+        .returns(ClassName.get("", "AppHttpRoutingData"))
+        .addCode(generateCreateMethodBody(collectedRoutes))
+        .build())
+    .build();
 
-JavaFile.
-
-builder("app.cache",routingData)
-    .
-
-build()
-    .
-
-writeTo(processingEnv.getFiler());
+JavaFile.builder("app.cache", routingData)
+    .build()
+    .writeTo(processingEnv.getFiler());
 ```
 
 ---
@@ -1693,15 +1757,15 @@ source files.
 ```go
 // load packages listed in valkyrja.yaml
 cfg := &packages.Config{
-Mode: packages.NeedFiles |
-packages.NeedSyntax |
-packages.NeedTypes |
-packages.NeedImports,
+    Mode: packages.NeedFiles |
+          packages.NeedSyntax |
+          packages.NeedTypes |
+          packages.NeedImports,
 }
 
 pkgs, err := packages.Load(cfg, providerPackagePaths...)
 if err != nil {
-log.Fatalf("failed to load packages: %v", err)
+    log.Fatalf("failed to load packages: %v", err)
 }
 ```
 
@@ -1710,32 +1774,32 @@ log.Fatalf("failed to load packages: %v", err)
 ```go
 // walk Register() or GetRoutes() method body
 func extractRoutes(pkg *packages.Package, typeName string) []RouteData {
-var routes []RouteData
+    var routes []RouteData
 
-for _, file := range pkg.Syntax {
-ast.Inspect(file, func (n ast.Node) bool {
-funcDecl, ok := n.(*ast.FuncDecl)
-if !ok || funcDecl.Name.Name != "GetRoutes" {
-return true
-}
+    for _, file := range pkg.Syntax {
+        ast.Inspect(file, func(n ast.Node) bool {
+            funcDecl, ok := n.(*ast.FuncDecl)
+            if !ok || funcDecl.Name.Name != "GetRoutes" {
+                return true
+            }
 
-// find the return statement
-for _, stmt := range funcDecl.Body.List {
-retStmt, ok := stmt.(*ast.ReturnStmt)
-if !ok { continue }
+            // find the return statement
+            for _, stmt := range funcDecl.Body.List {
+                retStmt, ok := stmt.(*ast.ReturnStmt)
+                if !ok { continue }
 
-// extract slice literal elements
-compLit, ok := retStmt.Results[0].(*ast.CompositeLit)
-if !ok { continue }
+                // extract slice literal elements
+                compLit, ok := retStmt.Results[0].(*ast.CompositeLit)
+                if !ok { continue }
 
-for _, elt := range compLit.Elts {
-routes = append(routes, extractRouteFromNode(elt, file, pkg))
-}
-}
-return false
-})
-}
-return routes
+                for _, elt := range compLit.Elts {
+                    routes = append(routes, extractRouteFromNode(elt, file, pkg))
+                }
+            }
+            return false
+        })
+    }
+    return routes
 }
 ```
 
@@ -1883,9 +1947,9 @@ def extract_provider_list(
 def extract_handlers(controller_class: type) -> list[dict]:
     """Extract @handler decorated methods from a controller class via AST."""
     filepath = inspect.getfile(controller_class)
-    source = open(filepath).read()
-    tree = ast.parse(source)
-    imports = collect_imports(tree)
+    source   = open(filepath).read()
+    tree     = ast.parse(source)
+    imports  = collect_imports(tree)
     handlers = []
 
     for node in ast.walk(tree):
@@ -1900,13 +1964,13 @@ def extract_handlers(controller_class: type) -> list[dict]:
             # extract the lambda/closure argument
             if not decorator.args: continue
             handler_source = ast.unparse(decorator.args[0])
-            handler_fqn = resolve_fqn(handler_source, imports)
+            handler_fqn    = resolve_fqn(handler_source, imports)
 
             # extract @parameter decorators from same method
             parameters = extract_parameters(node, imports)
 
             handlers.append({
-                'handler': handler_fqn,
+                'handler':    handler_fqn,
                 'parameters': parameters,
             })
 
@@ -1947,7 +2011,6 @@ $regexes
 )
 '''
 
-
 def generate_routing_data(collected: dict) -> str:
     routes_str = '\n'.join(
         f"        '{name}': {route_source},"
@@ -1962,7 +2025,6 @@ def generate_routing_data(collected: dict) -> str:
         dynamic_paths=build_paths_str(collected['dynamic_paths']),
         regexes=build_paths_str(collected['regexes']),
     )
-
 
 output = generate_routing_data(collected_data)
 open('app/cache/app_http_routing_data.py', 'w').write(output)

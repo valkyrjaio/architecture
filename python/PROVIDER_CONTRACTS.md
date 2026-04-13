@@ -64,8 +64,18 @@ class ComponentProviderContract(ABC):
     Defines what a component provider must implement.
 
     All methods must return simple list literals.
-    No conditional logic permitted — build tool reads these from AST.
+    No conditional logic permitted — Sindri reads these from AST.
     """
+
+    @staticmethod
+    @abstractmethod
+    def get_component_providers(app: 'ApplicationContract') -> list[type['ComponentProviderContract']]:
+        """
+        Declare this component's dependencies on other components.
+        The framework ensures listed components are registered before this one.
+        Must return a simple list literal — no conditional logic.
+        """
+        return []
 
     @staticmethod
     @abstractmethod
@@ -117,6 +127,13 @@ from valkyrja.http.provider import (
 
 
 class HttpComponentProvider(ComponentProviderContract):
+
+    @staticmethod
+    def get_component_providers(app: ApplicationContract) -> list[type[ComponentProviderContract]]:
+        return [
+            ContainerComponentProvider,  # HTTP depends on Container
+            EventComponentProvider,  # HTTP depends on Event
+        ]
 
     @staticmethod
     def get_container_providers(app: ApplicationContract) -> list[type[ServiceProviderContract]]:
@@ -220,8 +237,8 @@ class UserServiceProvider(ServiceProviderContract):
     def publishers() -> dict[str, Callable[[ContainerContract], None]]:
         """
         Build tool reads this map from AST.
-        Keys are string constants — forge writes them as module-level imports in the cache.
-        Values are method references — forge wraps them in lambdas in the cache.
+        Keys are string constants — Sindri writes them as module-level imports in the cache.
+        Values are method references — Sindri wraps them in lambdas in the cache.
         """
         return {
             ContainerConstants.USER_REPOSITORY: UserServiceProvider.publish_user_repository,
@@ -538,8 +555,8 @@ return get_extra_routes()
 All handler methods must be **static methods on the same class** as the provider or controller that defines the route or
 listener. This is the same pattern used by `publishers()` in service providers.
 
-**Why:** The forge tool reads exactly one file per provider or controller. All imports for handler bodies are in that
-one file — no cross-file import aggregation, no conflict detection, no registry needed.
+**Why:** Sindri reads exactly one file per provider or controller. All imports for handler bodies are in that one file —
+no cross-file import aggregation, no conflict detection, no registry needed.
 
 ```
 ✅ Method reference on the same class
