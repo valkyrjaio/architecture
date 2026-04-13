@@ -19,16 +19,22 @@
 
 ## Container Bindings
 
-- [ ] Use class objects as binding keys — no string constants files needed
-- [ ] Add `class_()` FQN helper (trailing underscore — `class` is reserved) — for serialization/cache, not bindings
-- [ ] All bindings use closure-based factories — no reflection-based instantiation
+- [ ] Add per-component string constants files (required — same as Go and TypeScript)
+    - [ ] `container/container_constants.py`
+    - [ ] `http/http_constants.py`
+    - [ ] `http/routing/http_routing_constants.py`
+    - [ ] `cli/cli_constants.py`
+    - [ ] `event/event_constants.py`
+    - [ ] *(remaining components)*
+- [ ] Add `class_()` FQN helper (trailing underscore — `class` is reserved)
+- [ ] All bindings use string constant keys and closure-based factories
 
 ```python
-# correct — class object as key
-container.bind(UserRepositoryContract, lambda c: UserRepository(c.make(Database)))
-
-# not needed — no string constants file for Python
-# ContainerConstants, HttpConstants etc. are Go/TypeScript concerns only
+# correct — string constant as key, no class object import forced
+container.bind(
+    ContainerConstants.USER_REPOSITORY,
+    lambda c: UserRepository(c.make(ContainerConstants.DATABASE))
+)
 ```
 
 ---
@@ -72,6 +78,18 @@ def handler(closure):
 - [ ] Implement `HttpCacheableHandlerContract` extending `HttpHandlerContract`
 - [ ] Implement `CliCacheableHandlerContract` extending `CliHandlerContract`
 - [ ] Implement `ListenerCacheableHandlerContract` extending `ListenerHandlerContract`
+
+---
+
+## Python 3.14 Lazy Imports — Track for Future Optimisation
+
+Python eagerly imports everything — this is a language characteristic, not a framework problem.
+No action at the framework level. Track the following:
+
+- [ ] Monitor Python 3.14 lazy imports feature for stable release
+- [ ] Test Valkyrja Python port compatibility with Python 3.14 lazy imports when available
+- [ ] If compatible — document as an optional cold start optimisation for Python 3.14+ deployments
+- [ ] No framework changes needed — lazy imports would be a Python runtime feature
 
 ---
 

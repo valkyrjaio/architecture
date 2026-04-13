@@ -126,8 +126,11 @@ Every port shares the same architectural identity:
 
 - Interpreted — no compile step, cache optional exactly like PHP
 - Decorators are executable at import time — self-registration pattern works
-- GIL limits true thread parallelism — async (ASGI/Uvicorn) is the idiomatic concurrency model
-- Python 3.13+ free-threaded mode (experimental GIL removal) worth watching
+- **Minimum version: Python 3.14** — lazy imports used natively, no older version support
+- GIL limits true thread parallelism — ASGI async is the idiomatic concurrency model
+- Python 3.14 lazy imports resolve the eager import cold start problem at the language level
+- For Lambda workloads where Python cold starts are unacceptable, switch to the Go or TypeScript port — same framework,
+  compiled binary startup
 - `inspect.getfile()` resolves class to source file — equivalent of PHP's `ReflectionClass::getFileName()`
 
 **Language-specific notes:**
@@ -190,13 +193,13 @@ frontend use without requiring it. Positioning stays: backend framework that hap
 
 ## Language Comparison Summary
 
-|            | Concurrency               | Annotations            | `class` ref       | Works without cache | Worker mode |
-|------------|---------------------------|------------------------|-------------------|---------------------|-------------|
-| PHP        | FPM / FrankenPHP / Swoole | ✅ Attributes           | ✅ `::class`       | ✅ always            | ✅ yes       |
-| Java       | Virtual threads (Loom)    | ✅ Annotations          | ✅ `.class`        | ✅ always            | ✅ yes       |
-| Go         | Goroutines (native)       | ❌ none                 | ❌ string const    | ✅ always            | ✅ always    |
-| Python     | asyncio / ASGI            | ✅ Decorators (runtime) | ✅ class ref       | ✅ always            | ✅ yes       |
-| TypeScript | Node.js event loop        | ⚠️ experimental        | ✅ constructor ref | ✅ always            | ✅ yes       |
+|              | Concurrency               | Annotations             | `class` ref       | Works without cache | Worker mode |
+|--------------|---------------------------|-------------------------|-------------------|---------------------|-------------|
+| PHP          | FPM / FrankenPHP / Swoole | ✅ Attributes            | ✅ `::class`       | ✅ always            | ✅ yes       |
+| Java         | Virtual threads (Loom)    | ✅ Annotations           | ✅ `.class`        | ✅ always            | ✅ yes       |
+| Go           | Goroutines (native)       | ❌ none                  | ❌ string const    | ✅ always            | ✅ always    |
+| Python 3.14+ | asyncio / ASGI            | ✅ Decorators (metadata) | string const      | ✅ always            | ✅ yes       |
+| TypeScript   | Node.js event loop        | ⚠️ experimental         | ✅ constructor ref | ✅ always            | ✅ yes       |
 
 ---
 

@@ -5,16 +5,17 @@
 Every class, interface, and contract in Valkyrja needs a stable, unique identifier for use as a container binding key.
 Languages differ in what they use as that key:
 
-| Language   | Binding key type            | Notes                                   |
-|------------|-----------------------------|-----------------------------------------|
-| PHP        | `::class` — FQN string      | compiler-verified                       |
-| Java       | `.class` — `Class<T>` token | compiler-verified                       |
-| Python     | class object (`type`)       | hashable, IDE-supported, idiomatic      |
-| Go         | string constant             | required — no class reference mechanism |
-| TypeScript | string constant             | required — interfaces erased at runtime |
+| Language   | Binding key type            | Notes                                                          |
+|------------|-----------------------------|----------------------------------------------------------------|
+| PHP        | `::class` — FQN string      | compiler-verified                                              |
+| Java       | `.class` — `Class<T>` token | compiler-verified                                              |
+| Python     | string constant             | class object forces import, defeating Python 3.14 lazy loading |
+| Go         | string constant             | required — no class reference mechanism                        |
+| TypeScript | string constant             | required — interfaces erased at runtime                        |
 
-**Go and TypeScript are the only ports that require string constants.** PHP and Java use native language mechanisms.
-Python uses class objects directly as keys — they are hashable and work as dict keys natively.
+**Go, Python, and TypeScript require string constants.** PHP and Java use native language mechanisms. Python uses string
+constants for the same reason as Go and TypeScript — using class objects as keys forces module imports, defeating Python
+3.14's lazy import mechanism which is the primary solution to Python's cold start problem.
 
 The string constant format for Go and TypeScript:
 
@@ -112,17 +113,17 @@ c.Make(DatabaseClass),
 )
 ```
 
-**Python** — class object as key, no string constant needed:
+**Python** — string constant as key:
 
 ```python
 container.bind(
-    UserRepositoryContract,  # class object — hashable, IDE-supported
-    lambda c: UserRepository(c.make(Database))
+    ContainerConstants.USER_REPOSITORY,
+    lambda c: UserRepository(c.make(ContainerConstants.DATABASE))
 )
 
 container.singleton(
-    UserRepositoryContract,
-    lambda c: UserRepository(c.make(Database))
+    ContainerConstants.ROUTER,
+    lambda c: Router(c.make(ContainerConstants.DISPATCHER))
 )
 ```
 
@@ -205,9 +206,8 @@ This is an honest reflection of each language's capabilities rather than a limit
 
 ## Per-Component Constants Files
 
-Constants files are **required for Go and TypeScript** where string constants are the only binding key mechanism. They
-are **optional but recommended for PHP and Java** as a complement to `::class` / `.class`. They are **not needed for
-Python** where class objects are used as keys directly.
+Constants files are **required for Go, Python, and TypeScript** where string constants are the only binding key
+mechanism. They are **optional but recommended for PHP and Java** as a complement to `::class` / `.class`.
 
 ### Why Per-Component, Not A Single Central File
 
@@ -255,7 +255,7 @@ valkyrja/
     ContainerConstants.php     ← PHP/Java: optional complement to ::class / .class
     container_constants.go     ← Go: required string constants
     container-constants.ts     ← TypeScript: required string constants
-    # Python: no constants file needed — class objects used as keys
+    container_constants.py     ← Python: required string constants
     ContainerContract.php
     ContainerException.php
   http/
@@ -330,30 +330,33 @@ Type safety is convention-enforced. The linter and code review are the enforceme
 
 ### Python
 
-Python class objects (`type`) are hashable and work natively as dict keys. The class itself is the binding key — no
-string constants file needed:
+**Minimum version: Python 3.14.** String constants are used as binding keys — same as Go and TypeScript. Using class
+object keys forces module imports which defeats Python 3.14's lazy import mechanism.
 
 ```python
-# bind against the contract class object
-container.bind(
-    UserRepositoryContract,
-    lambda c: UserRepository(c.make(Database))
-)
-
-# resolve against the same contract class object
-repo = container.make(UserRepositoryContract)
+# container_constants.py — required, same as Go and TypeScript
+class ContainerConstants:
+    CONTAINER = "io.valkyrja.container.ContainerContract"
+    ROUTER = "io.valkyrja.http.routing.RouterContract"
+    USER_REPOSITORY = "app.repositories.UserRepositoryContract"
+    DATABASE = "app.services.DatabaseContract"
 ```
 
-This is idiomatic Python, fully IDE-supported, and impossible to mistype. mypy/pyright validate that the class
-referenced exists.
+```python
+# binding and resolution via string key
+container.bind(
+    ContainerConstants.USER_REPOSITORY,
+    lambda c: UserRepository(c.make(ContainerConstants.DATABASE))
+)
 
-**No constants file is needed for Python.** The class object is the identifier.
+repo = container.make(ContainerConstants.USER_REPOSITORY)
+# with Python 3.14 lazy imports, the UserRepository module loads here — not at boot
+```
 
-The `class_()` FQN helper is still available for cases where a string representation is needed (e.g. serialization,
-logging, cache data file generation):
+The `class_()` FQN helper generates string constants from class objects where needed:
 
 ```python
-# available as a utility — not needed for container bindings
+# utility for generating string constants — not for use as a binding key directly
 def class_(cls) -> str:
     return f"{cls.__module__}.{cls.__qualname__}"
 ```
@@ -400,7 +403,7 @@ The key type per language:
 
 - PHP: `UserRepositoryContract::class` (FQN string)
 - Java: `UserRepositoryContract.class` (Class<T> token)
-- Python: `UserRepositoryContract` (class object)
+- Python: `'app.repositories.UserRepositoryContract'` (string constant)
 - Go: `"io.valkyrja.user.UserRepositoryContract"` (string constant)
 - TypeScript: `'io.valkyrja.user.UserRepositoryContract'` (string constant)
 

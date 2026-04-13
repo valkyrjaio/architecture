@@ -609,63 +609,63 @@ public class ForgeParser {
 package main
 
 import (
-	"fmt"
-	"go/ast"
-	"go/parser"
-	"go/token"
-	"os"
+    "fmt"
+    "go/ast"
+    "go/parser"
+    "go/token"
+    "os"
 )
 
 func main() {
-	// file path passed directly as CLI argument
-	// e.g. valkyrja-forge generate app/config/app_config.go
-	filepath := os.Args[1]
+    // file path passed directly as CLI argument
+    // e.g. valkyrja-forge generate app/config/app_config.go
+    filepath := os.Args[1]
 
-	// step 1: create a FileSet to track position information
-	fset := token.NewFileSet()
+    // step 1: create a FileSet to track position information
+    fset := token.NewFileSet()
 
-	// step 2: parse the file into an AST
-	file, err := parser.ParseFile(
-		fset,
-		filepath,
-		nil,                  // src — nil reads from disk
-		parser.ParseComments, // include comments in AST
-	)
-	if err != nil {
-		panic(fmt.Sprintf("parse error: %v", err))
-	}
+    // step 2: parse the file into an AST
+    file, err := parser.ParseFile(
+        fset,
+        filepath,
+        nil,                  // src — nil reads from disk
+        parser.ParseComments, // include comments in AST
+    )
+    if err != nil {
+        panic(fmt.Sprintf("parse error: %v", err))
+    }
 
-	// step 3: walk the AST with ast.Inspect
-	// returns true to continue into children, false to stop
-	ast.Inspect(file, func(n ast.Node) bool {
-		if n == nil {
-			return false
-		}
+    // step 3: walk the AST with ast.Inspect
+    // returns true to continue into children, false to stop
+    ast.Inspect(file, func(n ast.Node) bool {
+        if n == nil {
+            return false
+        }
 
-		switch node := n.(type) {
-		case *ast.FuncDecl:
-			fmt.Printf("Function: %s at %s\n",
-				node.Name.Name,
-				fset.Position(node.Pos()),
-			)
-		case *ast.ReturnStmt:
-			for _, result := range node.Results {
-				fmt.Printf("  Return: %T\n", result)
-			}
-		case *ast.CompositeLit:
-			// slice [] or map {} literal — provider lists live here
-			fmt.Printf("  Composite literal with %d elements\n", len(node.Elts))
-			for _, elt := range node.Elts {
-				fmt.Printf("    Element: %T = %v\n", elt, elt)
-			}
-		}
+        switch node := n.(type) {
+        case *ast.FuncDecl:
+            fmt.Printf("Function: %s at %s\n",
+                node.Name.Name,
+                fset.Position(node.Pos()),
+            )
+        case *ast.ReturnStmt:
+            for _, result := range node.Results {
+                fmt.Printf("  Return: %T\n", result)
+            }
+        case *ast.CompositeLit:
+            // slice [] or map {} literal — provider lists live here
+            fmt.Printf("  Composite literal with %d elements\n", len(node.Elts))
+            for _, elt := range node.Elts {
+                fmt.Printf("    Element: %T = %v\n", elt, elt)
+            }
+        }
 
-		return true // continue walking into children
-	})
+        return true // continue walking into children
+    })
 
-	// step 4: print any AST node back to source text
-	// go/printer writes to any io.Writer
-	// printer.Fprint(os.Stdout, fset, file)
+    // step 4: print any AST node back to source text
+    // go/printer writes to any io.Writer
+    // printer.Fprint(os.Stdout, fset, file)
 }
 ```
 
@@ -1452,7 +1452,6 @@ external file resolution needed.
 **Annotation processor setup:**
 
 ```java
-
 @SupportedAnnotationTypes("io.valkyrja.http.routing.Handler")
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class ValkyrjaAnnotationProcessor extends AbstractProcessor {
@@ -1467,8 +1466,8 @@ public class ValkyrjaAnnotationProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(
-            Set<? extends TypeElement> annotations,
-            RoundEnvironment roundEnv
+        Set<? extends TypeElement> annotations,
+        RoundEnvironment roundEnv
     ) {
         // collect all @Handler annotated methods
         for (Element element : roundEnv.getElementsAnnotatedWith(Handler.class)) {
@@ -1541,34 +1540,28 @@ private String resolveFQN(String source, ExecutableElement method) {
 ```java
 // generate AppHttpRoutingData record using JavaPoet
 TypeSpec routingData = TypeSpec.recordBuilder("AppHttpRoutingData")
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .addSuperinterface(HttpRoutingDataContract.class)
-                .addRecordComponent(ParameterSpec.builder(
-                        ParameterizedTypeName.get(Map.class, String.class, RouteContract.class),
-                        "routes"
-                ).build())
-                .addRecordComponent(ParameterSpec.builder(
-                        ParameterizedTypeName.get(Map.class, String.class,
-                                ParameterizedTypeName.get(Map.class, String.class, String.class)),
-                        "paths"
-                ).build())
-                // ... dynamicPaths, regexes
-                .addMethod(MethodSpec.methodBuilder("create")
-                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                        .returns(ClassName.get("", "AppHttpRoutingData"))
-                        .addCode(generateCreateMethodBody(collectedRoutes))
-                        .build())
-                .build();
+    .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+    .addSuperinterface(HttpRoutingDataContract.class)
+    .addRecordComponent(ParameterSpec.builder(
+        ParameterizedTypeName.get(Map.class, String.class, RouteContract.class),
+        "routes"
+    ).build())
+    .addRecordComponent(ParameterSpec.builder(
+        ParameterizedTypeName.get(Map.class, String.class,
+            ParameterizedTypeName.get(Map.class, String.class, String.class)),
+        "paths"
+    ).build())
+    // ... dynamicPaths, regexes
+    .addMethod(MethodSpec.methodBuilder("create")
+        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+        .returns(ClassName.get("", "AppHttpRoutingData"))
+        .addCode(generateCreateMethodBody(collectedRoutes))
+        .build())
+    .build();
 
-JavaFile.
-
-builder("app.cache",routingData)
-    .
-
-build()
-    .
-
-writeTo(processingEnv.getFiler());
+JavaFile.builder("app.cache", routingData)
+    .build()
+    .writeTo(processingEnv.getFiler());
 ```
 
 ---
@@ -1711,12 +1704,11 @@ importable class including framework classes.
 import ast
 import inspect
 
-
 def walk_provider(provider_class: type) -> dict:
     """Walk a provider class and extract its sub-providers via AST."""
     filepath = inspect.getfile(provider_class)
-    source = open(filepath).read()
-    tree = ast.parse(source)
+    source   = open(filepath).read()
+    tree     = ast.parse(source)
 
     # collect import map for FQN resolution
     import_map = collect_imports(tree)
@@ -1742,9 +1734,9 @@ def collect_imports(tree: ast.Module) -> dict[str, str]:
 
 
 def extract_provider_list(
-        tree: ast.Module,
-        method_name: str,
-        import_map: dict
+    tree: ast.Module,
+    method_name: str,
+    import_map: dict
 ) -> list[str]:
     """Extract the return value of a provider list method as FQN strings."""
     for node in ast.walk(tree):
@@ -1839,7 +1831,6 @@ $regexes
 )
 '''
 
-
 def generate_routing_data(collected: dict) -> str:
     routes_str = '\n'.join(
         f"        '{name}': {route_source},"
@@ -1854,7 +1845,6 @@ def generate_routing_data(collected: dict) -> str:
         dynamic_paths=build_paths_str(collected['dynamic_paths']),
         regexes=build_paths_str(collected['regexes']),
     )
-
 
 output = generate_routing_data(collected_data)
 open('app/cache/app_http_routing_data.py', 'w').write(output)
@@ -1877,7 +1867,7 @@ import * as fs from 'fs'
 
 // load tsconfig and create compiler program
 const configFile = ts.readConfigFile('tsconfig.json', ts.sys.readFile)
-const config = ts.parseJsonConfigFileContent(
+const config     = ts.parseJsonConfigFileContent(
     configFile.config,
     ts.sys,
     process.cwd()
@@ -1929,7 +1919,7 @@ function extractProviderList(
                         if (ts.isIdentifier(element)) {
                             // resolve to fully qualified module path via type checker
                             const symbol = checker.getSymbolAtLocation(element)
-                            const fqn = checker.getFullyQualifiedName(symbol!)
+                            const fqn    = checker.getFullyQualifiedName(symbol!)
                             classes.push(fqn)
                         }
                     }
@@ -2209,12 +2199,12 @@ composer require --dev valkyrja-forge
 ```json
 // composer.json
 {
-  "require": {
-    "valkyrja/framework": "^26.0"
-  },
-  "require-dev": {
-    "valkyrja-forge": "^1.0"
-  }
+    "require": {
+        "valkyrja/framework": "^26.0"
+    },
+    "require-dev": {
+        "valkyrja-forge": "^1.0"
+    }
 }
 ```
 

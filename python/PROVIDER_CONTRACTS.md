@@ -224,7 +224,7 @@ class UserServiceProvider(ServiceProviderContract):
         for cache generation.
         """
         return {
-            UserRepositoryClass: UserServiceProvider.publish_user_repository,
+            'app.repositories.UserRepositoryContract': UserServiceProvider.publish_user_repository,
         }
 
     @handler(lambda c, args: c.set_singleton(

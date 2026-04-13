@@ -19,7 +19,6 @@
 - **CGI mode** supported — Python is interpreted, cache optional in dev
 - **Granian** (Rust-based) as an emerging alternative for true multi-threaded workers
 - GIL limits true thread parallelism — ASGI async is the idiomatic concurrency model
-- Python 3.13+ free-threaded mode worth watching
 
 ---
 
@@ -74,38 +73,37 @@ class ComponentSpecificInvalidArgumentException(ComponentInvalidArgumentExceptio
 
 **Reference:** `CONTAINER_BINDINGS.md`
 
-### Class objects as keys — no string constants needed
+### String constants as keys — same as Go and TypeScript
 
-Python `type` objects are hashable and work natively as dict keys. The class or abstract class itself is the binding
-key — no constants file required:
+Python requires string constants for container binding keys. Using class objects as keys forces the module to be
+imported at key definition time — the class object cannot exist without its module loading. This defeats Python 3.14's
+lazy import mechanism which Valkyrja relies on for cold start performance.
 
 ```python
-# bind against the contract class directly
-container.bind(
-    UserRepositoryContract,
-    lambda c: UserRepository(c.make(Database))
-)
-
-container.singleton(
-    RouterContract,
-    lambda c: Router(c.make(DispatcherContract))
-)
-
-# resolve against the same contract
-repo = container.make(UserRepositoryContract)
+# container_constants.py — required per component
+class ContainerConstants:
+    CONTAINER = "io.valkyrja.container.ContainerContract"
+    ROUTER = "io.valkyrja.http.routing.RouterContract"
+    USER_REPOSITORY = "app.repositories.UserRepositoryContract"
+    DATABASE = "app.services.DatabaseContract"
 ```
 
-IDE autocomplete works on class references. mypy/pyright validate the class exists. It is impossible to mistype a class
-reference the way you can mistype a string.
+```python
+# bind and resolve via string constant
+container.bind(
+    ContainerConstants.USER_REPOSITORY,
+    lambda c: UserRepository(c.make(ContainerConstants.DATABASE))
+)
 
-**No per-component constants file is needed for Python.** This is the one port where constants files are optional and
-generally unnecessary.
+repo = container.make(ContainerConstants.USER_REPOSITORY)
+# with Python 3.14 lazy imports, UserRepository loads here — not at boot
+```
 
-### FQN helper — for serialization and cache generation only
+### FQN helper — for generating string constants
 
 ```python
 # 'class' is reserved — use class_()
-# Used for logging, cache data files, etc. — NOT for container bindings
+# Useful for generating constant values, logging, debugging
 def class_(cls) -> str:
     return f"{cls.__module__}.{cls.__qualname__}"
 ```
@@ -226,7 +224,105 @@ def show(self, id: int) -> ResponseContract:
 
 ---
 
-## 5. Decorators — Metadata Markers, Not Self-Registrars
+## 5. Python Imports and Cold Start — Python 3.14 Is the Answer
+
+Eager imports are a well-known Python ecosystem problem. Every module referenced in the import chain loads at boot —
+every controller, listener, and service class regardless of whether the current request needs them. FastAPI, Django, and
+Flask all have this problem. Real-world applications on AWS Lambda have reported 10–30 second cold starts for large
+applications.
+
+**This is a language-level problem and Python 3.14 solves it natively.**
+
+Valkyrja's Python port requires Python 3.14 minimum. This is a deliberate decision — building on 3.14 means lazy imports
+are available as a first-class language feature with no framework workarounds needed.
+
+### Python 3.14 Lazy Imports — What They Actually Do
+
+Python 3.14 introduces transparent lazy imports — module execution is deferred until the imported name is **first
+accessed**. The key word is "accessed". Constructing a tuple, dict, or any other data structure that references an
+imported name counts as accessing it.
+
+```python
+from app.services import UserServiceProvider  # lazy proxy — not yet loaded
+
+# tuple construction accesses UserServiceProvider — triggers the import HERE
+(UserServiceProvider, 'publish_user')  # ← module loads at this line
+```
+
+This means a plain tuple callable in the cache data file loads the provider module at cache file load time — even with
+Python 3.14 lazy imports. The lambda wrapper is still required for Python to achieve true deferred loading:
+
+```python
+# without lambda — UserServiceProvider loads when cache file loads
+APP_CONTAINER_DATA = {
+    'app.repositories.UserRepositoryContract': (UserServiceProvider, 'publish_user_repository'),
+}
+
+# with lambda — UserServiceProvider loads only when lambda is called
+# lambda body is not evaluated until called — name access deferred
+APP_CONTAINER_DATA = {
+    'app.repositories.UserRepositoryContract': lambda: (UserServiceProvider, 'publish_user_repository'),
+}
+```
+
+The lambda wrapper is **Python-only**. PHP's `[SomeClass::class, 'method']` uses `::class` which resolves to a plain
+string at compile time — no class loading. Compiled languages (Java, Go, TypeScript) have no equivalent concept.
+
+### String Keys for Container Bindings
+
+Because class object keys require the class to be imported (the class object cannot exist without its module loading),
+Python uses **string keys** for container bindings — same as Go and TypeScript:
+
+```python
+# class object key — forces UserRepositoryContract import at cache load time
+APP_CONTAINER_DATA = {
+    UserRepositoryContract: lambda: (UserServiceProvider, 'publish_user_repository'),
+    # UserRepositoryContract accessed here — module loads
+}
+
+# string key — no import of contract class at cache load time
+APP_CONTAINER_DATA = {
+    'app.repositories.UserRepositoryContract': lambda: (UserServiceProvider, 'publish_user_repository'),
+    # string literal — no import triggered
+}
+```
+
+With string keys and lambda wrappers:
+
+- Boot: cache file loads — no provider or contract modules imported
+- First resolution of a binding: lambda called — that provider module loads only then
+- Each request: only the providers needed for that request's bindings load
+
+### What the Cache Provides
+
+Even in pre-3.14 Python, the cache eliminates meaningful boot cost beyond imports:
+
+```
+Without cache — every boot:
+  ✗ Traverse provider tree
+  ✗ Scan @handler decorators across all controllers  
+  ✗ Build route dispatcher index (regex compilation, path indexing)
+  ✗ Register all container bindings
+  + Module imports (unavoidable in pre-3.14)
+
+With cache — every boot:
+  ✓ Load four pre-built data classes
+  ✓ Skip provider tree traversal entirely
+  ✓ Skip annotation scanning entirely
+  ✓ Skip route index construction entirely
+  + Module imports (deferred per-request with Python 3.14)
+```
+
+### The Multi-Language Escape Valve
+
+For Lambda-heavy workloads where Python cold starts remain a concern even with 3.14, Valkyrja's multi-language nature is
+the answer — switch the Lambda function to the Go or TypeScript port. Same framework architecture, same patterns, same
+team knowledge, compiled binary cold start times. This is a genuine differentiator of the Valkyrja ecosystem over
+single-language frameworks.
+
+---
+
+## 6. Decorators — Metadata Markers, Not Self-Registrars
 
 Python decorators execute at import time — but `@handler` must **not** self-register routes. It must be a metadata
 marker only:
@@ -305,7 +401,7 @@ anywhere the function is accessible.
 
 ---
 
-## 6. Deployment Models
+## 7. Deployment Models
 
 ### CGI / Lambda
 
@@ -342,7 +438,7 @@ worker.run(app)
 
 ---
 
-## 7. Build Tool — valkyrja-forge Python
+## 8. Build Tool — valkyrja-forge Python — valkyrja-forge Python
 
 **Reference:** `BUILD_TOOL.md`
 
