@@ -51,6 +51,18 @@
     - Only allow handler for routes and listener.
     - CacheableHandlerRoute|CacheableHandlerListener for cache writing of said
       closure.
+
+```php
+// HTTP
+/** Closure(ContainerContract, array<string, mixed>): ResponseContract */
+
+// CLI
+/** Closure(ContainerContract, array<string, mixed>): OutputContract */
+
+// Event listener
+/** Closure(ContainerContract, array<string, mixed>): mixed */
+```
+
 - Update routes list to always be closure/lambda. Self fulfilling as well. First
   hit creates a new route instance, that is then put in the routes list.
 
