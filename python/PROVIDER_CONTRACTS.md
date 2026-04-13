@@ -219,11 +219,12 @@ class UserServiceProvider(ServiceProviderContract):
     @staticmethod
     def publishers() -> dict[str, Callable[[ContainerContract], None]]:
         """
-        Build tool reads this map from AST and writes each callable
-        as a lambda in the generated cache data file.
+        Build tool reads this map from AST.
+        Keys are string constants — forge writes them as module-level imports in the cache.
+        Values are method references — forge wraps them in lambdas in the cache.
         """
         return {
-            'app.repositories.UserRepositoryContract': UserServiceProvider.publish_user_repository,
+            ContainerConstants.USER_REPOSITORY: UserServiceProvider.publish_user_repository,
         }
 
     @staticmethod

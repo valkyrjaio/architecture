@@ -1520,7 +1520,7 @@ private String resolveFQN(String source, ExecutableElement method) {
     // build import map: simple name → fully qualified name
     Map<String, String> importMap = new HashMap<>();
     for (ImportTree imp : unit.getImports()) {
-        String fqn       = imp.getQualifiedIdentifier().toString();
+        String fqn = imp.getQualifiedIdentifier().toString();
         String simpleName = fqn.substring(fqn.lastIndexOf('.') + 1);
         importMap.put(simpleName, fqn);
     }
@@ -1528,8 +1528,8 @@ private String resolveFQN(String source, ExecutableElement method) {
     // rewrite source replacing simple names with FQN
     for (Map.Entry<String, String> entry : importMap.entrySet()) {
         source = source.replaceAll(
-            "\\b" + Pattern.quote(entry.getKey()) + "\\b",
-            entry.getValue()
+                "\\b" + Pattern.quote(entry.getKey()) + "\\b",
+                entry.getValue()
         );
     }
     return source;
@@ -1541,24 +1541,24 @@ private String resolveFQN(String source, ExecutableElement method) {
 ```java
 // generate AppHttpRoutingData record using JavaPoet
 TypeSpec routingData = TypeSpec.recordBuilder("AppHttpRoutingData")
-    .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-    .addSuperinterface(HttpRoutingDataContract.class)
-    .addRecordComponent(ParameterSpec.builder(
-        ParameterizedTypeName.get(Map.class, String.class, RouteContract.class),
-        "routes"
-    ).build())
-    .addRecordComponent(ParameterSpec.builder(
-        ParameterizedTypeName.get(Map.class, String.class,
-            ParameterizedTypeName.get(Map.class, String.class, String.class)),
-        "paths"
-    ).build())
-    // ... dynamicPaths, regexes
-    .addMethod(MethodSpec.methodBuilder("create")
-        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-        .returns(ClassName.get("", "AppHttpRoutingData"))
-        .addCode(generateCreateMethodBody(collectedRoutes))
-        .build())
-    .build();
+                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                .addSuperinterface(HttpRoutingDataContract.class)
+                .addRecordComponent(ParameterSpec.builder(
+                        ParameterizedTypeName.get(Map.class, String.class, RouteContract.class),
+                        "routes"
+                ).build())
+                .addRecordComponent(ParameterSpec.builder(
+                        ParameterizedTypeName.get(Map.class, String.class,
+                                ParameterizedTypeName.get(Map.class, String.class, String.class)),
+                        "paths"
+                ).build())
+                // ... dynamicPaths, regexes
+                .addMethod(MethodSpec.methodBuilder("create")
+                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                        .returns(ClassName.get("", "AppHttpRoutingData"))
+                        .addCode(generateCreateMethodBody(collectedRoutes))
+                        .build())
+                .build();
 
 JavaFile.builder("app.cache", routingData)
     .build()
@@ -1579,15 +1579,15 @@ source files.
 ```go
 // load packages listed in valkyrja.yaml
 cfg := &packages.Config{
-    Mode: packages.NeedFiles |
-          packages.NeedSyntax |
-          packages.NeedTypes |
-          packages.NeedImports,
+Mode: packages.NeedFiles |
+packages.NeedSyntax |
+packages.NeedTypes |
+packages.NeedImports,
 }
 
 pkgs, err := packages.Load(cfg, providerPackagePaths...)
 if err != nil {
-    log.Fatalf("failed to load packages: %v", err)
+log.Fatalf("failed to load packages: %v", err)
 }
 ```
 
@@ -1630,22 +1630,22 @@ return routes
 ```go
 // extract function literal source text from AST node
 func extractFuncLiteral(node ast.Node, fset *token.FileSet) string {
-    var buf bytes.Buffer
-    printer.Fprint(&buf, fset, node)
-    return buf.String()
+var buf bytes.Buffer
+printer.Fprint(&buf, fset, node)
+return buf.String()
 }
 
 // resolve imports to fully qualified package paths
 func resolveFQN(source string, imports []*ast.ImportSpec) string {
-    for _, imp := range imports {
-        path    := strings.Trim(imp.Path.Value, `"`)
-        alias   := filepath.Base(path)
-        if imp.Name != nil {
-            alias = imp.Name.Name
-        }
-        source = strings.ReplaceAll(source, alias+".", path+"/")
-    }
-    return source
+for _, imp := range imports {
+path := strings.Trim(imp.Path.Value, `"`)
+alias := filepath.Base(path)
+if imp.Name != nil {
+alias = imp.Name.Name
+}
+source = strings.ReplaceAll(source, alias+".", path+"/")
+}
+return source
 }
 ```
 
@@ -1705,11 +1705,12 @@ importable class including framework classes.
 import ast
 import inspect
 
+
 def walk_provider(provider_class: type) -> dict:
     """Walk a provider class and extract its sub-providers via AST."""
     filepath = inspect.getfile(provider_class)
-    source   = open(filepath).read()
-    tree     = ast.parse(source)
+    source = open(filepath).read()
+    tree = ast.parse(source)
 
     # collect import map for FQN resolution
     import_map = collect_imports(tree)
@@ -1735,9 +1736,9 @@ def collect_imports(tree: ast.Module) -> dict[str, str]:
 
 
 def extract_provider_list(
-    tree: ast.Module,
-    method_name: str,
-    import_map: dict
+        tree: ast.Module,
+        method_name: str,
+        import_map: dict
 ) -> list[str]:
     """Extract the return value of a provider list method as FQN strings."""
     for node in ast.walk(tree):
@@ -1922,7 +1923,7 @@ function extractProviderList(
                         if (ts.isIdentifier(element)) {
                             // resolve to fully qualified module path via type checker
                             const symbol = checker.getSymbolAtLocation(element)
-                            const fqn    = checker.getFullyQualifiedName(symbol!)
+                            const fqn = checker.getFullyQualifiedName(symbol!)
                             classes.push(fqn)
                         }
                     }
@@ -1957,8 +1958,8 @@ function extractPublisherMethod(
             if ((member.name as ts.Identifier).text !== methodName) continue
 
             // extract method body source text
-            const body       = member.body!
-            const rawSource  = sourceFile.text.slice(body.pos, body.end)
+            const body = member.body!
+            const rawSource = sourceFile.text.slice(body.pos, body.end)
 
             // resolve all type references to fully qualified paths
             methodSource = resolveFQNTypes(rawSource, body, checker)
@@ -1978,7 +1979,7 @@ function resolveFQNTypes(
         if (ts.isIdentifier(child)) {
             const symbol = checker.getSymbolAtLocation(child)
             if (symbol) {
-                const fqn    = checker.getFullyQualifiedName(symbol)
+                const fqn = checker.getFullyQualifiedName(symbol)
                 source = source.replace(child.text, fqn)
             }
         }

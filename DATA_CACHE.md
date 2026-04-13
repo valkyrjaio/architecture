@@ -361,32 +361,32 @@ public class HttpComponentProvider implements ComponentProviderContract {
 
 ```go
 type ComponentProviderContract interface {
-    GetContainerProviders(app ApplicationContract) []ServiceProviderContract
-    GetEventProviders(app ApplicationContract) []ListenerProviderContract
-    GetCliProviders(app ApplicationContract) []CliRouteProviderContract
-    GetHttpProviders(app ApplicationContract) []HttpRouteProviderContract
+GetContainerProviders(app ApplicationContract) []ServiceProviderContract
+GetEventProviders(app ApplicationContract) []ListenerProviderContract
+GetCliProviders(app ApplicationContract) []CliRouteProviderContract
+GetHttpProviders(app ApplicationContract) []HttpRouteProviderContract
 }
 
 // implementation
 type HttpComponentProvider struct{}
 
 func (p *HttpComponentProvider) GetContainerProviders(app ApplicationContract) []ServiceProviderContract {
-    return []ServiceProviderContract{
-        &HttpContainerProvider{},
-        &HttpMiddlewareProvider{},
-    }
+return []ServiceProviderContract{
+&HttpContainerProvider{},
+&HttpMiddlewareProvider{},
+}
 }
 
 func (p *HttpComponentProvider) GetEventProviders(app ApplicationContract) []ListenerProviderContract {
-    return []ListenerProviderContract{&HttpEventProvider{}}
+return []ListenerProviderContract{&HttpEventProvider{}}
 }
 
 func (p *HttpComponentProvider) GetCliProviders(app ApplicationContract) []CliRouteProviderContract {
-    return []CliRouteProviderContract{}
+return []CliRouteProviderContract{}
 }
 
 func (p *HttpComponentProvider) GetHttpProviders(app ApplicationContract) []HttpRouteProviderContract {
-    return []HttpRouteProviderContract{&HttpRouteProvider{}}
+return []HttpRouteProviderContract{&HttpRouteProvider{}}
 }
 ```
 
@@ -436,8 +436,11 @@ class HttpComponentProvider(ComponentProviderContract):
 ```typescript
 export interface ComponentProviderContract {
     getContainerProviders(app: ApplicationContract): Array<new () => ServiceProviderContract>
+
     getEventProviders(app: ApplicationContract): Array<new () => ListenerProviderContract>
+
     getCliProviders(app: ApplicationContract): Array<new () => CliRouteProviderContract>
+
     getHttpProviders(app: ApplicationContract): Array<new () => HttpRouteProviderContract>
 }
 
@@ -535,24 +538,24 @@ public class UserServiceProvider implements ServiceProviderContract {
 
 ```go
 type ServiceProviderContract interface {
-Publishers() map[string]func (ContainerContract)
+    Publishers() map[string]func(ContainerContract)
 }
 
 // implementation
 type UserServiceProvider struct{}
 
-func (p *UserServiceProvider) Publishers() map[string]func (ContainerContract) {
-return map[string]func (ContainerContract){
-repoContract.UserRepositoryClass: p.PublishUserRepository,
-}
+func (p *UserServiceProvider) Publishers() map[string]func(ContainerContract) {
+    return map[string]func(ContainerContract){
+        repoContract.UserRepositoryClass: p.PublishUserRepository,
+    }
 }
 
 // Build tool reads this method body from AST for cache generation
 func (p *UserServiceProvider) PublishUserRepository(c ContainerContract) {
-c.SetSingleton(
-repoContract.UserRepositoryClass,
-repositories.NewUserRepository(c.Make(serviceContract.DatabaseClass)),
-)
+    c.SetSingleton(
+        repoContract.UserRepositoryClass,
+        repositories.NewUserRepository(c.Make(serviceContract.DatabaseClass)),
+    )
 }
 ```
 
@@ -563,7 +566,6 @@ class ServiceProviderContract(ABC):
     @staticmethod
     @abstractmethod
     def publishers() -> dict: ...
-
 
 # implementation
 class UserServiceProvider(ServiceProviderContract):
@@ -653,6 +655,7 @@ class UserHttpRouteProvider implements HttpRouteProviderContract
 ```java
 public interface HttpRouteProviderContract {
     static List<Class<?>> getControllerClasses();
+
     static List<RouteContract> getRoutes();
 }
 
@@ -665,8 +668,8 @@ public class UserHttpRouteProvider implements HttpRouteProviderContract {
 
     public static List<RouteContract> getRoutes() {
         return List.of(
-            HttpRoute.get("/orders", (ContainerContract c, List<Object> args) ->
-                c.getSingleton(OrderController.class).index((Request) args.get(0)))
+                HttpRoute.get("/orders", (ContainerContract c, List<Object> args) ->
+                        c.getSingleton(OrderController.class).index((Request) args.get(0)))
         );
     }
 }
@@ -676,23 +679,23 @@ public class UserHttpRouteProvider implements HttpRouteProviderContract {
 
 ```go
 type HttpRouteProviderContract interface {
-    GetControllerClasses() []string
-    GetRoutes() []RouteContract
+GetControllerClasses() []string
+GetRoutes() []RouteContract
 }
 
 // implementation — explicit registration only
 type UserHttpRouteProvider struct{}
 
 func (p *UserHttpRouteProvider) GetControllerClasses() []string {
-    return []string{}
+return []string{}
 }
 
 func (p *UserHttpRouteProvider) GetRoutes() []RouteContract {
-    return []RouteContract{
-        data.Get("/orders", func(c ContainerContract, args []any) any {
-            return c.GetSingleton(OrderControllerClass).(*OrderController).Index(args[0])
-        }),
-    }
+return []RouteContract{
+data.Get("/orders", func (c ContainerContract, args []any) any {
+return c.GetSingleton(OrderControllerClass).(*OrderController).Index(args[0])
+}),
+}
 }
 ```
 
@@ -729,6 +732,7 @@ class UserHttpRouteProvider(HttpRouteProviderContract):
 ```typescript
 export interface HttpRouteProviderContract {
     getControllerClasses(): string[]
+
     getRoutes(): RouteContract[]
 }
 
@@ -802,15 +806,15 @@ HttpRoute.get("/users/{id}/posts/{postId}", handler, List.of(
 ```go
 // Go
 data.Get("/users/{id}/posts/{postId}", handler,
-    parameter.New("id",     "[0-9]+"),
-    parameter.New("postId", "[0-9]+"),
+parameter.New("id", "[0-9]+"),
+parameter.New("postId", "[0-9]+"),
 )
 ```
 
 ```python
 # Python
 HttpRoute.get('/users/{id}/posts/{postId}', handler, [
-    Parameter('id',     pattern='[0-9]+'),
+    Parameter('id', pattern='[0-9]+'),
     Parameter('postId', pattern='[0-9]+'),
 ])
 ```
@@ -992,33 +996,33 @@ return new \Valkyrja\Http\Routing\Data\HttpRoutingData(
 ```java
 // generated — ALL http routes for the entire application as a record
 public record AppHttpRoutingData(
-                Map<String, RouteContract> routes,
-                Map<String, Map<String, String>> paths,
-                Map<String, Map<String, String>> dynamicPaths,
-                Map<String, Map<String, String>> regexes
-        ) implements HttpRoutingDataContract {
+    Map<String, RouteContract> routes,
+    Map<String, Map<String, String>> paths,
+    Map<String, Map<String, String>> dynamicPaths,
+    Map<String, Map<String, String>> regexes
+) implements HttpRoutingDataContract {
 
     public static AppHttpRoutingData create() {
         return new AppHttpRoutingData(
-                Map.of(
-                        // routes from UserHttpRouteProvider
-                        "user.show", new app.http.routing.AuthenticatedRoute(
-                                "/users/{id}", "GET",
-                                List.of(new Parameter("id", "[0-9]+")),
-                                (ContainerContract c, List<Object> args) ->
-                                        c.getSingleton(UserController.class).show((int) args.get(0))
-                        ),
-                        // routes from OrderHttpRouteProvider
-                        "order.index", new HttpRoute(
-                                "/orders", "GET", List.of(),
-                                (ContainerContract c, List<Object> args) ->
-                                        c.getSingleton(OrderController.class).index(args.get(0))
-                        )
-                        // ... all other routes
+            Map.of(
+                // routes from UserHttpRouteProvider
+                "user.show", new app.http.routing.AuthenticatedRoute(
+                    "/users/{id}", "GET",
+                    List.of(new Parameter("id", "[0-9]+")),
+                    (ContainerContract c, List<Object> args) ->
+                        c.getSingleton(UserController.class).show((int) args.get(0))
                 ),
-                Map.of("GET", Map.of("/orders", "order.index")),
-                Map.of("GET", Map.of("/users/{id}", "user.show")),
-                Map.of("GET", Map.of("^/users/(?P<id>[0-9]+)$", "user.show"))
+                // routes from OrderHttpRouteProvider
+                "order.index", new HttpRoute(
+                    "/orders", "GET", List.of(),
+                    (ContainerContract c, List<Object> args) ->
+                        c.getSingleton(OrderController.class).index(args.get(0))
+                )
+                // ... all other routes
+            ),
+            Map.of("GET", Map.of("/orders", "order.index")),
+            Map.of("GET", Map.of("/users/{id}", "user.show")),
+            Map.of("GET", Map.of("^/users/(?P<id>[0-9]+)$", "user.show"))
         );
     }
 }
