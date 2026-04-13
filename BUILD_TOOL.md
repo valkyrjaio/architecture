@@ -671,6 +671,387 @@ walkAST(sourceFile, (node) => {
 - Type guards: `ts.isClassDeclaration`, `ts.isMethodDeclaration`, `ts.isReturnStatement`, `ts.isArrayLiteralExpression`,
   etc.
 
+## AST Walk Strategy
+
+Once the config file is parsed, the forge tool follows a structured walk strategy. Each step produces data that feeds
+into the next, ultimately assembling the four output data classes.
+
+**Imports are only collected when needed for FQN rewriting** — specifically when extracting handler closures, publisher
+method bodies, service binding keys, and listener/route data that will be written into generated cache source files. For
+provider list methods (config, component providers, service/route/listener provider class lists) the forge tool only
+needs to read class references as identifiers to locate the next file — no FQN resolution needed, no import collection
+needed.
+
+---
+
+### Step 1: Walk the Config File
+
+**Goal:** Extract the component providers list.
+
+**What to collect:**
+
+```
+providers list  → list of class references from the providers property/method
+                  e.g. [HttpComponentProvider, ContainerComponentProvider, AppProvider]
+```
+
+No imports needed. The class references are read as identifiers and resolved to file paths by the build system (
+autoloader in PHP, classpath in Java, module paths in Go, `inspect.getfile` in Python, tsconfig in TypeScript). FQN
+resolution is not needed here — the identifier alone is enough to locate the next file.
+
+**Pattern:**
+
+```
+1. Parse config file into AST
+2. Find the providers list (array/slice/list literal on the config class)
+3. Extract each class reference as an identifier string
+4. For each identifier → resolve to file path → parse that file → Step 2
+```
+
+The providers list must be a simple literal — no variables, no method calls, no conditional logic. If it isn't, the
+forge tool emits an error.
+
+---
+
+### Step 2: Walk Each ComponentProvider File
+
+**Goal:** Categorize sub-providers by type so they can be handed to the correct walker.
+
+**What to collect:**
+
+```
+container_providers → list of class identifiers (ServiceProvider classes)
+event_providers     → list of class identifiers (ListenerProvider classes)
+http_providers      → list of class identifiers (HttpRouteProvider classes)
+cli_providers       → list of class identifiers (CliRouteProvider classes)
+```
+
+No imports needed. Same reasoning as Step 1 — the class identifiers are used only to locate the next file to parse, not
+to generate output.
+
+**Pattern:**
+
+```
+1. Parse ComponentProvider file into AST
+2. Find each of the four list methods by name
+3. Extract return value — must be a simple list literal
+4. Extract each class reference as an identifier
+5. For each identifier → resolve to file path → dispatch to Step 3
+```
+
+---
+
+### Step 3a: Walk ServiceProvider Files (Container Bindings)
+
+**Goal:** Extract all container bindings — the mapping of binding key to publisher function body.
+
+**Imports are needed here** — the publisher method bodies contain type references that will be written into generated
+cache source files and must be fully qualified.
+
+**What to collect:**
+
+```
+imports         → map of simple name → FQN
+                  needed to rewrite type references in publisher method bodies
+
+publishers      → map of binding key → publisher method body source text
+                  key format is language-specific:
+                    PHP/Java      → ::class / .class  (class name resolved to FQN via imports)
+                    Python        → class name        (resolved to FQN via imports)
+                    Go/TypeScript → string constant   (string literal value — used as-is)
+```
+
+**Pattern:**
+
+```
+1. Parse ServiceProvider file into AST
+2. Collect imports → FQN map  ← needed here
+3. Find the publishers() method
+4. Extract the map literal from the return statement
+5. For each entry:
+   a. Extract the key → resolve to canonical FQN string (language-specific, see table below)
+   b. Extract the value → method reference (e.g. self::publishRouter)
+   c. Resolve method reference → find that method in the same file
+   d. Extract the method body source text
+   e. Rewrite all type references in the body to FQN using import map
+6. Output: map of { canonical key string → publisher method body source text }
+```
+
+**Language-specific key resolution:**
+
+| Language   | Key in source                        | Resolution                                           |
+|------------|--------------------------------------|------------------------------------------------------|
+| PHP        | `RouterContract::class`              | Resolve `RouterContract` via import map → FQN string |
+| Java       | `RouterContract.class`               | Resolve `RouterContract` via import map → FQN string |
+| Python     | `RouterContract` (class name)        | Resolve via import map → FQN string                  |
+| Go         | `"io.valkyrja.http.RouterContract"`  | String literal — use as-is                           |
+| TypeScript | `RouterClass` (string constant name) | Resolve constant value via import map → string       |
+
+---
+
+### Step 3b: Walk ListenerProvider Files (Event Listeners)
+
+**Goal:** Extract explicit listeners and the list of annotated classes to scan.
+
+**Imports are needed for explicit listeners** — handler closures and event type references in listener data objects will
+be written into generated output and must be fully qualified.
+
+**Imports are not needed for the annotated class list** — those class identifiers are used only to locate files to scan
+in Step 4b.
+
+**What to collect:**
+
+```
+imports             → map of simple name → FQN
+                      needed to rewrite handler closures and event type references
+
+explicit_listeners  → list of listener data objects from getListeners()
+                      each listener carries:
+                        event type  (class reference → FQN via imports)
+                        priority    (integer literal, if present)
+                        handler     (closure source text, type refs rewritten to FQN)
+
+annotated_classes   → list of class identifiers from getListenerClasses()
+                      (PHP, Java, Python only — Go and TypeScript omit this method)
+                      no imports needed — identifiers only, used to locate files
+```
+
+**Pattern:**
+
+```
+1. Parse ListenerProvider file into AST
+2. Collect imports → FQN map  ← needed for explicit_listeners
+3. Find getListeners() method:
+   a. Extract return list literal
+   b. For each listener constructor call:
+      - Extract event type class reference → resolve to FQN via imports
+      - Extract handler closure source text → rewrite type refs to FQN
+      - Extract priority if present
+4. Find getListenerClasses() method (PHP/Java/Python only):
+   a. Extract return list literal
+   b. Extract each class reference as an identifier (no FQN resolution needed)
+   c. For each identifier → resolve to file path → Step 4b
+5. Output: { explicit_listeners: [...], annotated_class_files: [...] }
+```
+
+---
+
+### Step 3c: Walk HttpRouteProvider Files (HTTP Routes)
+
+**Goal:** Extract explicit routes and the list of annotated controller classes to scan.
+
+**Imports are needed for explicit routes** — handler closures contain type references that will be written into
+generated output.
+
+**Imports are not needed for the annotated class list** — identifiers only, used to locate controller files.
+
+**What to collect:**
+
+```
+imports             → map of simple name → FQN
+                      needed to rewrite handler closures and route type references
+
+explicit_routes     → list of route data objects from getRoutes()
+                      each route carries:
+                        method      (GET, POST, etc. — from factory method name)
+                        path        ('/users/{id}' — string literal)
+                        parameters  (list of Parameter objects — name + pattern string literals)
+                        handler     (closure source text, type refs rewritten to FQN)
+                        middleware  (if present)
+                        name        (if present)
+
+annotated_classes   → list of class identifiers from getControllerClasses()
+                      (PHP, Java, Python only — Go and TypeScript omit this method)
+                      no imports needed — identifiers only, used to locate files
+```
+
+**Pattern:**
+
+```
+1. Parse HttpRouteProvider file into AST
+2. Collect imports → FQN map  ← needed for explicit_routes
+3. Find getRoutes() method:
+   a. Extract return list literal
+   b. For each route constructor call (e.g. HttpRoute::get(...)):
+      - Extract HTTP method from the factory method name (get/post/put/delete/patch)
+      - Extract path string literal
+      - Extract handler closure source text → rewrite type refs to FQN
+      - Extract Parameter constructor calls if present:
+          name    → string literal argument
+          pattern → string literal argument (default '[^/]+' if absent)
+      - Extract middleware, name, and other metadata if present
+4. Find getControllerClasses() method (PHP/Java/Python only):
+   a. Extract return list literal
+   b. Extract each class reference as an identifier (no FQN resolution needed)
+   c. For each identifier → resolve to file path → Step 4a
+5. Output: { explicit_routes: [...], annotated_class_files: [...] }
+```
+
+---
+
+### Step 3d: Walk CliRouteProvider Files (CLI Routes)
+
+Identical to Step 3c with:
+
+- `getRoutes()` → CLI route objects (command path, description, handler)
+- `getControllerClasses()` → CLI controller/command classes to scan for annotations
+- No HTTP method field — CLI routes use command path only
+- Handler returns `OutputContract` instead of `ResponseContract`
+
+---
+
+### Step 4a: Scan Controller/Command Class Files for Route Annotations
+
+**Goal:** Extract routes from annotated/decorated methods. PHP, Java, Python only.
+
+**Imports are needed here** — handler closures will be written into generated output.
+
+**Input:** file path of a controller class (resolved in Step 3c or 3d).
+
+**What to collect per annotated method:**
+
+```
+imports     → map of simple name → FQN
+              needed to rewrite handler closure type references
+
+per method:
+  handler     → closure from #[Handler] / @Handler / @handler argument
+                type refs rewritten to FQN via imports
+  parameters  → list from #[Parameter] / @Parameter annotations
+                each carries: name (string literal), pattern (string literal)
+  path        → from route annotation — string literal
+  method      → HTTP method — from route annotation
+  middleware  → from middleware annotation if present
+  name        → from name annotation if present
+```
+
+**Pattern:**
+
+```
+1. Parse controller file into AST
+2. Collect imports → FQN map  ← needed here
+3. Walk all class methods:
+   For each method:
+     a. Check for @Handler / #[Handler] annotation:
+        - Extract closure argument source text
+        - Rewrite type references to FQN via imports
+     b. Check for @Parameter / #[Parameter] annotations (may be multiple):
+        - Extract name string literal
+        - Extract pattern string literal (default '[^/]+' if absent)
+     c. Check for route annotation (HTTP method + path):
+        - Extract HTTP method
+        - Extract path string literal
+     d. If handler found → add to routes list
+4. Output: list of route data objects, same shape as explicit_routes from Step 3c
+```
+
+---
+
+### Step 4b: Scan Listener Class Files for Listener Annotations
+
+**Goal:** Extract listeners from annotated/decorated methods. PHP, Java, Python only.
+
+**Imports are needed here** — handler closures and event type references will be written into generated output.
+
+**Pattern:**
+
+```
+1. Parse listener file into AST
+2. Collect imports → FQN map  ← needed here
+3. Walk all class methods:
+   For each method:
+     a. Check for @Handler / #[Handler] / @handler annotation:
+        - Extract closure source text
+        - Rewrite type references to FQN via imports
+     b. Check for @ListensTo / #[ListensTo] annotation:
+        - Extract event type class reference → resolve to FQN via imports
+        - Extract priority if present
+     c. If handler found → add to listeners list
+4. Output: list of listener data objects, same shape as explicit_listeners from Step 3b
+```
+
+---
+
+### Step 5: Run ProcessorContract for Routes
+
+**Goal:** Compile route regexes from path patterns and Parameter objects.
+
+For every route collected in Steps 3c, 3d, 4a:
+
+```
+1. Construct a plain ValkyrjaRoute from extracted data:
+   - path, method, parameters (name + pattern pairs)
+2. Pass to ProcessorContract::route() — same processor used at runtime
+3. Read back the compiled regex string
+4. Store alongside route data for Step 6
+```
+
+The forge tool has `ProcessorContract` available — it is compiled from the framework source. Regex compilation happens
+once at build time and is stored pre-compiled in the cache data class.
+
+---
+
+### Step 6: Assemble and Generate the Four Data Classes
+
+**Goal:** Aggregate everything and write the four output source files.
+
+```
+AppContainerData:
+  For each ServiceProvider (Step 3a):
+    Merge publishers map into global bindings map
+
+AppEventData:
+  For each ListenerProvider (Step 3b):
+    Merge explicit_listeners
+    Merge annotated listeners from Step 4b
+  Index by event type
+
+AppHttpRoutingData:
+  For each HttpRouteProvider (Step 3c):
+    Merge explicit_routes
+    Merge annotated routes from Step 4a
+  Run all routes through Step 5 (ProcessorContract → compiled regex)
+  Build four indexes: routes, paths, dynamicPaths, regexes
+
+AppCliRoutingData:
+  Same as AppHttpRoutingData but for CLI routes
+```
+
+The forge tool writes source files as text — it is a text generator, not a compiler. Application classes referenced in
+the output are written by name only. No application classes need to be compiled in at generation time.
+
+---
+
+### Full Walk Summary
+
+```
+Config file
+  └── providers list (no imports needed)
+        ├── ComponentProvider files (no imports needed)
+        │     └── four categorized sub-provider identifier lists
+        │           ├── ServiceProvider files
+        │           │     imports + publishers map → Step 3a → bindings
+        │           ├── ListenerProvider files
+        │           │     imports + explicit listeners → Step 3b
+        │           │     annotated class identifiers (no imports) → file paths
+        │           │           └── Listener class files
+        │           │                 imports + annotations → Step 4b → listeners
+        │           ├── HttpRouteProvider files
+        │           │     imports + explicit routes → Step 3c
+        │           │     annotated class identifiers (no imports) → file paths
+        │           │           └── Controller class files
+        │           │                 imports + annotations → Step 4a → routes
+        │           └── CliRouteProvider files
+        │                 imports + explicit routes → Step 3d
+        │                 annotated class identifiers (no imports) → file paths
+        │                       └── Command class files
+        │                             imports + annotations → Step 4a → routes
+        │
+        ├── Step 5: ProcessorContract → compile regexes for all routes
+        └── Step 6: generate AppContainerData, AppEventData,
+                    AppHttpRoutingData, AppCliRoutingData
+```
+
 ## Language-Specific AST Implementation
 
 ### PHP
