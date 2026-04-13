@@ -283,6 +283,12 @@ Unique class names across the framework eliminate the collision entirely — no 
 language-specific hacks. The convention that PHP could get away without now becomes a hard requirement for the
 multi-language ports.
 
+**Cross-application and package collisions:** The naming convention solves collisions within the framework but does not
+prevent collisions between the framework and application code, or between third-party packages. If a developer's
+application class name collides with a package class name in the generated file, that is the developer's responsibility
+to resolve — the same way any import conflict in their codebase is theirs to fix. The forge generates the best output it
+can from what it reads and aggregates. The developer is responsible for ensuring the generated file is valid.
+
 ### The Pattern
 
 ```
