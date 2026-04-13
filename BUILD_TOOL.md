@@ -159,6 +159,243 @@ See: https://valkyrja.io/docs/providers#build-tool-compatibility
 
 ---
 
+## Handler Method Pointer Convention
+
+Handlers must be **method pointers** — references to static methods on the same class as the provider or controller that
+defines the route, listener, or binding. They must not be inline closures or lambdas.
+
+This is the single most important convention for keeping the forge tool simple, import-safe, and conflict-free.
+
+### Why Method Pointers
+
+**Import safety** — the forge tool reads exactly one file per provider or controller. All imports needed for handler
+bodies are in that one file. No cross-file import aggregation, no conflict detection, no registry.
+
+**Conflict elimination** — import conflicts only arise when merging imports across files. Method pointers keep handlers
+self-contained in their source file, eliminating the root cause entirely.
+
+**Consistency** — service providers already follow this pattern exactly. `publishers()` returns a map of service id →
+method reference on the same class. Route and listener providers now follow the same pattern. The entire framework is
+consistent end to end.
+
+### The Pattern
+
+Every handler is a static method on the same class that declares it. The route/listener/binding definition points to
+that method by name. The forge tool reads the method body from the same file — no cross-file resolution needed.
+
+**Service providers** — already correct:
+
+```php
+// publishers() points to methods on the same class
+public static function publishers(): array
+{
+    return [
+        RouterContract::class => [self::class, 'publishRouter'],
+    ];
+}
+
+public static function publishRouter(ContainerContract $c): void
+{
+    $c->setSingleton(RouterContract::class, new Router($c->make(DispatcherContract::class)));
+}
+```
+
+**Route providers** — same pattern:
+
+```php
+// getRoutes() points to handler methods on the same class
+public static function getRoutes(): array
+{
+    return [
+        HttpRoute::get('/users/{id}', [self::class, 'showUser']),
+        HttpRoute::post('/users',     [self::class, 'createUser']),
+    ];
+}
+
+public static function showUser(ContainerContract $c, array $args): ResponseContract
+{
+    return $c->getSingleton(UserController::class)->show($args['id']);
+}
+
+public static function createUser(ContainerContract $c, array $args): ResponseContract
+{
+    return $c->getSingleton(UserController::class)->create($args);
+}
+```
+
+**Listener providers** — same pattern:
+
+```php
+// getListeners() points to handler methods on the same class
+public static function getListeners(): array
+{
+    return [
+        Listener::on(UserCreatedEvent::class, [self::class, 'onUserCreated']),
+    ];
+}
+
+public static function onUserCreated(ContainerContract $c, array $args): mixed
+{
+    return $c->getSingleton(UserCreatedListener::class)->handle($args['user_id']);
+}
+```
+
+### Annotated Controllers — PHP, Java, Python
+
+For annotated controllers, `#[Handler]` / `@Handler` / `@handler` lives on the **implementation method** and carries a *
+*callable reference** pointing to the static handler method. The handler may live on the same controller class, the
+route provider, or any other class — the forge tool follows the callable reference to wherever the handler lives.
+
+```
+Annotations live on:    the implementation method (show, store, index etc.)
+#[Handler] points to:   a callable (ClassName, methodName) — any class, anywhere
+Forge reads:            the handler method body from whichever file the callable resolves to
+```
+
+**PHP — handler on same controller:**
+
+```php
+class UserController
+{
+    // Annotations on the implementation method
+    #[Route('GET', '/users/{id}')]
+    #[Parameter('id', pattern: '[0-9]+')]
+    #[Handler([self::class, 'showHandler'])]  // callable — class + method name
+    public function show(string $id): ResponseContract
+    {
+        // actual implementation — not read by forge
+    }
+
+    // Forge resolves [self::class, 'showHandler'] → this file → reads this method
+    public static function showHandler(ContainerContract $c, array $args): ResponseContract
+    {
+        return $c->getSingleton(self::class)->show($args['id']);
+    }
+}
+```
+
+**PHP — handler on route provider:**
+
+```php
+class UserController
+{
+    #[Route('GET', '/users/{id}')]
+    #[Parameter('id', pattern: '[0-9]+')]
+    #[Handler([UserHttpRouteProvider::class, 'showUser'])]  // points elsewhere
+    public function show(string $id): ResponseContract { /* ... */ }
+}
+
+class UserHttpRouteProvider implements HttpRouteProviderContract
+{
+    // Forge resolves callable → this file → reads this method + this file's imports
+    public static function showUser(ContainerContract $c, array $args): ResponseContract
+    {
+        return $c->getSingleton(UserController::class)->show($args['id']);
+    }
+}
+```
+
+**Java — handler on same controller:**
+
+```java
+public class UserController {
+    @Route(method = "GET", path = "/users/{id}")
+    @Parameter(name = "id", pattern = "[0-9]+")
+    @Handler(clazz = UserController.class, method = "showHandler")
+    public ResponseContract show(String id) { /* actual implementation */ }
+
+    // Forge resolves clazz + method → this file → reads this method
+    public static ResponseContract showHandler(ContainerContract c, Map<String, Object> args) {
+        return c.getSingleton(UserController.class).show((String) args.get("id"));
+    }
+}
+```
+
+**Python — handler on same controller:**
+
+```python
+class UserController:
+    @route('GET', '/users/{id}')
+    @parameter('id', pattern='[0-9]+')
+    @handler((UserController, 'show_handler'))  # callable tuple
+    def show(self, id: str) -> ResponseContract:
+        pass  # actual implementation — not read by forge
+
+    # Forge resolves callable → this file → reads this method
+    @staticmethod
+    def show_handler(c: ContainerContract, args: dict) -> ResponseContract:
+        return c.get_singleton(UserController).show(args['id'])
+```
+
+### Why Not Inline Closures
+
+Inline closures in route definitions would require the forge tool to parse and rewrite type references from potentially
+any file in the application:
+
+```php
+// ❌ inline closure — forge must resolve ContainerContract, UserController
+//    from the imports of this specific file AND know if they conflict
+//    with imports from other route providers
+HttpRoute::get('/users/{id}', static fn($c, $args) =>
+    $c->getSingleton(UserController::class)->show($args['id'])
+)
+
+// ✅ method pointer — forge reads the method body from this same file
+//    all imports are right here, no cross-file resolution needed
+HttpRoute::get('/users/{id}', [self::class, 'showUser'])
+```
+
+### The Remaining Import Conflict Case
+
+Even with method pointers, the generated output file aggregates handler bodies from multiple provider files. If two
+providers import `UserController` from different namespaces, the forge tool cannot silently resolve this:
+
+```
+Error: Import conflict in generated AppHttpRoutingData.
+  App\Http\Controllers\UserController  (from UserHttpRouteProvider)
+  App\Api\Controllers\UserController   (from ApiHttpRouteProvider)
+Both resolve to the short name 'UserController'. Use the FQN directly in your handler
+or rename one of the classes to eliminate the conflict.
+```
+
+The developer fixes it in their source — the forge tool does not silently rename. Genuine class name collisions across
+providers are structural problems in the application that the developer must resolve.
+
+### Build Tool Contract — Handler Methods
+
+**For route providers and listener providers** (explicit `getRoutes()` / `getListeners()`):
+
+```
+✅ [self::class, 'methodName']           — PHP method pointer on same class
+✅ ClassName::methodName                  — Java static reference
+✅ self.method_name                       — Python method reference on same class
+✅ p.MethodName                           — Go method reference on same struct
+✅ this.methodName                        — TypeScript method reference on same class
+
+✅ Handler method must be static
+✅ Handler method must be on the same class as the provider
+✅ All type refs in handler body must be imported in the provider file
+
+❌ Inline closures or lambdas in route/listener definitions
+```
+
+**For annotated controllers and listeners** (PHP, Java, Python only):
+
+```
+✅ #[Handler([ClassName::class, 'methodName'])]   — PHP callable on any class
+✅ @Handler(clazz = ClassName.class, method = "m") — Java callable on any class
+✅ @handler((ClassName, 'method_name'))            — Python callable on any class
+
+✅ Annotation lives on the implementation method (the instance method)
+✅ Handler method must be static — anywhere in the codebase
+✅ All type refs in handler body must be imported in the handler's own file
+
+❌ Annotation on the static handler method itself
+❌ Handler method that is not static
+```
+
+---
+
 ## The Build Tool Bootstrap Problem — And Why It Doesn't Matter
 
 The build tool is a Valkyrja application, which means it bootstraps via the provider tree like any other Valkyrja
@@ -676,11 +913,17 @@ walkAST(sourceFile, (node) => {
 Once the config file is parsed, the forge tool follows a structured walk strategy. Each step produces data that feeds
 into the next, ultimately assembling the four output data classes.
 
-**Imports are only collected when needed for FQN rewriting** — specifically when extracting handler closures, publisher
-method bodies, service binding keys, and listener/route data that will be written into generated cache source files. For
-provider list methods (config, component providers, service/route/listener provider class lists) the forge tool only
-needs to read class references as identifiers to locate the next file — no FQN resolution needed, no import collection
-needed.
+**Imports are collected from every file parsed.** This is the safe, correct default — when the forge tool extracts a
+handler method body and writes it into generated output, any type reference in that body must be written as a FQN.
+Without the full import map the forge tool cannot resolve short names to their FQN.
+
+For provider list methods (config providers list, component provider sub-lists, route/listener class lists) the forge
+tool only needs the class identifier to locate the next file — import collection for those steps adds no cost and
+ensures no edge case is missed.
+
+The handler method pointer convention (see "Handler Method Pointer Convention" above) ensures that all imports needed
+for any handler body are always present in the same file as the provider or controller that defines the route or
+listener. No cross-file import aggregation is needed — each file is self-contained.
 
 ---
 
@@ -691,21 +934,19 @@ needed.
 **What to collect:**
 
 ```
+imports         → map of simple name → FQN (collected as standard practice)
 providers list  → list of class references from the providers property/method
                   e.g. [HttpComponentProvider, ContainerComponentProvider, AppProvider]
 ```
-
-No imports needed. The class references are read as identifiers and resolved to file paths by the build system (
-autoloader in PHP, classpath in Java, module paths in Go, `inspect.getfile` in Python, tsconfig in TypeScript). FQN
-resolution is not needed here — the identifier alone is enough to locate the next file.
 
 **Pattern:**
 
 ```
 1. Parse config file into AST
-2. Find the providers list (array/slice/list literal on the config class)
-3. Extract each class reference as an identifier string
-4. For each identifier → resolve to file path → parse that file → Step 2
+2. Collect all import statements → import map
+3. Find the providers list (array/slice/list literal on the config class)
+4. Extract each class reference as an identifier string
+5. For each identifier → resolve to file path → parse that file → Step 2
 ```
 
 The providers list must be a simple literal — no variables, no method calls, no conditional logic. If it isn't, the
@@ -720,23 +961,22 @@ forge tool emits an error.
 **What to collect:**
 
 ```
+imports             → map of simple name → FQN (collected as standard practice)
 container_providers → list of class identifiers (ServiceProvider classes)
 event_providers     → list of class identifiers (ListenerProvider classes)
 http_providers      → list of class identifiers (HttpRouteProvider classes)
 cli_providers       → list of class identifiers (CliRouteProvider classes)
 ```
 
-No imports needed. Same reasoning as Step 1 — the class identifiers are used only to locate the next file to parse, not
-to generate output.
-
 **Pattern:**
 
 ```
 1. Parse ComponentProvider file into AST
-2. Find each of the four list methods by name
-3. Extract return value — must be a simple list literal
-4. Extract each class reference as an identifier
-5. For each identifier → resolve to file path → dispatch to Step 3
+2. Collect all import statements → import map
+3. Find each of the four list methods by name
+4. Extract return value — must be a simple list literal
+5. Extract each class reference as an identifier
+6. For each identifier → resolve to file path → dispatch to Step 3
 ```
 
 ---
@@ -745,14 +985,10 @@ to generate output.
 
 **Goal:** Extract all container bindings — the mapping of binding key to publisher function body.
 
-**Imports are needed here** — the publisher method bodies contain type references that will be written into generated
-cache source files and must be fully qualified.
-
 **What to collect:**
 
 ```
 imports         → map of simple name → FQN
-                  needed to rewrite type references in publisher method bodies
 
 publishers      → map of binding key → publisher method body source text
                   key format is language-specific:
@@ -765,16 +1001,15 @@ publishers      → map of binding key → publisher method body source text
 
 ```
 1. Parse ServiceProvider file into AST
-2. Collect imports → FQN map  ← needed here
+2. Collect all import statements → import map
 3. Find the publishers() method
 4. Extract the map literal from the return statement
 5. For each entry:
    a. Extract the key → resolve to canonical FQN string (language-specific, see table below)
    b. Extract the value → method reference (e.g. self::publishRouter)
    c. Resolve method reference → find that method in the same file
-   d. Extract the method body source text
-   e. Rewrite all type references in the body to FQN using import map
-6. Output: map of { canonical key string → publisher method body source text }
+   d. Extract the callable value as a literal → written as-is into generated output
+6. Output: map of { canonical key string → callable literal }
 ```
 
 **Language-specific key resolution:**
@@ -840,49 +1075,43 @@ annotated_classes   → list of class identifiers from getListenerClasses()
 
 **Goal:** Extract explicit routes and the list of annotated controller classes to scan.
 
-**Imports are needed for explicit routes** — handler closures contain type references that will be written into
-generated output.
-
-**Imports are not needed for the annotated class list** — identifiers only, used to locate controller files.
-
 **What to collect:**
 
 ```
 imports             → map of simple name → FQN
-                      needed to rewrite handler closures and route type references
 
 explicit_routes     → list of route data objects from getRoutes()
                       each route carries:
                         method      (GET, POST, etc. — from factory method name)
                         path        ('/users/{id}' — string literal)
                         parameters  (list of Parameter objects — name + pattern string literals)
-                        handler     (closure source text, type refs rewritten to FQN)
+                        handler     (method pointer → [self::class, 'methodName'])
+                        handler body (static method on same class → extract and rewrite)
                         middleware  (if present)
                         name        (if present)
 
 annotated_classes   → list of class identifiers from getControllerClasses()
                       (PHP, Java, Python only — Go and TypeScript omit this method)
-                      no imports needed — identifiers only, used to locate files
 ```
 
 **Pattern:**
 
 ```
 1. Parse HttpRouteProvider file into AST
-2. Collect imports → FQN map  ← needed for explicit_routes
+2. Collect all import statements → import map
 3. Find getRoutes() method:
    a. Extract return list literal
    b. For each route constructor call (e.g. HttpRoute::get(...)):
       - Extract HTTP method from the factory method name (get/post/put/delete/patch)
       - Extract path string literal
-      - Extract handler closure source text → rewrite type refs to FQN
+      - Extract handler callable → [self::class, 'methodName'] — written as-is into output
       - Extract Parameter constructor calls if present:
           name    → string literal argument
           pattern → string literal argument (default '[^/]+' if absent)
       - Extract middleware, name, and other metadata if present
 4. Find getControllerClasses() method (PHP/Java/Python only):
    a. Extract return list literal
-   b. Extract each class reference as an identifier (no FQN resolution needed)
+   b. Extract each class reference as an identifier
    c. For each identifier → resolve to file path → Step 4a
 5. Output: { explicit_routes: [...], annotated_class_files: [...] }
 ```
@@ -904,21 +1133,33 @@ Identical to Step 3c with:
 
 **Goal:** Extract routes from annotated/decorated methods. PHP, Java, Python only.
 
-**Imports are needed here** — handler closures will be written into generated output.
-
 **Input:** file path of a controller class (resolved in Step 3c or 3d).
 
-**What to collect per annotated method:**
+The forge tool reads annotation literals and constructs route data objects — **no method body extraction, no import
+resolution of the callable**. The callable from `#[Handler]` is written directly into the generated output as-is,
+exactly like a callable in an explicit `getRoutes()` route or a service binding:
+
+```
+// service binding — callable literal written as-is
+SomeServiceId::class => [SomeProvider::class, 'publishMethod']
+
+// explicit route — callable literal written as-is
+new Route('/path', 'name', [SomeClass::class, 'theHandlerMethod'])
+
+// annotated route — same, callable literal written as-is
+#[Handler([SomeClass::class, 'theHandlerMethod'])]
+```
+
+**What to collect per annotated implementation method:**
 
 ```
 imports     → map of simple name → FQN
-              needed to rewrite handler closure type references
+              needed only to resolve the callable class name to FQN for the output literal
 
 per method:
-  handler     → closure from #[Handler] / @Handler / @handler argument
-                type refs rewritten to FQN via imports
+  callable    → (ClassName, methodName) from #[Handler] — written as-is into output
   parameters  → list from #[Parameter] / @Parameter annotations
-                each carries: name (string literal), pattern (string literal)
+                each: name (string literal), pattern (string literal)
   path        → from route annotation — string literal
   method      → HTTP method — from route annotation
   middleware  → from middleware annotation if present
@@ -929,20 +1170,21 @@ per method:
 
 ```
 1. Parse controller file into AST
-2. Collect imports → FQN map  ← needed here
+2. Collect all import statements → import map
 3. Walk all class methods:
-   For each method:
+   For each implementation method:
      a. Check for @Handler / #[Handler] annotation:
-        - Extract closure argument source text
-        - Rewrite type references to FQN via imports
+        - Extract callable literal: (ClassName, methodName)
+        - Resolve ClassName via imports → FQN (so output contains FQN, not short name)
      b. Check for @Parameter / #[Parameter] annotations (may be multiple):
         - Extract name string literal
         - Extract pattern string literal (default '[^/]+' if absent)
      c. Check for route annotation (HTTP method + path):
         - Extract HTTP method
         - Extract path string literal
-     d. If handler found → add to routes list
-4. Output: list of route data objects, same shape as explicit_routes from Step 3c
+     d. If handler found → construct route data from literals → add to output list
+4. Output: list of route data objects — same shape as explicit routes from Step 3c
+           callable written as FQN literal into generated cache data class
 ```
 
 ---
@@ -951,22 +1193,29 @@ per method:
 
 **Goal:** Extract listeners from annotated/decorated methods. PHP, Java, Python only.
 
-**Imports are needed here** — handler closures and event type references will be written into generated output.
+`#[Handler]` / `@Handler` / `@handler` lives on the **implementation method** and carries a **callable reference** —
+same pattern as annotated controllers. The handler may live on the listener class itself, the listener provider, or any
+other class.
 
 **Pattern:**
 
 ```
-1. Parse listener file into AST
-2. Collect imports → FQN map  ← needed here
+1. Parse listener class file into AST
+2. Collect all import statements → import map (for resolving callable class names)
 3. Walk all class methods:
    For each method:
      a. Check for @Handler / #[Handler] / @handler annotation:
-        - Extract closure source text
-        - Rewrite type references to FQN via imports
+        - Extract callable: (ClassName, methodName)
+        - Resolve ClassName via listener file's imports → FQN
      b. Check for @ListensTo / #[ListensTo] annotation:
         - Extract event type class reference → resolve to FQN via imports
         - Extract priority if present
-     c. If handler found → add to listeners list
+     c. If handler found:
+        - Resolve callable FQN → file path
+        - Parse handler file → collect its imports
+        - Find methodName static method in handler file
+        - Extract method body → rewrite type refs using handler file's imports
+        - Add listener data to output list
 4. Output: list of listener data objects, same shape as explicit_listeners from Step 3b
 ```
 
@@ -1026,26 +1275,36 @@ the output are written by name only. No application classes need to be compiled 
 
 ```
 Config file
-  └── providers list (no imports needed)
-        ├── ComponentProvider files (no imports needed)
-        │     └── four categorized sub-provider identifier lists
+  └── imports + providers list
+        ├── ComponentProvider files
+        │     └── imports + four categorized sub-provider identifier lists
         │           ├── ServiceProvider files
-        │           │     imports + publishers map → Step 3a → bindings
+        │           │     imports + publishers map + handler method bodies
+        │           │     → Step 3a → bindings
         │           ├── ListenerProvider files
-        │           │     imports + explicit listeners → Step 3b
-        │           │     annotated class identifiers (no imports) → file paths
+        │           │     imports + explicit listeners + handler method bodies
+        │           │     → Step 3b
+        │           │     annotated class identifiers → file paths
         │           │           └── Listener class files
-        │           │                 imports + annotations → Step 4b → listeners
+        │           │                 imports + annotations
+        │           │                 + handler method bodies (same file)
+        │           │                 → Step 4b → listeners
         │           ├── HttpRouteProvider files
-        │           │     imports + explicit routes → Step 3c
-        │           │     annotated class identifiers (no imports) → file paths
+        │           │     imports + explicit routes + handler method bodies
+        │           │     → Step 3c
+        │           │     annotated class identifiers → file paths
         │           │           └── Controller class files
-        │           │                 imports + annotations → Step 4a → routes
+        │           │                 imports + annotations
+        │           │                 + handler method bodies (same file)
+        │           │                 → Step 4a → routes
         │           └── CliRouteProvider files
-        │                 imports + explicit routes → Step 3d
-        │                 annotated class identifiers (no imports) → file paths
+        │                 imports + explicit routes + handler method bodies
+        │                 → Step 3d
+        │                 annotated class identifiers → file paths
         │                       └── Command class files
-        │                             imports + annotations → Step 4a → routes
+        │                             imports + annotations
+        │                             + handler method bodies (same file)
+        │                             → Step 4a → routes
         │
         ├── Step 5: ProcessorContract → compile regexes for all routes
         └── Step 6: generate AppContainerData, AppEventData,

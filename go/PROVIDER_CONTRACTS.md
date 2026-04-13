@@ -6,20 +6,16 @@ Go provider contracts differ from PHP/Java in several important ways:
 
 - No annotations — build tool reads method bodies directly from AST in all cases
 - No `::class` / `.class` — string constants used for all class references
-- Publisher methods can be struct methods OR package-level functions — build
-  tool handles both
-- No abstract classes — interfaces enforce the contract, unexported types
-  enforce instantiation restrictions
+- Publisher methods can be struct methods OR package-level functions — build tool handles both
+- No abstract classes — interfaces enforce the contract, unexported types enforce instantiation restrictions
 - All methods return simple slice/map literals — no conditional logic
-- `GetControllerClasses()` and `GetListenerClasses()` are **absent** — Go has no
-  annotations, so annotated class scanning is not possible. Including these
-  methods would imply capability that does not exist.
+- `GetControllerClasses()` and `GetListenerClasses()` are **absent** — Go has no annotations, so annotated class
+  scanning is not possible. Including these methods would imply capability that does not exist.
 
 ### Go Works Without Cache
 
-Go interface methods are called directly on provider structs at runtime — no
-reflection, no string lookup, no registry needed. The framework traverses the
-provider tree by direct method calls:
+Go interface methods are called directly on provider structs at runtime — no reflection, no string lookup, no registry
+needed. The framework traverses the provider tree by direct method calls:
 
 ```go
 // framework bootstrap — direct method calls, no cache needed
@@ -37,17 +33,15 @@ container.Bind(key, publisher) // direct function call ✅
 }
 ```
 
-Cache is a cold-start optimization for CGI and lambda deployments. Go's compiled
-binary and fast startup mean cache is less critical here than in other
-languages, but it is fully supported via the valkyrja-build tool when needed.
+Cache is a cold-start optimization for CGI and lambda deployments. Go's compiled binary and fast startup mean cache is
+less critical here than in other languages, but it is fully supported via the valkyrja-build tool when needed.
 
 ---
 
 ## ComponentProviderContract
 
-Top-level aggregator. Returns slices of sub-provider interface values. Build
-tool reads return values directly from AST — must be simple slice literals with
-no conditional logic.
+Top-level aggregator. Returns slices of sub-provider interface values. Build tool reads return values directly from
+AST — must be simple slice literals with no conditional logic.
 
 ```go
 // package: io/valkyrja/application/provider/contract
@@ -124,9 +118,8 @@ func (p *HttpComponentProvider) GetHttpProviders(
 
 ## ServiceProviderContract
 
-Container bindings provider. `Publishers()` returns a map of binding key string
-to publisher function reference. The build tool reads the map from AST, resolves
-each function reference, and reads that function body directly. Publisher
+Container bindings provider. `Publishers()` returns a map of binding key string to publisher function reference. The
+build tool reads the map from AST, resolves each function reference, and reads that function body directly. Publisher
 functions can be struct methods OR package-level functions — both are valid.
 
 ```go
@@ -215,10 +208,9 @@ func PublishUserRepository(c ctnContract.ContainerContract) {
 
 ## HttpRouteProviderContract
 
-HTTP route provider. Go has no annotations — explicit route definitions only.
-`GetControllerClasses()` returns string constants (no `::class` equivalent).
-Routes are complete data structures carrying method, path, constraints,
-middleware, and handler together.
+HTTP route provider. Go has no annotations — explicit route definitions only. `GetControllerClasses()` returns string
+constants (no `::class` equivalent). Routes are complete data structures carrying method, path, constraints, middleware,
+and handler together.
 
 ```go
 // package: io/valkyrja/http/routing/provider/contract
@@ -330,8 +322,7 @@ type ListenerProviderContract interface {
 
 ## Build Tool Contract
 
-Any method or function the build tool reads must return a single flat literal
-with no logic:
+Any method or function the build tool reads must return a single flat literal with no logic:
 
 ```go
 // ✅ simple slice of route objects
@@ -362,26 +353,39 @@ return routes
 
 ---
 
+## Handler Method Pointer Convention
+
+All handler methods must be **static methods on the same class** as the provider or controller that defines the route or
+listener. This is the same pattern used by `publishers()` in service providers.
+
+**Why:** The forge tool reads exactly one file per provider or controller. All imports for handler bodies are in that
+one file — no cross-file import aggregation, no conflict detection, no registry needed.
+
+```
+✅ Method reference on the same class
+✅ All type references imported in the same file
+
+❌ Inline closures or lambdas in route/listener definitions
+❌ References to types not imported in the current file
+❌ Handler methods on a different class
+```
+
+---
+
 ## Design Note — Why Routes Cannot Use a Publisher-Style Map
 
-An early consideration was expressing routes the same way as container
-bindings — a map of route identifier to handler function, with the build tool
-reading function bodies directly, eliminating the need for `GetRoutes()`
-entirely. This was rejected because routes are multi-dimensional data
-structures, not simple key→factory pairs.
+An early consideration was expressing routes the same way as container bindings — a map of route identifier to handler
+function, with the build tool reading function bodies directly, eliminating the need for `GetRoutes()` entirely. This
+was rejected because routes are multi-dimensional data structures, not simple key→factory pairs.
 
-A route carries: HTTP method, path pattern, dynamic segment constraints, regex
-compilation data, middleware chain, name/alias, parameter defaults, host
-constraints, and scheme constraints — all in addition to the handler. The
-`data.Get("/users/{id}", handler)` call is what populates all of these fields
-together. Decomposing this into a key/function-body map would lose all metadata
-the router needs to build its dispatcher index and compile route regexes.
+A route carries: HTTP method, path pattern, dynamic segment constraints, regex compilation data, middleware chain,
+name/alias, parameter defaults, host constraints, and scheme constraints — all in addition to the handler. The
+`data.Get("/users/{id}", handler)` call is what populates all of these fields together. Decomposing this into a
+key/function-body map would lose all metadata the router needs to build its dispatcher index and compile route regexes.
 
-The same reasoning applies to listeners — they carry event type binding,
-priority, and stop-propagation behavior alongside the handler. These cannot be
-expressed as a flat key/body map without losing the data the event dispatcher
+The same reasoning applies to listeners — they carry event type binding, priority, and stop-propagation behavior
+alongside the handler. These cannot be expressed as a flat key/body map without losing the data the event dispatcher
 requires.
 
-Container bindings by contrast are simple key→factory pairs. The binding key IS
-the complete identity. This is why `Publishers()` works as a map but
-`GetRoutes()` must return complete route objects.
+Container bindings by contrast are simple key→factory pairs. The binding key IS the complete identity. This is why
+`Publishers()` works as a map but `GetRoutes()` must return complete route objects.

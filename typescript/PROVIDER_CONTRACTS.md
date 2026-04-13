@@ -4,23 +4,19 @@
 
 TypeScript provider contracts differ from PHP/Java in several important ways:
 
-- No reliable decorators — explicit registration only, no annotated class
-  scanning
-- No `::class` / `.class` — but constructor references (
-  `Array<new () => Contract>`) allow direct instantiation and method calls at
-  runtime
+- No reliable decorators — explicit registration only, no annotated class scanning
+- No `::class` / `.class` — but constructor references (`Array<new () => Contract>`) allow direct instantiation and
+  method calls at runtime
 - `abstract class` enforces the contract at compile time
-- Publisher methods have no annotation — build tool reads method bodies directly
-  from AST
+- Publisher methods have no annotation — build tool reads method bodies directly from AST
 - TypeScript compiler API resolves module paths via `tsconfig.json`
 - All methods return simple array/object literals — no conditional logic
 
 ### TypeScript Works Without Cache
 
-The constructor reference return type is the key insight. The framework receives
-actual class constructors — not strings — so it can instantiate providers and
-call their methods directly at runtime with no registry, no string lookup, and
-no cache required:
+The constructor reference return type is the key insight. The framework receives actual class constructors — not
+strings — so it can instantiate providers and call their methods directly at runtime with no registry, no string lookup,
+and no cache required:
 
 ```typescript
 // framework bootstrap — direct instantiation, no cache needed
@@ -32,9 +28,8 @@ for (const ProviderClass of component.getHttpProviders(app)) {
 }
 ```
 
-This means TypeScript behaves identically to PHP and Python at runtime — the
-provider tree is traversed by direct instantiation and method calls. Cache is a
-cold-start optimization, not a correctness requirement.
+This means TypeScript behaves identically to PHP and Python at runtime — the provider tree is traversed by direct
+instantiation and method calls. Cache is a cold-start optimization, not a correctness requirement.
 
 ---
 
@@ -52,36 +47,27 @@ TypeScript has full generic type support for all return types:
 | `getListeners()`          | `ListenerContract[]`                             | Concrete listener data objects — fully typed          |
 | `publishers()`            | `Record<string, (c: ContainerContract) => void>` | Maps binding key string to publisher method reference |
 
-`getControllerClasses()` and `getListenerClasses()` are **not present** in the
-TypeScript contracts. TypeScript has no reliable decorator/annotation support,
-so annotated class scanning is not possible. Including these methods would imply
+`getControllerClasses()` and `getListenerClasses()` are **not present** in the TypeScript contracts. TypeScript has no
+reliable decorator/annotation support, so annotated class scanning is not possible. Including these methods would imply
 capability that does not exist. Go has the same omission for the same reason.
 
-`getRoutes()` and `getListeners()` are fully typed as `RouteContract[]` and
-`ListenerContract[]` — the TypeScript compiler validates that all returned
-objects implement the correct contract at compile time.
+`getRoutes()` and `getListeners()` are fully typed as `RouteContract[]` and `ListenerContract[]` — the TypeScript
+compiler validates that all returned objects implement the correct contract at compile time.
 
 ---
 
 ## ComponentProviderContract
 
-Top-level aggregator. Returns arrays of sub-provider constructors. Build tool
-reads return values directly from AST via TypeScript compiler API — must be
-simple array literals with no conditional logic.
+Top-level aggregator. Returns arrays of sub-provider constructors. Build tool reads return values directly from AST via
+TypeScript compiler API — must be simple array literals with no conditional logic.
 
 ```typescript
 // package: @valkyrja/application/provider/contract
 import type {ApplicationContract} from '@valkyrja/application/kernel/contract'
-import type {
-    ServiceProviderContract
-} from '@valkyrja/container/provider/contract'
+import type {ServiceProviderContract} from '@valkyrja/container/provider/contract'
 import type {ListenerProviderContract} from '@valkyrja/event/provider/contract'
-import type {
-    CliRouteProviderContract
-} from '@valkyrja/cli/routing/provider/contract'
-import type {
-    HttpRouteProviderContract
-} from '@valkyrja/http/routing/provider/contract'
+import type {CliRouteProviderContract} from '@valkyrja/cli/routing/provider/contract'
+import type {HttpRouteProviderContract} from '@valkyrja/http/routing/provider/contract'
 
 /**
  * Defines what a component provider must implement.
@@ -121,9 +107,7 @@ export interface ComponentProviderContract {
 
 ```typescript
 import type {ApplicationContract} from '@valkyrja/application/kernel/contract'
-import type {
-    ComponentProviderContract
-} from '@valkyrja/application/provider/contract'
+import type {ComponentProviderContract} from '@valkyrja/application/provider/contract'
 import {HttpContainerProvider} from './HttpContainerProvider'
 import {HttpMiddlewareProvider} from './HttpMiddlewareProvider'
 import {HttpEventProvider} from './HttpEventProvider'
@@ -160,9 +144,8 @@ export class HttpComponentProvider implements ComponentProviderContract {
 
 ## ServiceProviderContract
 
-Container bindings provider. `publishers()` returns a map of binding key string
-constant to publisher method reference. The build tool reads the map from AST
-via the TypeScript compiler API, resolves each method reference, and reads that
+Container bindings provider. `publishers()` returns a map of binding key string constant to publisher method reference.
+The build tool reads the map from AST via the TypeScript compiler API, resolves each method reference, and reads that
 method body directly — no annotation needed.
 
 ```typescript
@@ -211,13 +194,9 @@ export interface ServiceProviderContract {
 
 ```typescript
 import type {ContainerContract} from '@valkyrja/container/manager/contract'
-import type {
-    ServiceProviderContract
-} from '@valkyrja/container/provider/contract'
+import type {ServiceProviderContract} from '@valkyrja/container/provider/contract'
 import {UserRepository} from '../repositories/UserRepository'
-import {
-    UserRepositoryClass
-} from '../repositories/contract/UserRepositoryConstants'
+import {UserRepositoryClass} from '../repositories/contract/UserRepositoryConstants'
 import {DatabaseClass} from '../services/contract/DatabaseConstants'
 
 export class UserServiceProvider implements ServiceProviderContract {
@@ -250,9 +229,8 @@ export class UserServiceProvider implements ServiceProviderContract {
 
 ## HttpRouteProviderContract
 
-HTTP route provider. TypeScript has no reliable decorators — explicit route
-definitions only. `getControllerClasses()` returns string constants (no`::class`
-equivalent). Routes are complete data structures — they cannot be expressed as a
+HTTP route provider. TypeScript has no reliable decorators — explicit route definitions only. `getControllerClasses()`
+returns string constants (no `::class` equivalent). Routes are complete data structures — they cannot be expressed as a
 publisher-style map without losing the metadata the router requires.
 
 ```typescript
@@ -284,34 +262,39 @@ export interface HttpRouteProviderContract {
 
 ```typescript
 import type {RouteContract} from '@valkyrja/http/routing/data/contract'
-import type {
-    HttpRouteProviderContract
-} from '@valkyrja/http/routing/provider/contract'
+import type {HttpRouteProviderContract} from '@valkyrja/http/routing/provider/contract'
 import {HttpRoute} from '@valkyrja/http/routing/data'
 import type {ContainerContract} from '@valkyrja/container/manager/contract'
-import {
-    UserControllerClass
-} from '../controllers/contract/UserControllerConstants'
-import {
-    OrderControllerClass
-} from '../controllers/contract/OrderControllerConstants'
+import {UserControllerClass} from '../controllers/contract/UserControllerConstants'
+import {OrderControllerClass} from '../controllers/contract/OrderControllerConstants'
 import type {UserController} from '../controllers/UserController'
 import type {OrderController} from '../controllers/OrderController'
 
 export class UserHttpRouteProvider implements HttpRouteProviderContract {
 
+    /**
+     * Handler is a method reference on this same class.
+     * Forge reads handler method bodies from this file only.
+     */
     getRoutes(): RouteContract[] {
         return [
-            HttpRoute.get('/users',
-                (c: ContainerContract, args: any[]) =>
-                    (c.getSingleton(UserControllerClass) as UserController).index(args[0])),
-            HttpRoute.post('/users',
-                (c: ContainerContract, args: any[]) =>
-                    (c.getSingleton(UserControllerClass) as UserController).store(args[0])),
-            HttpRoute.get('/orders',
-                (c: ContainerContract, args: any[]) =>
-                    (c.getSingleton(OrderControllerClass) as OrderController).index(args[0])),
+            HttpRoute.get('/users', this.indexUsers.bind(this)),
+            HttpRoute.post('/users', this.storeUser.bind(this)),
+            HttpRoute.get('/orders', this.indexOrders.bind(this)),
         ]
+    }
+
+    /** Handler methods live on the same class — all imports self-contained. */
+    indexUsers(c: ContainerContract, args: Record<string, unknown>): ResponseContract {
+        return (c.getSingleton(UserControllerClass) as UserController).index(args)
+    }
+
+    storeUser(c: ContainerContract, args: Record<string, unknown>): ResponseContract {
+        return (c.getSingleton(UserControllerClass) as UserController).store(args)
+    }
+
+    indexOrders(c: ContainerContract, args: Record<string, unknown>): ResponseContract {
+        return (c.getSingleton(OrderControllerClass) as OrderController).index(args)
     }
 }
 ```
@@ -408,45 +391,53 @@ return [...this.getBaseRoutes(), ...this.getExtraRoutes()]
 
 ---
 
+## Handler Method Pointer Convention
+
+All handler methods must be **static methods on the same class** as the provider or controller that defines the route or
+listener. This is the same pattern used by `publishers()` in service providers.
+
+**Why:** The forge tool reads exactly one file per provider or controller. All imports for handler bodies are in that
+one file — no cross-file import aggregation, no conflict detection, no registry needed.
+
+```
+✅ Method reference on the same class
+✅ All type references imported in the same file
+
+❌ Inline closures or lambdas in route/listener definitions
+❌ References to types not imported in the current file
+❌ Handler methods on a different class
+```
+
+---
+
 ## Design Note — Why Routes Cannot Use a Publisher-Style Map
 
-An early consideration was expressing routes the same way as container
-bindings — a map of route identifier to handler function, with the build tool
-reading function bodies directly. This was rejected because routes are
-multi-dimensional data structures, not simple key→factory pairs.
+An early consideration was expressing routes the same way as container bindings — a map of route identifier to handler
+function, with the build tool reading function bodies directly. This was rejected because routes are multi-dimensional
+data structures, not simple key→factory pairs.
 
-A route carries: HTTP method, path pattern, dynamic segment constraints, regex
-compilation data, middleware chain, name/alias, parameter defaults, host
-constraints, and scheme constraints — all in addition to the handler. The
-`HttpRoute.get("/users/{id}", handler)` call is what populates all of these
-fields together. Decomposing this into a key/function-body map would lose all
-metadata the router needs to build its dispatcher index and compile route
-regexes.
+A route carries: HTTP method, path pattern, dynamic segment constraints, regex compilation data, middleware chain,
+name/alias, parameter defaults, host constraints, and scheme constraints — all in addition to the handler. The
+`HttpRoute.get("/users/{id}", handler)` call is what populates all of these fields together. Decomposing this into a
+key/function-body map would lose all metadata the router needs to build its dispatcher index and compile route regexes.
 
-The same reasoning applies to listeners — they carry event type binding,
-priority, and stop-propagation behavior alongside the handler. These cannot be
-expressed as a flat key/body map without losing the data the event dispatcher
+The same reasoning applies to listeners — they carry event type binding, priority, and stop-propagation behavior
+alongside the handler. These cannot be expressed as a flat key/body map without losing the data the event dispatcher
 requires.
 
-Container bindings by contrast are simple key→factory pairs. The binding key IS
-the complete identity. This is why `publishers()` works as a map but
-`getRoutes()` must return complete route objects.
+Container bindings by contrast are simple key→factory pairs. The binding key IS the complete identity. This is why
+`publishers()` works as a map but `getRoutes()` must return complete route objects.
 
 ## Note on TypeScript Decorators and Missing Methods
 
-TypeScript decorators are currently at stage 3 of the TC39 proposal process and
-are considered experimental. Valkyrja's TypeScript port does not rely on
-decorators for any core functionality to avoid coupling to an unstable language
+TypeScript decorators are currently at stage 3 of the TC39 proposal process and are considered experimental. Valkyrja's
+TypeScript port does not rely on decorators for any core functionality to avoid coupling to an unstable language
 feature.
 
-As a direct consequence, `getControllerClasses()` and `getListenerClasses()` are
-intentionally absent from all TypeScript provider contracts. Including them
-would imply that annotated class scanning works in TypeScript, which it does
-not. A method that always returns an empty array or is never called adds noise
-and invites confusion.
+As a direct consequence, `getControllerClasses()` and `getListenerClasses()` are intentionally absent from all
+TypeScript provider contracts. Including them would imply that annotated class scanning works in TypeScript, which it
+does not. A method that always returns an empty array or is never called adds noise and invites confusion.
 
-If decorators stabilize and become part of the TypeScript standard,
-`getControllerClasses()` and `getListenerClasses()` can be added to the
-contracts at that point as a non-breaking addition. Until then, TypeScript
-providers define routes and listeners exclusively via `getRoutes()` and
-`getListeners()`.
+If decorators stabilize and become part of the TypeScript standard, `getControllerClasses()` and `getListenerClasses()`
+can be added to the contracts at that point as a non-breaking addition. Until then, TypeScript providers define routes
+and listeners exclusively via `getRoutes()` and `getListeners()`.

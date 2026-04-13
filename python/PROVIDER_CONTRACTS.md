@@ -4,27 +4,21 @@
 
 Python provider contracts differ from PHP/Java in several ways:
 
-- Decorators are **metadata markers** — they attach closure metadata to methods
-  at import time but do NOT self-register routes. The framework reads metadata
-  during bootstrap; skips it when loading from cache.
-- `inspect.getfile(ClassName)` resolves class to source file — equivalent of
-  PHP's `ReflectionClass::getFileName()`
-- No `::class` needed — class objects are first-class values in Python, passed
-  directly
+- Decorators are **metadata markers** — they attach closure metadata to methods at import time but do NOT self-register
+  routes. The framework reads metadata during bootstrap; skips it when loading from cache.
+- `inspect.getfile(ClassName)` resolves class to source file — equivalent of PHP's `ReflectionClass::getFileName()`
+- No `::class` needed — class objects are first-class values in Python, passed directly
 - ABC enforces abstract contracts — `TypeError` raised on direct instantiation
 - `@staticmethod @abstractmethod` throughout — providers are stateless
-- Publisher methods have a `@handler` decorator carrying the closure — build
-  tool reads the decorator argument from AST
-- `class_` helper available (trailing underscore because `class` is reserved)
-  for FQN string derivation
+- Publisher methods have a `@handler` decorator carrying the closure — build tool reads the decorator argument from AST
+- `class_` helper available (trailing underscore because `class` is reserved) for FQN string derivation
 
 ---
 
 ## Type Hints
 
-Python classes are first-class `type` objects — passing a class directly is the
-idiomatic equivalent of PHP's `::class` and Java's `.class`. The type hints
-reflect this accurately:
+Python classes are first-class `type` objects — passing a class directly is the idiomatic equivalent of PHP's `::class`
+and Java's `.class`. The type hints reflect this accurately:
 
 | Method                      | Return type                                      | Reasoning                                                      |
 |-----------------------------|--------------------------------------------------|----------------------------------------------------------------|
@@ -38,22 +32,19 @@ reflect this accurately:
 | `get_listeners()`           | `list[ListenerContract]`                         | Returns concrete listener data objects                         |
 | `publishers()`              | `dict[str, Callable[[ContainerContract], None]]` | Maps binding key to publisher function reference               |
 
-`list[type]` is used for class lists rather than `list[Type[SomeContract]]`
-because controller and listener classes do not implement a provider contract —
-they carry `@handler` decorators. `list[type]` is the honest and accurate type
-for any list of Python class objects.
+`list[type]` is used for class lists rather than `list[Type[SomeContract]]` because controller and listener classes do
+not implement a provider contract — they carry `@handler` decorators. `list[type]` is the honest and accurate type for
+any list of Python class objects.
 
-For stricter typing on provider class lists,
-`list[Type[ServiceProviderContract]]` etc. can be used and mypy/pyright will
-validate that the listed classes implement the correct contract.
+For stricter typing on provider class lists, `list[Type[ServiceProviderContract]]` etc. can be used and mypy/pyright
+will validate that the listed classes implement the correct contract.
 
 ---
 
 ## ComponentProviderContract
 
-Top-level aggregator. Returns lists of sub-provider classes. Build tool reads
-return values directly from AST — must be simple list literals with no
-conditional logic.
+Top-level aggregator. Returns lists of sub-provider classes. Build tool reads return values directly from AST — must be
+simple list literals with no conditional logic.
 
 ```python
 # package: valkyrja.application.provider.contract
@@ -65,8 +56,7 @@ if TYPE_CHECKING:
     from valkyrja.container.provider.contract import ServiceProviderContract
     from valkyrja.event.provider.contract import ListenerProviderContract
     from valkyrja.cli.routing.provider.contract import CliRouteProviderContract
-    from valkyrja.http.routing.provider.contract import
-        HttpRouteProviderContract
+    from valkyrja.http.routing.provider.contract import HttpRouteProviderContract
 
 
 class ComponentProviderContract(ABC):
@@ -156,11 +146,9 @@ class HttpComponentProvider(ComponentProviderContract):
 
 ## ServiceProviderContract
 
-Container bindings provider. `publishers()` returns a map of binding key to
-publisher method reference. The build tool reads the map from AST, resolves each
-method reference via `inspect.getfile()`, and reads that method body. Publisher
-methods carry a `@handler` decorator — the build tool reads the decorator
-argument from AST for cache generation.
+Container bindings provider. `publishers()` returns a map of binding key to publisher method reference. The build tool
+reads the map from AST, resolves each method reference via `inspect.getfile()`, and reads that method body. Publisher
+methods carry a `@handler` decorator — the build tool reads the decorator argument from AST for cache generation.
 
 ```python
 # package: valkyrja.container.provider.contract
@@ -260,9 +248,8 @@ class UserServiceProvider(ServiceProviderContract):
 
 ## HttpRouteProviderContract
 
-HTTP route provider. Two sources: annotated controller classes (scanned for
-`@handler` decorated methods) and explicit route object definitions. Routes are
-complete data structures — they cannot be expressed as a publisher-style map
+HTTP route provider. Two sources: annotated controller classes (scanned for `@handler` decorated methods) and explicit
+route object definitions. Routes are complete data structures — they cannot be expressed as a publisher-style map
 without losing the metadata the router requires.
 
 ```python
@@ -328,22 +315,33 @@ class UserHttpRouteProvider(HttpRouteProviderContract):
 
     @staticmethod
     def get_routes() -> list[RouteContract]:
+        """
+        Handler is a method pointer on this same class.
+        Forge reads handler method bodies from this file only.
+        """
         return [
-            HttpRoute.get('/orders',
-                          lambda c, args: c.get_singleton(
-                              OrderControllerClass).index(args[0]))
+            HttpRoute.get('/orders', UserHttpRouteProvider.index_orders),
+            HttpRoute.get('/users', UserHttpRouteProvider.index_users),
         ]
+
+    @staticmethod
+    def index_orders(c: ContainerContract, args: dict) -> ResponseContract:
+        """Handler method lives on the same class — all imports self-contained."""
+        return c.get_singleton(OrderControllerClass).index(args)
+
+    @staticmethod
+    def index_users(c: ContainerContract, args: dict) -> ResponseContract:
+        return c.get_singleton(UserControllerClass).index(args)
 ```
 
 ### Controller with @handler Decorator
 
-The `@handler` decorator is a **metadata marker only** — it does not
-self-register routes at import time. It attaches the closure as metadata on the
-method. The framework reads this metadata during bootstrap (no cache) and skips
-it entirely when loading from cache.
+The `@handler` decorator is a **metadata marker only** — it does not self-register routes at import time. It attaches
+the closure as metadata on the method. The framework reads this metadata during bootstrap (no cache) and skips it
+entirely when loading from cache.
 
-This is intentional and consistent with PHP's `#[Handler]` attribute — both are
-inert metadata that the framework reads when needed, not active registrars.
+This is intentional and consistent with PHP's `#[Handler]` attribute — both are inert metadata that the framework reads
+when needed, not active registrars.
 
 ```python
 from valkyrja.http.routing.handler import handler
@@ -368,8 +366,7 @@ def handler(closure):
 
 class UserController:
 
-    @handler(
-        lambda c, args: c.get_singleton(UserControllerClass).index(args[0]))
+    @handler(lambda c, args: c.get_singleton(UserControllerClass).index(args[0]))
     def index(self, request) -> Response:
         """
         Build tool reads _valkyrja_handler metadata from AST
@@ -379,23 +376,20 @@ class UserController:
         """
         pass
 
-    @handler(
-        lambda c, args: c.get_singleton(UserControllerClass).store(args[0]))
+    @handler(lambda c, args: c.get_singleton(UserControllerClass).store(args[0]))
     def store(self, request) -> Response:
         pass
 ```
 
 ### Why Not Self-Registration
 
-Python decorators execute at module import time. If `@handler` self-registered
-routes, importing a controller module would immediately register its routes —
-even when loading from cache where those routes are already pre-built. The cache
-data file imports the same controller classes anyway (to reference them in route
-objects), so the imports cannot be avoided. Self-registration would cause double
-registration or conflicting state.
+Python decorators execute at module import time. If `@handler` self-registered routes, importing a controller module
+would immediately register its routes — even when loading from cache where those routes are already pre-built. The cache
+data file imports the same controller classes anyway (to reference them in route objects), so the imports cannot be
+avoided. Self-registration would cause double registration or conflicting state.
 
-Metadata-first solves this cleanly: the decorator is always inert, the framework
-decides whether to read the metadata based on whether cache is loaded.
+Metadata-first solves this cleanly: the decorator is always inert, the framework decides whether to read the metadata
+based on whether cache is loaded.
 
 ---
 
@@ -504,26 +498,39 @@ return get_extra_routes()
 
 ---
 
+## Handler Method Pointer Convention
+
+All handler methods must be **static methods on the same class** as the provider or controller that defines the route or
+listener. This is the same pattern used by `publishers()` in service providers.
+
+**Why:** The forge tool reads exactly one file per provider or controller. All imports for handler bodies are in that
+one file — no cross-file import aggregation, no conflict detection, no registry needed.
+
+```
+✅ Method reference on the same class
+✅ All type references imported in the same file
+
+❌ Inline closures or lambdas in route/listener definitions
+❌ References to types not imported in the current file
+❌ Handler methods on a different class
+```
+
+---
+
 ## Design Note — Why Routes Cannot Use a Publisher-Style Map
 
-An early consideration was expressing routes the same way as container
-bindings — a map of route identifier to handler function, with the build tool
-reading function bodies directly. This was rejected because routes are
-multi-dimensional data structures, not simple key→factory pairs.
+An early consideration was expressing routes the same way as container bindings — a map of route identifier to handler
+function, with the build tool reading function bodies directly. This was rejected because routes are multi-dimensional
+data structures, not simple key→factory pairs.
 
-A route carries: HTTP method, path pattern, dynamic segment constraints, regex
-compilation data, middleware chain, name/alias, parameter defaults, host
-constraints, and scheme constraints — all in addition to the handler. The
-`HttpRoute.get("/users/{id}", handler)` call is what populates all of these
-fields together. Decomposing this into a key/function-body map would lose all
-metadata the router needs to build its dispatcher index and compile route
-regexes.
+A route carries: HTTP method, path pattern, dynamic segment constraints, regex compilation data, middleware chain,
+name/alias, parameter defaults, host constraints, and scheme constraints — all in addition to the handler. The
+`HttpRoute.get("/users/{id}", handler)` call is what populates all of these fields together. Decomposing this into a
+key/function-body map would lose all metadata the router needs to build its dispatcher index and compile route regexes.
 
-The same reasoning applies to listeners — they carry event type binding,
-priority, and stop-propagation behavior alongside the handler. These cannot be
-expressed as a flat key/body map without losing the data the event dispatcher
+The same reasoning applies to listeners — they carry event type binding, priority, and stop-propagation behavior
+alongside the handler. These cannot be expressed as a flat key/body map without losing the data the event dispatcher
 requires.
 
-Container bindings by contrast are simple key→factory pairs. This is why
-`publishers()` works as a map but `get_routes()` must return complete route
-objects.
+Container bindings by contrast are simple key→factory pairs. This is why `publishers()` works as a map but
+`get_routes()` must return complete route objects.
