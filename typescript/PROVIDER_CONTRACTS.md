@@ -182,11 +182,11 @@ import type {ContainerContract} from '@valkyrja/container/manager/contract'
  */
 export interface ServiceProviderContract {
     /**
-     * Return a map of binding key to publisher method reference.
+     * Return a map of string binding key to publisher static method reference.
      * Must return a simple object literal — no conditional logic permitted.
-     * Each value must be a method reference on the same class.
+     * Each value must be a static method reference on the same class.
      */
-    publishers(): Record<string, (c: ContainerContract) => void>
+    publishers(): Readonly<Record<string, (c: ContainerContract) => void>>
 }
 ```
 
@@ -206,20 +206,16 @@ export class UserServiceProvider implements ServiceProviderContract {
      * resolves each method reference to its source location,
      * then reads each method body for cache generation.
      */
-    publishers(): Record<string, (c: ContainerContract) => void> {
+    publishers(): Readonly<Record<string, (c: ContainerContract) => void>> {
         return {
             [UserRepositoryClass]: this.publishUserRepository,
         }
     }
 
-    /**
-     * Build tool reads this method body from AST for cache generation.
-     * No annotation needed — discovered via publishers() map.
-     */
     publishUserRepository(c: ContainerContract): void {
         c.setSingleton(
             UserRepositoryClass,
-            new UserRepository(c.make(DatabaseClass))
+            new UserRepository(c.make<DatabaseContract>(DatabaseClass))
         )
     }
 }

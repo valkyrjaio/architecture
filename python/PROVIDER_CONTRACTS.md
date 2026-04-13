@@ -69,7 +69,7 @@ class ComponentProviderContract(ABC):
 
     @staticmethod
     @abstractmethod
-    def get_container_providers(app: 'ApplicationContract') -> list:
+    def get_container_providers(app: 'ApplicationContract') -> list[type['ServiceProviderContract']]:
         """
         Get the component's container service providers.
         Must return a simple list literal — no conditional logic.
@@ -78,7 +78,7 @@ class ComponentProviderContract(ABC):
 
     @staticmethod
     @abstractmethod
-    def get_event_providers(app: 'ApplicationContract') -> list:
+    def get_event_providers(app: 'ApplicationContract') -> list[type['ListenerProviderContract']]:
         """
         Get the component's event listener providers.
         Must return a simple list literal — no conditional logic.
@@ -87,7 +87,7 @@ class ComponentProviderContract(ABC):
 
     @staticmethod
     @abstractmethod
-    def get_cli_providers(app: 'ApplicationContract') -> list:
+    def get_cli_providers(app: 'ApplicationContract') -> list[type['CliRouteProviderContract']]:
         """
         Get the component's CLI route providers.
         Must return a simple list literal — no conditional logic.
@@ -96,7 +96,7 @@ class ComponentProviderContract(ABC):
 
     @staticmethod
     @abstractmethod
-    def get_http_providers(app: 'ApplicationContract') -> list:
+    def get_http_providers(app: 'ApplicationContract') -> list[type['HttpRouteProviderContract']]:
         """
         Get the component's HTTP route providers.
         Must return a simple list literal — no conditional logic.
@@ -119,24 +119,24 @@ from valkyrja.http.provider import (
 class HttpComponentProvider(ComponentProviderContract):
 
     @staticmethod
-    def get_container_providers(app) -> list[type]:
+    def get_container_providers(app: ApplicationContract) -> list[type[ServiceProviderContract]]:
         return [
             HttpContainerProvider,
             HttpMiddlewareProvider,
         ]
 
     @staticmethod
-    def get_event_providers(app) -> list[type]:
+    def get_event_providers(app: ApplicationContract) -> list[type[ListenerProviderContract]]:
         return [
             HttpEventProvider,
         ]
 
     @staticmethod
-    def get_cli_providers(app) -> list[type]:
+    def get_cli_providers(app: ApplicationContract) -> list[type[CliRouteProviderContract]]:
         return []
 
     @staticmethod
-    def get_http_providers(app) -> list[type]:
+    def get_http_providers(app: ApplicationContract) -> list[type[HttpRouteProviderContract]]:
         return [
             HttpRouteProvider,
         ]
@@ -153,7 +153,7 @@ methods carry a `@handler` decorator — the build tool reads the decorator argu
 ```python
 # package: valkyrja.container.provider.contract
 from abc import ABC, abstractmethod
-from typing import Callable, TYPE_CHECKING
+from typing import Any, Callable, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from valkyrja.container.manager.contract import ContainerContract
@@ -217,20 +217,15 @@ from app.services.contract import DatabaseClass
 class UserServiceProvider(ServiceProviderContract):
 
     @staticmethod
-    def publishers() -> dict:
+    def publishers() -> dict[str, Callable[[ContainerContract], None]]:
         """
-        Build tool reads this map from AST, resolves each method reference
-        via inspect.getfile(), then reads each method's @handler decorator
-        for cache generation.
+        Build tool reads this map from AST and writes each callable
+        as a lambda in the generated cache data file.
         """
         return {
             'app.repositories.UserRepositoryContract': UserServiceProvider.publish_user_repository,
         }
 
-    @handler(lambda c, args: c.set_singleton(
-        UserRepositoryClass,
-        UserRepository(c.make(DatabaseClass))
-    ))
     @staticmethod
     def publish_user_repository(container: ContainerContract) -> None:
         """
@@ -465,6 +460,45 @@ class ListenerProviderContract(ABC):
         """
         return []
 ```
+
+---
+
+## Data Classes — @dataclass
+
+Route data, listener data, and parameter data objects use `@dataclass` — the Python equivalent of PHP readonly classes
+and Java records. `frozen=True` makes them immutable:
+
+```python
+from dataclasses import dataclass, field
+from typing import Callable, Any
+
+
+@dataclass(frozen=True)
+class Parameter:
+    name: str
+    pattern: str = '[^/]+'
+
+
+@dataclass(frozen=True)
+class HttpRoute:
+    path: str
+    method: str
+    handler: tuple[type, str]  # (ProviderClass, 'method_name')
+    parameters: list[Parameter] = field(default_factory=list)
+    name: str | None = None
+    middleware: list[str] = field(default_factory=list)
+    compiled_regex: str | None = None  # set by ProcessorContract
+
+
+@dataclass(frozen=True)
+class Listener:
+    event_type: type
+    handler: tuple[type, str]  # (ProviderClass, 'method_name')
+    priority: int = 0
+```
+
+`frozen=True` prevents mutation after construction — the same guarantee PHP's `readonly` classes provide. mypy and
+pyright fully validate all field types.
 
 ---
 
