@@ -265,6 +265,24 @@ The generated `AppContainerData`, `AppEventData`, `AppHttpRoutingData`, and `App
 providers from multiple components in a single generated file. Identical class names across components produce namespace
 collisions that prevent compilation. Unique names are a hard requirement, not a style preference.
 
+**Why this wasn't a problem in PHP:** PHP callables in the cache used fully qualified class names —
+`\Valkyrja\Http\Provider\HttpServiceProvider::publishRouter`. No import statement required, no collision possible. Two
+classes named `ServiceProvider` in different namespaces coexist without conflict because the FQN distinguishes them.
+
+Other languages do not support this:
+
+- **Java** — `import` statements at the top of the file; two classes with the same simple name require aliasing or FQN
+  usage throughout, which is non-idiomatic
+- **Go** — package-qualified names (`http.ServiceProvider` vs `container.ServiceProvider`) would work but Go's
+  convention is to use the unqualified name after import, which collides
+- **Python** — `from app.http.provider import ServiceProvider` and `from app.container.provider import ServiceProvider`
+  in the same generated file is a straight name collision — one overwrites the other
+- **TypeScript** — same as Python; named imports collide on the simple name
+
+Unique class names across the framework eliminate the collision entirely — no aliasing, no FQN workarounds, no
+language-specific hacks. The convention that PHP could get away without now becomes a hard requirement for the
+multi-language ports.
+
 ### The Pattern
 
 ```
