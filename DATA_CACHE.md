@@ -134,18 +134,39 @@ vendor directory — no explicit listing needed.
 The build tool aggregates everything across all providers of each type into exactly four classes per layer (framework,
 third-party packages, application):
 
-**AppContainerData** — all bindings from every `ServiceProvider` across all components and the application. In PHP,
-Java, Go, and TypeScript the callable is stored directly. In Python a lambda wrapper is used so that provider modules
-are not imported until a binding is actually resolved — constructing a tuple in Python accesses the class name and
-triggers its import, so the lambda defers that access to first use.
+**AppContainerData** — all bindings from every `ServiceProvider` across all components and the application.
+
+In PHP, Java, Go, and TypeScript the callable tuple is stored directly — no wrapping needed since those languages don't
+have Python's eager import problem.
+
+In Python the container's internal bindings map always stores lambdas — whether populated from a service provider at
+runtime or loaded from a cache data file. This keeps the internal format identical in both paths with no conditional
+logic at resolution time.
+
+- **Service provider** returns plain method references — no lambda in source code
+- **Container** wraps method references in lambdas when registering from a provider
+- **Forge** reads the plain method reference from `publishers()` AST and writes it as a lambda in the generated cache
+  file — matching the container's internal format exactly
+- **Resolution** always calls the lambda — uniform, no conditional check needed
 
 ```python
-# Python container data — lambda wrapper defers provider import
+# service provider — clean, no lambda
+'app.repositories.UserRepositoryContract': UserServiceProvider.publish_user_repository
+
+# container wraps on registration from provider
+self._bindings[key] = lambda c=callable_ref: c
+
+# generated AppContainerData — forge writes as lambda, same format
 APP_CONTAINER_DATA = {
-    'app.repositories.UserRepositoryContract': lambda: (UserServiceProvider, 'publish_user_repository'),
-    # UserServiceProvider not imported until this lambda is called
+    'app.repositories.UserRepositoryContract': lambda: UserServiceProvider.publish_user_repository,
 }
+
+# container resolution — always calls lambda, no check needed
+callable_ref = self._bindings[key]()
+return callable_ref(self)
 ```
+
+See "Container — Uniform Lambda Format" in `README_PYTHON.md` for full implementation.
 
 **AppEventData** — all listeners from every `ListenerProvider` across all components and the application, keyed by event
 type.
@@ -340,32 +361,32 @@ public class HttpComponentProvider implements ComponentProviderContract {
 
 ```go
 type ComponentProviderContract interface {
-GetContainerProviders(app ApplicationContract) []ServiceProviderContract
-GetEventProviders(app ApplicationContract) []ListenerProviderContract
-GetCliProviders(app ApplicationContract) []CliRouteProviderContract
-GetHttpProviders(app ApplicationContract) []HttpRouteProviderContract
+    GetContainerProviders(app ApplicationContract) []ServiceProviderContract
+    GetEventProviders(app ApplicationContract) []ListenerProviderContract
+    GetCliProviders(app ApplicationContract) []CliRouteProviderContract
+    GetHttpProviders(app ApplicationContract) []HttpRouteProviderContract
 }
 
 // implementation
 type HttpComponentProvider struct{}
 
 func (p *HttpComponentProvider) GetContainerProviders(app ApplicationContract) []ServiceProviderContract {
-return []ServiceProviderContract{
-&HttpContainerProvider{},
-&HttpMiddlewareProvider{},
-}
+    return []ServiceProviderContract{
+        &HttpContainerProvider{},
+        &HttpMiddlewareProvider{},
+    }
 }
 
 func (p *HttpComponentProvider) GetEventProviders(app ApplicationContract) []ListenerProviderContract {
-return []ListenerProviderContract{&HttpEventProvider{}}
+    return []ListenerProviderContract{&HttpEventProvider{}}
 }
 
 func (p *HttpComponentProvider) GetCliProviders(app ApplicationContract) []CliRouteProviderContract {
-return []CliRouteProviderContract{}
+    return []CliRouteProviderContract{}
 }
 
 func (p *HttpComponentProvider) GetHttpProviders(app ApplicationContract) []HttpRouteProviderContract {
-return []HttpRouteProviderContract{&HttpRouteProvider{}}
+    return []HttpRouteProviderContract{&HttpRouteProvider{}}
 }
 ```
 
@@ -415,11 +436,8 @@ class HttpComponentProvider(ComponentProviderContract):
 ```typescript
 export interface ComponentProviderContract {
     getContainerProviders(app: ApplicationContract): Array<new () => ServiceProviderContract>
-
     getEventProviders(app: ApplicationContract): Array<new () => ListenerProviderContract>
-
     getCliProviders(app: ApplicationContract): Array<new () => CliRouteProviderContract>
-
     getHttpProviders(app: ApplicationContract): Array<new () => HttpRouteProviderContract>
 }
 
@@ -635,7 +653,6 @@ class UserHttpRouteProvider implements HttpRouteProviderContract
 ```java
 public interface HttpRouteProviderContract {
     static List<Class<?>> getControllerClasses();
-
     static List<RouteContract> getRoutes();
 }
 
@@ -648,8 +665,8 @@ public class UserHttpRouteProvider implements HttpRouteProviderContract {
 
     public static List<RouteContract> getRoutes() {
         return List.of(
-                HttpRoute.get("/orders", (ContainerContract c, List<Object> args) ->
-                        c.getSingleton(OrderController.class).index((Request) args.get(0)))
+            HttpRoute.get("/orders", (ContainerContract c, List<Object> args) ->
+                c.getSingleton(OrderController.class).index((Request) args.get(0)))
         );
     }
 }
@@ -659,23 +676,23 @@ public class UserHttpRouteProvider implements HttpRouteProviderContract {
 
 ```go
 type HttpRouteProviderContract interface {
-GetControllerClasses() []string
-GetRoutes() []RouteContract
+    GetControllerClasses() []string
+    GetRoutes() []RouteContract
 }
 
 // implementation — explicit registration only
 type UserHttpRouteProvider struct{}
 
 func (p *UserHttpRouteProvider) GetControllerClasses() []string {
-return []string{}
+    return []string{}
 }
 
 func (p *UserHttpRouteProvider) GetRoutes() []RouteContract {
-return []RouteContract{
-data.Get("/orders", func (c ContainerContract, args []any) any {
-return c.GetSingleton(OrderControllerClass).(*OrderController).Index(args[0])
-}),
-}
+    return []RouteContract{
+        data.Get("/orders", func(c ContainerContract, args []any) any {
+            return c.GetSingleton(OrderControllerClass).(*OrderController).Index(args[0])
+        }),
+    }
 }
 ```
 
@@ -712,7 +729,6 @@ class UserHttpRouteProvider(HttpRouteProviderContract):
 ```typescript
 export interface HttpRouteProviderContract {
     getControllerClasses(): string[]
-
     getRoutes(): RouteContract[]
 }
 
@@ -777,26 +793,24 @@ HttpRoute::get('/users/{id}/posts/{postId}', $handler, [
 
 ```java
 // Java
-HttpRoute.get("/users/{id}/posts/{postId}",handler, List.of(
-        new Parameter("id",     "[0-9]+"),
-    new
-
-Parameter("postId","[0-9]+")
+HttpRoute.get("/users/{id}/posts/{postId}", handler, List.of(
+    new Parameter("id",     "[0-9]+"),
+    new Parameter("postId", "[0-9]+")
 ))
 ```
 
 ```go
 // Go
 data.Get("/users/{id}/posts/{postId}", handler,
-parameter.New("id", "[0-9]+"),
-parameter.New("postId", "[0-9]+"),
+    parameter.New("id",     "[0-9]+"),
+    parameter.New("postId", "[0-9]+"),
 )
 ```
 
 ```python
 # Python
 HttpRoute.get('/users/{id}/posts/{postId}', handler, [
-    Parameter('id', pattern='[0-9]+'),
+    Parameter('id',     pattern='[0-9]+'),
     Parameter('postId', pattern='[0-9]+'),
 ])
 ```
@@ -833,21 +847,11 @@ public function show(int $id, int $postId): Response {}
 
 ```java
 // Java
-@Handler((ContainerContract c, List < Object > args) ->
-        c.
-
-getSingleton(UserController .class).
-
-show((int) args.
-
-get(0), (int)args.
-
-get(1)))
-
-@Parameter(name = "id", pattern = "[0-9]+")
+@Handler((ContainerContract c, List<Object> args) ->
+    c.getSingleton(UserController.class).show((int) args.get(0), (int) args.get(1)))
+@Parameter(name = "id",     pattern = "[0-9]+")
 @Parameter(name = "postId", pattern = "[0-9]+")
-public Response show(int id, int postId) {
-}
+public Response show(int id, int postId) {}
 ```
 
 ```python

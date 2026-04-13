@@ -322,7 +322,67 @@ single-language frameworks.
 
 ---
 
-## 6. Decorators — Metadata Markers, Not Self-Registrars
+## 6. Container — Uniform Lambda Format
+
+The container's internal bindings map always stores lambdas — whether populated from a service provider at runtime or
+loaded from a cache data file. This makes the internal format identical in both paths, and resolution always calls the
+lambda with no conditional logic.
+
+### Three Parties, One Job Each
+
+**Service provider** — returns a plain method reference map. No lambda, no framework concerns:
+
+```python
+class UserServiceProvider(ServiceProviderContract):
+    @staticmethod
+    def publishers() -> dict:
+        return {
+            'app.repositories.UserRepositoryContract': UserServiceProvider.publish_user_repository,
+        }
+```
+
+**Container** — wraps the method reference in a lambda when registering from a provider. Internal map always stores
+lambdas:
+
+```python
+class Container:
+
+    def register_provider(self, provider: ServiceProviderContract) -> None:
+        for key, callable_ref in provider.publishers().items():
+            # wrap in lambda — internal map always stores lambdas
+            self._bindings[key] = lambda c=callable_ref: c
+
+    def load_cache(self, data: dict) -> None:
+        # cache data already in lambda format — register as-is
+        self._bindings.update(data)
+
+    def make(self, key: str):
+        # always call the lambda — uniform, no conditional check needed
+        callable_ref = self._bindings[key]()
+        return callable_ref(self)
+
+    def singleton(self, key: str):
+        if key not in self._singletons:
+            self._singletons[key] = self.make(key)
+        return self._singletons[key]
+```
+
+**Forge** — reads the plain method reference from `publishers()` AST and writes it as a lambda into the generated cache
+file. Cache matches the container's internal format exactly:
+
+```python
+# generated AppContainerData — lambda format, matches container internal map
+APP_CONTAINER_DATA = {
+    'app.repositories.UserRepositoryContract': lambda: UserServiceProvider.publish_user_repository,
+}
+```
+
+This is the only Python-specific behaviour in the container registration path. The resolution path (`make()`) is uniform
+with no conditionals. The service provider stays clean with no framework-specific lambda syntax.
+
+---
+
+## 7. Decorators — Metadata Markers, Not Self-Registrars
 
 Python decorators execute at import time — but `@handler` must **not** self-register routes. It must be a metadata
 marker only:
@@ -401,7 +461,7 @@ anywhere the function is accessible.
 
 ---
 
-## 7. Deployment Models
+## 8. Deployment Models
 
 ### CGI / Lambda
 
@@ -438,7 +498,7 @@ worker.run(app)
 
 ---
 
-## 8. Build Tool — valkyrja-forge Python — valkyrja-forge Python
+## 9. Build Tool — valkyrja-forge Python — valkyrja-forge Python
 
 **Reference:** `BUILD_TOOL.md`
 

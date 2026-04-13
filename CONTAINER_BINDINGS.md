@@ -342,16 +342,77 @@ class ContainerConstants:
     DATABASE = "app.services.DatabaseContract"
 ```
 
-```python
-# binding and resolution via string key
-container.bind(
-    ContainerConstants.USER_REPOSITORY,
-    lambda c: UserRepository(c.make(ContainerConstants.DATABASE))
-)
+### The Uniform Lambda Pattern
 
-repo = container.make(ContainerConstants.USER_REPOSITORY)
-# with Python 3.14 lazy imports, the UserRepository module loads here — not at boot
+The container's internal bindings map always stores lambdas — whether populated from a service provider at runtime or
+loaded from a cache data file. This makes resolution uniform with no conditional logic.
+
+**Service provider** — plain method reference, no lambda:
+
+```python
+class UserServiceProvider(ServiceProviderContract):
+    @staticmethod
+    def publishers() -> dict:
+        return {
+            'app.repositories.UserRepositoryContract': UserServiceProvider.publish_user_repository,
+        }
+
+    @staticmethod
+    def publish_user_repository(c: ContainerContract) -> None:
+        c.set_singleton(
+            'app.repositories.UserRepositoryContract',
+            UserRepository(c.make('app.services.DatabaseContract'))
+        )
 ```
+
+**Container** — wraps method reference in lambda on registration, loads cache as-is, resolves by always calling the
+lambda:
+
+```python
+class Container:
+
+    def register_provider(self, provider: ServiceProviderContract) -> None:
+        for key, callable_ref in provider.publishers().items():
+            # wrap in lambda — internal map always stores lambdas
+            self._bindings[key] = lambda c=callable_ref: c
+
+    def load_cache(self, data: dict) -> None:
+        # cache data already in lambda format — register as-is
+        self._bindings.update(data)
+
+    def make(self, key: str):
+        # always call the lambda — uniform, no conditional check needed
+        callable_ref = self._bindings[key]()
+        return callable_ref(self)
+
+    def singleton(self, key: str):
+        if key not in self._singletons:
+            self._singletons[key] = self.make(key)
+        return self._singletons[key]
+```
+
+**Forge** — reads the plain method reference from `publishers()` AST and writes it as a lambda in the generated cache
+file, matching the container's internal format:
+
+```python
+# generated AppContainerData — lambda format, same as container internal map
+APP_CONTAINER_DATA = {
+    'app.repositories.UserRepositoryContract': lambda: UserServiceProvider.publish_user_repository,
+    'app.services.DatabaseContract': lambda: DatabaseServiceProvider.publish_database,
+    'io.valkyrja.http.RouterContract': lambda: HttpServiceProvider.publish_router,
+}
+```
+
+**Resolution is always uniform:**
+
+```python
+# always: call lambda → get method ref → call method ref with container
+callable_ref = self._bindings[key]()  # lambda() → method ref
+return callable_ref(self)  # method ref(container)
+```
+
+This is the only Python-specific behaviour in the container. No conditional checks, no dispatch-style indirection. The
+service provider stays clean, the cache format matches the internal map exactly.
 
 The `class_()` FQN helper generates string constants from class objects where needed:
 

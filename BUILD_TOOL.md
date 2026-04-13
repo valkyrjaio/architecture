@@ -609,63 +609,63 @@ public class ForgeParser {
 package main
 
 import (
-    "fmt"
-    "go/ast"
-    "go/parser"
-    "go/token"
-    "os"
+	"fmt"
+	"go/ast"
+	"go/parser"
+	"go/token"
+	"os"
 )
 
 func main() {
-    // file path passed directly as CLI argument
-    // e.g. valkyrja-forge generate app/config/app_config.go
-    filepath := os.Args[1]
+	// file path passed directly as CLI argument
+	// e.g. valkyrja-forge generate app/config/app_config.go
+	filepath := os.Args[1]
 
-    // step 1: create a FileSet to track position information
-    fset := token.NewFileSet()
+	// step 1: create a FileSet to track position information
+	fset := token.NewFileSet()
 
-    // step 2: parse the file into an AST
-    file, err := parser.ParseFile(
-        fset,
-        filepath,
-        nil,                  // src — nil reads from disk
-        parser.ParseComments, // include comments in AST
-    )
-    if err != nil {
-        panic(fmt.Sprintf("parse error: %v", err))
-    }
+	// step 2: parse the file into an AST
+	file, err := parser.ParseFile(
+		fset,
+		filepath,
+		nil,                  // src — nil reads from disk
+		parser.ParseComments, // include comments in AST
+	)
+	if err != nil {
+		panic(fmt.Sprintf("parse error: %v", err))
+	}
 
-    // step 3: walk the AST with ast.Inspect
-    // returns true to continue into children, false to stop
-    ast.Inspect(file, func(n ast.Node) bool {
-        if n == nil {
-            return false
-        }
+	// step 3: walk the AST with ast.Inspect
+	// returns true to continue into children, false to stop
+	ast.Inspect(file, func(n ast.Node) bool {
+		if n == nil {
+			return false
+		}
 
-        switch node := n.(type) {
-        case *ast.FuncDecl:
-            fmt.Printf("Function: %s at %s\n",
-                node.Name.Name,
-                fset.Position(node.Pos()),
-            )
-        case *ast.ReturnStmt:
-            for _, result := range node.Results {
-                fmt.Printf("  Return: %T\n", result)
-            }
-        case *ast.CompositeLit:
-            // slice [] or map {} literal — provider lists live here
-            fmt.Printf("  Composite literal with %d elements\n", len(node.Elts))
-            for _, elt := range node.Elts {
-                fmt.Printf("    Element: %T = %v\n", elt, elt)
-            }
-        }
+		switch node := n.(type) {
+		case *ast.FuncDecl:
+			fmt.Printf("Function: %s at %s\n",
+				node.Name.Name,
+				fset.Position(node.Pos()),
+			)
+		case *ast.ReturnStmt:
+			for _, result := range node.Results {
+				fmt.Printf("  Return: %T\n", result)
+			}
+		case *ast.CompositeLit:
+			// slice [] or map {} literal — provider lists live here
+			fmt.Printf("  Composite literal with %d elements\n", len(node.Elts))
+			for _, elt := range node.Elts {
+				fmt.Printf("    Element: %T = %v\n", elt, elt)
+			}
+		}
 
-        return true // continue walking into children
-    })
+		return true // continue walking into children
+	})
 
-    // step 4: print any AST node back to source text
-    // go/printer writes to any io.Writer
-    // printer.Fprint(os.Stdout, fset, file)
+	// step 4: print any AST node back to source text
+	// go/printer writes to any io.Writer
+	// printer.Fprint(os.Stdout, fset, file)
 }
 ```
 
@@ -1452,6 +1452,7 @@ external file resolution needed.
 **Annotation processor setup:**
 
 ```java
+
 @SupportedAnnotationTypes("io.valkyrja.http.routing.Handler")
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class ValkyrjaAnnotationProcessor extends AbstractProcessor {
@@ -1466,8 +1467,8 @@ public class ValkyrjaAnnotationProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(
-        Set<? extends TypeElement> annotations,
-        RoundEnvironment roundEnv
+            Set<? extends TypeElement> annotations,
+            RoundEnvironment roundEnv
     ) {
         // collect all @Handler annotated methods
         for (Element element : roundEnv.getElementsAnnotatedWith(Handler.class)) {
@@ -1519,7 +1520,7 @@ private String resolveFQN(String source, ExecutableElement method) {
     // build import map: simple name → fully qualified name
     Map<String, String> importMap = new HashMap<>();
     for (ImportTree imp : unit.getImports()) {
-        String fqn = imp.getQualifiedIdentifier().toString();
+        String fqn       = imp.getQualifiedIdentifier().toString();
         String simpleName = fqn.substring(fqn.lastIndexOf('.') + 1);
         importMap.put(simpleName, fqn);
     }
@@ -1527,8 +1528,8 @@ private String resolveFQN(String source, ExecutableElement method) {
     // rewrite source replacing simple names with FQN
     for (Map.Entry<String, String> entry : importMap.entrySet()) {
         source = source.replaceAll(
-                "\\b" + Pattern.quote(entry.getKey()) + "\\b",
-                entry.getValue()
+            "\\b" + Pattern.quote(entry.getKey()) + "\\b",
+            entry.getValue()
         );
     }
     return source;
@@ -1578,15 +1579,15 @@ source files.
 ```go
 // load packages listed in valkyrja.yaml
 cfg := &packages.Config{
-Mode: packages.NeedFiles |
-packages.NeedSyntax |
-packages.NeedTypes |
-packages.NeedImports,
+    Mode: packages.NeedFiles |
+          packages.NeedSyntax |
+          packages.NeedTypes |
+          packages.NeedImports,
 }
 
 pkgs, err := packages.Load(cfg, providerPackagePaths...)
 if err != nil {
-log.Fatalf("failed to load packages: %v", err)
+    log.Fatalf("failed to load packages: %v", err)
 }
 ```
 
@@ -1629,22 +1630,22 @@ return routes
 ```go
 // extract function literal source text from AST node
 func extractFuncLiteral(node ast.Node, fset *token.FileSet) string {
-var buf bytes.Buffer
-printer.Fprint(&buf, fset, node)
-return buf.String()
+    var buf bytes.Buffer
+    printer.Fprint(&buf, fset, node)
+    return buf.String()
 }
 
 // resolve imports to fully qualified package paths
 func resolveFQN(source string, imports []*ast.ImportSpec) string {
-for _, imp := range imports {
-path := strings.Trim(imp.Path.Value, `"`)
-alias := filepath.Base(path)
-if imp.Name != nil {
-alias = imp.Name.Name
-}
-source = strings.ReplaceAll(source, alias+".", path+"/")
-}
-return source
+    for _, imp := range imports {
+        path    := strings.Trim(imp.Path.Value, `"`)
+        alias   := filepath.Base(path)
+        if imp.Name != nil {
+            alias = imp.Name.Name
+        }
+        source = strings.ReplaceAll(source, alias+".", path+"/")
+    }
+    return source
 }
 ```
 
@@ -1831,6 +1832,7 @@ $regexes
 )
 '''
 
+
 def generate_routing_data(collected: dict) -> str:
     routes_str = '\n'.join(
         f"        '{name}': {route_source},"
@@ -1845,6 +1847,7 @@ def generate_routing_data(collected: dict) -> str:
         dynamic_paths=build_paths_str(collected['dynamic_paths']),
         regexes=build_paths_str(collected['regexes']),
     )
+
 
 output = generate_routing_data(collected_data)
 open('app/cache/app_http_routing_data.py', 'w').write(output)
@@ -1867,7 +1870,7 @@ import * as fs from 'fs'
 
 // load tsconfig and create compiler program
 const configFile = ts.readConfigFile('tsconfig.json', ts.sys.readFile)
-const config     = ts.parseJsonConfigFileContent(
+const config = ts.parseJsonConfigFileContent(
     configFile.config,
     ts.sys,
     process.cwd()
@@ -1954,8 +1957,8 @@ function extractPublisherMethod(
             if ((member.name as ts.Identifier).text !== methodName) continue
 
             // extract method body source text
-            const body = member.body!
-            const rawSource = sourceFile.text.slice(body.pos, body.end)
+            const body       = member.body!
+            const rawSource  = sourceFile.text.slice(body.pos, body.end)
 
             // resolve all type references to fully qualified paths
             methodSource = resolveFQNTypes(rawSource, body, checker)
@@ -1975,7 +1978,7 @@ function resolveFQNTypes(
         if (ts.isIdentifier(child)) {
             const symbol = checker.getSymbolAtLocation(child)
             if (symbol) {
-                const fqn = checker.getFullyQualifiedName(symbol)
+                const fqn    = checker.getFullyQualifiedName(symbol)
                 source = source.replace(child.text, fqn)
             }
         }
@@ -2199,12 +2202,12 @@ composer require --dev valkyrja-forge
 ```json
 // composer.json
 {
-    "require": {
-        "valkyrja/framework": "^26.0"
-    },
-    "require-dev": {
-        "valkyrja-forge": "^1.0"
-    }
+  "require": {
+    "valkyrja/framework": "^26.0"
+  },
+  "require-dev": {
+    "valkyrja-forge": "^1.0"
+  }
 }
 ```
 
