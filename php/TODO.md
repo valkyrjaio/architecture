@@ -26,7 +26,8 @@
 ## First for Parity with Java
 
 - dedicated Readme for ServiceProvider, ComponentProvider, etc.
-- Rename all Throwables and Exceptions with component unique names
+- ServiceProvider should not be final to allow for extending. This is a
+  framework after all.
 - ServiceProvider should have an attribute for the method
 - Change service and singletons to lambdas instead of what they are now. Add
   Service and Singleton annotations/Attributes
@@ -36,7 +37,7 @@
   ListenerDispatcher?
 - Rename collectors to what they're collecting. EventCollectorContract,
   CliRouteCollectorContract, HttpRouteCollectorContract, etc.
-- Remove the ComponentProvider constant class
+- !!! Remove the ComponentProvider constant class
 
 ## Container
 
@@ -53,7 +54,7 @@
 
 ## Http
 
- - Move File/Throwable/Exception/Constant to just File/Constant.
+- Move File/Throwable/Exception/Constant to just File/Constant.
 
 ## Bin
 
