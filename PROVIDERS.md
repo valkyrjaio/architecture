@@ -286,7 +286,7 @@ multi-language ports.
 **Cross-application and package collisions:** The naming convention solves collisions within the framework but does not
 prevent collisions between the framework and application code, or between third-party packages. If a developer's
 application class name collides with a package class name in the generated file, that is the developer's responsibility
-to resolve — the same way any import conflict in their codebase is theirs to fix. The forge generates the best output it
+to resolve — the same way any import conflict in their codebase is theirs to fix. Sindri generates the best output it
 can from what it reads and aggregates. The developer is responsible for ensuring the generated file is valid.
 
 ### The Pattern
@@ -390,8 +390,8 @@ All provider list methods must satisfy the build tool contract — simple litera
 ❌ Inline closures or lambdas as route handlers
 ```
 
-If any provider method violates this contract the forge tool emits an error and aborts cache generation. The application
-still runs without cache — the provider tree is traversed at runtime instead.
+If any provider method violates this contract Sindri emits an error and aborts cache generation. The application still
+runs without cache — the provider tree is traversed at runtime instead.
 
 ---
 
@@ -421,5 +421,5 @@ UserHttpRoutesProvider.getControllerClasses()   // PHP, Java, Python only
 ```
 
 At runtime (no cache) — the framework traverses this tree on every boot.
-With cache — the forge tool traverses this tree once at build time and writes the four data classes. The framework loads
-the data classes directly, skipping the tree entirely.
+With cache — Sindri traverses this tree once at build time and writes the four data classes. The framework loads the
+data classes directly, skipping the tree entirely.

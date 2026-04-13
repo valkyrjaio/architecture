@@ -1,19 +1,16 @@
 # PHP Port — Implementation Notes
 
-> Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `DISPATCH.md`,
-`DATA_CACHE.md`, `BUILD_TOOL.md`
+> Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `DISPATCH.md`, `DATA_CACHE.md`, `BUILD_TOOL.md`
 
-PHP is the reference implementation. All other ports are measured against it.
-The following changes are required to bring the existing implementation into
-alignment with the decisions made during cross-port planning.
+PHP is the reference implementation. All other ports are measured against it. The following changes are required to
+bring the existing implementation into alignment with the decisions made during cross-port planning.
 
 ---
 
 ## Status
 
-**Existing implementation requires the following changes.** Nothing here is
-net-new architecture — it is alignment work to make PHP consistent with the
-cross-port decisions.
+**Existing implementation requires the following changes.** Nothing here is net-new architecture — it is alignment work
+to make PHP consistent with the cross-port decisions.
 
 ---
 
@@ -23,19 +20,15 @@ cross-port decisions.
 
 ### Rename all exceptions and throwables
 
-Every exception and throwable across every component must be renamed to follow
-the convention:
+Every exception and throwable across every component must be renamed to follow the convention:
 
-- Framework base → `Valkyrja*` (e.g. `ValkyrjaThrowable`,
-  `ValkyrjaRuntimeException`, `ValkyrjaInvalidArgumentException`)
-- Component → `ComponentName*` (e.g. `ContainerRuntimeException`,
-  `HttpRuntimeException`)
-- Shared subcomponent → `ParentComponentSubComponent*` (e.g.
-  `HttpRoutingRuntimeException`, `CliRoutingRuntimeException`)
-- Unique subcomponent → `SubComponent*` (e.g. `RequestRuntimeException`,
-  `ResponseRuntimeException`)
-- Sub-subcomponent → prepend only as many parent names as needed to make the
-  name unique across the framework
+- Framework base → `Valkyrja*` (e.g. `ValkyrjaThrowable`, `ValkyrjaRuntimeException`,
+  `ValkyrjaInvalidArgumentException`)
+- Component → `ComponentName*` (e.g. `ContainerRuntimeException`, `HttpRuntimeException`)
+- Shared subcomponent → `ParentComponentSubComponent*` (e.g. `HttpRoutingRuntimeException`,
+  `CliRoutingRuntimeException`)
+- Unique subcomponent → `SubComponent*` (e.g. `RequestRuntimeException`, `ResponseRuntimeException`)
+- Sub-subcomponent → prepend only as many parent names as needed to make the name unique across the framework
 
 ### Make all base and categorical exceptions abstract
 
@@ -47,13 +40,13 @@ the convention:
 
 ### Ensure every component has categorical abstracts
 
-Every component must ship `ComponentRuntimeException` and
-`ComponentInvalidArgumentException` even if currently unused. Add where missing.
+Every component must ship `ComponentRuntimeException` and `ComponentInvalidArgumentException` even if currently unused.
+Add where missing.
 
 ### Create specific concrete exceptions per throw site
 
-Audit every `throw` statement in the codebase. Every throw must use a specific
-concrete exception named for the problem. No throwing abstract base exceptions.
+Audit every `throw` statement in the codebase. Every throw must use a specific concrete exception named for the problem.
+No throwing abstract base exceptions.
 
 ---
 
@@ -63,8 +56,8 @@ concrete exception named for the problem. No throwing abstract base exceptions.
 
 ### Add per-component constants files
 
-Every component needs a constants file containing FQN string identifiers for all
-classes, interfaces, and contracts in that component:
+Every component needs a constants file containing FQN string identifiers for all classes, interfaces, and contracts in
+that component:
 
 ```php
 // Http/HttpConstants.php
@@ -78,8 +71,7 @@ final class HttpConstants
 
 ### Migrate container bindings to closure-based factories
 
-All container bindings must use explicit closure factories. Remove all dynamic
-reflection-based instantiation:
+All container bindings must use explicit closure factories. Remove all dynamic reflection-based instantiation:
 
 ```php
 // before — dynamic dispatch, reflection-based
@@ -102,8 +94,8 @@ $container->bind(
 
 ### Migrate from publish() to publishers() map
 
-Service providers must return a `publishers()` map of class string to static
-method reference. The build tool reads this map via AST:
+Service providers must return a `publishers()` map of class string to static method reference. The build tool reads this
+map via AST:
 
 ```php
 public static function publishers(): array
@@ -122,15 +114,13 @@ public static function publishRouter(ContainerContract $container): void
 }
 ```
 
-No `@Handler` annotation needed on publisher methods — the build tool reads
-method bodies directly from AST.
+No `@Handler` annotation needed on publisher methods — the build tool reads method bodies directly from AST.
 
 ### Provider list methods must return simple list literals
 
-All `getContainerProviders()`, `getEventProviders()`, `getCliProviders()`,
-`getHttpProviders()`, `getControllerClasses()`, `getRoutes()`, `getListeners()`
-methods must return simple array literals with no conditional logic, variables,
-or method calls other than constructors and static factories.
+All `getContainerProviders()`, `getEventProviders()`, `getCliProviders()`, `getHttpProviders()`,
+`getControllerClasses()`, `getRoutes()`, `getListeners()` methods must return simple array literals with no conditional
+logic, variables, or method calls other than constructors and static factories.
 
 ---
 
@@ -155,13 +145,12 @@ Define the three handler function types as docblock-enforced closure signatures:
 
 ### Add HttpHandlerContract, CliHandlerContract, ListenerHandlerContract
 
-Each concern gets its own handler contract extending the base `HandlerContract`
-with the typed closure signature.
+Each concern gets its own handler contract extending the base `HandlerContract` with the typed closure signature.
 
 ### Add #[Handler] attribute to route/listener data classes
 
-Routes and listeners need `#[Handler]` attribute support on controller/action
-methods. The attribute carries the typed closure:
+Routes and listeners need `#[Handler]` attribute support on controller/action methods. The attribute carries the typed
+closure:
 
 ```php
 #[Handler(static fn(ContainerContract $c, array<string, mixed> $args): ResponseContract
@@ -172,8 +161,8 @@ public function show(int $id): ResponseContract {}
 
 ### Add #[Parameter] attribute
 
-Routes with dynamic segments need `#[Parameter]` attribute support on
-controller/action methods carrying the parameter name and pattern.
+Routes with dynamic segments need `#[Parameter]` attribute support on controller/action methods carrying the parameter
+name and pattern.
 
 ---
 
@@ -184,51 +173,43 @@ controller/action methods carrying the parameter name and pattern.
 ### Deprecate dispatch-based routing as the core mechanism
 
 - Add `@deprecated` to dispatch-based route handler methods
-- New routes must use `#[Handler]` attribute or explicit closure on the route
-  object
-- Dispatch component retained as opt-in for backwards compatibility but removed
-  from core pipeline
+- New routes must use `#[Handler]` attribute or explicit closure on the route object
+- Dispatch component retained as opt-in for backwards compatibility but removed from core pipeline
 - Add deprecation notices to guide developers toward closure-based handlers
 
 ### Remove dispatch from core routing pipeline
 
-The router and event dispatcher must invoke the handler closure directly if
-present. Dispatch is only invoked as a fallback if no closure handler is set (
-backwards compatibility).
+The router and event dispatcher must invoke the handler closure directly if present. Dispatch is only invoked as a
+fallback if no closure handler is set (backwards compatibility).
 
 ---
 
-## 6. Bin → valkyrja/build
+## 6. Bin → sindri
 
 **Reference:** `BUILD_TOOL.md`
 
 ### Extract Bin component to separate repository
 
-- Create `valkyrja/build` as a separate Composer package
-- Move all file generation, scaffolding, and `make:*` commands to the new
-  package
-- Add `nikic/php-parser` as a dependency of `valkyrja/build`, not the framework
-- The framework must have zero AST or build tooling dependencies after this
-  change
-- `valkyrja/build` is a `require-dev` dependency only — never in production
+- Create `sindri` as a separate Composer package
+- Move all file generation, scaffolding, and `make:*` commands to the new package
+- Add `nikic/php-parser` as a dependency of `sindri`, not the framework
+- The framework must have zero AST or build tooling dependencies after this change
+- `sindri` is a `require-dev` dependency only — never in production
 
-### Migrate cache generation to valkyrja-build
+### Migrate cache generation to sindri
 
-The existing `cache:generate` CLI command will break when handler logic is
-implemented. It must be migrated to the `valkyrja-build` AST-based approach
-before handler logic ships:
+The existing `cache:generate` CLI command will break when handler logic is implemented. It must be migrated to the
+`sindri` AST-based approach before handler logic ships:
 
 1. Implement nikic/php-parser provider tree walk
 2. Implement `#[Handler]` attribute extraction
 3. Implement FQN resolution via use statement map
 4. Implement `ProcessorContract::route()` invocation for regex compilation
-5. Generate `AppContainerData`, `AppEventData`, `AppHttpRoutingData`,
-   `AppCliRoutingData`
+5. Generate `AppContainerData`, `AppEventData`, `AppHttpRoutingData`, `AppCliRoutingData`
 
 ### Remove cache:generate CLI command from framework
 
-Once `valkyrja-build` is implemented, remove the `cache:generate` command from
-the framework's CLI component entirely.
+Once `sindri` is implemented, remove the `cache:generate` command from the framework's CLI component entirely.
 
 ---
 
@@ -276,8 +257,8 @@ interface ListenerProviderContract
 
 ### No valkyrja.yaml needed
 
-The application config class is the build tool entry point — it already lists
-all component providers. No separate yaml file required.
+The application config class is the build tool entry point — it already lists all component providers. No separate yaml
+file required.
 
 ```php
 // AppConfig — this IS the build tool entry point
@@ -294,37 +275,28 @@ new AppConfig(
 
 ### Drop the component provider constants class
 
-A constants class that provides string aliases for component provider class
-references must not be created. If it exists, remove it. It would allow
-developers to write `HttpConstants::HTTP_COMPONENT_PROVIDER` in the config which
-the build tool cannot resolve from AST.
+A constants class that provides string aliases for component provider class references must not be created. If it
+exists, remove it. It would allow developers to write `HttpConstants::HTTP_COMPONENT_PROVIDER` in the config which the
+build tool cannot resolve from AST.
 
-Binding key constants files (for container bindings) are unaffected — they are
-correct and should remain.
+Binding key constants files (for container bindings) are unaffected — they are correct and should remain.
 
 ### Ensure all provider list methods use ::class directly
 
-Audit all provider list methods (`getContainerProviders`, `getHttpProviders`
-etc.) to ensure they return `::class` references directly — never constant
-references.
+Audit all provider list methods (`getContainerProviders`, `getHttpProviders` etc.) to ensure they return `::class`
+references directly — never constant references.
 
 ---
 
 ## Priority Order
 
-1. **Throwable renaming and abstraction** — foundational, everything else builds
-   on stable exception types
+1. **Throwable renaming and abstraction** — foundational, everything else builds on stable exception types
 2. **Provider contract interfaces** — needed before build tool work
 3. **publishers() map migration** — needed before build tool work
-4. **Handler contracts and #[Handler] attribute** — needed before cache
-   generation
+4. **Handler contracts and #[Handler] attribute** — needed before cache generation
 5. **#[Parameter] attribute** — needed before cache generation
-6. **Bin extraction to valkyrja/build** — needed before handler logic ships (CLI
-   command will break)
-7. **valkyrja-build implementation** — PHP cache generation via AST
-8. **Dispatch deprecation** — additive, can happen alongside or after handler
-   contracts
-9. **Container constants files** — additive, can happen incrementally per
-   component
-10. **Closure-based container bindings** — additive, can happen incrementally
-    per component
+6. **Bin extraction to sindri** — needed before handler logic ships (CLI command will break)
+7. **sindri implementation** — PHP cache generation via AST
+8. **Dispatch deprecation** — additive, can happen alongside or after handler contracts
+9. **Container constants files** — additive, can happen incrementally per component
+10. **Closure-based container bindings** — additive, can happen incrementally per component

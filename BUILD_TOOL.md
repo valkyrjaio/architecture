@@ -2,16 +2,16 @@
 
 ## Overview
 
-`valkyrja-forge` is a standalone tool that ships with the Valkyrja framework. It generates cache data files for
-production CGI and lambda deployments across all language ports. The framework itself has zero AST or build dependency —
-all source extraction, analysis, and code generation logic lives exclusively in the build tool.
+`sindri` is a standalone tool that ships with the Valkyrja framework. It generates cache data files for production CGI
+and lambda deployments across all language ports. The framework itself has zero AST or build dependency — all source
+extraction, analysis, and code generation logic lives exclusively in the build tool.
 
-**valkyrja-forge** is itself a Valkyrja application. It ships without cache by default since it runs at deploy time
-rather than per-request. For environments where build tool startup time is a concern, valkyrja-forge can generate its
-own cache and rebuild — the same two-pass process it performs for any other compiled language application.
+**sindri** is itself a Valkyrja application. It ships without cache by default since it runs at deploy time rather than
+per-request. For environments where build tool startup time is a concern, sindri can generate its own cache and
+rebuild — the same two-pass process it performs for any other compiled language application.
 
-The name fits: a forge is where raw materials are shaped into something useful. valkyrja-forge takes raw source files
-and shapes them into optimized cache artifacts ready for production.
+The name fits: a forge is where raw materials are shaped into something useful. sindri takes raw source files and shapes
+them into optimized cache artifacts ready for production.
 
 ---
 
@@ -89,26 +89,26 @@ exists, and for cross-language string identity. They are never used in provider 
 
 ### Build Tool Invocation
 
-All forge implementations take the config file path directly — identical interface across all languages:
+All Sindri implementations take the config file path directly — identical interface across all languages:
 
 ```bash
 # PHP
-valkyrja-forge generate src/Config/AppConfig.php
+sindri generate src/Config/AppConfig.php
 
 # Java
-valkyrja-forge generate src/main/java/app/config/AppConfig.java
+sindri generate src/main/java/app/config/AppConfig.java
 
 # Go
-valkyrja-forge generate app/config/app_config.go
+sindri generate app/config/app_config.go
 
 # Python
-valkyrja-forge generate app/config/app_config.py
+sindri generate app/config/app_config.py
 
 # TypeScript
-valkyrja-forge generate src/config/AppConfig.ts
+sindri generate src/config/AppConfig.ts
 ```
 
-The file path approach is consistent, requires no class name resolution logic, and works identically in all five forge
+The file path approach is consistent, requires no class name resolution logic, and works identically in all five Sindri
 implementations.
 
 The build tool reads provider list methods from AST without executing them. All provider list methods must return simple
@@ -164,12 +164,12 @@ See: https://valkyrja.io/docs/providers#build-tool-compatibility
 Handlers must be **method pointers** — references to static methods on the same class as the provider or controller that
 defines the route, listener, or binding. They must not be inline closures or lambdas.
 
-This is the single most important convention for keeping the forge tool simple, import-safe, and conflict-free.
+This is the single most important convention for keeping Sindri simple, import-safe, and conflict-free.
 
 ### Why Method Pointers
 
-**Import safety** — the forge tool reads exactly one file per provider or controller. All imports needed for handler
-bodies are in that one file. No cross-file import aggregation, no conflict detection, no registry.
+**Import safety** — Sindri reads exactly one file per provider or controller. All imports needed for handler bodies are
+in that one file. No cross-file import aggregation, no conflict detection, no registry.
 
 **Conflict elimination** — import conflicts only arise when merging imports across files. Method pointers keep handlers
 self-contained in their source file, eliminating the root cause entirely.
@@ -181,7 +181,7 @@ consistent end to end.
 ### The Pattern
 
 Every handler is a static method on the same class that declares it. The route/listener/binding definition points to
-that method by name. The forge tool reads the method body from the same file — no cross-file resolution needed.
+that method by name. Sindri reads the method body from the same file — no cross-file resolution needed.
 
 **Service providers** — already correct:
 
@@ -244,7 +244,7 @@ public static function onUserCreated(ContainerContract $c, array $args): mixed
 
 For annotated controllers, `#[Handler]` / `@Handler` / `@handler` lives on the **implementation method** and carries a *
 *callable reference** pointing to the static handler method. The handler may live on the same controller class, the
-route provider, or any other class — the forge tool follows the callable reference to wherever the handler lives.
+route provider, or any other class — Sindri follows the callable reference to wherever the handler lives.
 
 ```
 Annotations live on:    the implementation method (show, store, index etc.)
@@ -263,7 +263,7 @@ class UserController
     #[Handler([self::class, 'showHandler'])]  // callable — class + method name
     public function show(string $id): ResponseContract
     {
-        // actual implementation — not read by forge
+        // actual implementation — not read by Sindri
     }
 
     // Forge resolves [self::class, 'showHandler'] → this file → reads this method
@@ -319,7 +319,7 @@ class UserController:
     @parameter('id', pattern='[0-9]+')
     @handler((UserController, 'show_handler'))  # callable tuple
     def show(self, id: str) -> ResponseContract:
-        pass  # actual implementation — not read by forge
+        pass  # actual implementation — not read by Sindri
 
     # Forge resolves callable → this file → reads this method
     @staticmethod
@@ -329,18 +329,18 @@ class UserController:
 
 ### Why Not Inline Closures
 
-Inline closures in route definitions would require the forge tool to parse and rewrite type references from potentially
-any file in the application:
+Inline closures in route definitions would require Sindri to parse and rewrite type references from potentially any file
+in the application:
 
 ```php
-// ❌ inline closure — forge must resolve ContainerContract, UserController
+// ❌ inline closure — Sindri must resolve ContainerContract, UserController
 //    from the imports of this specific file AND know if they conflict
 //    with imports from other route providers
 HttpRoute::get('/users/{id}', static fn($c, $args) =>
     $c->getSingleton(UserController::class)->show($args['id'])
 )
 
-// ✅ method pointer — forge reads the method body from this same file
+// ✅ method pointer — Sindri reads the method body from this same file
 //    all imports are right here, no cross-file resolution needed
 HttpRoute::get('/users/{id}', [self::class, 'showUser'])
 ```
@@ -348,7 +348,7 @@ HttpRoute::get('/users/{id}', [self::class, 'showUser'])
 ### The Remaining Import Conflict Case
 
 Even with method pointers, the generated output file aggregates handler bodies from multiple provider files. If two
-providers import `UserController` from different namespaces, the forge tool cannot silently resolve this:
+providers import `UserController` from different namespaces, Sindri cannot silently resolve this:
 
 ```
 Error: Import conflict in generated AppHttpRoutingData.
@@ -358,8 +358,8 @@ Both resolve to the short name 'UserController'. Use the FQN directly in your ha
 or rename one of the classes to eliminate the conflict.
 ```
 
-The developer fixes it in their source — the forge tool does not silently rename. Genuine class name collisions across
-providers are structural problems in the application that the developer must resolve.
+The developer fixes it in their source — Sindri does not silently rename. Genuine class name collisions across providers
+are structural problems in the application that the developer must resolve.
 
 ### Build Tool Contract — Handler Methods
 
@@ -407,13 +407,13 @@ For environments where this matters:
 
 ```bash
 # pass 1 — build the build tool without cache (slow first run)
-valkyrja-forge build-self --output build-tool-bootstrap
+sindri build-self --output build-tool-bootstrap
 
 # pass 2 — use the bootstrap to generate the build tool's own cache
 ./build-tool-bootstrap generate --self
 
 # pass 3 — rebuild the build tool with its own cache (fast)
-valkyrja-forge build-self --with-cache --output valkyrja-forge-optimized
+sindri build-self --with-cache --output sindri-optimized
 ```
 
 This is the same two-pass compile process the build tool applies to any compiled language application. The build tool
@@ -428,15 +428,15 @@ name resolution, no guesswork about directory structure, no extra logic. The dev
 
 ```bash
 # all languages — same pattern
-valkyrja-forge generate src/config/AppConfig.php
-valkyrja-forge generate src/main/java/app/config/AppConfig.java
-valkyrja-forge generate app/config/app_config.go
-valkyrja-forge generate app/config/app_config.py
-valkyrja-forge generate src/config/AppConfig.ts
+sindri generate src/config/AppConfig.php
+sindri generate src/main/java/app/config/AppConfig.java
+sindri generate app/config/app_config.go
+sindri generate app/config/app_config.py
+sindri generate src/config/AppConfig.ts
 ```
 
 PHP is the only language with native class-to-file resolution (`ReflectionClass::getFileName()`), but since all other
-languages require a file path anyway, PHP forge takes a file path too — keeping the CLI interface identical across all
+languages require a file path anyway, Sindri PHP takes a file path too — keeping the CLI interface identical across all
 language implementations.
 
 ---
@@ -456,7 +456,7 @@ use PhpParser\NodeVisitorAbstract;
 use PhpParser\Node;
 
 // entry point — file path passed as CLI argument
-// e.g. valkyrja-forge generate src/config/AppConfig.php
+// e.g. sindri generate src/config/AppConfig.php
 $filepath = $argv[1] ?? throw new InvalidArgumentException('File path required');
 
 if (!file_exists($filepath)) {
@@ -526,7 +526,7 @@ public class ForgeParser {
      * Parse a Java source file into an AST (CompilationUnitTree).
      * Takes a file path directly — no class name resolution needed.
      *
-     * e.g. valkyrja-forge generate src/main/java/app/config/AppConfig.java
+     * e.g. sindri generate src/main/java/app/config/AppConfig.java
      */
     public static CompilationUnitTree parseFile(String filePath) throws Exception {
         // step 1: get the system Java compiler
@@ -618,7 +618,7 @@ import (
 
 func main() {
 	// file path passed directly as CLI argument
-	// e.g. valkyrja-forge generate app/config/app_config.go
+	// e.g. sindri generate app/config/app_config.go
 	filepath := os.Args[1]
 
 	// step 1: create a FileSet to track position information
@@ -688,9 +688,9 @@ func main() {
 ```python
 #!/usr/bin/env python3
 """
-valkyrja-forge — Python AST bootstrap.
+sindri — Python AST bootstrap.
 
-Usage: valkyrja-forge generate app/config/app_config.py
+Usage: sindri generate app/config/app_config.py
 """
 
 import ast
@@ -782,9 +782,9 @@ import ts from 'typescript'
 import * as path from 'path'
 
 /**
- * valkyrja-forge — TypeScript AST bootstrap.
+ * sindri — TypeScript AST bootstrap.
  *
- * Usage: valkyrja-forge generate src/config/AppConfig.ts
+ * Usage: sindri generate src/config/AppConfig.ts
  */
 
 interface ParsedFile {
@@ -911,8 +911,8 @@ walkAST(sourceFile, (node) => {
 ## Constants Files
 
 Every Valkyrja component ships a constants file for all five languages. These are **part of the framework source** — not
-generated by the forge tool. They define the binding key for every contract and class in that component. Developers
-always reference the constant, never the raw string.
+generated by Sindri. They define the binding key for every contract and class in that component. Developers always
+reference the constant, never the raw string.
 
 The value type differs per language but the abstraction is consistent — callers never write the raw key, they always use
 the constant:
@@ -991,8 +991,8 @@ constants files. This is a quality-of-life feature to implement after the core f
 
 ### How the FQN String Is Derived
 
-For Go, Python, and TypeScript, the forge tool derives the FQN string for each class from the language-native
-module/package path:
+For Go, Python, and TypeScript, Sindri derives the FQN string for each class from the language-native module/package
+path:
 
 | Language   | FQN format                                | Example                                 |
 |------------|-------------------------------------------|-----------------------------------------|
@@ -1012,22 +1012,22 @@ dependency identifiers with per-request resolution — no caching, no container.
 containers like `lagom` use class objects as keys, forcing imports. Valkyrja's combination of string constant keys,
 per-component constants files, lambda-wrapped bindings, and Python 3.14 lazy imports is a novel approach. The constants
 files are the only visible cost to the developer — framework constants ship with the framework, and application
-constants are generated by forge.
+constants are generated by Sindri.
 
 ---
 
 ## AST Walk Strategy
 
-Once the config file is parsed, the forge tool follows a structured walk strategy. Each step produces data that feeds
-into the next, ultimately assembling the four output data classes.
+Once the config file is parsed, Sindri follows a structured walk strategy. Each step produces data that feeds into the
+next, ultimately assembling the four output data classes.
 
-**Imports are collected from every file parsed.** This is the safe, correct default — when the forge tool extracts a
-handler method body and writes it into generated output, any type reference in that body must be written as a FQN.
-Without the full import map the forge tool cannot resolve short names to their FQN.
+**Imports are collected from every file parsed.** This is the safe, correct default — when Sindri extracts a handler
+method body and writes it into generated output, any type reference in that body must be written as a FQN. Without the
+full import map Sindri cannot resolve short names to their FQN.
 
-For provider list methods (config providers list, component provider sub-lists, route/listener class lists) the forge
-tool only needs the class identifier to locate the next file — import collection for those steps adds no cost and
-ensures no edge case is missed.
+For provider list methods (config providers list, component provider sub-lists, route/listener class lists) Sindri only
+needs the class identifier to locate the next file — import collection for those steps adds no cost and ensures no edge
+case is missed.
 
 The handler method pointer convention (see "Handler Method Pointer Convention" above) ensures that all imports needed
 for any handler body are always present in the same file as the provider or controller that defines the route or
@@ -1057,8 +1057,8 @@ providers list  → list of class references from the providers property/method
 5. For each identifier → resolve to file path → parse that file → Step 2
 ```
 
-The providers list must be a simple literal — no variables, no method calls, no conditional logic. If it isn't, the
-forge tool emits an error.
+The providers list must be a simple literal — no variables, no method calls, no conditional logic. If it isn't, Sindri
+emits an error.
 
 ---
 
@@ -1243,9 +1243,9 @@ Identical to Step 3c with:
 
 **Input:** file path of a controller class (resolved in Step 3c or 3d).
 
-The forge tool reads annotation literals and constructs route data objects — **no method body extraction, no import
-resolution of the callable**. The callable from `#[Handler]` is written directly into the generated output as-is,
-exactly like a callable in an explicit `getRoutes()` route or a service binding:
+Sindri reads annotation literals and constructs route data objects — **no method body extraction, no import resolution
+of the callable**. The callable from `#[Handler]` is written directly into the generated output as-is, exactly like a
+callable in an explicit `getRoutes()` route or a service binding:
 
 ```
 // service binding — callable literal written as-is
@@ -1343,8 +1343,8 @@ For every route collected in Steps 3c, 3d, 4a:
 4. Store alongside route data for Step 6
 ```
 
-The forge tool has `ProcessorContract` available — it is compiled from the framework source. Regex compilation happens
-once at build time and is stored pre-compiled in the cache data class.
+Sindri has `ProcessorContract` available — it is compiled from the framework source. Regex compilation happens once at
+build time and is stored pre-compiled in the cache data class.
 
 ---
 
@@ -1374,8 +1374,8 @@ AppCliRoutingData:
   Same as AppHttpRoutingData but for CLI routes
 ```
 
-The forge tool writes source files as text — it is a text generator, not a compiler. Application classes referenced in
-the output are written by name only. No application classes need to be compiled in at generation time.
+Sindri writes source files as text — it is a text generator, not a compiler. Application classes referenced in the
+output are written by name only. No application classes need to be compiled in at generation time.
 
 ---
 
@@ -1775,7 +1775,7 @@ import (
     "io/valkyrja/http/routing/data/contract"
 )
 
-// AppHttpRoutingData — generated by valkyrja-forge, do not edit
+// AppHttpRoutingData — generated by sindri, do not edit
 var AppHttpRoutingData = data.HttpRoutingData{
     Routes: map[string]contract.RouteContract{
         {{- range .Routes}}
@@ -1927,7 +1927,7 @@ def resolve_fqn(source: str, import_map: dict[str, str]) -> str:
 from string import Template
 
 ROUTING_DATA_TEMPLATE = '''
-# generated by valkyrja-forge — do not edit
+# generated by sindri — do not edit
 from valkyrja.http.routing.data import HttpRoutingData
 $imports
 
@@ -2120,7 +2120,7 @@ function generateRoutingData(collected: CollectedRouteData): string {
         })
         .join('\n')
 
-    return `// generated by valkyrja-forge — do not edit
+    return `// generated by sindri — do not edit
 import { HttpRoutingData } from '@valkyrja/http/routing/data'
 ${collected.imports.join('\n')}
 
@@ -2151,7 +2151,7 @@ fs.writeFileSync('app/cache/AppHttpRoutingData.ts', generateRoutingData(collecte
 php -S localhost:8000 public/index.php
 
 # production CGI/lambda — cache required
-valkyrja-forge generate
+sindri generate
 deploy
 
 # production worker — cache optional
@@ -2162,17 +2162,17 @@ deploy
 
 ```bash
 # Java
-valkyrja-forge generate    # generates cache source files
+sindri generate    # generates cache source files
 mvn compile                # single pass — compiles with generated files
 deploy target/app.jar
 
 # Go
-valkyrja-forge generate    # generates cache source files
+sindri generate    # generates cache source files
 go build -o app            # compiles with generated files
 deploy app
 
 # TypeScript
-valkyrja-forge generate    # generates cache source files
+sindri generate    # generates cache source files
 tsc                        # compiles with generated files
 deploy dist/
 ```
@@ -2185,7 +2185,7 @@ steps:
     run: # language-specific install
 
   - name: Generate cache data files
-    run: valkyrja-forge generate
+    run: sindri generate
 
   - name: Build (compiled languages only)
     run: # mvn compile / go build / tsc
@@ -2198,19 +2198,19 @@ steps:
 
 ## The Build Tool Bootstrapping Itself
 
-`valkyrja-forge` is a Valkyrja application subject to the same rules as any other Valkyrja application. It ships without
-its own cache files because it runs at deploy time rather than per-request. For environments where build tool startup
-time is a concern, it can generate its own cache and rebuild:
+`sindri` is a Valkyrja application subject to the same rules as any other Valkyrja application. It ships without its own
+cache files because it runs at deploy time rather than per-request. For environments where build tool startup time is a
+concern, it can generate its own cache and rebuild:
 
 ```bash
 # pass 1 — build without cache (slow, one-time)
-valkyrja-forge build-self --output build-tool-bootstrap
+sindri build-self --output build-tool-bootstrap
 
 # pass 2 — generate the build tool's own cache
 ./build-tool-bootstrap generate --self
 
 # pass 3 — rebuild with cache (fast all subsequent runs)
-valkyrja-forge build-self --with-cache --output valkyrja-forge
+sindri build-self --with-cache --output sindri
 ```
 
 This is the same two-pass process the build tool applies to compiled language applications. The build tool bootstrapping
@@ -2221,17 +2221,17 @@ exemptions.
 
 ## Current Implementation Status
 
-| Language   | Without cache | Cache generation                                            | Notes                                                         |
-|------------|---------------|-------------------------------------------------------------|---------------------------------------------------------------|
-| PHP        | ✅ works       | ⚠️ CLI command exists — will break when handler logic ships | Migrate to valkyrja-forge before handler logic implementation |
-| Java       | ✅ works       | ❌ not yet built                                             | valkyrja-forge Java AST implementation pending                |
-| Go         | ✅ works       | ❌ not yet built                                             | valkyrja-forge Go AST implementation pending                  |
-| Python     | ✅ works       | ❌ not yet built                                             | valkyrja-forge Python AST implementation pending              |
-| TypeScript | ✅ works       | ❌ not yet built                                             | valkyrja-forge TypeScript compiler API implementation pending |
+| Language   | Without cache | Cache generation                                            | Notes                                                 |
+|------------|---------------|-------------------------------------------------------------|-------------------------------------------------------|
+| PHP        | ✅ works       | ⚠️ CLI command exists — will break when handler logic ships | Migrate to sindri before handler logic implementation |
+| Java       | ✅ works       | ❌ not yet built                                             | sindri Java AST implementation pending                |
+| Go         | ✅ works       | ❌ not yet built                                             | sindri Go AST implementation pending                  |
+| Python     | ✅ works       | ❌ not yet built                                             | sindri Python AST implementation pending              |
+| TypeScript | ✅ works       | ❌ not yet built                                             | sindri TypeScript compiler API implementation pending |
 
 The PHP CLI command is the most pressing TODO. It will stop working correctly once closure-based handler logic replaces
 the current dispatch-based routing — the existing serialization mechanism cannot handle closures. The migration to
-`valkyrja-forge` and `#[Handler]` annotation extraction needs to happen before handler logic ships in PHP.
+`sindri` and `#[Handler]` annotation extraction needs to happen before handler logic ships in PHP.
 
 ---
 
@@ -2252,12 +2252,12 @@ Third-party packages built on Valkyrja must follow the same policy to support fu
 
 ---
 
-## PHP Build Tool — valkyrja-forge-php (formerly Bin)
+## PHP Build Tool — valkyrja/sindri (formerly Bin)
 
 The PHP implementation of the build tool ships as its own standalone repository and Composer package — separate from the
 Valkyrja framework itself. It was previously part of the framework as the `Bin` component.
 
-**Package:** `valkyrja-forge` (or `valkyrja-forge-php`)
+**Package:** `sindri` (or `valkyrja/sindri`)
 **Repository:** separate from `valkyrja/framework`
 **Composer dependency:** `nikic/php-parser`
 
@@ -2276,14 +2276,14 @@ cache generation. None of this is a runtime concern. Keeping it in the framework
 
 Moving it out:
 
-- `nikic/php-parser` becomes a `valkyrja-forge` dependency, never present in production applications
+- `nikic/php-parser` becomes a `sindri` dependency, never present in production applications
 - The framework base code is simplified — no file generation, no scaffolding, no AST tooling
 - Each language port gets its own build tool repository following the same pattern
 - The separation of runtime vs build-time concerns is clean and explicit
 
 ---
 
-### What valkyrja-forge-php Provides
+### What valkyrja/sindri Provides
 
 **Cache generation**
 
@@ -2311,7 +2311,7 @@ Moving it out:
 
 ```bash
 # install as a dev dependency — never needed in production
-composer require --dev valkyrja-forge
+composer require --dev sindri
 ```
 
 ```json
@@ -2321,7 +2321,7 @@ composer require --dev valkyrja-forge
     "valkyrja/framework": "^26.0"
   },
   "require-dev": {
-    "valkyrja-forge": "^1.0"
+    "sindri": "^1.0"
   }
 }
 ```
@@ -2350,13 +2350,13 @@ composer create-project valkyrja/project my-app
 
 Each language port ships its own build tool as a separate package following the same pattern:
 
-| Language   | Build tool package                             | AST dependency                   |
-|------------|------------------------------------------------|----------------------------------|
-| PHP        | `valkyrja-forge` (separate repo, formerly Bin) | `nikic/php-parser`               |
-| Java       | `io.valkyrja:forge` (separate artifact)        | Trees API (built into javac)     |
-| Go         | `io/valkyrja/forge` (separate module)          | `go/analysis`, `go/ast` (stdlib) |
-| Python     | `valkyrja-forge` (separate PyPI package)       | `ast`, `inspect` (stdlib)        |
-| TypeScript | `@valkyrja/forge` (separate npm package)       | `typescript` compiler API        |
+| Language   | Build tool package                        | AST dependency                   |
+|------------|-------------------------------------------|----------------------------------|
+| PHP        | `sindri` (separate repo, formerly Bin)    | `nikic/php-parser`               |
+| Java       | `io.valkyrja:sindri` (separate artifact)  | Trees API (built into javac)     |
+| Go         | `io/valkyrja/sindri` (separate module)    | `go/analysis`, `go/ast` (stdlib) |
+| Python     | `sindri` (separate PyPI package)          | `ast`, `inspect` (stdlib)        |
+| TypeScript | `@valkyrja/sindri` (separate npm package) | `typescript` compiler API        |
 
 In all cases the build tool is a dev/build dependency only — never present in production runtime. The framework packages
 have zero AST or build tooling dependencies.
@@ -2392,18 +2392,18 @@ The four-output-class design emerged from recognizing that one class per provide
 structures at boot. One class per concern for the entire application means the framework loads exactly four objects and
 the data is immediately ready to use. The build tool does the aggregation work once at generation time.
 
-The self-bootstrapping property — the build tool running valkyrja-forge on itself to generate its own cache — was
-identified as a validation of the architecture's self-consistency rather than a practical requirement. It demonstrates
-that no special cases exist in the framework design.
+The self-bootstrapping property — the build tool running sindri on itself to generate its own cache — was identified as
+a validation of the architecture's self-consistency rather than a practical requirement. It demonstrates that no special
+cases exist in the framework design.
 
 The PHP CLI command breaking change was identified as the most pressing near-term issue. It is the only currently
 working cache generation mechanism, and it will stop working when closure-based handler logic replaces dispatch-based
 routing. This migration is documented as a TODO that must happen before handler logic ships in PHP.
 
-The separation of `Bin` from the framework into its own `valkyrja-forge` repository was decided when it became clear
-that the build tool needed `nikic/php-parser` as a dependency. Keeping this in the framework would mean a parser
-library — a purely development and build-time concern — would be a production dependency of every Valkyrja application.
-Moving it out keeps the framework clean and the separation of runtime vs build-time concerns explicit.
+The separation of `Bin` from the framework into its own `sindri` repository was decided when it became clear that the
+build tool needed `nikic/php-parser` as a dependency. Keeping this in the framework would mean a parser library — a
+purely development and build-time concern — would be a production dependency of every Valkyrja application. Moving it
+out keeps the framework clean and the separation of runtime vs build-time concerns explicit.
 
 The move also revealed that `Bin`'s file generation and scaffolding features were always development tooling, not
 framework concerns. Every file generation feature that lived in the framework now lives in the build tool where it

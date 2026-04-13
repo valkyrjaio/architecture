@@ -101,6 +101,54 @@ Established a complete provider contract hierarchy across all five languages:
 - TypeScript uses `Array<new () => Contract>` for provider class lists — constructor references allow direct
   instantiation at runtime
 
+**Provider Naming Convention:**
+
+All provider implementations — framework and application-defined — must be uniquely named across the entire framework.
+The naming rule is identical to the throwable naming rule: prepend parent component (and subcomponent if needed) names
+until the name is unique across the framework.
+
+The forcing function is the generated data cache file. `AppContainerData`, `AppEventData`, `AppHttpRoutingData`, and
+`AppCliRoutingData` each reference providers from multiple components in a single generated file. Identical class names
+across components produce namespace collisions that prevent compilation. Unique names are a hard requirement, not a
+style preference.
+
+**Pattern:** `ComponentNameTypeProvider` or `ComponentNameSubComponentTypeProvider`
+
+Where `Type` is one of:
+
+- `Component` — top-level aggregator (one per component)
+- `Service` — container bindings
+- `HttpRoutes` — HTTP route definitions
+- `CliRoutes` — CLI route definitions
+- `Listeners` — event listener definitions
+
+**Framework examples:**
+
+```
+HttpComponentProvider               — top-level HTTP aggregator
+HttpServiceProvider                 — HTTP container bindings
+HttpRoutingHttpRoutesProvider       — HTTP routing subcomponent routes
+HttpRoutingListenersProvider        — HTTP routing subcomponent listeners
+
+ContainerComponentProvider          — top-level Container aggregator
+ContainerServiceProvider            — Container bindings
+
+EventComponentProvider              — top-level Event aggregator
+EventServiceProvider                — Event container bindings
+EventListenersProvider              — Event listeners
+
+CliComponentProvider                — top-level CLI aggregator
+CliServiceProvider                  — CLI container bindings
+CliRoutesProvider                   — CLI routes
+```
+
+**Application-defined providers** follow the same rule. A developer overriding `HttpServiceProvider` to customise the
+router binding names their override `AppHttpServiceProvider` or `UserHttpServiceProvider` — never
+`HttpServiceProvider` (conflicts with the framework class) or `ServiceProvider` (ambiguous across the entire codebase).
+
+The uniqueness rule applies recursively — the same question as throwables: is this name unique across the entire
+framework? If no, prepend the immediate parent name and ask again.
+
 **Produced:** `CONTRACTS_JAVA.md`, `CONTRACTS_GO.md`, `CONTRACTS_PYTHON.md`, `CONTRACTS_TYPESCRIPT.md`
 
 ---
@@ -117,7 +165,7 @@ Established the complete cache generation architecture:
   indexes)
 - `AppCliRoutingData` — all CLI routes
 
-**valkyrja-forge tool:**
+**sindri tool:**
 
 - Standalone tool, separate from the framework
 - Reads application `AppConfig` class for top-level providers — no separate yaml file needed
@@ -139,7 +187,7 @@ Established the complete cache generation architecture:
 - Go: interface methods called directly on provider structs
 
 **PHP CLI command note:** The existing `cache:generate` command will break when handler logic is implemented. Must
-migrate to `valkyrja-forge` before handler logic ships.
+migrate to `sindri` before handler logic ships.
 
 **Produced:** `DATA_CACHE.md`
 
@@ -149,25 +197,25 @@ migrate to `valkyrja-forge` before handler logic ships.
 
 Established that:
 
-- `valkyrja-forge` is a standalone tool, separate repo per language
+- `sindri` is a standalone tool, separate repo per language
 - The build tool is itself a Valkyrja application — validates the cache-optional architecture
 - It can generate its own cache for optimized subsequent runs (three-pass bootstrap)
 - Language-specific AST implementations with practical code examples
 
-**PHP (`valkyrja-forge`, formerly `Bin`):**
+**PHP (`sindri`, formerly `Bin`):**
 
 - Bin component extracted from framework to separate repository
-- `nikic/php-parser` as dependency of `valkyrja-forge`, not the framework
+- `nikic/php-parser` as dependency of `sindri`, not the framework
 - All file generation and scaffolding moves here
 - Dev-only Composer dependency
 
 **Per-language build tools:**
 
-- PHP: `valkyrja-forge` — nikic/php-parser
-- Java: `io.valkyrja:forge` — Trees API + JavaPoet (annotation processor)
-- Go: `io/valkyrja/forge` — go/analysis, go/ast (stdlib)
-- Python: `valkyrja-forge` — ast, inspect (stdlib)
-- TypeScript: `@valkyrja/forge` — TypeScript compiler API
+- PHP: `sindri` — nikic/php-parser
+- Java: `io.valkyrja:sindri` — Trees API + JavaPoet (annotation processor)
+- Go: `io/valkyrja/sindri` — go/analysis, go/ast (stdlib)
+- Python: `sindri` — ast, inspect (stdlib)
+- TypeScript: `@valkyrja/sindri` — TypeScript compiler API
 
 **Framework source shipping policy:**
 
@@ -232,9 +280,8 @@ four classes — one per concern. The framework loads four objects at boot. No m
 method names were discovered at request time in production. Explicit closure handlers with typed signatures catch wrong
 return types and wrong parameters at compile time (Java, Go, TypeScript) or CI time (PHP, Python).
 
-**Bin belongs outside the framework, and becomes valkyrja-forge.** File generation and scaffolding are build-time
-concerns. Moving them to `valkyrja-forge` removes all AST and build tooling from the framework's production dependency
-tree.
+**Bin belongs outside the framework, and becomes sindri.** File generation and scaffolding are build-time concerns.
+Moving them to `sindri` removes all AST and build tooling from the framework's production dependency tree.
 
 **The framework has zero AST dependencies.** All AST logic lives in the build tool. The framework only knows how to load
 cache data classes if they exist and how to traverse the provider tree if they don't.
