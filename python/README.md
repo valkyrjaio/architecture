@@ -342,6 +342,15 @@ uses **string constants** for container binding keys — same as Go and TypeScri
 {'app.repositories.UserRepositoryContract': lambda: ...}  # string literal — nothing loads
 ```
 
+**Why not a lambda as the key?** The lambda deferral trick that works for values cannot work for keys. Python must
+evaluate every key at dict construction time to know where to store the value — `{lambda: UserRepositoryContract: ...}`
+would still require resolving the lambda immediately to build the dict. Even if Python allowed it, the container would
+have to call the key lambda on every lookup, defeating fast key resolution entirely. String constants are the correct
+and final answer for binding keys.
+
+**Decision:** Python container binding keys are always string constants — same as Go and TypeScript. Per-component
+constants files are required. This is accepted and closed.
+
 ### What the Cache Provides
 
 ```
