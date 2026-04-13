@@ -242,6 +242,10 @@ cache data classes if they exist and how to traverse the provider tree if they d
 **No valkyrja.yaml.** The application config class is already the authoritative provider list — no separate file needed.
 The build tool reads it via AST. This eliminates a duplicate source of truth.
 
+**Python uses class objects as container binding keys.** Python `type` objects are hashable — the class itself is the
+key, no string constants file needed. Go and TypeScript are the only ports that require string constants for binding
+keys.
+
 **No component provider constants class.** Provider class references must use `::class` / `.class` / class objects
 directly. A constants class would allow constant references that the build tool cannot resolve statically. Binding key
 constants files are unaffected.

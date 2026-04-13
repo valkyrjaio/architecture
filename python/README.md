@@ -1,7 +1,7 @@
 # Python Port — Implementation Notes
 
-> Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `DISPATCH.md`,
-`DATA_CACHE.md`, `BUILD_TOOL.md`, `CONTRACTS_PYTHON.md`
+> Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `DISPATCH.md`, `DATA_CACHE.md`, `BUILD_TOOL.md`,
+`CONTRACTS_PYTHON.md`
 > Port order: Container → Dispatch → Event → Application → CLI → HTTP → Bin
 
 ---
@@ -11,18 +11,14 @@
 - **Module namespace:** `valkyrja`
 - **ABC** enforces abstract contracts — `TypeError` on direct instantiation
 - **`@staticmethod @abstractmethod`** throughout — providers are stateless
-- **`inspect.getfile()`** for class-to-file resolution (equivalent of PHP's
-  `ReflectionClass::getFileName()`)
+- **`inspect.getfile()`** for class-to-file resolution (equivalent of PHP's `ReflectionClass::getFileName()`)
 - **`ast` module** for build tool AST parsing
-- **Decorators are runtime-executable** — `@handler` self-registers at import
-  time
+- **Decorators are runtime-executable** — `@handler` self-registers at import time
 - **`class_()` helper** for FQN derivation (`class` is reserved in Python)
 - **ASGI (Uvicorn/Hypercorn)** as the worker mode deployment model
 - **CGI mode** supported — Python is interpreted, cache optional in dev
-- **Granian** (Rust-based) as an emerging alternative for true multi-threaded
-  workers
-- GIL limits true thread parallelism — ASGI async is the idiomatic concurrency
-  model
+- **Granian** (Rust-based) as an emerging alternative for true multi-threaded workers
+- GIL limits true thread parallelism — ASGI async is the idiomatic concurrency model
 - Python 3.13+ free-threaded mode worth watching
 
 ---
@@ -48,8 +44,7 @@ class ComponentSpecificThrowable(ComponentThrowable): pass  # concrete
 class ValkyrjaRuntimeException(RuntimeError, ABC): pass
 
 
-class ComponentRuntimeException(ValkyrjaRuntimeException,
-                                ABC): pass  # always present
+class ComponentRuntimeException(ValkyrjaRuntimeException, ABC): pass  # always present
 
 
 class ComponentSpecificException(ComponentRuntimeException): pass  # concrete
@@ -59,23 +54,19 @@ class ComponentSpecificException(ComponentRuntimeException): pass  # concrete
 class ValkyrjaInvalidArgumentException(ValueError, ABC): pass
 
 
-class ComponentInvalidArgumentException(ValkyrjaInvalidArgumentException,
-                                        ABC): pass
+class ComponentInvalidArgumentException(ValkyrjaInvalidArgumentException, ABC): pass
 
 
-class ComponentSpecificInvalidArgumentException(
-    ComponentInvalidArgumentException): pass
+class ComponentSpecificInvalidArgumentException(ComponentInvalidArgumentException): pass
 ```
 
 ### Rules
 
-- `ValkyrjaInvalidArgumentException` extends `ValueError` for language-level
-  catchability
+- `ValkyrjaInvalidArgumentException` extends `ValueError` for language-level catchability
 - All base and categorical exceptions are abstract via ABC
 - Every component ships both categoricals even if unused
 - Naming: `ComponentName*`, shared subcomponents `ParentComponentSubComponent*`
-- `except ContainerNotFoundException as e:` — Python resolves top-to-bottom,
-  specific first
+- `except ContainerNotFoundException as e:` — Python resolves top-to-bottom, specific first
 
 ---
 
@@ -83,36 +74,40 @@ class ComponentSpecificInvalidArgumentException(
 
 **Reference:** `CONTAINER_BINDINGS.md`
 
-### String constants
+### Class objects as keys — no string constants needed
+
+Python `type` objects are hashable and work natively as dict keys. The class or abstract class itself is the binding
+key — no constants file required:
 
 ```python
-# container_constants.py
-class ContainerConstants:
-    CONTAINER = "io.valkyrja.container.ContainerContract"
-    ROUTER = "io.valkyrja.http.routing.RouterContract"
-    USER_REPOSITORY = "io.valkyrja.app.repositories.UserRepositoryContract"
-```
-
-### FQN helper
-
-```python
-# 'class' is reserved — use class_()
-def class_(cls) -> str:
-    return f"{cls.__module__}.{cls.__qualname__}"
-```
-
-### Closure-based bindings
-
-```python
+# bind against the contract class directly
 container.bind(
-    RouterClass,
-    lambda c: Router(c.make(DispatcherClass))
+    UserRepositoryContract,
+    lambda c: UserRepository(c.make(Database))
 )
 
 container.singleton(
-    RouterClass,
-    lambda c: Router(c.make(DispatcherClass))
+    RouterContract,
+    lambda c: Router(c.make(DispatcherContract))
 )
+
+# resolve against the same contract
+repo = container.make(UserRepositoryContract)
+```
+
+IDE autocomplete works on class references. mypy/pyright validate the class exists. It is impossible to mistype a class
+reference the way you can mistype a string.
+
+**No per-component constants file is needed for Python.** This is the one port where constants files are optional and
+generally unnecessary.
+
+### FQN helper — for serialization and cache generation only
+
+```python
+# 'class' is reserved — use class_()
+# Used for logging, cache data files, etc. — NOT for container bindings
+def class_(cls) -> str:
+    return f"{cls.__module__}.{cls.__qualname__}"
 ```
 
 ---
@@ -160,8 +155,7 @@ class ServiceProviderContract(ABC):
     def publishers() -> dict[str, Callable[[ContainerContract], None]]: ...
 ```
 
-Publisher methods carry `@handler` decorator — build tool reads decorator
-argument from AST:
+Publisher methods carry `@handler` decorator — build tool reads decorator argument from AST:
 
 ```python
 @staticmethod
@@ -176,8 +170,7 @@ def publishers() -> dict:
 ))
 @staticmethod
 def publish_user_repository(container: ContainerContract) -> None:
-    container.set_singleton(UserRepositoryClass,
-                            UserRepository(container.make(DatabaseClass)))
+    container.set_singleton(UserRepositoryClass, UserRepository(container.make(DatabaseClass)))
 ```
 
 ### HttpRouteProviderContract
@@ -185,15 +178,13 @@ def publish_user_repository(container: ContainerContract) -> None:
 ```python
 class HttpRouteProviderContract(ABC):
     @staticmethod @ abstractmethod
-    def get_controller_classes() -> list[
-        type]: ...  # classes with @handler decorators
+    def get_controller_classes() -> list[type]: ...  # classes with @handler decorators
 
     @staticmethod @ abstractmethod
     def get_routes() -> list[RouteContract]: ...
 ```
 
-All provider methods must return simple list/dict literals — no conditional
-logic.
+All provider methods must return simple list/dict literals — no conditional logic.
 
 ---
 
@@ -206,8 +197,7 @@ logic.
 ```python
 from typing import Callable, Any
 
-HttpHandlerFunc = Callable[
-    [ContainerContract, dict[str, Any]], ResponseContract]
+HttpHandlerFunc = Callable[[ContainerContract, dict[str, Any]], ResponseContract]
 CliHandlerFunc = Callable[[ContainerContract, dict[str, Any]], OutputContract]
 ListenerHandlerFunc = Callable[[ContainerContract, dict[str, Any]], Any]
 ```
@@ -220,8 +210,7 @@ class HttpHandlerContract(ABC):
     def get_handler(self) -> HttpHandlerFunc: ...
 
     @abstractmethod
-    def set_handler(self,
-                    handler: HttpHandlerFunc) -> 'HttpHandlerContract': ...
+    def set_handler(self, handler: HttpHandlerFunc) -> 'HttpHandlerContract': ...
 ```
 
 ### @handler decorator on controller methods
@@ -233,15 +222,14 @@ def show(self, id: int) -> ResponseContract:
     pass
 ```
 
-`ServerRequestContract` and `RouteContract` are not parameters — fetch from
-container if needed.
+`ServerRequestContract` and `RouteContract` are not parameters — fetch from container if needed.
 
 ---
 
 ## 5. Decorators — Metadata Markers, Not Self-Registrars
 
-Python decorators execute at import time — but `@handler` must **not**
-self-register routes. It must be a metadata marker only:
+Python decorators execute at import time — but `@handler` must **not** self-register routes. It must be a metadata
+marker only:
 
 ```python
 def handler(closure):
@@ -252,23 +240,68 @@ def handler(closure):
     return decorator
 ```
 
-**Why not self-registration:** The cache data file imports controller classes to
-reference them in route objects. Those imports cannot be avoided. If `@handler`
-self-registered, loading from cache would cause double registration or
-conflicting state — routes registered from cache AND from decorator execution on
-import.
+**Why not self-registration:** The cache data file imports controller classes to reference them in route objects. Those
+imports cannot be avoided. If `@handler` self-registered, loading from cache would cause double registration or
+conflicting state — routes registered from cache AND from decorator execution on import.
 
-**How it works without cache:** The framework scans controller classes for
-`_valkyrja_handler` metadata during bootstrap. It reads the metadata and
-registers routes from it.
+**How it works without cache:** The framework scans controller classes for `_valkyrja_handler` metadata during
+bootstrap. It reads the metadata and registers routes from it.
 
-**How it works with cache:** The framework loads cache data files directly and
-never calls `get_controller_classes()` or scans for `_valkyrja_handler`.
-Decorator metadata is never read.
+**How it works with cache:** The framework loads cache data files directly and never calls `get_controller_classes()` or
+scans for `_valkyrja_handler`. Decorator metadata is never read.
 
-The `@handler` decorator carries the closure for build tool extraction. The
-build tool reads `_valkyrja_handler` metadata from AST via `inspect.getfile()` +
-`ast.parse()`.
+The `@handler` decorator carries the closure for build tool extraction. The build tool reads `_valkyrja_handler`
+metadata from AST via `inspect.getfile()` + `ast.parse()`.
+
+### Accessing _valkyrja_handler at Runtime
+
+The framework reads the metadata from each method during bootstrap (no cache path):
+
+```python
+import inspect
+
+
+def scan_controller_for_handlers(controller_class: type) -> list[dict]:
+    """
+    Scan a controller class for methods carrying _valkyrja_handler metadata.
+    Called by the framework during bootstrap when no cache is loaded.
+    Never called when loading from cache.
+    """
+    handlers = []
+
+    for name, method in inspect.getmembers(controller_class, predicate=inspect.isfunction):
+        if not hasattr(method, '_valkyrja_handler'):
+            continue
+
+        handler_closure = method._valkyrja_handler
+
+        # @parameter decorator attaches parameter list similarly
+        parameters = getattr(method, '_valkyrja_parameters', [])
+
+        handlers.append({
+            'method': name,
+            'handler': handler_closure,
+            'parameters': parameters,
+        })
+
+    return handlers
+```
+
+The `@parameter` decorator follows the same pattern:
+
+```python
+def parameter(name: str, pattern: str = '[^/]+'):
+    def decorator(func):
+        if not hasattr(func, '_valkyrja_parameters'):
+            func._valkyrja_parameters = []
+        func._valkyrja_parameters.append({'name': name, 'pattern': pattern})
+        return func
+
+    return decorator
+```
+
+Both attributes are simple lists/values attached directly to the function object — readable via `hasattr` / `getattr`
+anywhere the function is accessible.
 
 ---
 
@@ -278,7 +311,7 @@ build tool reads `_valkyrja_handler` metadata from AST via `inspect.getfile()` +
 
 - Cache optional in dev — full provider tree traversal at import
 - Cache required for production — build tool generates `AppHttpRoutingData` etc.
-- `valkyrja-build` Python implementation uses `ast` module + `inspect.getfile()`
+- `valkyrja-forge` Python implementation uses `ast` module + `inspect.getfile()`
 
 ### Worker (ASGI)
 
@@ -293,8 +326,7 @@ async def __call__(self, scope, receive, send):
 
 ### CGI and Worker mode
 
-Framework supports both via different entry points. Developer writes application
-once:
+Framework supports both via different entry points. Developer writes application once:
 
 ```python
 # CGI entry
@@ -310,11 +342,11 @@ worker.run(app)
 
 ---
 
-## 7. Build Tool — valkyrja-build Python
+## 7. Build Tool — valkyrja-forge Python
 
 **Reference:** `BUILD_TOOL.md`
 
-- Separate PyPI package: `valkyrja-build`
+- Separate PyPI package: `valkyrja-forge`
 - Dev dependency only — never in production
 - Uses `ast` (stdlib) + `inspect` (stdlib) — no external AST library needed
 - `inspect.getfile(ClassName)` resolves any importable class to its source file
@@ -349,8 +381,7 @@ deploy with generated files
 
 1. Container component
 2. String constants per component + `class_()` helper
-3. Throwable hierarchy — ABC abstract, three branches, ValueError root for
-   InvalidArgument
+3. Throwable hierarchy — ABC abstract, three branches, ValueError root for InvalidArgument
 4. Closure-based bindings
 5. Provider contracts with proper type hints
 6. Callable type aliases — HttpHandlerFunc, CliHandlerFunc, ListenerHandlerFunc
@@ -359,4 +390,4 @@ deploy with generated files
 9. Route and listener data classes
 10. CGI and ASGI entry points
 11. Dispatch component
-12. valkyrja-build Python implementation
+12. valkyrja-forge Python implementation

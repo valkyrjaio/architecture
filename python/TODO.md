@@ -9,23 +9,27 @@
 - [ ] Implement `ValkyrjaThrowable(BaseException, ABC)` — abstract
 - [ ] Implement `ValkyrjaRuntimeException(RuntimeError, ABC)` — abstract
 - [ ] Implement `ValkyrjaInvalidArgumentException(ValueError, ABC)` — abstract, parity name, extends `ValueError`
-- [ ] Every component ships `ComponentRuntimeException` and `ComponentInvalidArgumentException` — abstract, always present
-- [ ] Naming: `ComponentName*`, shared subcomponents `ParentComponentSubComponent*`, unique subcomponents `SubComponent*`
+- [ ] Every component ships `ComponentRuntimeException` and `ComponentInvalidArgumentException` — abstract, always
+  present
+- [ ] Naming: `ComponentName*`, shared subcomponents `ParentComponentSubComponent*`, unique subcomponents
+  `SubComponent*`
 - [ ] Only concrete specific exceptions are thrown — never abstract base exceptions
 
 ---
 
 ## Container Bindings
 
-- [ ] Add per-component constants files
-    - [ ] `container/container_constants.py`
-    - [ ] `http/http_constants.py`
-    - [ ] `http/routing/http_routing_constants.py`
-    - [ ] `cli/cli_constants.py`
-    - [ ] `event/event_constants.py`
-    - [ ] *(remaining components)*
-- [ ] Add `class_()` FQN helper (trailing underscore — `class` is reserved)
+- [ ] Use class objects as binding keys — no string constants files needed
+- [ ] Add `class_()` FQN helper (trailing underscore — `class` is reserved) — for serialization/cache, not bindings
 - [ ] All bindings use closure-based factories — no reflection-based instantiation
+
+```python
+# correct — class object as key
+container.bind(UserRepositoryContract, lambda c: UserRepository(c.make(Database)))
+
+# not needed — no string constants file for Python
+# ContainerConstants, HttpConstants etc. are Go/TypeScript concerns only
+```
 
 ---
 
@@ -33,22 +37,27 @@
 
 - [ ] Implement `ComponentProviderContract(ABC)` with `@staticmethod @abstractmethod` methods
 - [ ] Implement `ServiceProviderContract(ABC)` with `publishers()` returning `dict[str, Callable]`
-- [ ] Implement `HttpRouteProviderContract(ABC)` with `get_controller_classes() -> list[type]` + `get_routes() -> list[RouteContract]`
-- [ ] Implement `CliRouteProviderContract(ABC)` with `get_controller_classes() -> list[type]` + `get_routes() -> list[RouteContract]`
-- [ ] Implement `ListenerProviderContract(ABC)` with `get_listener_classes() -> list[type]` + `get_listeners() -> list[ListenerContract]`
+- [ ] Implement `HttpRouteProviderContract(ABC)` with `get_controller_classes() -> list[type]` +
+  `get_routes() -> list[RouteContract]`
+- [ ] Implement `CliRouteProviderContract(ABC)` with `get_controller_classes() -> list[type]` +
+  `get_routes() -> list[RouteContract]`
+- [ ] Implement `ListenerProviderContract(ABC)` with `get_listener_classes() -> list[type]` +
+  `get_listeners() -> list[ListenerContract]`
 - [ ] All provider list methods return simple list/dict literals — no conditional logic
 
 ---
 
 ## Handler Contracts
 
-- [ ] Implement `@handler` decorator as **metadata marker only** — attaches `_valkyrja_handler` to method, does NOT self-register
+- [ ] Implement `@handler` decorator as **metadata marker only** — attaches `_valkyrja_handler` to method, does NOT
+  self-register
 
 ```python
 def handler(closure):
     def decorator(func):
         func._valkyrja_handler = closure  # metadata only
         return func
+
     return decorator
 ```
 
@@ -69,7 +78,18 @@ def handler(closure):
 ## Bootstrap — Cache vs No Cache
 
 - [ ] Without cache: framework scans controller classes for `_valkyrja_handler` metadata during bootstrap
-- [ ] With cache: framework loads cache data files directly — never calls `get_controller_classes()`, never reads `_valkyrja_handler`
+
+```python
+# framework bootstrap — reads metadata from each method
+for name, method in inspect.getmembers(controller_class, predicate=inspect.isfunction):
+    if hasattr(method, '_valkyrja_handler'):
+        closure = method._valkyrja_handler
+        parameters = getattr(method, '_valkyrja_parameters', [])
+        # register route from closure + parameters
+```
+
+- [ ] With cache: framework loads cache data files directly — never calls `get_controller_classes()`, never scans
+  `_valkyrja_handler`
 - [ ] Implement CGI entry point: `valkyrja.cgi.run(app)`
 - [ ] Implement ASGI worker entry point: `valkyrja.worker.run(app)`
 
@@ -83,9 +103,9 @@ def handler(closure):
 
 ---
 
-## valkyrja-build Python
+## valkyrja-forge Python
 
-- [ ] Create `valkyrja-build` as a separate PyPI package
+- [ ] Create `valkyrja-forge` as a separate PyPI package
 - [ ] Dev dependency only — never in production
 - [ ] Implement `inspect.getfile(ProviderClass)` for class-to-file resolution
 - [ ] Implement `ast.parse()` + `ast.walk()` for provider tree walk

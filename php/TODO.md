@@ -25,8 +25,6 @@
 
 ## First for Parity with Java
 
-- Readme for how to make an application from scratch, what files are needed etc.
-    - Config, App, ServiceProvider, ComponentProvider, etc.
 - dedicated Readme for ServiceProvider, ComponentProvider, etc.
 - Rename all Throwables and Exceptions with component unique names
 - ServiceProvider should have an attribute for the method
