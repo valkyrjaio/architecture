@@ -222,3 +222,72 @@ ecosystems and NestJS being the closest philosophical equivalent.
 
 The cross-port legibility goal — that a developer familiar with one Valkyrja port can immediately read another — was
 established as a north star that guides every language-specific architectural decision.
+
+---
+
+## Why These Five Languages Are the Right Architectural Foundation
+
+The five chosen languages are not arbitrary. Together they represent the full spectrum of paradigms any future port
+could encounter. Every architectural decision made for these five has already been stress-tested against the hardest
+cases each paradigm presents.
+
+**PHP** — dynamic, interpreted, autoloaded. The origin and reference implementation. Establishes the baseline patterns
+everything else maps from. If a decision works cleanly in PHP it is a valid framework pattern.
+
+**Java** — strictly compiled, JVM, annotation processor, generics, checked exceptions. The enterprise end of the
+spectrum. Forces the framework to work in a fully static type system with no runtime dynamism. If a decision works in
+Java it works in any compiled statically-typed language.
+
+**Go** — compiled but opinionated, no classes, no annotations, no inheritance, interface-implicit. Forces the framework
+to work without any of the OOP assumptions PHP and Java share. The most structurally different of the five — if a
+decision survives Go it survives anything.
+
+**Python** — dynamic like PHP but with completely different import semantics, no native interfaces, decorators instead
+of annotations, eager imports, the lazy loading problem. Forces lazy loading discipline and the string constant
+resolution into the architecture at the design level.
+
+**TypeScript** — type erasure at runtime, interface-as-contract without runtime identity, compiled but the type system
+disappears at execution. Forces the framework to work where static types are a development-time construct only.
+
+### The Paradigm Coverage
+
+| Paradigm characteristic               | Covered by                             |
+|---------------------------------------|----------------------------------------|
+| Dynamic typing                        | PHP, Python                            |
+| Static typing, compiled               | Java, Go, TypeScript                   |
+| Annotations / attributes              | PHP, Java, Python                      |
+| No annotations at all                 | Go, TypeScript                         |
+| Runtime class identity                | PHP, Java, Python                      |
+| No runtime class identity             | Go, TypeScript                         |
+| Eager import system                   | Python                                 |
+| Compiled binary, near-zero cold start | Go                                     |
+| JVM / bytecode                        | Java                                   |
+| Type erasure at runtime               | TypeScript                             |
+| Native concurrency primitives         | Go (goroutines)                        |
+| Async / event loop                    | Python (asyncio), TypeScript (Node.js) |
+
+### Future Ports Are Already Solved
+
+Because the five ports cover every paradigm combination, any future language port maps onto patterns already designed
+and documented:
+
+| Future port | Maps onto                                                                                                                     |
+|-------------|-------------------------------------------------------------------------------------------------------------------------------|
+| **Kotlin**  | Java — identical JVM, all exceptions unchecked by default, annotation processor available                                     |
+| **C#**      | Java + TypeScript hybrid — compiled, static types, attributes like Java, nullable reference types like TypeScript strict mode |
+| **Swift**   | Go + TypeScript — compiled binary, no JVM, protocol-oriented (like Go interfaces), type erasure in generics                   |
+| **Rust**    | Go — compiled binary, no classes, trait-based (like Go interfaces), explicit over implicit. Add ownership semantics on top    |
+| **Ruby**    | Python — dynamic, interpreted, open classes. Module system differs but provider/handler patterns map directly                 |
+| **Scala**   | Java — JVM, same annotation processor, functional additions are additive not structural                                       |
+| **Dart**    | TypeScript — compiled, type erasure optional, async/await, null safety                                                        |
+
+No future port requires a new architectural discovery. The decisions are made. The patterns exist. Implementation is a
+mapping exercise, not a design exercise.
+
+### Why This Was Done Now
+
+All architectural decisions were made with all five ports in mind before any port reached mass adoption. This is
+deliberate — a multi-language reorg after adoption would require coordinated breaking changes across all five language
+implementations simultaneously, effectively making reorg impossible. The diversity of the five languages is what makes
+the architecture robust: a decision that survives the constraints of Go, Python, and TypeScript simultaneously is a
+decision that will survive any future language's constraints.
