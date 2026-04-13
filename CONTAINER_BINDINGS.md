@@ -206,8 +206,15 @@ This is an honest reflection of each language's capabilities rather than a limit
 
 ## Per-Component Constants Files
 
-Constants files are **required for Go, Python, and TypeScript** where string constants are the only binding key
-mechanism. They are **optional but recommended for PHP and Java** as a complement to `::class` / `.class`.
+Constants files exist for **all five languages** at the component level — they ship as part of the framework source. PHP
+and Java constants hold `::class` / `.class` values respectively. Go, Python, and TypeScript hold string literals. The
+abstraction is consistent across all languages — callers always reference the constant, never the raw value.
+
+```
+Framework constants  → shipped with each component, all five languages
+Application constants → written by the developer, following the same pattern
+                        (forge auto-generation is a planned future enhancement)
+```
 
 ### Why Per-Component, Not A Single Central File
 

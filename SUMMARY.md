@@ -248,6 +248,16 @@ minimum** — lazy imports are the language-level solution to Python's cold star
 where cold starts remain a concern, the Go or TypeScript port provides compiled binary startup times within the same
 framework ecosystem.
 
+**No existing Python framework does this.** FastAPI uses function objects as dependency identifiers with per-request
+resolution — no container, no caching. Django has no DI container at all. Third-party containers like `lagom` use class
+objects as keys, forcing imports. Valkyrja's string constant approach with lambda-wrapped bindings and Python 3.14 lazy
+imports is the first Python framework design that achieves genuine lazy loading of service providers at the container
+level.
+
+Per-component constants files ship with the framework for all five languages — PHP holds `::class` strings, Java holds
+`.class` objects, Go/Python/TypeScript hold string literals. Application-defined constants follow the same pattern,
+written by the developer. Forge auto-generating application constants is a planned future enhancement.
+
 **No component provider constants class.** Provider class references must use `::class` / `.class` / class objects
 directly. A constants class would allow constant references that the build tool cannot resolve statically. Binding key
 constants files are unaffected.

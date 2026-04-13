@@ -129,8 +129,9 @@ Every port shares the same architectural identity:
 - **Minimum version: Python 3.14** — lazy imports used natively, no older version support
 - GIL limits true thread parallelism — ASGI async is the idiomatic concurrency model
 - Python 3.14 lazy imports resolve the eager import cold start problem at the language level
-- For Lambda workloads where Python cold starts are unacceptable, switch to the Go or TypeScript port — same framework,
-  compiled binary startup
+- String constants for binding keys — same as Go and TypeScript, forge generates constants files
+- No existing Python framework achieves lazy provider loading at the container level — Valkyrja is first
+- For Lambda workloads where cold starts remain a concern, switch to the Go or TypeScript port
 - `inspect.getfile()` resolves class to source file — equivalent of PHP's `ReflectionClass::getFileName()`
 
 **Language-specific notes:**
