@@ -53,6 +53,10 @@ import appContract "io/valkyrja/application/kernel/contract"
 // All methods must return simple slice literals — no conditional logic permitted.
 // The build tool reads these return values directly from AST.
 type ComponentProviderContract interface {
+	// GetComponentProviders returns the component providers this component depends on.
+	// The framework ensures all listed components are fully registered
+	// before this component's providers are registered.
+	GetComponentProviders(app appContract.ApplicationContract) []ComponentProviderContract
 	// GetContainerProviders returns the component's container service providers.
 	GetContainerProviders(app appContract.ApplicationContract) []ServiceProviderContract
 
@@ -81,6 +85,15 @@ import (
 )
 
 type HttpComponentProvider struct{}
+
+func (p *HttpComponentProvider) GetComponentProviders(
+	app appContract.ApplicationContract,
+) []ComponentProviderContract {
+	return []ComponentProviderContract{
+		&ContainerComponentProvider{}, // HTTP depends on Container
+		&EventComponentProvider{},     // HTTP depends on Event
+	}
+}
 
 func (p *HttpComponentProvider) GetContainerProviders(
 	app appContract.ApplicationContract,

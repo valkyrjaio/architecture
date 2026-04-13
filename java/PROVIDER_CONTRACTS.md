@@ -33,6 +33,18 @@ import java.util.List;
 public interface ComponentProviderContract {
 
     /**
+     * Get the component providers this component depends on.
+     * The framework ensures all listed components are fully registered
+     * before this component's providers are registered.
+     * Must return a simple List.of() literal — no conditional logic.
+     */
+    static List<Class<? extends ComponentProviderContract>> getComponentProviders(
+            ApplicationContract app
+    ) {
+        return List.of();
+    }
+
+    /**
      * Get the component's container service providers.
      * Must return a simple List.of() literal — no conditional logic.
      */
@@ -89,6 +101,15 @@ import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
 import java.util.List;
 
 public class HttpComponentProvider implements ComponentProviderContract {
+
+    public static List<Class<? extends ComponentProviderContract>> getComponentProviders(
+            ApplicationContract app
+    ) {
+        return List.of(
+                ContainerComponentProvider.class,  // HTTP depends on Container
+                EventComponentProvider.class       // HTTP depends on Event
+        );
+    }
 
     public static List<Class<? extends ServiceProviderContract>> getContainerProviders(
             ApplicationContract app

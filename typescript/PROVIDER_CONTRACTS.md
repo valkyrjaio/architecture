@@ -81,6 +81,9 @@ export interface ComponentProviderContract {
      * equivalent of PHP's array of ::class strings.
      * Must return a simple array literal — no conditional logic.
      */
+    /** Get the component providers this component depends on. The framework ensures all listed components are fully registered before this component's providers are registered. */
+    getComponentProviders(app: ApplicationContract): Array<new () => ComponentProviderContract>
+
     getContainerProviders(app: ApplicationContract): Array<new () => ServiceProviderContract>
 
     /**
@@ -114,6 +117,13 @@ import {HttpEventProvider} from './HttpEventProvider'
 import {HttpRouteProvider} from './HttpRouteProvider'
 
 export class HttpComponentProvider implements ComponentProviderContract {
+
+    getComponentProviders(app: ApplicationContract) {
+        return [
+            ContainerComponentProvider,  // HTTP depends on Container
+            EventComponentProvider,      // HTTP depends on Event
+        ]
+    }
 
     getContainerProviders(app: ApplicationContract) {
         return [

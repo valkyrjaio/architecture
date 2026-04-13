@@ -223,8 +223,9 @@ Once `sindri` is implemented, remove the `cache:generate` command from the frame
 interface ComponentProviderContract
 {
     /**
-     * Declare this component's dependencies on other components.
-     * The framework ensures listed components are registered before this one.
+     * Get the component providers this component depends on.
+     * The framework ensures all listed components are fully registered
+     * before this component's providers are registered.
      * Sindri uses this during the dependency resolution pass (Step 1a) to build
      * the full ordered, deduplicated component list before walking any providers.
      */
