@@ -182,6 +182,600 @@ eating its own dog food is a validation that the framework's cache-optional arch
 
 ---
 
+## Getting an AST From a File Path
+
+The build tool takes the application config class name as its CLI argument. The first step in all languages is resolving
+that class name to a file path and parsing it into an AST. Everything else — provider tree walking, handler extraction,
+code generation — builds on this foundation.
+
+---
+
+### PHP
+
+**Argument:** fully-qualified class name, e.g. `App\Config\AppConfig`
+
+**File resolution:** `ReflectionClass::getFileName()` resolves any autoloadable class to its absolute source file path.
+
+```php
+#!/usr/bin/env php
+<?php
+
+require_once 'vendor/autoload.php';
+
+use PhpParser\ParserFactory;
+use PhpParser\NodeTraverser;
+use PhpParser\PrettyPrinter;
+use PhpParser\NodeVisitorAbstract;
+use PhpParser\Node;
+
+// entry point — config class FQN passed as CLI argument
+// e.g. valkyrja-forge generate "App\Config\AppConfig"
+$configClass = $argv[1] ?? 'App\\Config\\AppConfig';
+
+// step 1: resolve class name to absolute file path via reflection
+// requires the class to be autoloadable — composer autoloader handles this
+$reflector = new ReflectionClass($configClass);
+$filepath  = $reflector->getFileName();
+
+if ($filepath === false) {
+    throw new RuntimeException("Cannot resolve file for class: {$configClass}");
+}
+
+// step 2: parse the file into an AST
+$parser = (new ParserFactory())->createForNewestSupportedVersion();
+$ast    = $parser->parse(file_get_contents($filepath));
+
+// $ast is an array of PhpParser\Node objects — ready for traversal
+
+// step 3: walk the AST with a visitor
+$traverser = new NodeTraverser();
+$traverser->addVisitor(new class extends NodeVisitorAbstract {
+    public function enterNode(Node $node): void {
+        if ($node instanceof Node\Stmt\Class_) {
+            echo "Class: " . $node->name . PHP_EOL;
+        }
+        if ($node instanceof Node\Stmt\ClassMethod) {
+            echo "  Method: " . $node->name . PHP_EOL;
+        }
+    }
+});
+$traverser->traverse($ast);
+
+// step 4: print any AST node back to PHP source text
+$printer    = new PrettyPrinter\Standard();
+$someNode   = $ast[0]; // any Node object
+$sourceText = $printer->prettyPrint([$someNode]);
+```
+
+**Key classes:**
+
+- `ParserFactory` — creates the parser targeting the installed PHP version
+- `NodeTraverser` + `NodeVisitorAbstract` — visitor pattern for walking the AST
+- `PrettyPrinter\Standard` — prints any AST node back to PHP source text
+- `ReflectionClass::getFileName()` — resolves a class name to its absolute file path
+
+---
+
+### Java
+
+**Argument:** fully-qualified class name, e.g. `app.config.AppConfig`
+
+**File resolution:** FQN maps directly to a directory path. The forge tool searches configured source roots. During
+annotation processing the Trees API provides direct access.
+
+```java
+import com.sun.source.tree.*;
+import com.sun.source.util.*;
+import javax.tools.*;
+import java.io.File;
+import java.nio.file.Paths;
+import java.util.List;
+
+public class ForgeParser {
+
+    /**
+     * Resolve a FQN to its source file path.
+     * Searches source roots — requires -sources.jar on the classpath.
+     * e.g. "app.config.AppConfig" -> "src/main/java/app/config/AppConfig.java"
+     */
+    public static String resolveClassToFile(String fqn, String sourceRoot) {
+        String relativePath = fqn.replace('.', File.separatorChar) + ".java";
+        return Paths.get(sourceRoot, relativePath).toString();
+    }
+
+    /**
+     * Parse a Java source file into an AST (CompilationUnitTree).
+     * Uses ToolProvider.getSystemJavaCompiler() — no javac subprocess needed.
+     */
+    public static CompilationUnitTree parseFile(String filePath) throws Exception {
+        // step 1: get the system Java compiler
+        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+
+        // step 2: create a file manager
+        StandardJavaFileManager fileManager =
+            compiler.getStandardFileManager(null, null, null);
+
+        // step 3: wrap the source file
+        Iterable<? extends JavaFileObject> compilationUnits =
+            fileManager.getJavaFileObjects(filePath);
+
+        // step 4: create a compilation task — parse only, no output
+        JavaCompiler.CompilationTask task = compiler.getTask(
+            null,                   // writer (null = stderr)
+            fileManager,
+            null,                   // diagnostic listener
+            List.of("-proc:none"),  // disable annotation processing
+            null,
+            compilationUnits
+        );
+
+        // step 5: get the JavacTask and parse
+        JavacTask javacTask = (JavacTask) task;
+        Iterable<? extends CompilationUnitTree> units = javacTask.parse();
+        CompilationUnitTree unit = units.iterator().next();
+
+        // unit.getTypeDecls()  — class/interface declarations in this file
+        // unit.getImports()    — import statements for FQN resolution
+
+        return unit;
+    }
+
+    /**
+     * Walk the AST using a TreeScanner visitor.
+     */
+    public static void walkAST(CompilationUnitTree unit) {
+        unit.accept(new TreeScanner<Void, Void>() {
+            @Override
+            public Void visitClass(ClassTree node, Void p) {
+                System.out.println("Class: " + node.getSimpleName());
+                return super.visitClass(node, p); // continue walking
+            }
+
+            @Override
+            public Void visitMethod(MethodTree node, Void p) {
+                System.out.println("  Method: " + node.getName());
+                return super.visitMethod(node, p);
+            }
+
+            @Override
+            public Void visitReturn(ReturnTree node, Void p) {
+                System.out.println("    Return: " + node.getExpression());
+                return super.visitReturn(node, p);
+            }
+        }, null);
+    }
+
+    public static void main(String[] args) throws Exception {
+        String configClass = args[0]; // e.g. "app.config.AppConfig"
+        String sourceRoot  = args.length > 1 ? args[1] : "src/main/java";
+
+        String filePath = resolveClassToFile(configClass, sourceRoot);
+        System.out.println("Parsing: " + filePath);
+
+        CompilationUnitTree unit = parseFile(filePath);
+        walkAST(unit);
+    }
+}
+```
+
+**Key classes:**
+
+- `ToolProvider.getSystemJavaCompiler()` — gets the javac compiler instance at runtime
+- `JavacTask.parse()` — parses source to AST without compiling or type-checking
+- `CompilationUnitTree` — top-level AST node containing imports and class declarations
+- `TreeScanner<R, P>` — generic visitor for walking the AST, return value propagated up
+- `Trees.instance(javacTask)` — full type information when needed (not required for parse-only)
+
+---
+
+### Go
+
+**Argument:** package path, e.g. `app/config`
+
+**File resolution:** Go package paths map directly to directory paths. `go/packages.Load()` resolves the package and
+returns all its source files automatically.
+
+```go
+package main
+
+import (
+    "fmt"
+    "go/ast"
+    "go/parser"
+    "go/token"
+    "os"
+    "path/filepath"
+    "strings"
+
+    "golang.org/x/tools/go/packages"
+)
+
+// resolvePackageToFiles resolves a Go package path to its source files.
+// Option A: use go/packages for full type info (recommended).
+func resolvePackageToFiles(pkgPath string) ([]*ast.File, *token.FileSet, error) {
+    fset := token.NewFileSet()
+
+    cfg := &packages.Config{
+        Mode: packages.NeedFiles |
+              packages.NeedSyntax |   // parsed AST per file
+              packages.NeedTypes |    // type information
+              packages.NeedImports,   // import map for FQN resolution
+        Fset: fset,
+    }
+
+    pkgs, err := packages.Load(cfg, pkgPath)
+    if err != nil {
+        return nil, nil, err
+    }
+    if len(pkgs) == 0 {
+        return nil, nil, fmt.Errorf("package not found: %s", pkgPath)
+    }
+
+    // pkgs[0].Syntax — []*ast.File, one per source file in the package
+    return pkgs[0].Syntax, fset, nil
+}
+
+// parseFile parses a single .go file directly from a file path.
+// Option B: use go/parser for simple cases without type info.
+func parseFile(filepath string) (*ast.File, *token.FileSet, error) {
+    fset := token.NewFileSet()
+    file, err := parser.ParseFile(
+        fset,
+        filepath,
+        nil,                  // src — nil reads from disk
+        parser.ParseComments, // include comments in AST
+    )
+    return file, fset, err
+}
+
+// walkAST walks all nodes in a file using ast.Inspect.
+// The callback returns true to continue walking children, false to stop.
+func walkAST(file *ast.File, fset *token.FileSet) {
+    ast.Inspect(file, func(n ast.Node) bool {
+        if n == nil {
+            return false
+        }
+
+        switch node := n.(type) {
+        case *ast.FuncDecl:
+            fmt.Printf("Function: %s at %s\n",
+                node.Name.Name,
+                fset.Position(node.Pos()),
+            )
+        case *ast.ReturnStmt:
+            // return statement — check if it's a slice/map literal
+            for _, result := range node.Results {
+                fmt.Printf("  Return: %T\n", result)
+            }
+        case *ast.CompositeLit:
+            // slice literal [] or map literal {} — extract elements
+            for _, elt := range node.Elts {
+                fmt.Printf("    Element: %T\n", elt)
+            }
+        }
+
+        return true // continue walking
+    })
+}
+
+func main() {
+    pkgPath := os.Args[1] // e.g. "app/config"
+
+    // option A: load full package (recommended — resolves imports)
+    files, fset, err := resolvePackageToFiles(pkgPath)
+    if err != nil {
+        panic(err)
+    }
+
+    for _, file := range files {
+        fmt.Println("File:", fset.File(file.Pos()).Name())
+        walkAST(file, fset)
+    }
+
+    // option B: parse a single file directly
+    singleFile, singleFset, err := parseFile("src/app/config/app_config.go")
+    if err != nil {
+        panic(err)
+    }
+    walkAST(singleFile, singleFset)
+
+    // print any AST node back to source text
+    _ = strings.Builder{} // go/printer writes to an io.Writer
+    // printer.Fprint(&buf, fset, someNode)
+    _ = filepath.Join("") // suppress unused import warning
+}
+```
+
+**Key packages:**
+
+- `go/parser` — `parser.ParseFile()` parses a `.go` file into `*ast.File`
+- `go/token` — `token.FileSet` tracks file/line/column positions
+- `go/ast` — all AST node types and `ast.Inspect()` walker
+- `golang.org/x/tools/go/packages` — loads full packages with type info and import resolution
+- `go/printer` — `printer.Fprint(w, fset, node)` prints any AST node back to source text
+
+---
+
+### Python
+
+**Argument:** fully-qualified class name, e.g. `app.config.AppConfig`
+
+**File resolution:** `inspect.getfile()` resolves any importable class to its absolute source file path.
+
+```python
+#!/usr/bin/env python3
+"""
+valkyrja-forge — Python AST bootstrap.
+
+Usage: valkyrja-forge generate app.config.AppConfig
+"""
+
+import ast
+import importlib
+import inspect
+import sys
+from pathlib import Path
+
+
+def resolve_class_to_file(fqn: str) -> tuple[type, str]:
+    """
+    Resolve a fully-qualified class name to its source file.
+
+    Args:
+        fqn: e.g. 'app.config.AppConfig'
+
+    Returns:
+        (class_object, absolute_file_path)
+    """
+    # step 1: split module path from class name
+    # 'app.config.AppConfig' -> module='app.config', class='AppConfig'
+    module_path, class_name = fqn.rsplit('.', 1)
+
+    # step 2: import the module
+    module = importlib.import_module(module_path)
+
+    # step 3: get the class from the module
+    cls = getattr(module, class_name)
+
+    # step 4: resolve class to absolute file path
+    # inspect.getfile() works for any importable class including framework classes
+    filepath = inspect.getfile(cls)
+
+    return cls, filepath
+
+
+def parse_file(filepath: str) -> ast.Module:
+    """Parse a Python source file into an AST."""
+    source = Path(filepath).read_text(encoding='utf-8')
+    return ast.parse(source, filename=filepath)
+
+
+def parse_from_class(fqn: str) -> tuple[ast.Module, str]:
+    """
+    Resolve a class name to its file and parse it into an AST.
+
+    Returns:
+        (ast.Module, filepath)
+    """
+    _, filepath = resolve_class_to_file(fqn)
+    tree = parse_file(filepath)
+    return tree, filepath
+
+
+def walk_ast(tree: ast.Module) -> None:
+    """Walk all nodes in an AST and print class/function names."""
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ClassDef):
+            print(f"Class: {node.name}")
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            print(f"  Method: {node.name}")
+        elif isinstance(node, ast.Return):
+            if node.value:
+                # ast.unparse converts any node back to Python source text
+                print(f"    Return: {ast.unparse(node.value)}")
+
+
+def collect_imports(tree: ast.Module) -> dict[str, str]:
+    """
+    Build a map of simple name -> fully qualified module path.
+    Used for FQN resolution when reading class references.
+
+    e.g. 'from app.http.provider import HttpComponentProvider'
+      -> {'HttpComponentProvider': 'app.http.provider.HttpComponentProvider'}
+    """
+    import_map: dict[str, str] = {}
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom):
+            module = node.module or ''
+            for alias in node.names:
+                name = alias.asname or alias.name
+                import_map[name] = f"{module}.{alias.name}"
+        elif isinstance(node, ast.Import):
+            for alias in node.names:
+                name = alias.asname or alias.name
+                import_map[name] = alias.name
+
+    return import_map
+
+
+if __name__ == '__main__':
+    config_class = sys.argv[1]  # e.g. 'app.config.AppConfig'
+
+    tree, filepath = parse_from_class(config_class)
+    print(f"Parsed: {filepath}")
+
+    # walk all nodes
+    walk_ast(tree)
+
+    # collect imports for FQN resolution
+    imports = collect_imports(tree)
+    print(f"Imports: {imports}")
+
+    # dump the full AST structure (useful for debugging)
+    print(ast.dump(tree, indent=2))
+```
+
+**Key modules:**
+
+- `ast.parse(source)` — parses Python source string into `ast.Module`
+- `ast.walk(tree)` — generator yielding every node in the tree recursively
+- `ast.unparse(node)` — converts any AST node back to Python source text
+- `ast.dump(tree, indent=2)` — pretty-prints the entire AST structure for debugging
+- `inspect.getfile(cls)` — resolves any class object to its absolute source file path
+- `importlib.import_module(path)` — imports a module by dotted string path
+
+---
+
+### TypeScript
+
+**Argument:** module path, e.g. `src/config/AppConfig`
+
+**File resolution:** TypeScript compiler API resolves module paths via `tsconfig.json`. `ts.createProgram` loads all
+project files and their ASTs together.
+
+```typescript
+import ts from 'typescript'
+import * as path from 'path'
+
+/**
+ * valkyrja-forge — TypeScript AST bootstrap.
+ *
+ * Usage: valkyrja-forge generate src/config/AppConfig
+ */
+
+interface ParsedFile {
+    sourceFile: ts.SourceFile
+    program:    ts.Program
+    checker:    ts.TypeChecker
+}
+
+/**
+ * Load tsconfig.json and create a compiler program.
+ * The program contains the full AST for every file in the project.
+ */
+function createProgram(tsconfigPath: string = 'tsconfig.json'): ts.Program {
+    // step 1: read tsconfig.json
+    const configFile = ts.readConfigFile(tsconfigPath, ts.sys.readFile)
+    if (configFile.error) {
+        throw new Error(ts.flattenDiagnosticMessageText(
+            configFile.error.messageText, '\n'
+        ))
+    }
+
+    // step 2: parse the tsconfig content
+    const config = ts.parseJsonConfigFileContent(
+        configFile.config,
+        ts.sys,
+        path.dirname(path.resolve(tsconfigPath))
+    )
+
+    // step 3: create the compiler program
+    // this loads and parses all files listed in tsconfig
+    return ts.createProgram({
+        rootNames: config.fileNames,
+        options:   config.options,
+    })
+}
+
+/**
+ * Get the AST SourceFile for a given file path.
+ * The file must be included in the tsconfig project.
+ */
+function getSourceFile(filePath: string): ParsedFile {
+    const program     = createProgram()
+    const checker     = program.getTypeChecker()
+    const absolutePath = path.resolve(filePath.endsWith('.ts')
+        ? filePath
+        : filePath + '.ts'
+    )
+
+    const sourceFile = program.getSourceFile(absolutePath)
+
+    if (!sourceFile) {
+        throw new Error(
+            `File not found in program: ${absolutePath}\n` +
+            `Ensure the file is included in tsconfig.json`
+        )
+    }
+
+    return { sourceFile, program, checker }
+}
+
+/**
+ * Walk all nodes in a source file recursively.
+ * Visitor receives each node — return value not used.
+ */
+function walkAST(
+    node: ts.Node,
+    visitor: (node: ts.Node) => void
+): void {
+    visitor(node)
+    ts.forEachChild(node, child => walkAST(child, visitor))
+}
+
+/**
+ * Get the original source text of any AST node.
+ */
+function getNodeText(node: ts.Node, sourceFile: ts.SourceFile): string {
+    return node.getText(sourceFile)
+}
+
+/**
+ * Resolve an identifier to its fully qualified name using the type checker.
+ * e.g. 'HttpComponentProvider' -> 'app/http/provider/HttpComponentProvider'
+ */
+function getFQN(node: ts.Node, checker: ts.TypeChecker): string | undefined {
+    const symbol = checker.getSymbolAtLocation(node)
+    if (!symbol) return undefined
+    return checker.getFullyQualifiedName(symbol)
+}
+
+// entry point
+const moduleArg  = process.argv[2] // e.g. 'src/config/AppConfig'
+const { sourceFile, program, checker } = getSourceFile(moduleArg)
+
+console.log(`Parsed: ${sourceFile.fileName}`)
+
+// walk the AST
+walkAST(sourceFile, (node) => {
+    if (ts.isClassDeclaration(node) && node.name) {
+        console.log(`Class: ${node.name.text}`)
+    }
+
+    if (ts.isMethodDeclaration(node)) {
+        const name = (node.name as ts.Identifier).text
+        console.log(`  Method: ${name}`)
+    }
+
+    if (ts.isReturnStatement(node) && node.expression) {
+        console.log(`    Return: ${getNodeText(node.expression, sourceFile)}`)
+
+        // if it's an array literal — extract elements
+        if (ts.isArrayLiteralExpression(node.expression)) {
+            node.expression.elements.forEach(elt => {
+                const fqn = getFQN(elt, checker)
+                console.log(`      Element FQN: ${fqn}`)
+            })
+        }
+    }
+})
+```
+
+**Key APIs:**
+
+- `ts.readConfigFile` — reads and parses `tsconfig.json`
+- `ts.parseJsonConfigFileContent` — resolves tsconfig paths and options
+- `ts.createProgram` — creates the compiler with all project files loaded and parsed
+- `program.getSourceFile(path)` — gets the `ts.SourceFile` (AST) for an absolute path
+- `program.getTypeChecker()` — type checker for symbol and FQN resolution
+- `ts.forEachChild(node, cb)` — iterates immediate children of any node
+- `node.getText(sourceFile)` — original source text of any AST node
+- `checker.getSymbolAtLocation(node)` — resolves any identifier to its symbol
+- `checker.getFullyQualifiedName(symbol)` — FQN of any symbol
+- Type guard helpers: `ts.isClassDeclaration`, `ts.isMethodDeclaration`, `ts.isReturnStatement`,
+  `ts.isArrayLiteralExpression`, etc.
+
 ## Language-Specific AST Implementation
 
 ### PHP
@@ -323,7 +917,6 @@ external file resolution needed.
 **Annotation processor setup:**
 
 ```java
-
 @SupportedAnnotationTypes("io.valkyrja.http.routing.Handler")
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class ValkyrjaAnnotationProcessor extends AbstractProcessor {
@@ -338,8 +931,8 @@ public class ValkyrjaAnnotationProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(
-            Set<? extends TypeElement> annotations,
-            RoundEnvironment roundEnv
+        Set<? extends TypeElement> annotations,
+        RoundEnvironment roundEnv
     ) {
         // collect all @Handler annotated methods
         for (Element element : roundEnv.getElementsAnnotatedWith(Handler.class)) {
@@ -456,15 +1049,15 @@ source files.
 ```go
 // load packages listed in valkyrja.yaml
 cfg := &packages.Config{
-Mode: packages.NeedFiles |
-packages.NeedSyntax |
-packages.NeedTypes |
-packages.NeedImports,
+    Mode: packages.NeedFiles |
+          packages.NeedSyntax |
+          packages.NeedTypes |
+          packages.NeedImports,
 }
 
 pkgs, err := packages.Load(cfg, providerPackagePaths...)
 if err != nil {
-log.Fatalf("failed to load packages: %v", err)
+    log.Fatalf("failed to load packages: %v", err)
 }
 ```
 
@@ -507,22 +1100,22 @@ return routes
 ```go
 // extract function literal source text from AST node
 func extractFuncLiteral(node ast.Node, fset *token.FileSet) string {
-var buf bytes.Buffer
-printer.Fprint(&buf, fset, node)
-return buf.String()
+    var buf bytes.Buffer
+    printer.Fprint(&buf, fset, node)
+    return buf.String()
 }
 
 // resolve imports to fully qualified package paths
 func resolveFQN(source string, imports []*ast.ImportSpec) string {
-for _, imp := range imports {
-path := strings.Trim(imp.Path.Value, `"`)
-alias := filepath.Base(path)
-if imp.Name != nil {
-alias = imp.Name.Name
-}
-source = strings.ReplaceAll(source, alias+".", path+"/")
-}
-return source
+    for _, imp := range imports {
+        path    := strings.Trim(imp.Path.Value, `"`)
+        alias   := filepath.Base(path)
+        if imp.Name != nil {
+            alias = imp.Name.Name
+        }
+        source = strings.ReplaceAll(source, alias+".", path+"/")
+    }
+    return source
 }
 ```
 
@@ -710,7 +1303,6 @@ $regexes
 )
 '''
 
-
 def generate_routing_data(collected: dict) -> str:
     routes_str = '\n'.join(
         f"        '{name}': {route_source},"
@@ -725,7 +1317,6 @@ def generate_routing_data(collected: dict) -> str:
         dynamic_paths=build_paths_str(collected['dynamic_paths']),
         regexes=build_paths_str(collected['regexes']),
     )
-
 
 output = generate_routing_data(collected_data)
 open('app/cache/app_http_routing_data.py', 'w').write(output)
@@ -748,7 +1339,7 @@ import * as fs from 'fs'
 
 // load tsconfig and create compiler program
 const configFile = ts.readConfigFile('tsconfig.json', ts.sys.readFile)
-const config = ts.parseJsonConfigFileContent(
+const config     = ts.parseJsonConfigFileContent(
     configFile.config,
     ts.sys,
     process.cwd()
@@ -800,7 +1391,7 @@ function extractProviderList(
                         if (ts.isIdentifier(element)) {
                             // resolve to fully qualified module path via type checker
                             const symbol = checker.getSymbolAtLocation(element)
-                            const fqn = checker.getFullyQualifiedName(symbol!)
+                            const fqn    = checker.getFullyQualifiedName(symbol!)
                             classes.push(fqn)
                         }
                     }
@@ -835,8 +1426,8 @@ function extractPublisherMethod(
             if ((member.name as ts.Identifier).text !== methodName) continue
 
             // extract method body source text
-            const body = member.body!
-            const rawSource = sourceFile.text.slice(body.pos, body.end)
+            const body       = member.body!
+            const rawSource  = sourceFile.text.slice(body.pos, body.end)
 
             // resolve all type references to fully qualified paths
             methodSource = resolveFQNTypes(rawSource, body, checker)
@@ -856,7 +1447,7 @@ function resolveFQNTypes(
         if (ts.isIdentifier(child)) {
             const symbol = checker.getSymbolAtLocation(child)
             if (symbol) {
-                const fqn = checker.getFullyQualifiedName(symbol)
+                const fqn    = checker.getFullyQualifiedName(symbol)
                 source = source.replace(child.text, fqn)
             }
         }
@@ -1080,12 +1671,12 @@ composer require --dev valkyrja-forge
 ```json
 // composer.json
 {
-  "require": {
-    "valkyrja/framework": "^26.0"
-  },
-  "require-dev": {
-    "valkyrja-forge": "^1.0"
-  }
+    "require": {
+        "valkyrja/framework": "^26.0"
+    },
+    "require-dev": {
+        "valkyrja-forge": "^1.0"
+    }
 }
 ```
 
