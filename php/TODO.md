@@ -51,6 +51,10 @@
     - CacheableHandlerRoute|CacheableHandlerListener for cache writing of said
       closure.
 
+## Http
+
+ - Move File/Throwable/Exception/Constant to just File/Constant.
+
 ## Bin
 
 - Becomes build tool. Own repo.
