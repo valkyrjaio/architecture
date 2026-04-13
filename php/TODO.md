@@ -51,6 +51,24 @@
     - Only allow handler for routes and listener.
     - CacheableHandlerRoute|CacheableHandlerListener for cache writing of said
       closure.
+- Update routes list to always be closure/lambda. Self fulfilling as well. First
+  hit creates a new route instance, that is then put in the routes list.
+
+```java
+// first access — lambda called, route resolved, map updated
+Supplier<Route> entry = routes.get(name);
+Route route = entry.get();
+routes.
+
+put(name, () ->route); // replace with trivial supplier — subsequent calls free
+
+// subsequent access — trivial lambda, no re-resolution
+Route route = routes.get(name).get(); // just returns the cached instance
+```
+
+Granted this is a Java example, but it translates to the other languages as
+well. The concept of caching and using suppliers to avoid redundant computations
+is applicable across different programming paradigms.
 
 ## Http
 

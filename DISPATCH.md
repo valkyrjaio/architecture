@@ -687,6 +687,141 @@ status as a required central dependency of the routing and event pipeline.
 
 ---
 
+## Internal Route and Listener Collection — Supplier Pattern
+
+The router and event dispatcher store routes and listeners internally as a map of name/key to a callable that returns
+the route or listener object. This applies to both runtime registration and cache loading.
+
+### Why a Callable Rather Than the Object Directly
+
+A route or listener loaded from cache may never be needed for a given request. Storing a callable defers construction
+until the route is actually matched — and once resolved, the callable is replaced in the map with one that returns the
+already-constructed instance. The map self-optimizes on first access.
+
+This is the same pattern as the container's `Supplier` approach for service bindings — uniform across all concerns.
+
+### The Pattern Across All Languages
+
+```
+Map<name, callable>
+  where callable returns Route or Listener on invocation
+
+First access:
+  callable invoked → Route constructed
+  map entry replaced with trivial callable returning the cached instance
+
+Subsequent access:
+  trivial callable invoked → cached instance returned immediately
+```
+
+**PHP**
+
+```php
+// internal map — Closure returning RouteContract
+private array $routes = []; // string → Closure(): RouteContract
+
+// registration
+$this->routes[$name] = fn() => $route;
+
+// first resolution — replace with cached instance
+$resolved = ($this->routes[$name])();
+$this->routes[$name] = fn() => $resolved;
+
+// subsequent resolution — trivial closure
+$route = ($this->routes[$name])();
+```
+
+**Java**
+
+```java
+// internal map — Supplier<RouteContract>
+private Map<String, Supplier<RouteContract>> routes = new HashMap<>();
+
+// registration
+routes.
+
+put(name, () ->route);
+
+// first resolution — replace with cached instance
+RouteContract resolved = routes.get(name).get();
+routes.
+
+put(name, () ->resolved);
+
+// subsequent resolution — trivial supplier
+RouteContract route = routes.get(name).get();
+```
+
+**Go**
+
+```go
+// internal map — func() RouteContract
+var routes map[string]func () RouteContract
+
+// registration
+routes[name] = func () RouteContract { return route }
+
+// first resolution — replace with cached instance
+resolved := routes[name]()
+routes[name] = func () RouteContract { return resolved }
+
+// subsequent resolution — trivial func
+route := routes[name]()
+```
+
+**Python**
+
+```python
+# internal map — lambda returning RouteContract
+_routes: dict[str, Callable[[], RouteContract]] = {}
+
+# registration
+_routes[name] = lambda: route
+
+# first resolution — replace with cached instance
+resolved = _routes[name]()
+_routes[name] = lambda: resolved
+
+# subsequent resolution — trivial lambda
+route = _routes[name]()
+```
+
+**TypeScript**
+
+```typescript
+// internal map — () => RouteContract
+private
+routes: Map<string, () => RouteContract> = new Map()
+
+// registration
+this.routes.set(name, () => route)
+
+// first resolution — replace with cached instance
+const resolved = this.routes.get(name)!()
+this.routes.set(name, () => resolved)
+
+// subsequent resolution — trivial function
+const route = this.routes.get(name)!()
+```
+
+### Uniform Resolution
+
+Resolution is always the same call regardless of whether the entry is a lazy supplier or a trivial cached-instance
+supplier:
+
+| Language   | Resolution call          |
+|------------|--------------------------|
+| PHP        | `($routes[$name])()`     |
+| Java       | `routes.get(name).get()` |
+| Go         | `routes[name]()`         |
+| Python     | `routes[name]()`         |
+| TypeScript | `routes.get(name)!()`    |
+
+No branching, no `instanceof` check, no `if lazy else cached`. The map self-manages. This applies equally to the
+listener collection — same pattern, `ListenerContract` instead of `RouteContract`.
+
+---
+
 ## Per-Language Summary
 
 ### PHP
