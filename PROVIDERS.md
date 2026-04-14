@@ -43,9 +43,9 @@ interface ComponentProviderContract
 All five methods must return simple list literals — no conditional logic, no variables, no loops. Sindri reads these
 from AST.
 
-**`getComponentProviders()`** — declares this component's dependencies on other components. The framework uses the
-returned list to ensure dependent components are registered before this one. This removes the burden of manually
-ordering providers in the app config.
+**`getComponentProviders()`** — returns the component providers this component depends on. The framework ensures all
+listed components are fully registered before this component's providers are registered. This removes the burden of
+manually ordering providers in the app config.
 
 ```php
 class HttpComponentProvider implements ComponentProviderContract
@@ -122,8 +122,34 @@ interface ServiceProviderContract {
 }
 ```
 
-**The `publishers()` map** — keys are binding identifiers, values are method references on the same class. The build
-tool reads this from AST and writes each value as a lambda in the generated `AppContainerData`.
+**The `publishers()` map** — keys are binding identifiers, values are method references on the same class. Sindri reads
+this from AST and writes each value as a lambda in the generated `AppContainerData`. The `provides()` method from
+earlier versions is removed — the publishers map is the sole source of truth for what a service provider registers.
+
+**`ServiceContract`** — an optional companion pattern for service classes. A class implementing `ServiceContract`
+defines a static `make()` factory that receives the container and returns an instance. Publisher methods can delegate to
+it directly:
+
+```php
+class UserRepository implements UserRepositoryContract, ServiceContract
+{
+    public static function make(ContainerContract $container, array $arguments = []): static
+    {
+        return new static($container->getSingleton(DatabaseContract::class));
+    }
+}
+
+// Publisher delegates to the class's own factory
+public static function publishUserRepository(ContainerContract $container): void
+{
+    $container->setSingleton(
+        UserRepositoryContract::class,
+        UserRepository::make($container)
+    );
+}
+```
+
+This gives each class explicit ownership of its own instantiation. No reflection, no autowiring.
 
 ```php
 class HttpServiceProvider implements ServiceProviderContract

@@ -213,7 +213,7 @@ abstraction is consistent across all languages — callers always reference the 
 ```
 Framework constants  → shipped with each component, all five languages
 Application constants → written by the developer, following the same pattern
-                        (forge auto-generation is a planned future enhancement)
+                        (Sindri auto-generation is a planned future enhancement)
 ```
 
 ### Why Per-Component, Not A Single Central File
@@ -455,6 +455,48 @@ type ContainerKey = typeof ContainerConstants[keyof typeof ContainerConstants]
 classes, but cannot represent interface bindings — the primary use case in Valkyrja. A constructor reference to
 `UserRepositoryContract` does not exist if `UserRepositoryContract` is an interface. String constants are the only
 mechanism that works uniformly for both interface and class bindings.
+
+---
+
+## Container API
+
+### Binding Methods
+
+| Method                        | Description                                                                                     |
+|-------------------------------|-------------------------------------------------------------------------------------------------|
+| `bind(id, callable)`          | Binds a service ID to a callable factory. Returns a fresh instance on every `getService()` call |
+| `bindSingleton(id, callable)` | Same as `bind()` but singleton-scoped — callable invoked once, result cached                    |
+| `bindAlias(alias, id)`        | Maps one service ID to another already registered                                               |
+| `setSingleton(id, instance)`  | Registers an already-constructed object directly — used inside publisher callbacks              |
+
+The recommended callable convention is `[ClassName::class, 'make']` pointing to a static factory — or
+`[ServiceProvider::class, 'publishMethod']` from the publishers map.
+
+### Inspection Methods
+
+| Method                    | Description                                          |
+|---------------------------|------------------------------------------------------|
+| `has(id)`                 | PSR-11 — true if registered in any form              |
+| `isSingleton(id)`         | True if binding OR resolved instance exists          |
+| `isSingletonBinding(id)`  | True if callable binding exists but not yet resolved |
+| `isSingletonInstance(id)` | True if already resolved and cached                  |
+| `isService(id)`           | True if registered as a per-call service             |
+| `isAlias(id)`             | True if registered as an alias                       |
+
+`isSingleton` is equivalent to `isSingletonBinding || isSingletonInstance`. The two fine-grained methods are used by
+child containers to distinguish "registered but not yet built" from "already live and reusable".
+
+### Resolution Methods
+
+| Method              | Description                                                                             |
+|---------------------|-----------------------------------------------------------------------------------------|
+| `get(id)`           | PSR-11 — works across all three types, slightly slower due to additional lookup         |
+| `getSingleton(id)`  | Resolves a singleton — creates and caches on first access, returns cached on subsequent |
+| `getService(id)`    | Resolves a service — always returns a fresh instance                                    |
+| `getAliased(alias)` | Resolves the service the alias points to                                                |
+
+When the type is known, prefer the specific method over `get()`. The difference is small per call but meaningful in hot
+paths like route dispatch.
 
 ---
 

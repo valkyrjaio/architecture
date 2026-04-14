@@ -90,12 +90,12 @@ $container->bind(
 
 ## 3. Service Providers — publishers() map
 
-**Reference:** `DATA_CACHE.md`, `CONTRACTS_JAVA.md` (pattern reference)
+**Reference:** `DATA_CACHE.md`, `CONTAINER_BINDINGS.md`, `PROVIDERS.md`
 
-### Migrate from publish() to publishers() map
+### publishers() map — the sole registration mechanism
 
-Service providers must return a `publishers()` map of class string to static method reference. The build tool reads this
-map via AST:
+Service providers must return a `publishers()` map of service IDs to static method references. The `provides()` method
+from earlier versions is removed — the publishers map is the sole source of truth. Sindri reads this map via AST:
 
 ```php
 public static function publishers(): array
@@ -109,18 +109,47 @@ public static function publishRouter(ContainerContract $container): void
 {
     $container->setSingleton(
         RouterContract::class,
-        new Router($container->make(DispatcherContract::class))
+        new Router($container->getSingleton(DispatcherContract::class))
     );
 }
 ```
 
-No `@Handler` annotation needed on publisher methods — the build tool reads method bodies directly from AST.
+### ServiceContract — optional class-level factory pattern
+
+Classes implementing `ServiceContract` define a static `make()` factory that publisher methods can delegate to. This
+gives each class explicit ownership of its instantiation — no reflection, no autowiring:
+
+```php
+class Router implements RouterContract, ServiceContract
+{
+    public static function make(ContainerContract $container, array $arguments = []): static
+    {
+        return new static($container->getSingleton(DispatcherContract::class));
+    }
+}
+
+public static function publishRouter(ContainerContract $container): void
+{
+    $container->setSingleton(RouterContract::class, Router::make($container));
+}
+```
+
+### Binding methods available in publisher callbacks
+
+Publisher callbacks have access to the full container binding API:
+
+| Method                        | Use                                                                   |
+|-------------------------------|-----------------------------------------------------------------------|
+| `setSingleton(id, instance)`  | Register an already-constructed singleton — most common in publishers |
+| `bindSingleton(id, callable)` | Register a deferred singleton with a callable factory                 |
+| `bind(id, callable)`          | Register a per-call service (fresh instance every resolution)         |
+| `bindAlias(alias, id)`        | Map one service ID to another                                         |
 
 ### Provider list methods must return simple list literals
 
-All `getContainerProviders()`, `getEventProviders()`, `getCliProviders()`, `getHttpProviders()`,
-`getControllerClasses()`, `getRoutes()`, `getListeners()` methods must return simple array literals with no conditional
-logic, variables, or method calls other than constructors and static factories.
+All `getComponentProviders()`, `getContainerProviders()`, `getEventProviders()`, `getCliProviders()`,
+`getHttpProviders()`, `getControllerClasses()`, `getRoutes()`, `getListeners()` methods must return simple array
+literals with no conditional logic, variables, or method calls other than constructors and static factories.
 
 ---
 
