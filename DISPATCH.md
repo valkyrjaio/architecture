@@ -494,7 +494,7 @@ $route->setHandlerMethod('index');
 // method doesn't exist?    RuntimeException at request time — in production
 
 // new handler — method pointer on the route provider, type enforced before shipping
-// handler lives on the same class as the route definition — forge reads one file
+// handler lives on the same class as the route definition — Sindri reads one file
 HttpRoute::get('/users/{id}', [self::class, 'showUser'])
 
 public static function showUser(ContainerContract $c, array<string, mixed> $args): ResponseContract
@@ -911,7 +911,7 @@ router.get('/users',
 
 ## Annotated Controllers — PHP, Java, Python
 
-For annotated controllers, annotations live on the **implementation method**. The forge tool reads the annotations and
+For annotated controllers, annotations live on the **implementation method**. Sindri reads the annotations and
 constructs a route object — exactly the same shape as a route returned from `getRoutes()`. **No method body extraction.
 No import resolution of the callable.** The callable from `#[Handler]` is written directly into the generated cache data
 class as a literal, just as it appears in the source.
@@ -926,7 +926,7 @@ SomeServiceId::class => [SomeServiceProvider::class, 'publishSomeClass']
 new Route('/users/{id}', 'user.show', [SomeClass::class, 'theHandlerMethod'])
 ```
 
-The forge tool reads literals, writes literals. No execution, no body extraction, no cross-file resolution.
+Sindri reads literals, writes literals. No execution, no body extraction, no cross-file resolution.
 
 Go and TypeScript have no annotation support — routes are always registered explicitly via `getRoutes()`.
 
@@ -957,7 +957,7 @@ class UserController
     #[Handler([self::class, 'showHandler'])]
     public function show(string $id): ResponseContract
     {
-        // actual implementation — irrelevant to forge
+        // actual implementation — irrelevant to Sindri
     }
 
     // The handler — may be on this class or any other class
@@ -1002,7 +1002,7 @@ public class UserController {
     @Parameter(name = "id", pattern = "[0-9]+")
     @Handler(clazz = UserController.class, method = "showHandler")
     public ResponseContract show(String id) {
-        // actual implementation — irrelevant to forge
+        // actual implementation — irrelevant to Sindri
     }
 
     public static ResponseContract showHandler(ContainerContract c, Map<String, Object> args) {
@@ -1045,7 +1045,7 @@ class UserController:
     @parameter('id', pattern='[0-9]+')
     @handler((UserController, 'show_handler'))  # callable tuple — written as-is
     def show(self, id: str) -> ResponseContract:
-        pass  # actual implementation — irrelevant to forge
+        pass  # actual implementation — irrelevant to Sindri
 
     @staticmethod
     def show_handler(c: ContainerContract, args: dict) -> ResponseContract:
@@ -1168,3 +1168,42 @@ Each handler concern has its own specific return type: HTTP handlers return `Res
 arguments — is consistent across all three. `ServerRequestContract` and `RouteContract` are intentionally absent from
 the handler signature. They are always available via the container when needed, keeping the signature minimal and
 avoiding coupling HTTP-specific objects to CLI and listener handlers.
+
+### The Hybrid Dispatch + Handler Thought — Considered and Rejected
+
+A hybrid approach was considered: keep the dispatch object (class + method reference) alongside the handler closure, and
+construct the handler from the dispatch object at runtime or build time. This would have allowed developers to keep
+writing dispatch-style registrations while the framework transparently produced the equivalent closure.
+
+It doesn't work, and neither does constructing handlers via AST generation:
+
+**Runtime construction is reflection.** Building a closure from a class reference and method name at runtime is exactly
+what Dispatch already does — dynamic invocation via reflection. The hybrid just hides this behind a different API
+without solving the underlying problem for Go, TypeScript, and Python where reflection-based method dispatch doesn't
+exist.
+
+**AST-generated handlers break the no-cache runtime path.** If Sindri generates the handler closure from a dispatch
+object at build time, the runtime path without a cache has no handler — the dispatch object alone is not executable. The
+no-cache path must work identically to the cached path. A framework that only works correctly after running the build
+tool is not the framework Valkyrja is.
+
+**AST-generated handlers require dependency inference.** To generate a handler closure from a dispatch object, Sindri
+would have to figure out which dependencies to pass to the target method — reading its signature, resolving each
+parameter type to a container binding, and writing the corresponding `$container->getSingleton(...)` calls. This is too
+much magic, too many assumptions, and it breaks the moment a method has a complex or ambiguous signature. The developer
+is the right person to write this logic, not the build tool.
+
+**AST-generated handlers limit custom logic.** A developer who wants to do something beyond a simple `getSingleton` call
+before invoking their method — logging, transformation, conditional behaviour — has no place to put it. The generated
+handler would be a fixed template. Writing the handler directly gives the developer full control over what happens in
+that closure.
+
+The extra burden on the developer — writing a handler method alongside their implementation method — is real and
+acknowledged. The tradeoff is worth it: the handler is explicit, readable, statically checkable by the compiler or
+analyser, testable in isolation, and works identically with and without cache. The dispatch object goes away regardless
+of which alternative is considered.
+
+**Future consideration:** A Sindri feature that optionally generates handler scaffolding from annotated methods could
+reduce the boilerplate cost for developers who opt in. This would be strictly opt-in, generate handler method stubs for
+the developer to review and customise rather than silently inject logic at build time, and would not affect the runtime
+path in any way. Not supported in the current version.
