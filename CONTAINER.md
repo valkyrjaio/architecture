@@ -429,3 +429,48 @@ or `$container->get(NotifierContract::class)`.
 > choose one or the other. Be sure not to register the same contract twice with
 > conflicting implementations, as would be the case if these two examples were
 > combined.
+
+---
+
+## Binding without a Service Provider — Cache Incompatibility
+
+**Direct bindings registered imperatively inside `getContainerProviders()` are
+invisible to Sindri and will not be included in the generated cache.**
+
+Sindri walks the AST of `getContainerProviders()` and reads only the returned
+list of service provider class references. Imperative code inside the method
+body — `$app->getContainer()->bindSingleton(...)` calls — is executed code, not
+a literal. Sindri does not execute code; it reads literals. Those bindings are
+never seen.
+
+The result is a gap in `AppContainerData`: the service is registered at runtime
+but absent from the cache. When the application boots from cache the binding
+does not exist and any attempt to resolve it fails.
+
+```php
+// ✅ cache-compatible — Sindri reads NotifierServiceProvider from the return literal
+public static function getContainerProviders(ApplicationContract $app): array
+{
+    return [NotifierServiceProvider::class];
+}
+
+// ❌ cache-incompatible — Sindri cannot see the bindSingleton call
+public static function getContainerProviders(ApplicationContract $app): array
+{
+    $app->getContainer()->bindSingleton(
+        NotifierContract::class,
+        [SlackNotifier::class, 'make']
+    );
+
+    return [];
+}
+```
+
+**Direct bindings are only safe in applications that never use the cache** —
+development-only CGI mode, or applications that explicitly opt out of cache
+generation. For any production deployment using Sindri-generated cache data,
+all bindings must go through service providers.
+
+This is consistent across all five Valkyrja language ports. There is no
+runtime fallback or alternative cache generation path — the constraint is
+inherent to static AST analysis.
