@@ -1,4 +1,4 @@
-# Valkyrja Forge — Build Tool
+# Sindri — Build Tool
 
 ## Overview
 
@@ -10,8 +10,25 @@ extraction, analysis, and code generation logic lives exclusively in the build t
 per-request. For environments where build tool startup time is a concern, sindri can generate its own cache and
 rebuild — the same two-pass process it performs for any other compiled language application.
 
-The name fits: a forge is where raw materials are shaped into something useful. sindri takes raw source files and shapes
-them into optimized cache artifacts ready for production.
+The name fits: Sindri was the master smith of Norse mythology who forged Mjölnir and the other legendary artifacts.
+Sindri takes raw source files and shapes them into optimised cache artifacts ready for production.
+
+### Namespace and Package Names
+
+Sindri is a peer tool to the Valkyrja framework, not a component within it. Its namespace reflects this — `Sindri`
+stands alone rather than nesting under `Valkyrja\*`:
+
+| Language   | Namespace / Package                     |
+|------------|-----------------------------------------|
+| PHP        | `Sindri`                                |
+| Java       | `sindri` (top-level package)            |
+| Go         | `sindri` (module: `io/valkyrja/sindri`) |
+| Python     | `sindri` (PyPI: `valkyrja-sindri`)      |
+| TypeScript | `sindri` (npm: `@valkyrja/sindri`)      |
+
+The package names are namespaced under `valkyrja` at the ecosystem level — clearly Valkyrja's tool. The PHP/Java
+namespace and Go/Python/TypeScript module name are just `sindri` — consistent with its identity as a standalone binary
+rather than a framework component.
 
 ---
 
@@ -2392,7 +2409,7 @@ composer require --dev sindri
 ```json
 // composer.json
 {
-  "require": {
+  "require"    : {
     "valkyrja/framework": "^26.0"
   },
   "require-dev": {

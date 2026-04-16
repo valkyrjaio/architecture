@@ -211,11 +211,15 @@ Established that:
 
 **Per-language build tools:**
 
-- PHP: `sindri` — nikic/php-parser
-- Java: `io.valkyrja:sindri` — Trees API + JavaPoet (annotation processor)
-- Go: `io/valkyrja/sindri` — go/analysis, go/ast (stdlib)
-- Python: `sindri` — ast, inspect (stdlib)
-- TypeScript: `@valkyrja/sindri` — TypeScript compiler API
+- PHP: `valkyrja/sindri` (namespace: `Sindri`) — nikic/php-parser
+- Java: `io.valkyrja:sindri` (package: `sindri`) — Trees API + JavaPoet (annotation processor)
+- Go: `io/valkyrja/sindri` (module: `sindri`) — go/analysis, go/ast (stdlib)
+- Python: `valkyrja-sindri` (module: `sindri`) — ast, inspect (stdlib)
+- TypeScript: `@valkyrja/sindri` (module: `sindri`) — TypeScript compiler API
+
+**Namespace decision:** Sindri uses `Sindri` as its top-level PHP namespace (not `Valkyrja\Sindri`) and the equivalent
+standalone name in other languages. Sindri is a peer tool to the framework, not a component within it. Package names are
+namespaced under `valkyrja` at the ecosystem level for discoverability — the namespace/module name is just `sindri`.
 
 **Framework source shipping policy:**
 
