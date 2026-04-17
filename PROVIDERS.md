@@ -214,6 +214,18 @@ interface HttpRouteProviderContract {
 **Handler method pointer convention** — route handlers must be static methods on the same provider class (or pointed to
 via `#[Handler]` callable on annotated controllers). No inline closures or lambdas in route definitions.
 
+**Why handlers live on the route, not in a separate list** — an alternative design would have the provider expose a
+separate `getHandlers()` method (or similar), leaving each route without a handler at definition time, and rely on the
+router or collection to pair routes with handlers later. That approach is rejected for two reasons:
+
+1. **Unnecessary coupling in the collection and router/dispatcher.** The router and route collection have no reason to
+   know about handler wiring. Keeping that logic inside them adds a layer of complexity that belongs nowhere near
+   dispatch — it is purely a registration concern.
+2. **Deferred, non-local binding.** When a route carries its handler directly, the relationship is self-evident and
+   statically verifiable. Splitting them forces a reader (and any static analyser or build tool) to reconcile two
+   separate lists and trust that they stay in sync. The Route object is the natural owner of its handler data; the
+   provider is the natural place to write that data in; there is no reason to introduce a third party to join them.
+
 ```php
 class UserHttpRouteProvider implements HttpRouteProviderContract
 {
@@ -301,6 +313,12 @@ class UserEventListenerProvider implements ListenerProviderContract
     }
 }
 ```
+
+**Why handlers live on the listener, not in a separate list** — the same rationale applies here as for HTTP routes. A
+design where the provider holds a parallel `getHandlers()` list and the event dispatcher pairs listeners with handlers
+after the fact adds indirection to the dispatcher and collection that serves no purpose. The listener object is the
+natural owner of its handler; keeping the two co-located makes the binding explicit, statically checkable, and trivially
+testable without touching the dispatcher at all.
 
 ---
 
