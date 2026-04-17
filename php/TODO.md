@@ -23,72 +23,43 @@
 # Changes for v26
 -----------------
 
-## First for Parity with Java
+## First for Parity with All Languages
 
-- dedicated Readme for ServiceProvider, ComponentProvider, etc.
-- ServiceProvider should not be final to allow for extending. This is a
-  framework after all.
-- ServiceProvider should have an attribute for the method
-- Change service and singletons to lambdas instead of what they are now. Add
-  Service and Singleton annotations/Attributes
-- Bypass dispatch by adding handler, and making a closure for these using the
-  dispatch object.
-- Rename Event\Dispatcher to something else. EventDispatcher?
-  ListenerDispatcher?
-- Rename collectors to what they're collecting. EventCollectorContract,
-  CliRouteCollectorContract, HttpRouteCollectorContract, etc.
-- !!! Remove the ComponentProvider constant class
+- Add component constant class for bindings
+- Move all file generation stuff to the new forge repo (Sindri)
 
-## Container
+## Contract and Class name constants
 
-- bindService and bindSingleton to take closures/callables
+- Other languages (Go, Python, TypeScript) do not have support for class names
+  like PHP and Java.
+- We would need a constant class that has all the defined class names and
+  contracts for the component
 
-## Http/Cli (and Listener)
+## Application
 
-- Need to deprecate dispatch entirely. We cannot have it be the crux that
-  handles calling route and listener actions magically. This only works in PHP
-  and Java, will fail to have a solution for this in the other languages.
-    - Only allow handler for routes and listener.
-    - CacheableHandlerRoute|CacheableHandlerListener for cache writing of said
-      closure.
-
-```php
-// HTTP
-/** Closure(ContainerContract, array<string, mixed>): ResponseContract */
-
-// CLI
-/** Closure(ContainerContract, array<string, mixed>): OutputContract */
-
-// Event listener
-/** Closure(ContainerContract, array<string, mixed>): mixed */
-```
-
-- Update routes list to always be closure/lambda. Self fulfilling as well. First
-  hit creates a new route instance, that is then put in the routes list.
-
-```java
-// first access — lambda called, route resolved, map updated
-Supplier<Route> entry = routes.get(name);
-Route route = entry.get();
-routes.
-
-put(name, () ->route); // replace with trivial supplier — subsequent calls free
-
-// subsequent access — trivial lambda, no re-resolution
-Route route = routes.get(name).get(); // just returns the cached instance
-```
-
-Granted this is a Java example, but it translates to the other languages as
-well. The concept of caching and using suppliers to avoid redundant computations
-is applicable across different programming paradigms.
+- ConfigContract, CliConfigContract, HttpConfigContract like in Java.
 
 ## Http
 
 - Move File/Throwable/Exception/Constant to just File/Constant.
+- Http config should have all middleware in it.
 
 ## Bin
 
 - Becomes build tool. Own repo.
+
+## Env
+
+- Continue deprecating this.
+
+## Documentation
+
+- dedicated Readme for ServiceProvider, ComponentProvider, etc.
+
+## Container
+
+- ServiceProvider should have an attribute for the method (Provides)
+    - This can be something we add later, but at this time it's not required
 
 ## Auth
 
@@ -99,21 +70,10 @@ is applicable across different programming paradigms.
           minutes the cache is cleared automatically.
             - Also cleared after successful retrieval for security reasons
 
-## Contract and Class name constants
-
-- Other languages (Go, Python, TypeScript) do not have support for class names
-  like PHP and Java.
-- We would need a constant class that has all the defined class names and
-  contracts for the component
-
 ## Validation
 
 - Rename getException to throwException or actually return the exception and
   throw where required.
-
-## Github
-
-- Remove the validate composer individual checks?
 
 ## ALL
 
@@ -121,16 +81,12 @@ is applicable across different programming paradigms.
 - Check all strings and see if they should be non-empty-string
 - Rethink optional parameters, but maybe we can do this in v26
 
-## Env
-
-- Continue deprecating this.
-
 ## Http
 
 - RateLimiterMiddleware
     - The lesson from the Ebay interview :)
 - Should config for middleware be baked into http and cli since they're so
-  integral, or should they be their own config. I am leaning toward the latter.
+    integral, or should they be their own config. I am leaning toward the latter.
     - If we keep as is then we have the ability to make a single handler later
       and use the config data class to house the middlewares and add to the list
       via the matched route in Router.
