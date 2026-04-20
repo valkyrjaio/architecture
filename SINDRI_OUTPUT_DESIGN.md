@@ -58,7 +58,7 @@ form a visually distinct frame.
 │       █
 │
 │   Running on Valkyrja v26.1.0 · PHP 8.4.17
-│   ~/Dropbox/Sites/Valkyrja/app
+│   ~/app
 ╰── Forging application cache · cache:generate
 ```
 
@@ -73,7 +73,7 @@ echo <<<TEXT
     │       █
     │
     │   Running on Valkyrja v26.1.0 · PHP 8.4.17
-    │   ~/Dropbox/Sites/Valkyrja/app
+    │   ~/app
     ╰── Forging application cache · cache:generate
     
     TEXT;
