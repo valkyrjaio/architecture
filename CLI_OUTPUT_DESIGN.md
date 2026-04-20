@@ -66,11 +66,12 @@ Valkyrja's CLI output follows the same five principles as Sindri:
 
 A sixth principle, specific to command-level design:
 
-6. **Banner when substantive, bare when utility** — commands that
-   perform substantive work or produce operationally significant
-   output include the banner. Commands that are purely informational
-   or machine-parseable (e.g., `version --short`, `list:base`) omit
-   the banner to stay grep-friendly.
+6. **Banner by default, opt-out for utility commands** — the banner is
+   included in every command's output by default. Specific commands may
+   opt out entirely (for commands whose entire purpose is
+   machine-consumable output, like `list:base`) or expose opt-out flags
+   for scripting contexts (e.g., `--short`, `--no-banner`). Applications
+   can suppress the banner globally via `CliConfig::$showBanner`.
 
 Default Valkyrie Icon
 ---------------------
@@ -423,42 +424,14 @@ scales to any number of values.
 
 ### Utility commands (`version`, `list:base`, etc.)
 
-Utility commands produce information that is often consumed by scripts
-or grepped by humans. They omit the banner to keep output compact and
-greppable.
+Utility commands are commands whose output is frequently consumed by
+scripts or grepped by humans. They follow the same banner-by-default
+rule as every other command, but offer opt-out flags (or, in special
+cases, omit the banner unconditionally) for script-friendly output.
 
-**Example — `version`:**
-
-```
-Acme Application v1.0.0
-Built on Valkyrja v26.1.0 (date: March 31 2026 11:22:55 MST)
-Running on PHP 8.4.7
-```
-
-Three lines, no banner, no decoration. Human-readable and scriptable.
-
-**Example — `version --short`:**
+**Example — `version` (default, banner included):**
 
 ```
-1.0.0
-```
-
-Single line, bare version number. Ideal for script consumption.
-
-**Example — `list:base`:**
-
-```
-cache:clear,cache:warm,http:list,http:show,list,list:base,migrate,migrate:rollback,queue:work,version
-```
-
-Comma-delimited single line. No banner, no spaces, no color. Designed
-for script consumption.
-
-Utility commands may offer a `--fancy` flag (or similar) to produce
-full banner output for human-facing invocations:
-
-```
-$ bin/console version --fancy
 ╭── Acme Application v1.0.0
 │
 │   ▗▄▄▖     ▗▄▄▖
@@ -471,7 +444,40 @@ $ bin/console version --fancy
 ╰── Version Information
 ```
 
-The default is spare; the banner is opt-in for these commands.
+**Example — `version --short`:**
+
+```
+1.0.0
+```
+
+Single line, bare version number. Ideal for script consumption.
+
+**Example — `version --plain`:**
+
+```
+Acme Application v1.0.0
+Built on Valkyrja v26.1.0 (date: March 31 2026 11:22:55 MST)
+Running on PHP 8.4.7
+```
+
+Three-line, no-banner format. Useful when the banner renders badly
+(CI logs without Unicode box-drawing support, terminals with poor
+color support, etc.).
+
+**Example — `list:base` (banner omitted unconditionally):**
+
+```
+cache:clear,cache:warm,http:list,http:show,list,list:base,migrate,migrate:rollback,queue:work,version
+```
+
+Single line, comma-delimited, no banner. `list:base` is a special case:
+its entire design purpose is machine-consumable output, so the banner
+is omitted regardless of flags.
+
+Most commands should support `--no-banner` as a general-purpose
+opt-out for pipeline use. Applications consuming Valkyrja CLI output
+in CI or automation contexts can invoke any command with `--no-banner`
+to get bare output.
 
 Customization via CliConfig
 ---------------------------
