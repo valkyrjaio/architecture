@@ -16,45 +16,34 @@ structure:
 │
 │   {app-icon}
 │
-│   Running on Valkyrja v{valkyrja-version} · PHP {php-version}
+│   Built on Valkyrja v{valkyrja-version} (date: {valkyrja-build-date})
+│   Running on PHP {php-version}
 │   {project-root-path}
 ╰── {action-description} · {exact-command}
 ```
 
-```php
-
-echo <<<TEXT
-
-    ╭── Application v1.0.0
-    │
-    │   ▗▄▄▖     ▗▄▄▖
-    │   ▝▜██▄▄▄▄▄██▛▘
-    │      ▝▜███▛▘
-    │         █
-    │
-    │   Running on Valkyrja vXX.X.X · PHP X.X.X
-    │   ~/app
-    ╰── Running whatever command · whatever:command
-
-    TEXT;
-
-```
-
 Each slot is resolved from `CliConfig` with sensible defaults:
 
-| Slot                 | Source                            | Default                              |
-|----------------------|-----------------------------------|--------------------------------------|
-| `app-name`           | `CliConfig::$appName`             | `Valkyrja Application`               |
-| `app-version`        | `CliConfig::$appVersion`          | `1.0.0`                              |
-| `app-icon`           | `CliConfig::$appIcon`             | Valkyrie icon (see below)            |
-| `valkyrja-version`   | Valkyrja runtime constant         | Current framework version            |
-| `php-version`        | `PHP_VERSION` constant            | Current PHP version                  |
-| `project-root-path`  | `CliConfig::$projectRoot`         | Detected from application bootstrap  |
-| `action-description` | Per-command, set by command class | Command class's declared description |
-| `exact-command`      | Preserved from invocation         | Subcommand name and flags as typed   |
+| Slot                  | Source                            | Default                              |
+|-----------------------|-----------------------------------|--------------------------------------|
+| `app-name`            | `CliConfig::$appName`             | `Valkyrja Application`               |
+| `app-version`         | `CliConfig::$appVersion`          | `1.0.0`                              |
+| `app-icon`            | `CliConfig::$appIcon`             | Valkyrie icon (see below)            |
+| `valkyrja-version`    | Valkyrja runtime constant         | Current framework version            |
+| `valkyrja-build-date` | Valkyrja runtime constant         | Framework build timestamp            |
+| `php-version`         | `PHP_VERSION` constant            | Current PHP version                  |
+| `project-root-path`   | `CliConfig::$projectRoot`         | Detected from application bootstrap  |
+| `action-description`  | Per-command, set by command class | Command class's declared description |
+| `exact-command`       | Preserved from invocation         | Subcommand name and flags as typed   |
 
 Applications override any slot by setting the corresponding property on
 their `CliConfig` instance. Properties not set fall through to defaults.
+
+The "Built on Valkyrja" line communicates the framework version the
+application was built against (a dependency relationship), while the
+"Running on PHP" line communicates the runtime language version. These
+are deliberately distinguished because they represent different
+relationships and change under different circumstances.
 
 Design Principles
 -----------------
@@ -74,6 +63,14 @@ Valkyrja's CLI output follows the same five principles as Sindri:
 5. **Graceful degradation** — the output structure that handles success
    cleanly must also handle partial failure, total failure, and no-op
    runs without redesign.
+
+A sixth principle, specific to command-level design:
+
+6. **Banner when substantive, bare when utility** — commands that
+   perform substantive work or produce operationally significant
+   output include the banner. Commands that are purely informational
+   or machine-parseable (e.g., `version --short`, `list:base`) omit
+   the banner to stay grep-friendly.
 
 Default Valkyrie Icon
 ---------------------
@@ -116,15 +113,16 @@ application by name and version. This is what the developer or operator
 sees first and is the slot most worth customizing.
 
 **Body** — contains the application icon, a blank line above and below,
-and two context lines:
+and three context lines:
 
-1. The runtime environment: `Running on Valkyrja v{version} · PHP
-   {version}`
-2. The project root path
+1. The framework relationship: `Built on Valkyrja v{version} (date:
+   {build-date})`
+2. The runtime language: `Running on PHP {version}`
+3. The project root path
 
 **Bottom row** — `╰── {action-description} · {exact-command}` — names
-the action narratively (e.g., "Serving application," "Migrating
-database") and preserves the exact subcommand that produced it. The
+the action narratively (e.g., "Serving application," "Listing HTTP
+routes") and preserves the exact subcommand that produced it. The
 description is set per-command by the command class; the exact command
 is preserved from the user's invocation.
 
@@ -263,6 +261,218 @@ A `Warning` exit code of `0` is deliberate — warnings are informational
 and must not fail CI. Commands that treat warnings as errors can opt in
 via a `--warnings-as-errors` flag or per-command configuration.
 
+Command Patterns
+----------------
+
+Valkyrja's built-in commands follow consistent visual patterns that
+compose into a learnable surface. Application commands are encouraged
+to use the same patterns where they apply.
+
+### List commands (`list`, `http:list`, etc.)
+
+A list command enumerates a collection of named items in a compact,
+scannable format. The visual grammar is shared between the CLI command
+list and any entity-list (routes, queues, migrations, events).
+
+**Format rules:**
+
+1. **Items grouped by namespace or shared prefix.** An item forms a
+   namespace group when 2+ items share the same prefix (for commands:
+   text before `:`; for routes: leading path segment). Singleton items
+   stay in the top-level section.
+2. **Top-level items first, then namespace groups.** Alphabetical
+   within each section.
+3. **Namespace groups have a header line** (the shared prefix, indented
+   with a single leading space for visual hierarchy). Items within the
+   group are indented an additional space.
+4. **Dot-leader alignment.** Item identifier on the left, dots filling
+   the gap, descriptive identifier on the right. All items in a group
+   align to the same column.
+
+**Example — `list`:**
+
+```
+ help....................Get help for a command
+ list....................List all CLI commands
+ somecustomcommand.......Run the custom command
+ version.................Show application version
+
+ cache
+  cache:clear............Clear the application cache
+  cache:warm.............Warm the cache
+
+ http
+  http:list..............List all registered HTTP routes
+  http:show..............Show detail for a specific route
+
+ migrate
+  migrate................Run pending database migrations
+  migrate:rollback.......Rollback the most recent migration
+
+ queue
+  queue:work.............Process jobs from the queue
+```
+
+**Example — `http:list`:**
+
+```
+ /......................home
+ /blah..................blah
+ /foo...................foo
+
+ /user
+  /user/{id}............user.get
+  /user/{id}............user.post
+  /user/{id}............user.put
+  /user/all.............user.all
+```
+
+Routes use their path as the left-side identifier and their name as the
+right-side identifier. The grouping and format rules are otherwise
+identical to the command `list`.
+
+Multiple routes with the same path but different methods appear as
+separate rows with distinct names (e.g., three `/user/{id}` rows with
+names `user.get`, `user.post`, `user.put`). Methods, middleware, regex,
+and other per-route metadata are not shown here — those live in
+`http:show`.
+
+### Show commands (`help <command>`, `http:show <name>`, etc.)
+
+A show command produces a detailed, man-page-style view of a single
+item (or a small matched set). The visual grammar is shared between
+help pages and entity-show commands.
+
+**Format rules:**
+
+1. **Item identifier at the top,** followed by optional short
+   description.
+2. **Labeled fields** for single-value data (e.g., `Path:`, `Methods:`).
+3. **Indented sub-sections** for multi-value data (e.g.,
+   `Parameters:`, `Middleware:`), with contents listed one per line.
+4. **Long values get their own line** to avoid fighting for column
+   space with short values.
+5. **Multiple matched items** separated by blank lines, each
+   self-contained.
+
+**Example — `help migrate`:**
+
+```
+migrate
+  Run pending database migrations.
+
+Usage:
+  bin/console migrate [options]
+
+Description:
+  Runs all migrations that have not yet been applied to the database.
+  Migrations are discovered in the directory configured via
+  database.migrations_path and executed in timestamp order.
+
+  Each migration runs inside a transaction by default. If a migration
+  fails, the transaction is rolled back and the command exits with
+  status code 1.
+
+Arguments:
+  (none)
+
+Options:
+  --connection=<name>     Database connection to run against
+                          (default: the configured default connection)
+  --dry-run               Show which migrations would run without
+                          applying them
+  --force                 Run in production even if database appears
+                          to contain data
+  --pretend               Alias for --dry-run
+  --step=<n>              Run only the next N migrations (default: all)
+
+Examples:
+  bin/console migrate
+  bin/console migrate --dry-run
+  bin/console migrate --connection=testing --step=1
+
+Related commands:
+  migrate:rollback        Rollback the most recent migration
+  migrate:status          Show status of all migrations
+  migrate:fresh           Drop all tables and re-run all migrations
+```
+
+**Example — `http:show user.put`:**
+
+```
+user.put
+  Path:     /users/{id}
+  Methods:  PUT
+  Regex:    /^\/users\/(?<id>\d+)$/
+
+  Parameters:
+    id  int  required
+
+  Middleware:
+    App\Http\Middleware\AuthMiddleware
+    App\Http\Middleware\ThrottleMiddleware
+    App\Http\Middleware\ValidateCsrfToken
+    App\Http\Middleware\AdminOnlyMiddleware
+```
+
+The `Parameters:` and `Middleware:` sections use indented sub-lines
+because their contents are multi-value and may include long strings
+(especially middleware class FQCNs in strongly-namespaced languages).
+Putting each value on its own line prevents column-space fights and
+scales to any number of values.
+
+### Utility commands (`version`, `list:base`, etc.)
+
+Utility commands produce information that is often consumed by scripts
+or grepped by humans. They omit the banner to keep output compact and
+greppable.
+
+**Example — `version`:**
+
+```
+Acme Application v1.0.0
+Built on Valkyrja v26.1.0 (date: March 31 2026 11:22:55 MST)
+Running on PHP 8.4.7
+```
+
+Three lines, no banner, no decoration. Human-readable and scriptable.
+
+**Example — `version --short`:**
+
+```
+1.0.0
+```
+
+Single line, bare version number. Ideal for script consumption.
+
+**Example — `list:base`:**
+
+```
+cache:clear,cache:warm,http:list,http:show,list,list:base,migrate,migrate:rollback,queue:work,version
+```
+
+Comma-delimited single line. No banner, no spaces, no color. Designed
+for script consumption.
+
+Utility commands may offer a `--fancy` flag (or similar) to produce
+full banner output for human-facing invocations:
+
+```
+$ bin/console version --fancy
+╭── Acme Application v1.0.0
+│
+│   ▗▄▄▖     ▗▄▄▖
+│   ▝▜██▄▄▄▄▄██▛▘
+│      ▝▜███▛▘
+│         █
+│
+│   Built on Valkyrja v26.1.0 (date: March 31 2026 11:22:55 MST)
+│   Running on PHP 8.4.7
+╰── Version Information
+```
+
+The default is spare; the banner is opt-in for these commands.
+
 Customization via CliConfig
 ---------------------------
 
@@ -364,12 +574,16 @@ Column alignment rules used throughout Valkyrja CLI output:
 
 - **Dot-leader status column:** all step lines pad to the same total
   width so status labels align on the right.
+- **Dot-leader list column:** in `list`-style commands, all items in a
+  group pad to the same total width so item descriptions align.
 - **Detail line indent:** two spaces from the start of the step line,
   followed by `▸ ` and the detail content.
 - **Banner body content:** three spaces from the left frame character
   (`│   `).
 - **Custom icons:** preserve their original indentation; the framework
   prepends `│   ` to each line.
+- **Namespace group headers:** single leading space for the header,
+  two leading spaces for items within the group.
 
 Relationship to Sindri Output
 -----------------------------
@@ -387,10 +601,11 @@ The key visual distinctions:
 - **Sindri's top-line identifies Sindri** (`Sindri v26.0.0`); a
   Valkyrja application's top-line identifies the application
   (`Acme Inc. API v1.2.3`).
-- **Sindri's body line says "Running on Valkyrja"** because Sindri is
-  built on Valkyrja; an application's body line also says "Running on
-  Valkyrja" for the same reason. Valkyrja consistently appears as the
-  substrate.
+- **Sindri's body lines say "Running on Valkyrja"** because Sindri is
+  built on Valkyrja; an application's body lines say "Built on
+  Valkyrja" and "Running on PHP" to distinguish framework dependency
+  from runtime language. Valkyrja consistently appears as the
+  substrate for both.
 - **Sindri's "succeeded" category is labeled "written"** because
   Sindri's primary output is generated files; Valkyrja's "succeeded"
   category is labeled "succeeded" because applications can perform any
