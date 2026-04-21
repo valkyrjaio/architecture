@@ -1,215 +1,508 @@
 # gRPC
 
-This document describes how gRPC integrates into the Valkyrja framework as a first-class protocol alongside HTTP and
-CLI. The design is language-agnostic and applies to all current and planned Valkyrja ports (PHP, Java, TypeScript, Go,
-Python).
+This document describes how gRPC integrates into Valkyrja as a first-class protocol alongside HTTP and CLI. The design
+is language-agnostic and applies to all current and planned Valkyrja ports (PHP, Java, TypeScript, Go, Python).
 
 ## Design Principles
 
-gRPC in Valkyrja follows the same architectural pattern already established for HTTP and CLI:
+gRPC follows the architectural pattern already established for HTTP and CLI:
 
 1. **Worker-agnostic.** The framework never depends on a specific server or worker implementation. Adapters bridge
-   external workers to Valkyrja's internal contracts, exactly as they do for HTTP (CGI, FrankenPHP, RoadRunner, Swoole,
-   etc.) and CLI.
+   external workers (RoadRunner, OpenSwoole, grpc-java, grpc-go, @grpc/grpc-js, grpcio) to Valkyrja's internal
+   contracts, exactly as they do for HTTP and CLI today.
+
 2. **Framework features are inherited, not reimplemented.** Middleware, the container, event dispatch, exception
    handling, and observability all work the same way in gRPC as they do in HTTP and CLI. Worker implementations do not
-   ship their own versions of these concerns.
-3. **No router needed.** gRPC already identifies `(service, method)` at the protocol level via the `:path`
-   pseudo-header (`/package.Service/Method`). Valkyrja uses a direct `Map<string, ServiceRoute>` lookup, the same shape
-   CLI uses for commands, without any pattern matching or parsing.
-4. **Symmetry across protocols.** The conceptual pipeline is identical for all three protocols:
+   ship their own versions of these concerns — that is what the framework provides.
+
+3. **Response propagation, Go-style.** Unwinding uses `ServiceResponse` objects flowing back up through the pipeline,
+   with each layer inspecting what it received and deciding how to proceed. Exceptions are a fallback: when code cannot
+   produce a response directly, `ThrowableCaught` middleware converts them back into the response flow.
+
+4. **No routing logic, just map lookup.** gRPC identifies `(service, method)` at the protocol level via the `:path`
+   pseudo-header (`/package.Service/Method`). A direct `Map<string, Route>` lookup resolves it — the same shape CLI uses
+   for commands, without pattern matching or parsing. The component is still called `Router` for consistency with HTTP
+   and CLI, since its role (resolve an inbound call to a `Route` and dispatch) is the same; only the resolution strategy
+   differs.
+
+5. **Symmetry across protocols.** The pipeline shape is identical to HTTP and CLI:
 
 ```
-HTTP:   Server  → RequestHandler → [Router → Route]    → Middleware → Dispatch
-CLI:    Console → InputHandler   → [Parser → Command]  → Middleware → Dispatch
-gRPC:   Server  → ServiceHandler → [Map → ServiceRoute] → Middleware → Dispatch
+HTTP:   Server  → RequestHandler → Router (pattern match) → middleware → handler
+CLI:    Console → InputHandler   → Router (map lookup)    → middleware → handler
+gRPC:   Server  → ServiceHandler → Router (map lookup)    → middleware → handler
 ```
 
-The bracketed segment is the only per-protocol difference. In gRPC, it is the cheapest of the three because the work is
-done at the protocol layer before the framework is invoked.
+## The Wire Protocol
+
+gRPC is HTTP/2 with specific conventions. Every call has three wire segments:
+
+**Request:**
+
+- `:method: POST`, `:path: /package.Service/Method`, `content-type: application/grpc`
+- Optional `grpc-timeout` (duration with unit suffix: `5S`, `500m`, `1H`, etc.)
+- Optional `grpc-encoding` (compression)
+- Custom metadata as HTTP/2 headers (keys ending in `-bin` carry binary values)
+- Body: one or more length-prefixed framed messages (1 byte compression flag + 4 bytes big-endian length + N bytes
+  protobuf)
+
+**Response:**
+
+- Initial headers: `:status: 200`, `content-type`, initial response metadata
+- Body: zero or more length-prefixed framed messages
+- Trailers (HTTP/2 trailing headers): `grpc-status` (integer 0–16), optional `grpc-message`, optional
+  `grpc-status-details-bin` (base64 `google.rpc.Status` protobuf), custom trailing metadata
+
+Two important properties:
+
+- **gRPC errors return HTTP/2 `:status: 200`.** The actual RPC outcome lives in the `grpc-status` trailer.
+  `:status: 200` means "transport worked"; `grpc-status: 5` means "the call failed with NOT_FOUND."
+- **Trailers are mandatory.** `grpc-status` is always sent as a trailer, even on success. This is why gRPC requires
+  HTTP/2 — HTTP/1.1 does not support trailers cleanly.
+
+The library handles all of this framing. The framework and user code work with decoded message objects, metadata as
+structured maps, and status as a value type. Bytes never cross into framework territory.
 
 ## Core Contracts
 
-The language-agnostic surface area is intentionally small. Five contracts are sufficient.
+The language-agnostic surface area is intentionally small: eight contracts total, plus the pipeline components.
 
 ### `ServiceHandler`
 
 The kernel entry point for gRPC, analogous to `RequestHandler` (HTTP) and `InputHandler` (CLI). Worker adapters hand
-calls to `ServiceHandler::handle()`; everything downstream is pure Valkyrja.
+calls to `ServiceHandler.handle()`; everything downstream is pure Valkyrja.
 
 Responsibilities:
 
-- Look up the `ServiceRoute` in the service map by fully-qualified method name.
-- Compose and execute the middleware pipeline for that route.
-- Resolve the handler via the container and dispatch.
-- Map exceptions to gRPC status codes on the way out.
+- Orchestrate the middleware pipeline stages (`CallReceived`, `SendingResponse`, `Terminated`).
+- Delegate to `Router` for route resolution and handler dispatch.
+- Run `ThrowableCaught` middleware when exceptions propagate up.
+- Fast-exit on cancellation signals.
 
-### `ServiceRoute`
+### `ServiceCall` (immutable)
 
-The value stored in the service map, analogous to `Route` (HTTP) and `Command` (CLI).
+What comes in from the worker adapter. Models the inbound side of the wire.
 
-Carries:
+```
+ServiceCall
+  getMethod(): string                   // "/package.Service/Method" — the map key
+  getMetadata(): Metadata               // inbound headers (one bucket inbound)
+  getDeadline(): Deadline               // never null; may be Deadline::none()
+  getCancellation(): CancellationToken  // never null; may be Token::never()
+  getPeer(): Peer                       // never null; auth may be "insecure"
+  getMessages(): iterable<Message>      // decoded inbound messages (length 1 for unary/server-stream)
+  getRoute(): Route                     // resolved route metadata
+```
 
-- Handler reference (class + method, or callable).
-- Middleware stack for the service/method.
-- Request and response message type information (from the `.proto`).
-- Streaming flags (`isClientStreaming`, `isServerStreaming`) as metadata.
-- Any per-route configuration (deadlines, auth requirements, etc.).
+### `ServiceResponse` (immutable)
 
-### `ServiceCall`
+What goes out. Models the outbound side of the wire.
 
-What comes in from the worker adapter. Wraps:
+```
+ServiceResponse
+  getStatus(): Status
+  withStatus(Status): static
 
-- Fully-qualified method name.
-- Incoming messages as an iterable/stream (length 1 for unary and server-streaming calls).
-- Metadata (inbound headers).
-- Deadline and cancellation signal.
-- Peer information.
-- Correlation/trace identifiers.
+  getInitialMetadata(): Metadata
+  withInitialMetadata(Metadata): static
 
-### `ServiceResponse`
+  getTrailingMetadata(): Metadata
+  withTrailingMetadata(Metadata): static
 
-What goes out. Wraps:
+  getMessages(): iterable<Message>
+  withMessages(iterable<Message>): static
 
-- Outgoing messages as a sink/writer (accepts one write for unary and client-streaming calls).
-- Outgoing metadata (trailers and initial headers).
-- Status code and message (on error paths).
+  isCancellation(): bool    // convenience: status.isCancellation()
+```
 
-### `Interceptor`
+`messages` is typed as `iterable<Message>` so unary responses use `[singleMessage]` and streaming responses use a lazy
+generator/async-iterable. The underlying concrete type differs; the contract does not.
 
-The gRPC-specific name for middleware, aligned with terminology already used by gRPC libraries in every target language.
-Operates on `ServiceCall` and produces a `ServiceResponse`, composing identically to HTTP and CLI middleware. Existing
-framework middleware contracts are reused; the only difference is the shape of the call/response objects being passed
-through.
+Initial metadata locks the moment the first message is written to the wire (wire-level constraint). Trailing metadata
+stays mutable until the handler returns and the adapter flushes the call's close.
 
-## Streaming
+### `Route` (immutable)
 
-Streaming is treated as the primitive, with unary as a degenerate case. This avoids the lock-in that would occur if
-unary were the primitive and streaming were bolted on later.
+The value stored in the service map, analogous to HTTP's `Route` and CLI's `Command`. Held in a `Map<string, Route>`
+keyed by fully-qualified method name.
 
-gRPC's four call patterns reduce to two boolean dimensions:
+```
+Route
+  getMethod(): string                   // "/package.Service/Method"
+  getService(): string                  // "package.Service"
+  getMethodName(): string               // "Method"
+  getHandler(): Handler                 // class+method reference or callable
+  getMiddleware(): list<Middleware>     // stack for this route
+  getRequestType(): class-string        // generated protobuf message type
+  getResponseType(): class-string       // generated protobuf message type
+  isClientStreaming(): bool
+  isServerStreaming(): bool
+```
 
-|                       | client streaming: no | client streaming: yes |
-|-----------------------|----------------------|-----------------------|
-| server streaming: no  | Unary                | Client-streaming      |
-| server streaming: yes | Server-streaming     | Bidirectional         |
+### `Status` (immutable)
 
-The `ServiceCall.messages` field is always an iterable/stream; for unary and server-streaming calls it yields exactly
-one message. The `ServiceResponse` always exposes a sink; for unary and client-streaming responses it accepts exactly
-one write. This keeps the contract stable whether only unary is implemented initially or all four patterns are supported
-from day one.
+The gRPC call outcome. Mirrors the pattern HTTP uses for status code plus reason phrase, with an additional field for
+rich error details.
 
-A `@Unary` convenience wrapper (name adapted per language's conventions) adapts a plain `(Request) -> Response` handler
-into the streaming contract, giving developers the simpler ergonomics for the common case without altering the
-underlying architecture.
+```
+Status
+  getCode(): StatusCode        // enum: OK, CANCELLED, ..., UNAUTHENTICATED
+  getMessage(): string         // never null; defaults from code (human-readable)
+  getDetails(): ?bytes         // optional; google.rpc.Status protobuf bytes
 
-Each target language has a native iterable + sink primitive to implement these:
+  isOk(): bool
+  isCancellation(): bool       // true for CANCELLED or DEADLINE_EXCEEDED
 
-| Language   | Incoming stream                     | Outgoing sink             |
-|------------|-------------------------------------|---------------------------|
-| PHP        | `Generator` / RR channels           | `Generator` / RR channels |
-| Java       | `Flow.Publisher` / `StreamObserver` | `StreamObserver`          |
-| TypeScript | `AsyncIterable<T>`                  | writable stream           |
-| Go         | channel `<-chan T`                  | channel `chan<- T`        |
-| Python     | `AsyncIterator[T]`                  | `AsyncGenerator[T, None]` |
+  static ok(): Status
+  static cancelled(?string): Status
+  static deadlineExceeded(?string): Status
+  static notFound(?string): Status
+  static unimplemented(?string): Status
+  static internal(?string, ?bytes): Status
+  // ... factory per code
+```
 
-The contract stays identical; the primitive used to satisfy it is whichever is idiomatic in each language.
+The `StatusCode` enum is gRPC-specific, not reused from HTTP. The two enums have different ranges, different names, and
+different semantics; reusing HTTP's would accept values with no meaning on the wire.
+
+### `Metadata`
+
+Multi-map of string keys to lists of string-or-binary values. Case-insensitive keys. Represents both HTTP/2 headers (
+request metadata, initial response metadata) and HTTP/2 trailing headers (trailing response metadata).
+
+```
+Metadata
+  get(string): ?string|bytes            // first value
+  getAll(string): list<string|bytes>    // all values
+  has(string): bool
+  with(string, string|bytes): static
+  withAdded(string, string|bytes): static
+  without(string): static
+  toArray(): array<string, list<string|bytes>>
+  // iteration
+```
+
+Keys ending in `-bin` carry binary values (base64-encoded on the wire; decoded at the library boundary). The
+`string|bytes` union reflects this.
+
+Metadata may share its underlying primitive with HTTP's `Headers` if the shapes align cleanly; if binary-value handling
+makes sharing awkward, they stay separate.
+
+### `Deadline`
+
+Represents the absolute time at which the call's budget expires. Computed once at call receipt from the inbound
+`grpc-timeout` header; propagated as an absolute time so every downstream layer agrees on the same reference point.
+
+```
+Deadline
+  getAbsoluteTime(): Instant
+  getRemaining(): Duration
+  isExpired(): bool
+  hasDeadline(): bool
+
+  static fromTimeout(Duration): Deadline
+  static fromAbsolute(Instant): Deadline
+  static none(): Deadline    // sentinel; always hasDeadline=false, never expired
+```
+
+Never null on `ServiceCall`. `Deadline::none()` is the sentinel for "no deadline set by client."
+
+### `CancellationToken`
+
+The signal for "should this work stop?" Unifies two causes: client-initiated cancellation (HTTP/2 RST_STREAM) and
+deadline expiry. Deadline expiry is modeled as a cause of cancellation; code only checks cancellation, consulting
+`getReason()` if the distinction matters.
+
+```
+CancellationToken
+  isCancelled(): bool
+  getReason(): ?CancellationReason      // CLIENT_CANCELLED | DEADLINE_EXCEEDED | null
+  throwIfCancelled(): void              // throws CancelledException if cancelled
+  onCancelled(callable): void           // register listener
+```
+
+Never null on `ServiceCall`. Adapters wire the token: listen to the library's native cancellation signal, fire the
+token; register the deadline timer, fire the token on expiry.
+
+Language-native awaitable/async extensions (Go's `<-ctx.Done()`, JS `AbortSignal`, etc.) may be added per port where
+idiomatic, but the base contract is poll + listener, which works in every language.
+
+### `Peer`
+
+Information about the connection's other end. Derived from the transport, not from a single header.
+
+```
+Peer
+  getAddress(): string                  // "192.168.1.5:54321" or "unix:/var/run/sock"
+  getAddressType(): AddressType         // IPV4 | IPV6 | UNIX | UNKNOWN
+  getAuthContext(): AuthContext         // always present; type may be "insecure"
+
+AuthContext
+  getType(): string                     // "ssl" | "tls" | "insecure" | custom
+  getProperties(): array<string, list<string>>
+  getPeerCertificates(): list<Certificate>
+  getPeerSubject(): ?string
+  getTransportSecurityType(): ?string
+```
+
+## Cancellation and Deadline Model
+
+Cancellation enforcement in gRPC is **cooperative** in every target language. No gRPC library in any language forcibly
+interrupts running handler code. This is a deliberate ecosystem-wide choice — forcible interruption (thread kill,
+goroutine stop) is either unavailable or unsafe (leaves locks held, resources leaked). Valkyrja follows the same model.
+
+### What the library handles automatically
+
+- Parses `grpc-timeout`, computes deadline.
+- Fires language-native cancellation signal on client cancel or deadline expiry.
+- Rejects writes to a closed call (silent drop or error depending on language).
+- Sends `DEADLINE_EXCEEDED` / `CANCELLED` status to the client if deadline/cancellation fires before the handler
+  produces a response.
+
+### What the framework does
+
+The framework's role is to **surface the library's signals uniformly and check them at orchestration boundaries**,
+converting detected cancellation into `ServiceResponse` objects directly (not exceptions) so the normal
+response-propagation flow handles them.
+
+**Check locations (all in framework code, no user involvement):**
+
+- `ServiceHandler` checks cancellation at entry, after each major pipeline stage, and before handing the response to the
+  adapter.
+- `Router` checks cancellation at entry, after middleware stages, and after the user handler returns.
+- `MiddlewareHandler` checks cancellation before invoking its wrapped middleware.
+- `ServiceResponse.messages.write()` (inside the adapter's write loop) checks cancellation before each outbound message
+  write.
+
+Plus the check on **returned responses**: every orchestrator that receives a `ServiceResponse` back from a delegated
+stage checks `response.isCancellation()`. If true, it fast-exits the pipeline, skipping remaining request-processing
+middleware.
+
+This dual mechanism — checking the call's cancellation token and checking the returned response's status — provides
+complete coverage with no gaps.
+
+### Fast-exit path
+
+On cancellation detection, the pipeline collapses to:
+
+```
+Normal:     CallReceived → Router (RouteMatched → handler → RouteDispatched)
+            → SendingResponse → [wire write] → Terminated
+
+Cancelled:  CallReceived → [cancellation detected]
+            → SendingResponse → [wire write] → Terminated
+```
+
+`SendingResponse` and `Terminated` still run — they are cheap, and observability of cancelled calls is often more
+valuable than observability of successful ones. Request-processing middleware (`RouteMatched`, `RouteNotMatched`,
+`RouteDispatched`, `ThrowableCaught`) is skipped.
+
+### User handler cooperation
+
+Framework-provided cancellation handling covers everything above the user handler boundary. Inside the handler, three
+mechanisms help without requiring explicit checks:
+
+- **Response writes check automatically.** Writing to `ServiceResponse.messages` throws `CancelledException` if the call
+  is cancelled. Streaming handlers that write messages iteratively get automatic cancellation on their next write.
+- **Cancellable iteration helper.** `call.cancellable(iterable)` yields items from the source while checking
+  cancellation between iterations.
+- **Deadline-aware clients.** Valkyrja-provided HTTP and gRPC clients propagate the current `Deadline` to outbound calls
+  so downstream work inherits the remaining budget.
+
+For pure CPU-bound loops or third-party SDK calls that are not cancellation-aware, handlers must explicitly check
+`call.getCancellation().throwIfCancelled()` at appropriate points. This is the irreducible cooperative part.
+
+### Why the framework does not kill handlers
+
+A runaway handler that ignores cancellation runs to completion. The library drops its response (the client has already
+seen `DEADLINE_EXCEEDED`), and the worker is occupied for the duration. This is acceptable degradation: correctness is
+preserved (the client got the right outcome at the right time), only server capacity is affected. Worker occupancy from
+runaway handlers is managed at the worker pool or platform level (worker recycling, pool sizing, Kubernetes limits) —
+outside the framework's scope.
+
+## Middleware Pipeline
+
+The gRPC pipeline mirrors HTTP/CLI with gRPC-specific defaults.
+
+```
+1. CallReceived         always runs; pre-router
+2. Router resolves route from map
+3a. RouteMatched        runs if route found; pre-handler
+    User handler runs, produces ServiceResponse
+3b. RouteDispatched     runs if route was found; post-handler
+ OR
+3c. RouteNotMatched     runs if route not found
+    Default terminal produces ServiceResponse::unimplemented()
+
+[if any above threw]
+4. ThrowableCaught      runs if any earlier stage threw
+
+5. SendingResponse      always runs (including error/cancellation paths)
+   Adapter writes messages and trailers to wire
+6. Terminated           runs after wire write complete
+```
+
+All stages except `CallReceived` and `SendingResponse` are optional. Middleware in each stage is resolved from the
+container and composed via `MiddlewareHandler`.
+
+### `MiddlewareHandler` as the short-circuit mechanism
+
+`MiddlewareHandler` is the active orchestrator for each stage. Middleware implementations are passive — resolved from
+the container, called via `handle(call, next)`, and free to either return a response directly (short-circuit) or
+delegate to `next` (continue the chain).
+
+`next` is itself a `MiddlewareHandler` instance. Its `handle()` method is both the entry point from outside the chain
+and the continuation point from inside. This single source of truth is where cancellation checks live:
+
+```
+MiddlewareHandler.handle(call, next):
+    if call.getCancellation().isCancelled():
+        return ServiceResponse::cancelled(call.getCancellation().getReason())
+
+    middleware = container.get(this.middlewareClass)
+    return middleware.handle(call, next)
+```
+
+Middleware implementations neither check nor know about cancellation. Every middleware in the system gets
+cancellation-correct behavior for free.
+
+Short-circuiting is structural: a middleware returning a response without calling `next` simply skips the remainder of
+the chain. No special signal, no flag — the absence of the `next` call is the short-circuit.
+
+### `RouteNotMatched` default
+
+When the Router's map lookup returns no entry, `RouteNotMatched` middleware runs, with a framework-provided terminal
+that produces `ServiceResponse::unimplemented()` with `grpc-status: UNIMPLEMENTED (12)`. User middleware in this stage
+can log unknown method attempts, monitor for scanning, collect metrics on bad-client rates.
+
+### `ThrowableCaught` and cancellation
+
+Cancellation detected by the framework's check points never produces an exception — it produces a `ServiceResponse`
+directly with `CANCELLED` or `DEADLINE_EXCEEDED` status. The cancelled response flows through the normal propagation
+path (with fast-exit skipping request-processing middleware).
+
+User code can still throw `CancelledException` via explicit `throwIfCancelled()` calls. These exceptions unwind normally
+to `ThrowableCaught`, which converts them to cancellation responses and rejoins the normal flow.
+
+The net effect: `ThrowableCaught` handles all thrown exceptions uniformly; cancellation is never a special case in
+exception-handling code because the framework's own cancellation handling stays in the response-propagation path.
+
+### `Terminated` stage
+
+Runs after the adapter has written the full response (all messages + trailing metadata + status) to the wire. Used for
+cleanup, async logging, metrics emission, and event publication that should not block the client.
+
+Per-worker viability:
+
+- PHP (RoadRunner/Swoole): supported.
+- Java: runs after `StreamObserver.onCompleted()`.
+- Go: runs after the handler returns, in the same or a spawned goroutine.
+- Python async: runs after the handler coroutine yields its response.
+- TypeScript: runs after `callback()` or stream end.
 
 ## Worker Adapters
 
-Worker adapters bridge an external gRPC server implementation to `ServiceHandler`. The adapter's entire job is:
+Adapters bridge an external gRPC server implementation to `ServiceHandler`. The adapter's responsibilities:
 
-1. Receive the native call representation from the worker.
-2. Wrap it in a `ServiceCall`.
-3. Invoke `ServiceHandler::handle()`.
-4. Unwrap the `ServiceResponse` back into the worker's native form.
+1. Accept the native call representation from the gRPC library.
+2. Decode the inbound message(s) (library handles protobuf deserialization).
+3. Build a `ServiceCall`: populate `method`, `metadata`, `deadline`, `cancellation`, `peer`, `messages`, `route`.
+4. Wire the `CancellationToken` to the library's native cancellation signal and to the deadline timer.
+5. Invoke `ServiceHandler.handle(call)`.
+6. Translate the returned `ServiceResponse` into the library's native response API (call `.onNext()`, `return response`,
+   `callback()`, etc. depending on the library).
+7. During streaming writes, route each write through the cancellation check: writes to `ServiceResponse.messages` on a
+   cancelled call raise `CancelledException`.
 
-This mirrors the existing adapter pattern used for HTTP across CGI, worker, and runtime-embedded modes, and for CLI
-across different console implementations.
+Adapters do **not** forcibly interrupt handler execution — that is not possible in any target language. They are signal
+translators, not enforcers.
 
-### Target Adapters by Language
+### Target adapters by language
 
 **PHP**
 
-- RoadRunner (`spiral/roadrunner-grpc`) — primary recommended adapter; most mature PHP gRPC option.
-- OpenSwoole (`Swoole\GrpcServer` / `openswoole/grpc`) — coroutine-based alternative; useful for streaming-heavy
+- RoadRunner (`spiral/roadrunner-grpc`) — primary recommended adapter.
+- OpenSwoole (`Swoole\GrpcServer` / `openswoole/grpc`) — coroutine-based alternative, useful for streaming-heavy
   workloads.
-- FrankenPHP — deferred until the ecosystem provides a native gRPC termination path into PHP workers.
+- FrankenPHP — deferred until the ecosystem provides native gRPC termination into PHP workers.
 
-**Java**
+**Java** — `grpc-java` with `ServerBuilder`. Generated `BindableService` implementations delegate to
+`ServiceHandler.handle()` with `StreamObserver` adapted to the `ServiceCall`/`ServiceResponse` shape.
 
-- `grpc-java` with `ServerBuilder` — canonical. Generated `BindableService` implementations delegate to
-  `ServiceHandler::handle()` with `StreamObserver` adapted to `ServiceCall`/`ServiceResponse`.
+**TypeScript** — `@grpc/grpc-js`.
 
-**TypeScript**
+**Go** — `google.golang.org/grpc`.
 
-- `@grpc/grpc-js` — the standard Node.js gRPC library.
+**Python** — `grpcio` (async API).
 
-**Go**
+Each adapter is expected to be thin (roughly 30–60 lines of glue code). All protocol-framework integration — middleware,
+container, error mapping, observability — lives above the adapter in Valkyrja code that is unaware of which worker is
+running.
 
-- `google.golang.org/grpc` — generated service interface methods wrap parameters into `ServiceCall` and forward.
+### Adapter interface
 
-**Python**
+```
+ServiceAdapter
+  start(ServiceHandler): void   // begin accepting calls (bind port, TLS, etc.)
+  stop(): void                  // graceful shutdown
+```
 
-- `grpcio` (async API) — handlers adapt `ServicerContext` and request iterables into `ServiceCall`.
-
-The adapter in each language is expected to be small (roughly fifty lines of glue code). All protocol-framework
-integration — middleware, container resolution, error mapping, observability — lives above the adapter in Valkyrja code
-that is unaware of which worker is running.
+Adapter-specific configuration (TLS, thread pools, plugin registration, port binding) lives on the adapter
+implementation, not in the framework-agnostic contract.
 
 ## Service Registration
 
-Service registration follows the discovery → map pattern already used by HTTP routes and CLI commands. A `@GrpcService`
-annotation (or language-idiomatic equivalent: PHP attribute, TS decorator, Go build-time tag, Python class decorator)
-marks generated service implementations. A build-time or boot-time scan populates the service map keyed by
-fully-qualified method name.
+Service registration follows the discovery → map pattern already used by HTTP routes and CLI commands. Each language
+uses its idiomatic mechanism:
 
-In Java, this aligns with the annotation-processor-plus-data-class-generation approach already adopted for `@Provides`.
-The same `@GrpcService` processor generates the service map as a data class at compile time.
+- **PHP** — `#[GrpcService]` attribute on generated service classes; scan populates the map at boot; result cached via
+  the existing data-class generation mechanism (`App\Grpc\Data` namespace, paralleling `App\Http\Data` and
+  `App\Cli\Data`).
+- **Java** — `@GrpcService` annotation; annotation processor + JavaPoet generates a data class mapping fully-qualified
+  method names to `Route` instances at compile time (matching the existing `@Provides` processor pattern).
+- **Go** — build-time tag or `go:generate` directive; generated registry file.
+- **TypeScript** — decorator or manifest file.
+- **Python** — class decorator.
 
-In PHP, attribute scanning populates the map at boot, with the result cached via the existing data class generation
-mechanism (`App\Grpc\Data` namespace following the pattern established by `App\Http\Data` and `App\Cli\Data`).
+The underlying artifact is always the same: a `Map<string, Route>` available to `Router` at call time.
 
-Equivalent mechanisms apply in the remaining languages, always producing the same underlying artifact: a
-`Map<string, ServiceRoute>` available to `ServiceHandler` at call time.
+## Exception → Status Mapping
 
-## Error Handling
+Exceptions reaching `ThrowableCaught` are translated to `ServiceResponse` objects with appropriate status. Default
+mappings (configurable per application):
 
-gRPC status codes are produced by the standard Valkyrja exception handling pipeline, augmented with a gRPC-specific
-output mapping. The exception handler already responsible for translating exceptions to HTTP responses gains an
-equivalent path that maps exceptions to `(status_code, status_message, trailers)` triples. No separate status mapper
-contract is required; this is an output format of the existing exception handling system.
+- `NotFoundException` → `NOT_FOUND`
+- `ValidationException` → `INVALID_ARGUMENT`
+- `UnauthorizedException` → `UNAUTHENTICATED`
+- `ForbiddenException` → `PERMISSION_DENIED`
+- `CancelledException` → `CANCELLED` or `DEADLINE_EXCEEDED` (from reason)
+- Any uncaught `Throwable` → `INTERNAL`
 
-## Context Propagation
+Language-native cancellation exceptions (`context.Canceled` in Go, `asyncio.CancelledError` in Python, etc.) are
+converted to `CancelledException` at the adapter boundary before reaching `ThrowableCaught`, so exception-handling code
+sees a uniform type hierarchy.
 
-Per-call context (deadline, cancellation, metadata) is carried on the `ServiceCall` object and passed explicitly through
-the middleware pipeline, rather than through ambient or thread-local storage. This choice:
-
-- Aligns with Go's idiomatic explicit-context style.
-- Works uniformly in PHP, which lacks ambient context primitives.
-- Is consistent with how HTTP and CLI already pass request/input objects.
-- Keeps middleware and handlers trivially testable.
-
-In Java and Python, where ambient context is idiomatic in some codebases, the explicit `ServiceCall` remains the
-contract; adapters may bridge to `io.grpc.Context` or `contextvars` at the boundary if interop with other libraries
-requires it.
+Rich error details (`grpc-status-details-bin` carrying `google.rpc.Status` protobuf) can be populated by user middleware
+via `Status.withDetails()`.
 
 ## Scope of What Is Not Portable
 
 The following is unavoidably per-language and per-worker, and is not part of the framework's agnostic surface:
 
 - Server bootstrap and port binding.
-- TLS configuration.
+- TLS and mTLS configuration.
 - Generated stubs from `.proto` files (each language's `protoc` plugin).
 - Native request/response message types produced by the generator.
 - Worker-specific configuration (thread pools, coroutine settings, plugin registration).
+- The underlying cancellation/context primitive (Go `context.Context`, Java `io.grpc.Context`, JS `AbortSignal`, etc.) —
+  Valkyrja's `CancellationToken` wraps these.
 
-Everything above the adapter layer — service map, middleware composition, container resolution, error mapping, context
-propagation, observability hooks — is standardized across all five languages.
+Everything above the adapter layer — service map, middleware composition, container resolution, error mapping,
+cancellation model, context propagation, observability hooks — is standardized across all five languages.
 
 ## Implementation Sequence
 
-The recommended order for building out gRPC support across the ecosystem:
+Recommended order for building out gRPC support across the ecosystem:
 
 1. Finalize this contracts document (language-agnostic).
 2. Prototype in Java. The language's gRPC library is the most mature; design tensions surface fastest there.
@@ -219,8 +512,11 @@ The recommended order for building out gRPC support across the ecosystem:
 
 ## Summary
 
-gRPC in Valkyrja is architecturally indistinguishable from HTTP and CLI aside from the bracketed discovery step in the
-request pipeline. The framework contributes what it always contributes: middleware, container, dispatch, error handling,
-observability. The worker adapter contributes what it always contributes: translation between an external protocol
-server and the framework's internal contract. No new cross-cutting concepts are introduced; the existing Valkyrja
+gRPC in Valkyrja is architecturally indistinguishable from HTTP and CLI aside from the specific shape of the Router (map
+lookup), the `ServiceCall`/`ServiceResponse` contracts (typed messages instead of body bytes), and the addition of a
+`CancellationToken`/`Deadline` cooperation model. The framework contributes what it always contributes: middleware,
+container, dispatch, error handling, observability. The worker adapter contributes what it always contributes:
+translation between an external protocol server and the framework's internal contract. Cancellation is cooperative
+everywhere — the framework checks at orchestration boundaries and inside response writes; user handlers opt into deeper
+cooperation via helpers or explicit checks. No new cross-cutting concepts are introduced; the existing Valkyrja
 architecture extends naturally to a third protocol.
