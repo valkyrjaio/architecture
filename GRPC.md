@@ -265,18 +265,65 @@ The framework's role is to **surface the library's signals uniformly and check t
 converting detected cancellation into `ServiceResponse` objects directly (not exceptions) so the normal
 response-propagation flow handles them.
 
-**Check locations (all in framework code, no user involvement):**
+#### The two-question pattern
 
-- `ServiceHandler` checks cancellation at entry, after each major pipeline stage, and before handing the response to the
-  adapter.
-- `Router` checks cancellation at entry, after middleware stages, and after the user handler returns.
-- `MiddlewareHandler` checks cancellation before invoking its wrapped middleware.
-- `ServiceResponse.messages.write()` (inside the adapter's write loop) checks cancellation before each outbound message
-  write.
+At every orchestrator boundary where control transfers between units of work, the same two questions are asked:
 
-Plus the check on **returned responses**: every orchestrator that receives a `ServiceResponse` back from a delegated
-stage checks `response.isCancellation()`. If true, it fast-exits the pipeline, skipping remaining request-processing
+1. **Has cancellation fired, or has the deadline elapsed?** (inspect `call.getCancellation()`)
+2. **Does the response we have in hand already carry a cancellation status?** (inspect `response.isCancellation()`, when
+   a response exists)
+
+If either answer is yes, fast-exit: return the cancellation response up the stack, skipping remaining request-processing
 middleware.
+
+#### Pre-check creates or overlays; post-check inspects only
+
+The two questions are not symmetric in their effect:
+
+- **Pre-check (before delegation).** If cancellation has fired on the call, construct the cancellation response. If a
+  response already exists from earlier pipeline work, overlay the cancellation status on it with
+  `response.withStatus(Status.cancelled(reason))` — preserving metadata accumulated by middleware that did manage to
+  run. If no response exists yet, build fresh with `ServiceResponse.cancelled(reason)`. This situation only occurs at
+  `ServiceHandler` entry, before any middleware has run.
+- **Post-check (after delegation returns).** If the returned response already has a cancellation status, pass it through
+  unchanged. It is already correct — whatever downstream work produced it may have set useful metadata that should be
+  preserved.
+
+The shared check logic:
+
+```
+checkAndFinalize(call, response?) -> ServiceResponse?:
+    if call.getCancellation().isCancelled():
+        reason = call.getCancellation().getReason()
+        if response exists:
+            return response.withStatus(Status.cancelled(reason))
+        else:
+            return ServiceResponse.cancelled(reason)
+
+    if response exists and response.isCancellation():
+        return response    // already cancelled; preserve as-is
+
+    return null             // no cancellation; continue normally
+```
+
+Implemented as a single helper on a common base (or as a utility each orchestrator calls), applied identically at every
+delegation site.
+
+#### Check locations
+
+All in framework code, no user involvement required:
+
+- `ServiceHandler` at entry (the only location where no response yet exists), and around each delegation to
+  `CallReceived` middleware, `Router`, and `SendingResponse` middleware.
+- `Router` around delegation to `RouteMatched`/`RouteNotMatched` middleware, the user handler, and `RouteDispatched`
+  middleware.
+- `MiddlewareHandler` before invoking its wrapped middleware.
+- `ServiceResponse.messages.write()` (inside the adapter's write loop) before each outbound message write.
+
+Every orchestrator boundary runs the two-question check. Beyond `ServiceHandler` entry, a response is almost always
+already in hand — either produced by a short-circuiting middleware, by the user handler, or by earlier pipeline work —
+so the pre-check's "overlay existing response" branch is the common case. The post-check propagates cancellation
+fast-exit up the stack without needing any additional mechanism.
 
 This dual mechanism — checking the call's cancellation token and checking the returned response's status — provides
 complete coverage with no gaps.
@@ -352,19 +399,32 @@ the container, called via `handle(call, next)`, and free to either return a resp
 delegate to `next` (continue the chain).
 
 `next` is itself a `MiddlewareHandler` instance. Its `handle()` method is both the entry point from outside the chain
-and the continuation point from inside. This single source of truth is where cancellation checks live:
+and the continuation point from inside. This single source of truth is where cancellation checks live, following the
+two-question pattern:
 
 ```
-MiddlewareHandler.handle(call, next):
-    if call.getCancellation().isCancelled():
-        return ServiceResponse::cancelled(call.getCancellation().getReason())
+MiddlewareHandler.handle(call, response?, next):
+    // Pre-check: cancellation fired on the call, or response already cancelled
+    short_circuit = checkAndFinalize(call, response?)
+    if short_circuit != null:
+        return short_circuit
 
+    // Delegate to the wrapped middleware
     middleware = container.get(this.middlewareClass)
-    return middleware.handle(call, next)
+    returnedResponse = middleware.handle(call, response?, next)
+
+    // Post-check: middleware's returned response is cancelled (fast-exit)
+    // or cancellation fired during middleware execution
+    short_circuit = checkAndFinalize(call, returnedResponse)
+    if short_circuit != null:
+        return short_circuit
+
+    return returnedResponse
 ```
 
-Middleware implementations neither check nor know about cancellation. Every middleware in the system gets
-cancellation-correct behavior for free.
+The `response?` parameter reflects that a response may already exist by the time a middleware chain is entered (from an
+earlier short-circuit) or may not (at the very start of the first stage). Middleware implementations neither check nor
+know about cancellation. Every middleware in the system gets cancellation-correct behavior for free.
 
 Short-circuiting is structural: a middleware returning a response without calling `next` simply skips the remainder of
 the chain. No special signal, no flag — the absence of the `next` call is the short-circuit.
