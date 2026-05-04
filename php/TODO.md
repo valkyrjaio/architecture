@@ -1,56 +1,52 @@
-```php
-/* +-----------------------------------------------------------------------+ *
- * | This file is part of the Valkyrja Framework package.                  | *
- * +-----------------------------------------------------------------------+ *
- * | Copyright (c) 2025-present Melech Mizrachi <melechmizrachi@gmail.com> | *
- * +-----------------------------------------------------------------------+ *
- * | This source file is subject to the MIT license that is bundled with   | *
- * | this package in the file LICENSE.md, and is also available through    | *
- * | the world-wide-web at the following url:                              | *
- * +-----------------------------------------------------------------------+ *
- * | https://github.com/valkyrjaio/valkyrja/blob/master/LICENSE.md         | *
- * +-----------------------------------------------------------------------+ */
-```
-
 # Versioning
 ------------
 
-- Major – Most Breaking Changes, etc. Yearly
+- Major – Most Breaking Changes, New Features, etc. Yearly
 - Minor – New features or fixes that are breaking changes but must be
   implemented before a major release
-- Patch - Fixes that are not breaking changes
+- Patch – Fixes that are not breaking changes, documentation updates, small
+  automic fixes/changes that are not breaking
 
 # Changes for v26
 -----------------
 
-## First for Parity with All Languages
+- Tests for repos that have none (php cs fixer, phparkitect, etc)
+    - Test the rules exist that we expect
+    - Test the rules are what we expect configured how we expect.
+    - Etc
 
-- Add component constant class for bindings
-- Move all file generation stuff to the new forge repo (Sindri)
+- Rename ResponseFactoryContract in View and Routing to Routing* and View*
+- We will need to remove the ResponseFileGenerator, and FileGenerator in the
+  future. We anyway need to rethink how we do the response cache so it can work
+  in other languages (I'm thinking Json for the response data and reconstruct a
+  response with that Json data, with headers, etc).
 
 ## Contract and Class name constants
 
-- Other languages (Go, Python, TypeScript) do not have support for class names
-  like PHP and Java.
-- We would need a constant class that has all the defined class names and
-  contracts for the component
+- Add component constant class for bindings
+    - We don't need this for other language parity. The other languages would
+      have these files. We can add them later.
+    - Other languages (Go, Python, TypeScript) do not have support for class
+      names
+      like PHP and Java.
+    - We would need a constant class that has all the defined class names and
+      contracts for the component
 
-## Application
+## Sindri
 
-- ConfigContract, CliConfigContract, HttpConfigContract like in Java.
-
-## Http
-
-- Move File/Throwable/Exception/Constant to just File/Constant.
-- Http config should have all middleware in it.
-
-## Bin
-
-- Becomes build tool. Own repo.
+- "init" (or some name) command
+    - Interactive – Stays open like Claude, and can allow a dev to just keep
+      running commands within the same "session"?
 
 ## Env
 
 - Continue deprecating this.
+    - Need to figure out what is left first after moving certain functionality
+      to Sindri.
+
+# gRPC
+
+- Implement fully.
 
 ## Documentation
 
@@ -70,11 +66,6 @@
           minutes the cache is cleared automatically.
             - Also cleared after successful retrieval for security reasons
 
-## Validation
-
-- Rename getException to throwException or actually return the exception and
-  throw where required.
-
 ## ALL
 
 - Change `array<array-key, blah>` to `array<blah>`
@@ -86,7 +77,7 @@
 - RateLimiterMiddleware
     - The lesson from the Ebay interview :)
 - Should config for middleware be baked into http and cli since they're so
-    integral, or should they be their own config. I am leaning toward the latter.
+  integral, or should they be their own config. I am leaning toward the latter.
     - If we keep as is then we have the ability to make a single handler later
       and use the config data class to house the middlewares and add to the list
       via the matched route in Router.
