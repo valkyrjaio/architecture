@@ -15,7 +15,6 @@
     - Test the rules are what we expect configured how we expect.
     - Etc
 
-- Rename ResponseFactoryContract in View and Routing to Routing* and View*
 - We will need to remove the ResponseFileGenerator, and FileGenerator in the
   future. We anyway need to rethink how we do the response cache so it can work
   in other languages (I'm thinking Json for the response data and reconstruct a

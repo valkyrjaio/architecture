@@ -5,31 +5,34 @@
 TypeScript provider contracts differ from PHP/Java in several important ways:
 
 - No reliable decorators — explicit registration only, no annotated class scanning
-- No `::class` / `.class` — but constructor references (`Array<new () => Contract>`) allow direct instantiation and
-  method calls at runtime
-- `abstract class` enforces the contract at compile time
+- `new X()` used in array literals — `NewExpression` nodes carry the class name directly
+- Instance methods throughout — the framework receives provider instances and calls methods directly
 - Publisher methods have no annotation — build tool reads method bodies directly from AST
 - TypeScript compiler API resolves module paths via `tsconfig.json`
 - All methods return simple array/object literals — no conditional logic
 
 ### TypeScript Works Without Cache
 
-The constructor reference return type is the key insight. The framework receives actual class constructors — not
-strings — so it can instantiate providers and call their methods directly at runtime with no registry, no string lookup,
-and no cache required:
+Provider methods return instances directly. The framework traverses the provider tree by direct method calls — no
+string lookup, no registry needed:
 
 ```typescript
-// framework bootstrap — direct instantiation, no cache needed
-for (const ProviderClass of component.getHttpProviders(app)) {
-    const provider = new ProviderClass()           // direct instantiation ✅
-    for (const route of provider.getRoutes()) {    // direct method call ✅
-        router.register(route)
+// framework bootstrap — direct method calls, no cache needed
+for (const component of componentProviders) {
+    for (const provider of component.getContainerProviders(app)) { // already an instance ✅
+        for (const [key, callback] of Object.entries(provider.publishers())) {
+            container.bind(key, callback) // direct call ✅
+        }
+    }
+    for (const provider of component.getHttpProviders(app)) { // already an instance ✅
+        for (const route of provider.getRoutes()) { // direct method call ✅
+            router.register(route)
+        }
     }
 }
 ```
 
-This means TypeScript behaves identically to PHP and Python at runtime — the provider tree is traversed by direct
-instantiation and method calls. Cache is a cold-start optimization, not a correctness requirement.
+Cache is a cold-start optimization, not a correctness requirement.
 
 ---
 
@@ -39,10 +42,10 @@ TypeScript has full generic type support for all return types:
 
 | Method                    | Return type                                      | Reasoning                                             |
 |---------------------------|--------------------------------------------------|-------------------------------------------------------|
-| `getContainerProviders()` | `Array<new () => ServiceProviderContract>`       | Constructor references for provider classes           |
-| `getEventProviders()`     | `Array<new () => ListenerProviderContract>`      | Constructor references for provider classes           |
-| `getCliProviders()`       | `Array<new () => CliRouteProviderContract>`      | Constructor references for provider classes           |
-| `getHttpProviders()`      | `Array<new () => HttpRouteProviderContract>`     | Constructor references for provider classes           |
+| `getContainerProviders()` | `ServiceProviderContract[]`                      | Provider instances returned directly                  |
+| `getEventProviders()`     | `ListenerProviderContract[]`                     | Provider instances returned directly                  |
+| `getCliProviders()`       | `CliRouteProviderContract[]`                     | Provider instances returned directly                  |
+| `getHttpProviders()`      | `HttpRouteProviderContract[]`                    | Provider instances returned directly                  |
 | `getRoutes()`             | `RouteContract[]`                                | Concrete route data objects — fully typed             |
 | `getListeners()`          | `ListenerContract[]`                             | Concrete listener data objects — fully typed          |
 | `publishers()`            | `Record<string, (c: ContainerContract) => void>` | Maps binding key string to publisher method reference |
@@ -58,8 +61,9 @@ compiler validates that all returned objects implement the correct contract at c
 
 ## ComponentProviderContract
 
-Top-level aggregator. Returns arrays of sub-provider constructors. Build tool reads return values directly from AST via
-TypeScript compiler API — must be simple array literals with no conditional logic.
+Top-level aggregator. Returns arrays of sub-provider **instances** by category. Build tool reads return values directly
+from AST via TypeScript compiler API — must be simple array literals with no conditional logic. Each array element must
+be a `new X()` expression — Sindri reads `NewExpression.expression` to extract the provider class name.
 
 ```typescript
 // package: @valkyrja/application/provider/contract
@@ -75,34 +79,16 @@ import type {HttpRouteProviderContract} from '@valkyrja/http/routing/provider/co
  * No conditional logic permitted — build tool reads these from AST.
  */
 export interface ComponentProviderContract {
-    /**
-     * Get the component's container service providers.
-     * Returns constructor references — Array<new () => T> is the TypeScript
-     * equivalent of PHP's array of ::class strings.
-     * Must return a simple array literal — no conditional logic.
-     */
     /** Get the component providers this component depends on. The framework ensures all listed components are fully registered before this component's providers are registered. */
-    getComponentProviders(app: ApplicationContract): Array<new () => ComponentProviderContract>
+    getComponentProviders(app: ApplicationContract): ComponentProviderContract[]
 
-    getContainerProviders(app: ApplicationContract): Array<new () => ServiceProviderContract>
+    getContainerProviders(app: ApplicationContract): ServiceProviderContract[]
 
-    /**
-     * Get the component's event listener providers.
-     * Must return a simple array literal — no conditional logic.
-     */
-    getEventProviders(app: ApplicationContract): Array<new () => ListenerProviderContract>
+    getEventProviders(app: ApplicationContract): ListenerProviderContract[]
 
-    /**
-     * Get the component's CLI route providers.
-     * Must return a simple array literal — no conditional logic.
-     */
-    getCliProviders(app: ApplicationContract): Array<new () => CliRouteProviderContract>
+    getCliProviders(app: ApplicationContract): CliRouteProviderContract[]
 
-    /**
-     * Get the component's HTTP route providers.
-     * Must return a simple array literal — no conditional logic.
-     */
-    getHttpProviders(app: ApplicationContract): Array<new () => HttpRouteProviderContract>
+    getHttpProviders(app: ApplicationContract): HttpRouteProviderContract[]
 }
 ```
 
@@ -118,33 +104,33 @@ import {HttpRouteProvider} from './HttpRouteProvider'
 
 export class HttpComponentProvider implements ComponentProviderContract {
 
-    getComponentProviders(app: ApplicationContract) {
+    getComponentProviders(app: ApplicationContract): ComponentProviderContract[] {
         return [
-            ContainerComponentProvider,  // HTTP depends on Container
-            EventComponentProvider,      // HTTP depends on Event
+            new ContainerComponentProvider(),  // HTTP depends on Container
+            new EventComponentProvider(),       // HTTP depends on Event
         ]
     }
 
-    getContainerProviders(app: ApplicationContract) {
+    getContainerProviders(app: ApplicationContract): ServiceProviderContract[] {
         return [
-            HttpContainerProvider,
-            HttpMiddlewareProvider,
+            new HttpContainerProvider(),
+            new HttpMiddlewareProvider(),
         ]
     }
 
-    getEventProviders(app: ApplicationContract) {
+    getEventProviders(app: ApplicationContract): ListenerProviderContract[] {
         return [
-            HttpEventProvider,
+            new HttpEventProvider(),
         ]
     }
 
-    getCliProviders(app: ApplicationContract) {
+    getCliProviders(app: ApplicationContract): CliRouteProviderContract[] {
         return []
     }
 
-    getHttpProviders(app: ApplicationContract) {
+    getHttpProviders(app: ApplicationContract): HttpRouteProviderContract[] {
         return [
-            HttpRouteProvider,
+            new HttpRouteProvider(),
         ]
     }
 }
@@ -235,9 +221,8 @@ export class UserServiceProvider implements ServiceProviderContract {
 
 ## HttpRouteProviderContract
 
-HTTP route provider. TypeScript has no reliable decorators — explicit route definitions only. `getControllerClasses()`
-returns string constants (no `::class` equivalent). Routes are complete data structures — they cannot be expressed as a
-publisher-style map without losing the metadata the router requires.
+HTTP route provider. TypeScript has no reliable decorators — explicit route definitions only. Routes are complete data
+structures — they cannot be expressed as a publisher-style map without losing the metadata the router requires.
 
 ```typescript
 // package: @valkyrja/http/routing/provider/contract
@@ -280,7 +265,7 @@ export class UserHttpRouteProvider implements HttpRouteProviderContract {
 
     /**
      * Handler is a method reference on this same class.
-     * Forge reads handler method bodies from this file only.
+     * Sindri reads handler method bodies from this file only.
      */
     getRoutes(): RouteContract[] {
         return [
@@ -317,13 +302,6 @@ import type {RouteContract} from '@valkyrja/cli/routing/data/contract'
  * Defines what a CLI route provider must implement.
  */
 export interface CliRouteProviderContract {
-    /**
-     * Get a list of controller class string constants.
-     * Returns empty array — TypeScript has no reliable annotations to scan.
-     * Must return a simple array literal — no conditional logic permitted.
-     */
-    getControllerClasses(): string[]
-
     /**
      * Get a list of explicit CLI route definitions.
      * Must return a simple array literal — no conditional logic permitted.
@@ -367,18 +345,16 @@ export interface ListenerProviderContract {
 Any method the build tool reads must return a single flat literal with no logic:
 
 ```typescript
-// ✅ simple array literal
-return [UserControllerClass, OrderControllerClass]
+// ✅ simple array of instances
+return [new UserContainerProvider(), new OrderContainerProvider()]
 
 // ✅ simple object literal with method reference
 return {[UserRepositoryClass]: this.publishUserRepository}
 
 // ✅ simple array of route objects
 return [
-    HttpRoute.get('/users', (c, args) => ...
-),
-HttpRoute.post('/users', (c, args) =>
-...),
+    HttpRoute.get('/users', this.indexUsers.bind(this)),
+    HttpRoute.post('/users', this.storeUser.bind(this)),
 ]
 
 // ❌ conditional logic
@@ -399,7 +375,7 @@ return [...this.getBaseRoutes(), ...this.getExtraRoutes()]
 
 ## Handler Method Pointer Convention
 
-All handler methods must be **static methods on the same class** as the provider or controller that defines the route or
+All handler methods must be **methods on the same class** as the provider or controller that defines the route or
 listener. This is the same pattern used by `publishers()` in service providers.
 
 **Why:** Sindri reads exactly one file per provider or controller. All imports for handler bodies are in that one file —
@@ -431,8 +407,8 @@ The same reasoning applies to listeners — they carry event type binding, prior
 alongside the handler. These cannot be expressed as a flat key/body map without losing the data the event dispatcher
 requires.
 
-Container bindings by contrast are simple key→factory pairs. The binding key IS the complete identity. This is why
-`publishers()` works as a map but `getRoutes()` must return complete route objects.
+Container bindings by contrast are simple key→factory pairs. This is why `publishers()` works as a map but `getRoutes()`
+must return complete route objects.
 
 ## Note on TypeScript Decorators and Missing Methods
 
