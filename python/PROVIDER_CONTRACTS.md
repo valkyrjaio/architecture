@@ -2,49 +2,118 @@
 
 ## Overview
 
+**Minimum Python version: 3.14+** — the framework requires PEP 690 lazy imports (see [Lazy Loading](#lazy-loading--pep-690) below).
+
 Python provider contracts differ from PHP/Java in several ways:
 
 - Decorators are **metadata markers** — they attach closure metadata to methods at import time but do NOT self-register
   routes. The framework reads metadata during bootstrap; skips it when loading from cache.
 - `inspect.getfile(ClassName)` resolves class to source file — equivalent of PHP's `ReflectionClass::getFileName()`
-- No `::class` needed — class objects are first-class values in Python, passed directly
+- No `::class` needed — `X()` creates an instance directly; Python classes are first-class callables
 - ABC enforces abstract contracts — `TypeError` raised on direct instantiation
-- `@staticmethod @abstractmethod` throughout — providers are stateless
+- Instance methods throughout — providers are instantiated and their methods called directly
 - Publisher methods have a `@handler` decorator carrying the closure — build tool reads the decorator argument from AST
 - `class_` helper available (trailing underscore because `class` is reserved) for FQN string derivation
 
 ---
 
+## Lazy Loading — PEP 690
+
+Python 3.14 ships PEP 690 lazy imports. Under PEP 690, a top-level `from X import Y` registers the name immediately
+but **defers execution of module `X`'s body** until something actually accesses `Y`. This is the mechanism that makes
+top-level provider imports safe — they do not load sub-provider modules at instantiation time.
+
+### Expected behavior
+
+```python
+from valkyrja.http.provider import HttpContainerProvider  # module body deferred
+
+class HttpComponentProvider(ComponentProviderContract):
+    pass  # instantiating this class does NOT trigger the HttpContainerProvider import
+
+provider = HttpComponentProvider()  # fine — no sub-provider modules loaded yet
+
+providers = provider.get_container_providers(app)
+# ↑ HttpContainerProvider() is called here — THIS fires the deferred import
+```
+
+When Sindri's cache is active, `get_container_providers()` is never called at runtime, so the sub-provider modules
+never load. This is exactly the intended behavior.
+
+### Eager-load exceptions
+
+PEP 690 treats any operation that goes beyond name identity as access, which forces the deferred load. The following
+patterns all trigger an eager load:
+
+- Using the class as a **list element or dict key** — `[MyClass]` or `{MyClass: ...}` counts as access
+- `isinstance(x, MyClass)` — forces load
+- Runtime-evaluated type hints — forces load
+- `hasattr`, `getattr`, introspection — forces load
+- Anything touching `__class__`, `__module__`, or other class attributes
+
+### Affected methods
+
+Two provider method categories cannot benefit from deferred loading because they must return live class objects:
+
+| Method                      | Why eager load is unavoidable                                         |
+|-----------------------------|-----------------------------------------------------------------------|
+| `get_controller_classes()`  | Returns `[MyController]` — placing the class in a list forces access |
+| `get_listener_classes()`    | Same — `[MyListener]` forces access                                   |
+
+`publishers()` dict keys are also class references in current implementations and carry the same constraint. If a
+string key is sufficient downstream, switching to string keys would make those imports deferrable.
+
+### Verification
+
+Before relying on this behavior, run a minimal test:
+
+```python
+import sys
+
+# In a fresh interpreter, import a provider but don't call its methods
+from valkyrja.http.provider.component import HttpComponentProvider
+
+assert 'valkyrja.http.provider.container' not in sys.modules  # sub-provider not loaded yet
+
+provider = HttpComponentProvider()
+
+assert 'valkyrja.http.provider.container' not in sys.modules  # still not loaded
+
+provider.get_container_providers(app)
+
+assert 'valkyrja.http.provider.container' in sys.modules  # loaded NOW
+```
+
+If the second assertion fails (module loaded at instantiation), PEP 690 is not active or not behaving as expected.
+
+---
+
 ## Type Hints
 
-Python classes are first-class `type` objects — passing a class directly is the idiomatic equivalent of PHP's `::class`
-and Java's `.class`. The type hints reflect this accurately:
+Provider list methods return **instances**, not class objects:
 
-| Method                      | Return type                                      | Reasoning                                                      |
-|-----------------------------|--------------------------------------------------|----------------------------------------------------------------|
-| `get_container_providers()` | `list[type]`                                     | Returns class objects implementing `ServiceProviderContract`   |
-| `get_event_providers()`     | `list[type]`                                     | Returns class objects implementing `ListenerProviderContract`  |
-| `get_cli_providers()`       | `list[type]`                                     | Returns class objects implementing `CliRouteProviderContract`  |
-| `get_http_providers()`      | `list[type]`                                     | Returns class objects implementing `HttpRouteProviderContract` |
-| `get_controller_classes()`  | `list[type]`                                     | Returns class objects carrying `@handler` decorated methods    |
-| `get_listener_classes()`    | `list[type]`                                     | Returns class objects carrying `@handler` decorated methods    |
-| `get_routes()`              | `list[RouteContract]`                            | Returns concrete route data objects                            |
-| `get_listeners()`           | `list[ListenerContract]`                         | Returns concrete listener data objects                         |
-| `publishers()`              | `dict[str, Callable[[ContainerContract], None]]` | Maps binding key to publisher function reference               |
+| Method                      | Return type                                      | Reasoning                                                        |
+|-----------------------------|--------------------------------------------------|------------------------------------------------------------------|
+| `get_container_providers()` | `list[ServiceProviderContract]`                  | Returns provider instances called directly by the framework      |
+| `get_event_providers()`     | `list[ListenerProviderContract]`                 | Returns provider instances called directly by the framework      |
+| `get_cli_providers()`       | `list[CliRouteProviderContract]`                 | Returns provider instances called directly by the framework      |
+| `get_http_providers()`      | `list[HttpRouteProviderContract]`                | Returns provider instances called directly by the framework      |
+| `get_controller_classes()`  | `list[type]`                                     | Returns class objects carrying `@handler` decorated methods      |
+| `get_listener_classes()`    | `list[type]`                                     | Returns class objects carrying `@handler` decorated methods      |
+| `get_routes()`              | `list[RouteContract]`                            | Returns concrete route data objects                              |
+| `get_listeners()`           | `list[ListenerContract]`                         | Returns concrete listener data objects                           |
+| `publishers()`              | `dict[str, Callable[[ContainerContract], None]]` | Maps binding key to publisher function reference                 |
 
-`list[type]` is used for class lists rather than `list[Type[SomeContract]]` because controller and listener classes do
-not implement a provider contract — they carry `@handler` decorators. `list[type]` is the honest and accurate type for
-any list of Python class objects.
-
-For stricter typing on provider class lists, `list[Type[ServiceProviderContract]]` etc. can be used and mypy/pyright
-will validate that the listed classes implement the correct contract.
+`list[type]` is used for controller and listener class lists because those classes do not implement a provider contract
+— they carry `@handler` decorators. `list[type]` is the honest and accurate type for any list of Python class objects.
 
 ---
 
 ## ComponentProviderContract
 
-Top-level aggregator. Returns lists of sub-provider classes. Build tool reads return values directly from AST — must be
-simple list literals with no conditional logic.
+Top-level aggregator. Returns lists of sub-provider **instances** by category. Build tool reads return values directly
+from AST — must be simple list literals with no conditional logic. Each list element must be a `X()` call expression —
+Sindri reads `Call.func` (a `Name` node) to extract the provider class name.
 
 ```python
 # package: valkyrja.application.provider.contract
@@ -65,53 +134,49 @@ class ComponentProviderContract(ABC):
 
     All methods must return simple list literals.
     No conditional logic permitted — Sindri reads these from AST.
+    Each list element must be an X() call expression.
     """
 
-    @staticmethod
     @abstractmethod
-    def get_component_providers(app: 'ApplicationContract') -> list[type['ComponentProviderContract']]:
+    def get_component_providers(self, app: 'ApplicationContract') -> list['ComponentProviderContract']:
         """
         Declare this component's dependencies on other components.
         The framework ensures listed components are registered before this one.
         Must return a simple list literal — no conditional logic.
         """
-        return []
+        ...
 
-    @staticmethod
     @abstractmethod
-    def get_container_providers(app: 'ApplicationContract') -> list[type['ServiceProviderContract']]:
+    def get_container_providers(self, app: 'ApplicationContract') -> list['ServiceProviderContract']:
         """
         Get the component's container service providers.
         Must return a simple list literal — no conditional logic.
         """
-        return []
+        ...
 
-    @staticmethod
     @abstractmethod
-    def get_event_providers(app: 'ApplicationContract') -> list[type['ListenerProviderContract']]:
+    def get_event_providers(self, app: 'ApplicationContract') -> list['ListenerProviderContract']:
         """
         Get the component's event listener providers.
         Must return a simple list literal — no conditional logic.
         """
-        return []
+        ...
 
-    @staticmethod
     @abstractmethod
-    def get_cli_providers(app: 'ApplicationContract') -> list[type['CliRouteProviderContract']]:
+    def get_cli_providers(self, app: 'ApplicationContract') -> list['CliRouteProviderContract']:
         """
         Get the component's CLI route providers.
         Must return a simple list literal — no conditional logic.
         """
-        return []
+        ...
 
-    @staticmethod
     @abstractmethod
-    def get_http_providers(app: 'ApplicationContract') -> list[type['HttpRouteProviderContract']]:
+    def get_http_providers(self, app: 'ApplicationContract') -> list['HttpRouteProviderContract']:
         """
         Get the component's HTTP route providers.
         Must return a simple list literal — no conditional logic.
         """
-        return []
+        ...
 ```
 
 ### HttpComponentProvider Implementation
@@ -128,34 +193,29 @@ from valkyrja.http.provider import (
 
 class HttpComponentProvider(ComponentProviderContract):
 
-    @staticmethod
-    def get_component_providers(app: ApplicationContract) -> list[type[ComponentProviderContract]]:
+    def get_component_providers(self, app: ApplicationContract) -> list[ComponentProviderContract]:
         return [
-            ContainerComponentProvider,  # HTTP depends on Container
-            EventComponentProvider,  # HTTP depends on Event
+            ContainerComponentProvider(),  # HTTP depends on Container
+            EventComponentProvider(),      # HTTP depends on Event
         ]
 
-    @staticmethod
-    def get_container_providers(app: ApplicationContract) -> list[type[ServiceProviderContract]]:
+    def get_container_providers(self, app: ApplicationContract) -> list[ServiceProviderContract]:
         return [
-            HttpContainerProvider,
-            HttpMiddlewareProvider,
+            HttpContainerProvider(),
+            HttpMiddlewareProvider(),
         ]
 
-    @staticmethod
-    def get_event_providers(app: ApplicationContract) -> list[type[ListenerProviderContract]]:
+    def get_event_providers(self, app: ApplicationContract) -> list[ListenerProviderContract]:
         return [
-            HttpEventProvider,
+            HttpEventProvider(),
         ]
 
-    @staticmethod
-    def get_cli_providers(app: ApplicationContract) -> list[type[CliRouteProviderContract]]:
+    def get_cli_providers(self, app: ApplicationContract) -> list[CliRouteProviderContract]:
         return []
 
-    @staticmethod
-    def get_http_providers(app: ApplicationContract) -> list[type[HttpRouteProviderContract]]:
+    def get_http_providers(self, app: ApplicationContract) -> list[HttpRouteProviderContract]:
         return [
-            HttpRouteProvider,
+            HttpRouteProvider(),
         ]
 ```
 
@@ -211,14 +271,13 @@ class ServiceProviderContract(ABC):
             )
     """
 
-    @staticmethod
     @abstractmethod
-    def publishers() -> dict[str, Callable[['ContainerContract'], None]]:
+    def publishers(self) -> dict[str, Callable[['ContainerContract'], None]]:
         """
         Return a map of binding key to publisher method reference.
         Must return a simple dict literal — no conditional logic permitted.
         """
-        return {}
+        ...
 ```
 
 ### UserServiceProvider Implementation
@@ -233,8 +292,7 @@ from app.services.contract import DatabaseClass
 
 class UserServiceProvider(ServiceProviderContract):
 
-    @staticmethod
-    def publishers() -> dict[str, Callable[[ContainerContract], None]]:
+    def publishers(self) -> dict[str, Callable[[ContainerContract], None]]:
         """
         Build tool reads this map from AST.
         Keys are string constants — Sindri writes them as module-level imports in the cache.
@@ -286,8 +344,12 @@ class HttpRouteProviderContract(ABC):
         then scans for @handler decorated methods.
         Returns empty list if using explicit routes only.
         Must return a simple list literal — no conditional logic permitted.
+
+        NOTE: Returning live class objects ([MyController]) forces PEP 690 deferred
+        imports to resolve immediately. This is an unavoidable exception — the class
+        object itself is required. Document imports accordingly.
         """
-        return []
+        ...
 
     @staticmethod
     @abstractmethod
@@ -300,7 +362,7 @@ class HttpRouteProviderContract(ABC):
         the metadata the router needs to build its dispatcher index.
         Must return a simple list literal — no conditional logic permitted.
         """
-        return []
+        ...
 ```
 
 ### UserHttpRouteProvider Implementation
@@ -330,7 +392,7 @@ class UserHttpRouteProvider(HttpRouteProviderContract):
     def get_routes() -> list[RouteContract]:
         """
         Handler is a method pointer on this same class.
-        Forge reads handler method bodies from this file only.
+        Sindri reads handler method bodies from this file only.
         """
         return [
             HttpRoute.get('/orders', UserHttpRouteProvider.index_orders),
@@ -427,7 +489,7 @@ class CliRouteProviderContract(ABC):
         Get a list of attributed controller or action classes.
         Must return a simple list literal — no conditional logic permitted.
         """
-        return []
+        ...
 
     @staticmethod
     @abstractmethod
@@ -436,7 +498,7 @@ class CliRouteProviderContract(ABC):
         Get a list of explicit CLI route definitions.
         Must return a simple list literal — no conditional logic permitted.
         """
-        return []
+        ...
 ```
 
 ---
@@ -463,8 +525,11 @@ class ListenerProviderContract(ABC):
         Build tool uses inspect.getfile() to locate each class source file,
         then scans for @handler decorated methods.
         Must return a simple list literal — no conditional logic permitted.
+
+        NOTE: Same eager-load exception as get_controller_classes() — live class
+        objects in the list force PEP 690 deferred imports to resolve immediately.
         """
-        return []
+        ...
 
     @staticmethod
     @abstractmethod
@@ -476,7 +541,7 @@ class ListenerProviderContract(ABC):
         the metadata the event dispatcher requires.
         Must return a simple list literal — no conditional logic permitted.
         """
-        return []
+        ...
 ```
 
 ---
@@ -525,14 +590,14 @@ pyright fully validate all field types.
 Any method the build tool reads must return a single flat literal with no logic:
 
 ```python
-# ✅ simple list literal
-return [UserController, OrderController]
+# ✅ simple list of instances
+return [HttpContainerProvider(), HttpMiddlewareProvider()]
 
 # ✅ simple dict literal with method reference
 return {UserRepositoryClass: UserServiceProvider.publish_user_repository}
 
 # ✅ simple list of route objects
-return [HttpRoute.get('/users', lambda c, args: ...)]
+return [HttpRoute.get('/users', UserHttpRouteProvider.index_users)]
 
 # ❌ conditional logic
 if condition:

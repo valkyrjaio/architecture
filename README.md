@@ -55,6 +55,7 @@ Cross-cutting architectural decisions that apply to all ports.
 | [`DISPATCH.md`](DISPATCH.md)                     | Handler contracts, typed signatures, dispatch deprecation |
 | [`DATA_CACHE.md`](DATA_CACHE.md)                 | Cache architecture, provider contracts, build flows       |
 | [`BUILD_TOOL.md`](BUILD_TOOL.md)                 | Build tool design, Bin extraction, AST implementations    |
+| [`STATIC_METHODS.md`](STATIC_METHODS.md)         | Static interface methods — cross-language design and registry pattern |
 
 Language Contracts
 ------------------
