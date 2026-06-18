@@ -14,5 +14,5 @@
 ```
 
 ## TODOs
-fo
+
 Missing badges for scrutinizer
