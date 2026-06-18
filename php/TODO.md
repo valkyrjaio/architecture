@@ -10,6 +10,8 @@
 # Changes for v26
 -----------------
 
+- Move stable release badge before PHP version badge to match Java and TypeScript
+
 - Tests for repos that have none (php cs fixer, phparkitect, etc)
     - Test the rules exist that we expect
     - Test the rules are what we expect configured how we expect.
