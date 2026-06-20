@@ -10,17 +10,8 @@
 # Changes for v26
 -----------------
 
+- Eventually test contracts as well to ensure they have the expected signatures
 - Move stable release badge before PHP version badge to match Java and TypeScript
-
-- Tests for repos that have none (php cs fixer, phparkitect, etc)
-    - Test the rules exist that we expect
-    - Test the rules are what we expect configured how we expect.
-    - Etc
-
-- We will need to remove the ResponseFileGenerator, and FileGenerator in the
-  future. We anyway need to rethink how we do the response cache so it can work
-  in other languages (I'm thinking Json for the response data and reconstruct a
-  response with that Json data, with headers, etc).
 
 ## Contract and Class name constants
 
@@ -224,6 +215,7 @@
 - Add StreamResource type
     - Can use this for mocking anywhere fopen etc are used
 - Undo the UuidV1 int cast change me thinks
+- 
 - Add fromMixed(mixed $value) to each support helper class of each type.
 
 ## Rector
