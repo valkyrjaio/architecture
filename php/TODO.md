@@ -11,7 +11,43 @@
 -----------------
 
 - Eventually test contracts as well to ensure they have the expected signatures
-- Move stable release badge before PHP version badge to match Java and TypeScript
+- Move stable release badge before PHP version badge to match Java and
+  TypeScript
+
+- Add more routing tests for both cli and http, especially dynamic routes in
+  http.
+    - Should ensure all possible perumations work
+        - options, arguments for cli
+        - dynamic routes in http
+        - various paths for static http routes
+
+## Branch coverage in CI
+
+- The coverage scripts now run with `--path-coverage` (all repos) so branch/path
+  coverage is reported alongside lines. **Treat branch/path as informational,
+  NOT
+  a 100% gate — in PHP it cannot reach 100%.** Xdebug path coverage instruments
+  *every internal function call* (`strpos`, `substr`, `property_exists`, …) as a
+  potential exception edge; those edges are never taken (the builtins don't
+  throw),
+  so they sit permanently uncovered. e.g. `AstReader::buildEnumCaseExpr` shows
+  "uncovered branches" on plain `strpos`/`substr` lines — there is no `throw`/
+  `if`
+  there to test. sindri is 100% line / 97% branch and that 97% is its ceiling.
+- So: keep **100% line coverage** as the CI gate (achievable, currently met in
+  valkyrja + sindri). Use `--path-coverage` output to *spot* a genuinely real
+  uncovered branch (a real `if`/ternary/`throw`/`catch` direction never taken),
+  then close it — extract the hard-to-reach bit into a `protected` seam and
+  override it in a fixture (as done for `UlidFactory`'s `unpackRandomBytes`
+  failure
+  via `UlidFactoryClass::setForceUnpackFail`). Real gaps also show up as the
+  handful of uncovered **lines**, which is the reliable signal; the rest of the
+  branch delta is Xdebug exception-edge noise.
+- **Java/TypeScript are different — there 100% branch IS achievable.** JaCoCo
+  (`BRANCH` counter) and Vitest (istanbul/v8) measure decision coverage WITHOUT
+  PHP/Xdebug's per-call exception edges, so a 100% branch gate is realistic
+  there.
+  (Flagged in their TODO.md files.)
 
 ## Contract and Class name constants
 
@@ -26,6 +62,14 @@
 
 ## Sindri
 
+- Ship a standalone, downloadable executable on each release so Sindri can be
+  used without installing it as a project dependency.
+    - PHP: build a **Phar** (e.g. via `humbug/box`) from `bin/sindri`, make it
+      executable, and attach it to the GitHub release as a release asset so it
+      can be downloaded and run directly (`php sindri.phar ...` or `./sindri`).
+    - Mirror this across the other ports — Java ships a runnable **jar**,
+      TypeScript ships a standalone binary (Node SEA / `bun build --compile`).
+      See each language's `TODO.md` for the per-language task.
 - "init" (or some name) command
     - Interactive – Stays open like Claude, and can allow a dev to just keep
       running commands within the same "session"?
@@ -215,7 +259,7 @@
 - Add StreamResource type
     - Can use this for mocking anywhere fopen etc are used
 - Undo the UuidV1 int cast change me thinks
-- 
+-
 - Add fromMixed(mixed $value) to each support helper class of each type.
 
 ## Rector
