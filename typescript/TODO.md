@@ -4,6 +4,14 @@
 
 Missing badges for scrutinizer, coverage %, sonarcloud maintainability
 
+### Branch coverage in CI
+
+Vitest coverage (istanbul or v8 provider) reports **branch coverage**. Set
+`coverage.thresholds.branches` to **100** (alongside lines/functions/statements)
+so every ternary / `&&`/`||` short-circuit / optional-chain / `switch` arm is
+exercised both ways — line coverage can read 100% while a branch is half-tested.
+PHP and Java are enforcing the same (see their `TODO.md` files).
+
 ## Port gaps (found while porting the Application tests)
 
 These are places where the TS port lags PHP. Tests currently assert the **current
@@ -82,3 +90,15 @@ target yet):
 - Event **ComponentProvider** / **ServiceProvider** (`Provider/`) — this is the
   missing `EventComponentProvider` referenced under the Application gap above
 - `Listener` / `ListenerHandler` **attributes** (`Attribute/`) — no TS attributes
+
+## Sindri
+
+- Ship a standalone, downloadable executable on each release so Sindri can be
+  used without installing it via npm.
+    - TypeScript: bundle `bin/sindri` to a single JS file (esbuild/rollup) and
+      produce a standalone binary — Node's **Single Executable Application**
+      (SEA), or `bun build --compile` / `deno compile` / `pkg` — then attach it
+      to the GitHub release as a release asset so it can be downloaded and run
+      directly (`./sindri`).
+    - This mirrors PHP shipping a **Phar** and Java shipping a runnable **jar**
+      on release — see each language's `TODO.md` for the per-language task.
