@@ -2,7 +2,8 @@
 
 ## Overview
 
-**Minimum Python version: 3.14+** — the framework requires PEP 690 lazy imports (see [Lazy Loading](#lazy-loading--pep-690) below).
+**Minimum Python version: 3.14+** for modern typing and language features. Note: PEP 690 lazy imports were
+**withdrawn** and never shipped — these contracts do **not** rely on them (see *Imports and Cold Start* below).
 
 Python provider contracts differ from PHP/Java in several ways:
 
@@ -17,74 +18,42 @@ Python provider contracts differ from PHP/Java in several ways:
 
 ---
 
-## Lazy Loading — PEP 690
+## Imports and Cold Start — No Lazy Imports (PEP 690 Withdrawn)
 
-Python 3.14 ships PEP 690 lazy imports. Under PEP 690, a top-level `from X import Y` registers the name immediately
-but **defers execution of module `X`'s body** until something actually accesses `Y`. This is the mechanism that makes
-top-level provider imports safe — they do not load sub-provider modules at instantiation time.
+> **PEP 690 (implicit lazy imports) was withdrawn and never shipped. Python 3.14 does *not* lazy-load imports.** An
+> earlier draft of these contracts assumed it would. Its successor, **PEP 810 (explicit lazy imports)**, is still under
+> discussion and unshipped. Treat lazy imports as a *possible future optimization*, not a mechanism these contracts
+> rely on.
 
-### Expected behavior
+Because there are no lazy imports today, a top-level `from valkyrja.http.provider import HttpContainerProvider`
+**executes that module's body eagerly** at import time. The contracts do **not** depend on deferral for correctness —
+they rely on two things that hold in every Python version:
 
-```python
-from valkyrja.http.provider import HttpContainerProvider  # module body deferred
+- **Cache means the provider tree is never walked at runtime.** When Sindri's cache is active,
+  `get_container_providers()` / `get_controller_classes()` / etc. are never called, so the provider modules they would
+  import are never imported at boot. The generated cache file references bindings by **string key** with
+  **lambda-wrapped** values (see `DATA_CACHE.md`), so loading it imports only the constants modules — not the providers.
+- **String binding keys avoid importing the bound class.** A string-literal key loads nothing; a class-object key would
+  force the import. This is plain Python, independent of any lazy-import feature.
 
-class HttpComponentProvider(ComponentProviderContract):
-    pass  # instantiating this class does NOT trigger the HttpContainerProvider import
+What is *not* avoided today: once a provider module is imported (no cache, or because the cache file references it), its
+top-level imports load eagerly. A future PEP 810 `lazy import` could defer those per-name — and the contracts would need
+no change to benefit — but they are correct without it. For cold-start-sensitive (e.g. Lambda) workloads, the Go or
+TypeScript port is the escape valve.
 
-provider = HttpComponentProvider()  # fine — no sub-provider modules loaded yet
+### If explicit lazy imports (PEP 810) later land
 
-providers = provider.get_container_providers(app)
-# ↑ HttpContainerProvider() is called here — THIS fires the deferred import
-```
+Should an opt-in `lazy import` form ship, these patterns would still force a deferred name to resolve immediately (they
+go beyond name identity), so they could never be deferred:
 
-When Sindri's cache is active, `get_container_providers()` is never called at runtime, so the sub-provider modules
-never load. This is exactly the intended behavior.
+- Using the class as a **list element or dict key** — `[MyClass]` or `{MyClass: ...}`
+- `isinstance(x, MyClass)`; runtime-evaluated type hints
+- `hasattr` / `getattr` / introspection; anything touching `__class__`, `__module__`, or other class attributes
 
-### Eager-load exceptions
-
-PEP 690 treats any operation that goes beyond name identity as access, which forces the deferred load. The following
-patterns all trigger an eager load:
-
-- Using the class as a **list element or dict key** — `[MyClass]` or `{MyClass: ...}` counts as access
-- `isinstance(x, MyClass)` — forces load
-- Runtime-evaluated type hints — forces load
-- `hasattr`, `getattr`, introspection — forces load
-- Anything touching `__class__`, `__module__`, or other class attributes
-
-### Affected methods
-
-Two provider method categories cannot benefit from deferred loading because they must return live class objects:
-
-| Method                      | Why eager load is unavoidable                                         |
-|-----------------------------|-----------------------------------------------------------------------|
-| `get_controller_classes()`  | Returns `[MyController]` — placing the class in a list forces access |
-| `get_listener_classes()`    | Same — `[MyListener]` forces access                                   |
-
-`publishers()` dict keys are also class references in current implementations and carry the same constraint. If a
-string key is sufficient downstream, switching to string keys would make those imports deferrable.
-
-### Verification
-
-Before relying on this behavior, run a minimal test:
-
-```python
-import sys
-
-# In a fresh interpreter, import a provider but don't call its methods
-from valkyrja.http.provider.component import HttpComponentProvider
-
-assert 'valkyrja.http.provider.container' not in sys.modules  # sub-provider not loaded yet
-
-provider = HttpComponentProvider()
-
-assert 'valkyrja.http.provider.container' not in sys.modules  # still not loaded
-
-provider.get_container_providers(app)
-
-assert 'valkyrja.http.provider.container' in sys.modules  # loaded NOW
-```
-
-If the second assertion fails (module loaded at instantiation), PEP 690 is not active or not behaving as expected.
+The two provider methods that must return live class objects — `get_controller_classes()` and `get_listener_classes()`
+(returning `[MyController]` / `[MyListener]`) — could therefore never be deferred even under PEP 810; today they simply
+import eagerly like everything else. Where a string key is sufficient downstream, `publishers()` string keys keep those
+bindings free of forced class imports.
 
 ---
 
@@ -345,9 +314,10 @@ class HttpRouteProviderContract(ABC):
         Returns empty list if using explicit routes only.
         Must return a simple list literal — no conditional logic permitted.
 
-        NOTE: Returning live class objects ([MyController]) forces PEP 690 deferred
-        imports to resolve immediately. This is an unavoidable exception — the class
-        object itself is required. Document imports accordingly.
+        NOTE: This returns live class objects ([MyController]), so their modules are
+        imported eagerly (there are no lazy imports — see Imports and Cold Start).
+        With cache active this method is never called, so those imports never happen
+        at boot.
         """
         ...
 
@@ -526,8 +496,8 @@ class ListenerProviderContract(ABC):
         then scans for @handler decorated methods.
         Must return a simple list literal — no conditional logic permitted.
 
-        NOTE: Same eager-load exception as get_controller_classes() — live class
-        objects in the list force PEP 690 deferred imports to resolve immediately.
+        NOTE: Same as get_controller_classes() — live class objects in the list are
+        imported eagerly; with cache active this method is never called at boot.
         """
         ...
 

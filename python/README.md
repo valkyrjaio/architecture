@@ -1,7 +1,7 @@
 # Python Port — Implementation Notes
 
 > Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `DISPATCH.md`, `DATA_CACHE.md`, `BUILD_TOOL.md`,
-`CONTRACTS_PYTHON.md`
+`PROVIDER_CONTRACTS.md`
 > Port order: Container → Dispatch → Event → Application → CLI → HTTP → Bin
 
 ---
@@ -76,8 +76,8 @@ class ComponentSpecificInvalidArgumentException(ComponentInvalidArgumentExceptio
 ### String constants as keys — same as Go and TypeScript
 
 Python requires string constants for container binding keys. Using class objects as keys forces the module to be
-imported at key definition time — the class object cannot exist without its module loading. This defeats Python 3.14's
-lazy import mechanism which Valkyrja relies on for cold start performance.
+imported at key definition time — the class object cannot exist without its module loading. String keys avoid that
+eager import entirely, independent of any lazy-import language feature (see §5).
 
 ```python
 # container_constants.py — required per component
@@ -96,7 +96,7 @@ container.bind(
 )
 
 repo = container.make(ContainerConstants.USER_REPOSITORY)
-# with Python 3.14 lazy imports, UserRepository loads here — not at boot
+# UserRepository is only *used* when the lambda runs; without PEP 810 its top-level import still loads eagerly
 ```
 
 ### FQN helper — for generating string constants
@@ -112,7 +112,7 @@ def class_(cls) -> str:
 
 ## 3. Provider Contracts
 
-**Reference:** `CONTRACTS_PYTHON.md`, `DATA_CACHE.md`
+**Reference:** `PROVIDER_CONTRACTS.md`, `DATA_CACHE.md`
 
 ### Type hints
 
@@ -224,156 +224,80 @@ def show(self, id: int) -> ResponseContract:
 
 ---
 
-## 5. Python Imports and Cold Start — Python 3.14 Is the Answer
+## 5. Python Imports and Cold Start — an Open Problem (PEP 690 Withdrawn)
 
-Eager imports are a well-known Python ecosystem problem. FastAPI, Django, and Flask all have it. Real-world applications
-on AWS Lambda have reported 10–30 second cold starts for large applications.
+Eager imports are a well-known Python cold-start cost. FastAPI, Django, and Flask all pay it; large applications on AWS
+Lambda have reported multi-second cold starts. Python imports every referenced module at import time, and **no stable
+language feature changes this today.**
 
-**This is a language-level problem and Python 3.14 solves it natively.**
+### The lazy-import plan changed — PEP 690 was withdrawn
 
-Valkyrja's Python port requires Python 3.14 minimum — lazy imports are a first-class language feature with no framework
-workarounds needed.
+An earlier draft of this port assumed **PEP 690 (implicit lazy imports)** would ship in Python 3.14 and make top-level
+imports lazy by default. **That did not happen.** PEP 690 was withdrawn and never merged; Python 3.14 does **not**
+lazy-load imports. Its successor, **PEP 810 (explicit lazy imports)** — an opt-in `lazy import ...` form — is still under
+discussion and unshipped as of this writing. Treat lazy imports as a **possible future optimization**, not something the
+port relies on.
 
-### How Python 3.14 Lazy Imports Work
+### Why the architecture still holds
 
-Python 3.14 makes **top-level module imports** lazy by default. Each import statement at the top of a module creates a
-lazy proxy — the actual module does not load until that name is first accessed during execution.
+The container design does **not** depend on lazy imports for correctness — it only *benefits* from them if they arrive:
 
-```python
-# top-level imports — lazy proxies created, nothing loaded yet
-from app.repositories import UserRepository  # proxy: UserRepository
-from app.repositories import OrderRepository  # proxy: OrderRepository
-from app.services import EmailService  # proxy: EmailService
+- **String-constant binding keys** avoid importing the bound class at key-definition time. This is plain Python, true in
+  every version: a string literal loads nothing, whereas a class-object key forces the import.
 
+  ```python
+  # class object key — forces module import when the dict key is evaluated
+  {UserRepositoryContract: lambda: ...}  # UserRepositoryContract accessed → loads
 
-class UserServiceProvider:
-    @staticmethod
-    def publish_user_repository(c):
-        # UserRepository accessed here for the first time — loads NOW
-        c.set_singleton(key, UserRepository(c.make(db_key)))
-        # OrderRepository never accessed in this method — never loads
+  # string key — no import triggered
+  {'app.repositories.UserRepositoryContract': lambda: ...}  # string literal — nothing loads
+  ```
 
-    @staticmethod
-    def publish_order_repository(c):
-        # OrderRepository accessed here for the first time — loads NOW
-        c.set_singleton(key, OrderRepository(c.make(db_key)))
-        # EmailService never accessed in this method — never loads
-```
+- **Lambda-wrapped values** defer *when the provider method is referenced* from cache-load time to first resolution.
+  Also version-independent — a name inside a lambda body is not evaluated until the lambda runs:
 
-**Critically:** imports inside function/method bodies use `EAGER_IMPORT_NAME` and are always eager even with Python
-3.14. Only top-level module imports are lazified. This is the correct behaviour for Valkyrja — all imports are at module
-level, and each import only loads when the method that uses it is called.
+  ```python
+  # NO lambda — UserServiceProvider accessed at module level when the dict is built (loads at cache load)
+  {ContainerConstants.USER_REPOSITORY: UserServiceProvider.publish_user_repository}
 
-### The Full Lazy Loading Chain
+  # WITH lambda — UserServiceProvider inside the lambda body — loads only when the lambda is called
+  {ContainerConstants.USER_REPOSITORY: lambda: UserServiceProvider.publish_user_repository}
+  ```
 
-```python
-# generated AppContainerData
-from app.constants.container_constants import ContainerConstants  # loads at boot
+  The lambda wrapper is **Python-only**. PHP's `[SomeClass::class, 'method']` uses `::class`, a compile-time string with
+  no class loading; compiled languages have no equivalent concern.
 
-# provider names inside lambdas — accessed only when lambda is called
-APP_CONTAINER_DATA = {
-    ContainerConstants.USER_REPOSITORY: lambda: UserServiceProvider.publish_user_repository,
-    ContainerConstants.ORDER_REPOSITORY: lambda: OrderServiceProvider.publish_order_repository,
-    ContainerConstants.EMAIL_SERVICE: lambda: EmailServiceProvider.publish_email_service,
-}
-```
+**Why not a lambda as the key?** The deferral trick that works for values cannot work for keys — Python must evaluate
+every key at dict-construction time to know where to store the value, and would have to re-call a key-lambda on every
+lookup. **String constants are the correct and final answer for binding keys** (same as Go and TypeScript);
+per-component constants files are required. Accepted and closed.
 
-```
-Cache file loads at boot:
-  ✓ ContainerConstants loads (accessed as dict key at module level)
-  ✗ UserServiceProvider NOT loaded — inside lambda, not accessed
-  ✗ OrderServiceProvider NOT loaded — inside lambda, not accessed
-  ✗ EmailServiceProvider NOT loaded — inside lambda, not accessed
+What none of this removes today is the **top-level `import` of a provider's own dependencies**: once a provider module
+loads, its module-level imports load eagerly. A future PEP 810 could turn those into `lazy import` and defer them
+per-name — and the framework would need no change to benefit — but it works correctly without it.
 
-Lambda for USER_REPOSITORY called (first resolution):
-  ✓ UserServiceProvider module loads
-  ✓ Top-level imports become lazy proxies:
-      UserRepository proxy created  — not loaded yet
-      OrderRepository proxy created — not loaded yet
-      EmailService proxy created    — not loaded yet
-
-publish_user_repository(container) called:
-  ✓ UserRepository name accessed → UserRepository module loads
-  ✗ OrderRepository never accessed in this method → never loads
-  ✗ EmailService never accessed in this method → never loads
-
-Lambda for ORDER_REPOSITORY called (if ever resolved):
-  ✓ OrderServiceProvider module loads (if different file)
-  → publish_order_repository accesses OrderRepository → loads
-  ✗ EmailService still never loaded
-```
-
-Each name only loads when it is actually accessed during execution — per name, not per module load. A service provider
-with ten publishers only loads the service classes for the publishers that are actually called.
-
-### Why the Lambda Wrapper Is Still Needed
-
-With Python 3.14 lazy imports, a name inside a lambda body is a lazy proxy — it is not accessed until the lambda
-executes. A name at module level (e.g. as a dict key) is accessed when the module loads. The lambda is what separates "
-accessed at module load" from "accessed at first resolution":
-
-```python
-# NO lambda — UserServiceProvider accessed at module level when dict is built
-APP_CONTAINER_DATA = {
-    ContainerConstants.USER_REPOSITORY: UserServiceProvider.publish_user_repository,
-    # UserServiceProvider accessed here ↑ — loads when cache file loads
-}
-
-# WITH lambda — UserServiceProvider inside lambda body — deferred
-APP_CONTAINER_DATA = {
-    ContainerConstants.USER_REPOSITORY: lambda: UserServiceProvider.publish_user_repository,
-    # UserServiceProvider NOT accessed here — loads when lambda is called
-}
-```
-
-The lambda wrapper is **Python-only**. PHP's `[SomeClass::class, 'method']` uses `::class` which is a compile-time
-string — no class loading. Compiled languages have no equivalent concept.
-
-### String Keys for Container Bindings
-
-Class object keys require the class to be imported — the class object cannot exist without its module loading. Python
-uses **string constants** for container binding keys — same as Go and TypeScript:
-
-```python
-# class object key — forces module import when dict key is evaluated
-{UserRepositoryContract: lambda: ...}  # UserRepositoryContract accessed → loads
-
-# string key — no import triggered
-{'app.repositories.UserRepositoryContract': lambda: ...}  # string literal — nothing loads
-```
-
-**Why not a lambda as the key?** The lambda deferral trick that works for values cannot work for keys. Python must
-evaluate every key at dict construction time to know where to store the value — `{lambda: UserRepositoryContract: ...}`
-would still require resolving the lambda immediately to build the dict. Even if Python allowed it, the container would
-have to call the key lambda on every lookup, defeating fast key resolution entirely. String constants are the correct
-and final answer for binding keys.
-
-**Decision:** Python container binding keys are always string constants — same as Go and TypeScript. Per-component
-constants files are required. This is accepted and closed.
-
-### What the Cache Provides
+### What the cache provides (independent of lazy imports)
 
 ```
 Without cache — every boot:
-  ✗ Traverse provider tree
+  ✗ Traverse the provider tree
   ✗ Scan @handler decorators across all controllers
-  ✗ Build route dispatcher index (regex compilation, path indexing)
+  ✗ Build the route dispatcher index (regex compilation, path indexing)
   ✗ Register all container bindings
-  + All modules load eagerly
 
-With cache + Python 3.14 — every boot:
+With cache — every boot:
   ✓ Load four pre-built data classes
-  ✓ Skip provider tree traversal entirely
-  ✓ Skip annotation scanning entirely
-  ✓ Skip route index construction entirely
-  + Only constants modules load at boot
-  + Everything else loads per-request, per-name, on first access
+  ✓ Skip provider-tree traversal, annotation scanning, and route-index construction
 ```
+
+Cache removes the framework's own boot work. It does **not** eliminate Python's module-import cost — that remains the
+language's cold-start weakness until (and unless) explicit lazy imports ship.
 
 ### The Multi-Language Escape Valve
 
-For Lambda-heavy workloads where cold starts remain a concern, the Go or TypeScript port provides compiled binary
-startup times within the same framework ecosystem. Same architecture, same patterns, different runtime.
+For Lambda-heavy workloads where cold start is the binding constraint, the **Go or TypeScript** port gives compiled /
+fast-start runtimes within the same framework ecosystem — same architecture, same patterns, different runtime. This is
+the recommended answer for cold-start-sensitive deployments, rather than a language feature that has not materialized.
 
 ---
 
@@ -429,7 +353,7 @@ class Container:
         return self._singletons[key]
 ```
 
-**Forge** — reads `publishers()` from AST. Writes constant keys as module-level imports (load at boot). Wraps method
+**sindri** (the build tool) — reads `publishers()` from AST. Writes constant keys as module-level imports (load at boot). Wraps method
 reference values in lambdas (load only when binding resolved). Cache matches the container's internal format exactly:
 
 ```python
@@ -533,7 +457,7 @@ anywhere the function is accessible.
 
 - Cache optional in dev — full provider tree traversal at import
 - Cache required for production — build tool generates `AppHttpRoutingData` etc.
-- `valkyrja-forge` Python implementation uses `ast` module + `inspect.getfile()`
+- `sindri` Python implementation uses `ast` module + `inspect.getfile()`
 
 ### Worker (ASGI)
 
@@ -564,11 +488,11 @@ worker.run(app)
 
 ---
 
-## 9. Build Tool — valkyrja-forge Python — valkyrja-forge Python
+## 9. Build Tool — sindri (Python)
 
 **Reference:** `BUILD_TOOL.md`
 
-- Separate PyPI package: `valkyrja-forge`
+- Separate PyPI package: `sindri`
 - Dev dependency only — never in production
 - Uses `ast` (stdlib) + `inspect` (stdlib) — no external AST library needed
 - `inspect.getfile(ClassName)` resolves any importable class to its source file
@@ -612,4 +536,4 @@ deploy with generated files
 9. Route and listener data classes
 10. CGI and ASGI entry points
 11. Dispatch component
-12. valkyrja-forge Python implementation
+12. sindri Python implementation

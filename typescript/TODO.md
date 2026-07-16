@@ -4,6 +4,24 @@
 
 Missing badges for scrutinizer, coverage %, sonarcloud maintainability
 
+### High priority — rename test `classes` → `fixtures`
+
+**Cross-language change — mirror this in every port (Go, Java, PHP, Python) so
+the test trees stay 1:1.** Rename the reusable-test-double directory from
+`classes` to `fixtures`. "Fixtures" is the widely-understood term for reusable
+test doubles/sample classes; "classes" is generic and reads oddly next to
+`unit`/`functional`.
+
+TypeScript specifics:
+
+- Move `tests/classes/` (or wherever the reusable doubles live) → `tests/fixtures/`
+  and update every import path across the Vitest suites.
+- Update any path aliases / `tsconfig` `paths`, ESLint/Prettier globs, and Vitest
+  coverage include/exclude that name the `classes` dir.
+- Decide whether the `*Class` file/suffix convention also becomes `*Fixture`
+  (preferred for full parity) or stays — pick one and apply it everywhere.
+- Update `TESTING_METHODOLOGY.md` once the rename lands.
+
 ### Branch coverage in CI
 
 Vitest coverage (istanbul or v8 provider) reports **branch coverage**. Set
