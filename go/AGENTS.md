@@ -30,10 +30,12 @@ Go idiom. Authoritative port detail: [`README.md`](README.md),
 
 ### Errors (not exceptions)
 
-Go has no exceptions — errors are values. The throwable naming parity is kept on
-the error types (`ValkyrjaRuntimeException`, `ValkyrjaInvalidArgumentException` as
-exported structs) with an unexported marker interface (`valkyrjaThrowable`
-embedding `error`) standing in for the abstract base. Return errors; do not
+Go has no exceptions — errors are values, and Go uses the **`*Error` suffix**
+throughout (not `*Exception`, which is foreign to Go). The error types are
+exported structs — `ValkyrjaRuntimeError`, `ValkyrjaInvalidArgumentError`,
+`ContainerNotFoundError`, etc. — with an unexported marker interface
+(`valkyrjaThrowable` embedding `error`) standing in for the abstract base and
+unexported categoricals like `containerRuntimeError`. Return errors; do not
 `panic` for normal control flow. Detail: [`../THROWABLES.md`](../THROWABLES.md).
 
 ---
