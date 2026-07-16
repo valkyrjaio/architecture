@@ -5,9 +5,9 @@ covering everything from studying the existing ports, to the architecture
 documents, to the `template` repo, to the reusable CI workflows and rulesets in
 `.github`, to the framework/build-tool repos themselves.
 
-> **How to read this.** The body (§0–§8) is written to be **language-agnostic** —
+> **How to read this.** The body (§0–§9) is written to be **language-agnostic** —
 > it describes the process and the invariants that hold for *any* port. Concrete,
-> language-specific quirks live in the **Findings log** (§9). Wherever the body
+> language-specific quirks live in the **Findings log** (§10). Wherever the body
 > says "see Findings," expect that a real language hit a wrinkle there and yours
 > might too. When you finish a port, append your own findings — this is a living
 > document.
@@ -27,6 +27,7 @@ Before touching anything, understand the moving parts:
 | **Ruleset** | `valkyrjaio/.github/rulesets/<lang>/` | Required-status-check branch protection |
 | **Framework repo** | `valkyrjaio/valkyrja-<lang>` | The runtime (zero AST/build deps) |
 | **Build tool repo** | `valkyrjaio/sindri-<lang>` (naming varies) | Dev-only cache generator (AST / compiler API) |
+| **Application repo** | `valkyrjaio/application-<lang>` (naming varies) | The runnable example app users clone; wired against the *published* framework + build tool |
 | **Entry adapters** | `entry/*` in the framework repo | Server adapters for the language's ecosystem |
 | **Org config** | `SUPPORTED_LANGUAGES` var, org secrets | Publishing credentials, language enablement |
 
@@ -36,7 +37,10 @@ For a *new* language, first pick the **closest existing port** to crib from — 
 statically-typed/compiled language mirrors the compiled ports; a
 dynamic/interpreted one mirrors the interpreted ports. The `template` repos of all
 languages are near-identical in shape, so **diffing two of them is the fastest way
-to learn the skeleton**.
+to learn the skeleton**. Then diff the closest port's **three "real" repos** the same
+way — `template` shows the bare skeleton, `application` shows a fully-wired runnable app,
+and `sindri` shows the code-gen — so you see the same conventions at three levels of
+completeness before you write a line.
 
 ---
 
@@ -77,6 +81,12 @@ Then **decide and write down** (these become the Layer-2 docs in Phase 1):
 - **Handler/attribute mechanism** — how the handler marker is expressed as **inert
   metadata**, never a self-registrar.
 - **Build tool AST strategy** — which parser/analyzer the build tool uses.
+- **Build tool packaging / distribution** — how the build tool ships as a runnable
+  CLI (bundled script, compiled binary, published console-entry, …) and how the
+  `application` and every other repo invoke it.
+- **Generated-file seeding** — the build tool emits per-app cache files that are
+  gitignored; decide how a fresh clone stays green (ship `.example` twins + the
+  ecosystem's install hook that copies them into place).
 - **Deployment model / entry adapters** — the server story and whether a
   CGI/serverless mode exists.
 
@@ -170,7 +180,7 @@ reusables), `update-dependencies.yml`, `release-new-version.yml`,
 `cherry-pick-commits.yml`, `restore-branch-from-backup.yml`. The
 language-agnostic reusables already exist and are pinned to a SHA; the
 language-specific `_*-<lang>.yml` may not exist yet — reference them and let
-pinning follow (see Phase 3 ordering note, and §7 on automatic ref-pinning).
+pinning follow (see Phase 3 ordering note, and §8 on automatic ref-pinning).
 
 **VALIDATE THE GATE LOCALLY before committing.** Run the full CI gate through the
 root facade on the actual template. This is the one part you *can* verify without
@@ -280,8 +290,19 @@ detection points — pick it in Phase 0 and use it consistently in every repo na
 
 ## 6. Phase 5 — Framework, build tool, and adapter repos
 
-With the scaffolding in place, port the framework itself into `valkyrja-<lang>`
-(and the build tool into `sindri-<lang>`), created from the `template`.
+With the scaffolding in place, port the runtime and its dev tooling. All three repos
+below are **cloned from the `template`** and inherit its root facade, per-tool CI
+isolation, and workflow set.
+
+**Repo release ordering (chicken-and-egg).** The build tool depends on the *published*
+framework, and the `application` (Phase 6) depends on the *published* framework **and**
+build tool. So the natural order is **framework → build tool → application**. During
+development, don't wait on releases: wire the downstream repo to the local upstream with
+a composite/workspace build (the same pattern the adapters use — see
+[`GRPC_IMPLEMENTATION.md`](GRPC_IMPLEMENTATION.md) §Adapters), verify it compiles/greens,
+then release upstream and bump the pin.
+
+### Framework repo (`valkyrja-<lang>`)
 
 - **Component port order:** Container → Dispatch → Event → Application → CLI →
   HTTP → Bin.
@@ -294,9 +315,84 @@ With the scaffolding in place, port the framework itself into `valkyrja-<lang>`
   the two-job structure (`release` + `publish`), unlike the template.
 - Add `entry/*` server adapters per the deployment decision.
 
+### Build tool repo (`sindri-<lang>`)
+
+The build tool is the **dev-only cache generator** that keeps the framework AST-free: it
+statically analyzes an application and emits pre-computed data classes the framework loads
+at boot, so dispatch needs **zero reflection**. It is **itself a Valkyrja application** —
+it uses the framework's own container and CLI — so it is built from the `template` like any
+other repo and depends on the *published* framework (it reads the framework's provider and
+attribute/decorator contracts).
+
+- **Pipeline shape** (mirror the reference port's module layout): `Ast/` — readers that
+  parse (never execute) the app's `Config`, walk the provider tree
+  (component/service/route/listener providers), and read the per-protocol route/param/
+  middleware attributes, returning immutable result/data types; `Generate/` — the
+  orchestrator that drives read → generate; `Generator/` — one generator per output cache
+  file; plus its own `Cli/Command`, `Provider`, `Constant`, and `Throwable` trees.
+- **What `sindri generate <config-path>` does:** read the app `Config` → walk its providers
+  → extract container bindings, per-protocol routes, and event listeners → emit the cache
+  data classes (one per concern: container, event, and each protocol's routing) that
+  **extend the framework's base data classes**. Write **only when content changes** so a
+  no-op run is clean.
+- **Read, never execute.** The tool works from source/AST, so it must resolve imports and
+  class→file references itself; it tolerates only the simple literal shapes the providers
+  actually use (arrays/objects of class references). This is what lets it run before the
+  app is runnable.
+- **AST engine is per-language → Findings.** Which parser/analyzer and code-emitter the
+  tool uses (e.g. a compiler-API wrapper vs. the stdlib AST module vs. an analysis
+  framework) is a language decision recorded in Phase 0 and detailed in the Findings log.
+- **Distribution.** Ship it as a runnable CLI via a `bin`/console entry (some ecosystems
+  bundle to a single self-contained executable; others expose an installed console
+  script) so every consuming repo invokes it by the same command name through the root
+  facade.
+
+### Entry adapters
+
+Add `entry/*` server/worker adapters per the deployment decision — thin translation
+layers over the published framework plus a native driver/server library, per
+[`ADDING_A_MODULE.md`](ADDING_A_MODULE.md) §Adapters.
+
 ---
 
-## 7. Cross-cutting conventions (apply everywhere)
+## 7. Phase 6 — The application starter repo (`application-<lang>`)
+
+The `application` repo is the **runnable example app** users clone to start a project — a
+GitHub "template" repository. It is **not** the `template` repo: `template` is the minimal
+structural source-of-truth every repo is cloned from; `application` is a fully-wired,
+working app that demonstrates the framework end-to-end. Build it **after** the framework
+and build tool (it depends on **both**, published), cloning the sibling `application` and
+translating it.
+
+**Per-protocol sub-app anatomy.** The app is organized into one sub-app per protocol
+(`Http/`, `Cli/` today; a new one lands here whenever a protocol module is added — see
+[`ADDING_A_MODULE.md`](ADDING_A_MODULE.md)). Each sub-app mirrors the same shape:
+
+- **`App`** — the entry class, extending the framework's protocol entry (HTTP/CLI/…).
+- **`Config`** (+ a committed **`Config.example`** twin) — namespace, base path, version,
+  data path/namespace, and the registered component providers.
+- **`Controller/`** — example controllers, plus an `Abstract` base extending the
+  framework's controller. `Cli/` additionally has **`Command/`** examples.
+- **`Provider/`** — the component/service/data/route provider set that wires the sub-app.
+- **`Data/`** — the **generated** cache classes (container, event, routing) that the build
+  tool emits, each with a committed **`.example`** twin.
+
+**Generated-file seeding.** The generated `Config` and `Data/*` are gitignored; commit
+`.example` twins and an install hook (per the Phase 0 decision) that copies each `.example`
+into place on a fresh clone, so the app type-checks/tests green before the build tool is
+ever run. Expose **`sindri:<proto>` regen shortcuts** through the root facade (one per
+sub-app `Config`) that re-run the build tool to refresh the cache after providers/routes
+change.
+
+**CI & tests.** Keep full `.github/ci/<tool>/` isolation and the workflow set at parity
+with the `template`. Tests are the mirrored unit tree at **100% coverage** **plus
+functional tests that boot the full app** and drive each protocol end-to-end (per
+[`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md)); reusable controllers/commands are
+fixtures.
+
+---
+
+## 8. Cross-cutting conventions (apply everywhere)
 
 - **Definition of done:** every code branch tested, all tests pass, the *full* CI
   gate green, coverage 100% (line and branch where supported) and never dropping.
@@ -321,7 +417,7 @@ With the scaffolding in place, port the framework itself into `valkyrja-<lang>`
 
 ---
 
-## 8. Master checklist
+## 9. Master checklist
 
 **Phase 0 — decide**
 - [ ] Read the architecture canon + the closest existing language's `<lang>/`
@@ -329,6 +425,7 @@ With the scaffolding in place, port the framework itself into `valkyrja-<lang>`
 - [ ] Contracts mechanism; binding-key strategy (string vs reference)
 - [ ] Throwable→native-root mapping; taxonomy segment spelling + escapes
 - [ ] Handler/metadata mechanism; build-tool AST strategy; deployment model
+- [ ] Build-tool packaging/distribution; generated-file seeding (`.example` + install hook)
 - [ ] **Verify every "load-bearing" language feature actually exists today**
 
 **Phase 1 — architecture docs**
@@ -356,15 +453,24 @@ With the scaffolding in place, port the framework itself into `valkyrja-<lang>`
 - [ ] `-<lang>$` block in `_enforce-repo-settings.yml`
 - [ ] Fill in the `#### <Language>` section of `.github/CONTRIBUTING.md` (checks + local commands)
 
-**Phase 5 — framework/build-tool/adapters**
+**Phase 5 — framework/build-tool/adapters** *(order: framework → build tool → application)*
 - [ ] `valkyrja-<lang>` + `sindri-<lang>` from the template
 - [ ] Ports in component order, code+tests together, 100% coverage
 - [ ] `publish` job wired into the framework repo's `release-new-version.yml` (if publishing)
+- [ ] Build tool: `Ast → Generate → Generator` pipeline; cache classes extend framework base
+      data classes; `bin`/CLI distribution; depends on the *published* framework
 - [ ] `entry/*` adapters
+
+**Phase 6 — application starter repo**
+- [ ] `application-<lang>` from the template, against *published* framework + build tool
+- [ ] Per-protocol sub-apps (`App`, `Config`+`.example`, `Controller`(+`Abstract`), `Provider` set, `Data` cache, CLI `Command`)
+- [ ] `.example` twins + install-hook seeding; `sindri:<proto>` regen shortcuts
+- [ ] `.github/ci` + workflow parity with the template
+- [ ] Unit tests at 100% + functional tests that boot the app end-to-end
 
 ---
 
-## 9. Findings log
+## 10. Findings log
 
 Concrete, language-specific wrinkles that arose per port. Treat each as a
 *possibility to check for* in your language — the analogous issue may or may not
