@@ -168,3 +168,63 @@ were replaced with explicit ordered-map loops.
       config or resolve provider/controller classes referenced from it. Confirm
       Sindri can find and read the right config from outside the app's vendor tree
       before adopting this layout in PHP.
+
+### Sindri generation bugs found comparing Java output to PHP (June 2026)
+
+Generating the application's `App*Data` against the published Sindri 26.1.1 produced
+output badly diverging from PHP. Fixes are being made in `java/sindri`:
+
+- **[FIXED] HTTP route values were not real suppliers.** `HttpRouteAttributeReader`
+  stored `new NameExpr(name)`, so `routes()` emitted `"version", version` (a bare,
+  undefined identifier — non-compiling) instead of `() -> new Route(...)`. Now builds
+  a `Supplier<RouteContract>` with the handler method-ref and request methods.
+- **[FIXED] HEAD method dropped from `paths()`.** `AstHttpDataFileGenerator.buildPathsBody`
+  skipped `HEAD`; PHP includes it. Removed the skip.
+- **[FIXED] Dynamic routes + `dynamicPaths()`/`regexes()` not generated.** `regexes()` was
+  hardcoded to `Map.of()`; dynamic routes (`{param}` paths) weren't detected and their
+  `Parameter`s/regex weren't emitted. Fixed: `HttpRouteParameterReader` now reads
+  `@Parameter`/`@Parameters` (resolving `Regex.*` constants via reflection); the reader
+  detects `{` paths, precomputes the match regex by running the **real framework
+  `Processor`** (drift-proof), and emits a `DynamicRoute` supplier; the generator emits
+  `regexes()` and the dynamic `paths()`. Unit-verified in `generatesExpectedDynamicRouteContent`
+  (asserts the `DynamicRoute` supplier, the `Regex.ALPHA`→`[a-zA-Z]+` resolution, the computed
+  `(?<value>…)` regex, populated `dynamicPaths()`/`regexes()`, and that the whole generated
+  file parses as valid Java). **App port gap (separate):** the app's `HomeController` still
+  lacks the dynamic route PHP has — add it to the Java app to get matching output.
+- **[FIXED] `AppContainerData` missing framework providers (~36 of ~40 callbacks).**
+  `fqnToFilePath` only resolved app-namespace source, so framework providers
+  (`io.valkyrja.*`, reached via `HttpApplicationComponentProvider`) were skipped, and
+  `collectProviderData` only recursed one level. Fixed by (1) `resolveSourceFromClasspath`
+  — resolving a framework class's `.java` from the valkyrja **sources jar** on the
+  classpath and staging it as a temp file (the portable equivalent of PHP's
+  `ReflectionClass::getFileName()`), (2) full breadth-first recursion of the
+  component-provider graph with a visited set, (3) adding `io.valkyrja:valkyrja:<v>:sources`
+  to Sindri's runtime classpath and to the application's `sindri` task configuration.
+  Unit-verified in `resolvesFrameworkProvidersFromClasspath` (app source in a temp dir +
+  a "framework" provider, two levels deep, resolved from the test classpath).
+  **Caveat:** not yet run end-to-end against the *real* valkyrja sources — that needs the
+  app to regenerate with this Sindri build, which happens after a Sindri release. The real
+  sources jar is confirmed on the classpath and contains the provider `.java`.
+
+### Test gaps to strengthen in ALL THREE languages (Java/PHP/TS)
+
+The bugs above slipped through because the end-to-end generate test
+(`GenerateDataFromConfigCommandTest`) only asserted the four `App*Data` files **exist**,
+not their **content** — so non-compiling/empty output passed. When fixing each bug,
+strengthen tests to assert the generated content, and mirror these in PHP and TS:
+
+- **Assert generated `routes()` content**: a real `() -> new Route(...)` supplier with
+  the handler method-ref and request methods (not a bare name); the bare-name placeholder
+  must never appear. (Done in Java's `generatesExpectedHttpRoutingContent`.)
+- **Assert `paths()` includes `HEAD`** for default-method routes. (Done in Java.)
+- **Assert `AppContainerData` callbacks include framework-provider publishers**, not just
+  app-local ones — requires a fixture whose component provider pulls in a "framework"
+  provider resolved from outside the app namespace. (Done in Java's
+  `resolvesFrameworkProvidersFromClasspath`, including a two-levels-deep provider to guard
+  the recursion depth.)
+- **Assert dynamic-route output**: `DynamicRoute` supplier, populated `dynamicPaths()` and
+  `regexes()`, and that `Regex.*` parameter constants resolve. (Done in Java's
+  `generatesExpectedDynamicRouteContent`.)
+- **Parse the generated file** in a test so malformed output / bad escaping is caught
+  structurally, not just by substring. (Done in Java via `StaticJavaParser.parse` on the
+  generated `AppHttpRoutingData`; ideally extend to a full compile, and to PHP/TS.)

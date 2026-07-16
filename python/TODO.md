@@ -4,6 +4,21 @@
 
 ---
 
+## High priority — name test fixtures `fixtures`, not `classes`
+
+**Cross-language change — mirror this in every port (Go, Java, PHP, TypeScript)
+so the test trees stay 1:1.** Reusable test doubles/sample classes live under a
+`fixtures` package/dir, **not** `classes`. "Fixtures" is the widely-understood
+term; "classes" is generic and reads oddly next to `unit`/`functional`. Python is
+not ported yet, so build it this way from the start (no rename needed):
+
+- [ ] Put reusable doubles under `tests/fixtures/` (mirroring PHP's `Fixtures`
+      subdivisions: `provider`, `contract`, …), never `tests/classes/`.
+- [ ] Decide whether the `*Class` suffix convention also becomes `*Fixture`
+      (preferred for full parity) — pick one and apply it everywhere.
+
+---
+
 ## Throwables
 
 - [ ] Implement `ValkyrjaThrowable(BaseException, ABC)` — abstract

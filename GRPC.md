@@ -318,7 +318,9 @@ All in framework code, no user involvement required:
 - `Router` around delegation to `RouteMatched`/`RouteNotMatched` middleware, the user handler, and `RouteDispatched`
   middleware.
 - `MiddlewareHandler` before invoking its wrapped middleware.
-- `ServiceResponse.messages.write()` (inside the adapter's write loop) before each outbound message write.
+- The adapter's message-drain loop: outbound messages are a pull-based iterable, drained through
+  `call.cancellable(...)`, which checks cancellation before yielding each message and exits iteration early once the
+  call is cancelled. There is no push `write()` channel; the check lives at each pull step.
 
 Every orchestrator boundary runs the two-question check. Beyond `ServiceHandler` entry, a response is almost always
 already in hand — either produced by a short-circuiting middleware, by the user handler, or by earlier pipeline work —
@@ -349,10 +351,13 @@ valuable than observability of successful ones. Request-processing middleware (`
 Framework-provided cancellation handling covers everything above the user handler boundary. Inside the handler, three
 mechanisms help without requiring explicit checks:
 
-- **Response writes check automatically.** Writing to `ServiceResponse.messages` throws `CancelledException` if the call
-  is cancelled. Streaming handlers that write messages iteratively get automatic cancellation on their next write.
+- **Message iteration is checked at each step.** Outbound messages are a pull-based iterable, not a push channel. As
+  each message is consumed for the wire, cancellation is checked and iteration exits early — so a streaming handler's
+  message stream stops at the next item once the call is cancelled. This is a pull-based model by design: it maps
+  cleanly onto Go channels, JS async-iterables, and PHP generators, which are all pull-based too.
 - **Cancellable iteration helper.** `call.cancellable(iterable)` yields items from the source while checking
-  cancellation between iterations.
+  cancellation between iterations — the single mechanism behind the per-step check above. Handlers wrap their own
+  generators with it; the adapter drains the response's messages through it.
 - **Deadline-aware clients.** Valkyrja-provided HTTP and gRPC clients propagate the current `Deadline` to outbound calls
   so downstream work inherits the remaining budget.
 
@@ -471,8 +476,9 @@ Adapters bridge an external gRPC server implementation to `ServiceHandler`. The 
 5. Invoke `ServiceHandler.handle(call)`.
 6. Translate the returned `ServiceResponse` into the library's native response API (call `.onNext()`, `return response`,
    `callback()`, etc. depending on the library).
-7. During streaming writes, route each write through the cancellation check: writes to `ServiceResponse.messages` on a
-   cancelled call raise `CancelledException`.
+7. During streaming, drain the response's messages through the per-step cancellation check by iterating
+   `call.cancellable(response.getMessages())`: cancellation is checked before each outbound message and iteration exits
+   early once the call is cancelled. Messages are pulled, never pushed — there is no `write()` sink.
 
 Adapters do **not** forcibly interrupt handler execution — that is not possible in any target language. They are signal
 translators, not enforcers.
