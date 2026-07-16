@@ -283,6 +283,16 @@ Keep each branch and PR small and atomic — one focused change per PR.
 - PR description follows the template — fill **Description**, **Types of
   changes**, and **Changes** (bold file/component — em dash — what changed).
 
+### Current working branch
+
+The current working branch is always the current-year `??.x` branch (for 2026,
+`26.x`) — never `master`/`main`. If no current-year branch exists, use the
+previous year's `??.x`; if that does not exist either, fall back to `master`.
+
+Before starting work on that branch, first check it is not behind its remote (or
+the branch it should track). If it is behind, update it — or confirm with the
+user how to proceed — before doing any work.
+
 ### Branch names
 
 `prefix/descriptive-name`, kebab-case. When an issue tracks the work, include it:
