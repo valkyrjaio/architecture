@@ -36,19 +36,19 @@ error
 isValkyrjaThrowable()
 }
 
-// RuntimeException — exported struct with unexported field
-type ValkyrjaRuntimeException struct {
+// RuntimeError — exported struct with unexported field
+type ValkyrjaRuntimeError struct {
 valkyrjaThrowable // unexported embedded — prevents external instantiation
 message string
 }
-func (e *ValkyrjaRuntimeException) Error() string { return e.message }
+func (e *ValkyrjaRuntimeError) Error() string { return e.message }
 
-// InvalidArgumentException — exported struct with unexported field
-type ValkyrjaInvalidArgumentException struct {
+// InvalidArgumentError — exported struct with unexported field
+type ValkyrjaInvalidArgumentError struct {
 valkyrjaThrowable
 message string
 }
-func (e *ValkyrjaInvalidArgumentException) Error() string { return e.message }
+func (e *ValkyrjaInvalidArgumentError) Error() string { return e.message }
 ```
 
 ### Component categoricals — always present, unexported interface
@@ -56,28 +56,28 @@ func (e *ValkyrjaInvalidArgumentException) Error() string { return e.message }
 ```go
 // always present per component, unexported
 type containerRuntimeError interface {
-ValkyrjaRuntimeException
+ValkyrjaRuntimeError
 isContainerRuntimeError()
 }
 
 // concrete errors — exported, implement the unexported interface
-type ContainerNotFoundException struct {
-ValkyrjaRuntimeException
+type ContainerNotFoundError struct {
+ValkyrjaRuntimeError
 }
 ```
 
 ### Naming convention
 
-- Shared subcomponents: `HttpRoutingRuntimeException`,
-  `CliRoutingRuntimeException`
-- Unique subcomponents: `RequestRuntimeException`, `ResponseRuntimeException`
+- Shared subcomponents: `HttpRoutingRuntimeError`,
+  `CliRoutingRuntimeError`
+- Unique subcomponents: `RequestRuntimeError`, `ResponseRuntimeError`
 - Unexported = abstract equivalent (component categoricals)
 - Exported = concrete (specific errors only)
 
 ### Error checking
 
 ```go
-var target *ContainerNotFoundException
+var target *ContainerNotFoundError
 if errors.As(err, &target) {
 // handle specifically
 }
