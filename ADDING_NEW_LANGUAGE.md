@@ -266,6 +266,13 @@ sibling. Key fields:
    mirroring the existing ones. This is a **shared-file edit** — apply the
    concurrency rule from §4.
 
+**Document the checks for contributors.** `.github/CONTRIBUTING.md` has a
+*Running CI Locally* section with a per-language subsection — fill in your
+language's (they start as *Coming soon.*) with a table of each CI check and the
+local command that runs it via the root facade. This is the human-facing twin of
+the ruleset's required status checks; **the two lists must stay in sync** (same
+checks, one for machines, one for humans).
+
 The repo-name **suffix** (e.g. `-python`, `-go`) is load-bearing for both
 detection points — pick it in Phase 0 and use it consistently in every repo name.
 
@@ -347,6 +354,7 @@ With the scaffolding in place, port the framework itself into `valkyrja-<lang>`
 - [ ] `rulesets/<lang>/Required <Lang> PR Checks.json` (contexts match job names)
 - [ ] Language suffix in `SUPPORTED_LANGUAGES`
 - [ ] `-<lang>$` block in `_enforce-repo-settings.yml`
+- [ ] Fill in the `#### <Language>` section of `.github/CONTRIBUTING.md` (checks + local commands)
 
 **Phase 5 — framework/build-tool/adapters**
 - [ ] `valkyrja-<lang>` + `sindri-<lang>` from the template
