@@ -21,6 +21,11 @@ This is **Layer 1** of a three-layer guide:
 > deeper architecture document disagree, the architecture document wins — fix the
 > guide.
 
+> **Before contributing, also read
+> [`CONTRIBUTING.md`](https://github.com/valkyrjaio/.github/blob/master/CONTRIBUTING.md)**
+> — the submission process, running CI locally, the commit/PR conventions, and
+> branch targeting. This guide is the technical companion to it.
+
 ---
 
 ## 1. What Valkyrja is
