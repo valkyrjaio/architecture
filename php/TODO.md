@@ -21,33 +21,43 @@
         - dynamic routes in http
         - various paths for static http routes
 
+## Split the framework out of the main repo
+
+- Eventually split the framework out and keep the main (`valkyrja`) repo lighter.
+  Not a task for now — captured here so it isn't lost. The `--path-coverage`
+  CI cost (below) is one symptom of how large the main repo has become.
+
 ## Branch coverage in CI
 
-- The coverage scripts now run with `--path-coverage` (all repos) so branch/path
-  coverage is reported alongside lines. **Treat branch/path as informational,
-  NOT
-  a 100% gate — in PHP it cannot reach 100%.** Xdebug path coverage instruments
-  *every internal function call* (`strpos`, `substr`, `property_exists`, …) as a
-  potential exception edge; those edges are never taken (the builtins don't
-  throw),
-  so they sit permanently uncovered. e.g. `AstReader::buildEnumCaseExpr` shows
-  "uncovered branches" on plain `strpos`/`substr` lines — there is no `throw`/
-  `if`
-  there to test. sindri is 100% line / 97% branch and that 97% is its ceiling.
-- So: keep **100% line coverage** as the CI gate (achievable, currently met in
-  valkyrja + sindri). Use `--path-coverage` output to *spot* a genuinely real
-  uncovered branch (a real `if`/ternary/`throw`/`catch` direction never taken),
-  then close it — extract the hard-to-reach bit into a `protected` seam and
-  override it in a fixture (as done for `UlidFactory`'s `unpackRandomBytes`
-  failure
-  via `UlidFactoryClass::setForceUnpackFail`). Real gaps also show up as the
-  handful of uncovered **lines**, which is the reliable signal; the rest of the
-  branch delta is Xdebug exception-edge noise.
-- **Java/TypeScript are different — there 100% branch IS achievable.** JaCoCo
-  (`BRANCH` counter) and Vitest (istanbul/v8) measure decision coverage WITHOUT
-  PHP/Xdebug's per-call exception edges, so a 100% branch gate is realistic
-  there.
-  (Flagged in their TODO.md files.)
+- **100% branch/path coverage IS achievable in PHP** — earlier notes here
+  claimed Xdebug's per-internal-call "exception edges" made it impossible; that
+  was wrong. The real cause of phantom uncovered branches is namespace function
+  resolution: an unqualified builtin call (e.g. `strpos()`) inside a namespace
+  compiles to a runtime "does `Ns\strpos` exist? → fall back to `\strpos`"
+  lookup, and Xdebug counts the never-taken namespace-local edge as an uncovered
+  branch (and it multiplies path counts). Importing the function
+  (`use function strpos;`) resolves it at compile time and the phantom branch
+  disappears. The `@auto` php-cs-fixer ruleset now does this automatically via
+  `native_function_invocation` + `global_namespace_import`. sindri is at **100%
+  line + 100% branch**; valkyrja is being driven to the same.
+- Two genuinely-unreachable categories remain and are handled, not excused:
+    - **Exhaustive `match($enum)` with no `default`** — PHP compiles in an
+      `UnhandledMatchError` throw no input can reach. Fold the last arm into
+      `default` (e.g. `default => 28` instead of `self::CONCEAL => 28`).
+    - **I/O syscalls a test intercepts via namespace-function shadowing**
+      (`header`/`flush`/`ob_flush`/`ob_get_level` in `Response`). Qualifying them
+      for coverage breaks the shadow. Wrap each in a protected seam method,
+      override the seam in a `Tests\Classes` fixture for behavior assertions, and
+      add one real-call test to cover the seam bodies (see
+      `ResponseSendRecorderClass`).
+- `--path-coverage` is **slow in CI on valkyrja** (the largest repo), so it is
+  split into its own `path-coverage` Composer script there (root
+  `phpunit-path-coverage`); the default `coverage` script no longer runs it. The
+  other repos keep `--path-coverage` in their `coverage` script (fast enough).
+  TODO: once branch coverage is locked in, add a Cobertura-based branch gate so
+  it stays at 100% on future changes.
+- **Java/TypeScript** also reach 100% branch — JaCoCo (`BRANCH`) and Vitest
+  (istanbul/v8) measure decision coverage directly. (Flagged in their TODO.md.)
 
 ## Contract and Class name constants
 
@@ -261,6 +271,8 @@
 - Undo the UuidV1 int cast change me thinks
 -
 - Add fromMixed(mixed $value) to each support helper class of each type.
+- **Port the Type module to the other languages** (Go, Java, Python,
+  TypeScript) — port the tests alongside the code for 1:1 parity.
 
 ## Rector
 
@@ -360,6 +372,8 @@
 
 ## ORM
 
+- **Change model casting to closures/callables** to ensure cross-language
+  compatibility for this feature.
 - Statement::fetch() should return null when no data found
 - `$this->getXValue()` for any `static::getXField()`
 - Use defaultable service for Entity instead of Entity Matchers??
