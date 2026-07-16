@@ -1,10 +1,10 @@
 # Testing & Coverage Methodology
 
-How every Valkyrja repository is tested, and how to reach **100% code coverage**. This is language-agnostic guidance
+How every Valkyrja repository is tested, and how to reach **100% code coverage (line and branch)**. This is language-agnostic guidance
 with PHP specifics called out; ports (Go, Python, TypeScript, Java) mirror the same structure and recipes against their
 equivalent tooling (see [CI_TOOLS.md](CI_TOOLS.md)).
 
-> **Porting rule:** port code **and its tests together**, not as a later pass. The goal is 100% coverage in every
+> **Porting rule:** port code **and its tests together**, not as a later pass. The goal is 100% coverage — line and branch — in every
 > language. Mirror the source repo's test directory layout and map the test framework (e.g. PHPUnit → Vitest:
 > `assertSame` → `expect().toBe`, data providers → `it.each`, `setUp` → `beforeEach`).
 
@@ -22,7 +22,7 @@ tests/
     Abstract/<Repo>TestCase.php      # per-repo base test case
     Unit/...                         # unit tests              (namespace Vendor\Tests\Unit\...)
     Functional/...                   # functional/integration  (namespace Vendor\Tests\Functional\...)
-    Classes/...                      # reusable test fixtures/doubles (real classes, not *Test.php)
+    Fixtures/...                     # reusable test fixtures/doubles (real classes, not *Test.php)
 .github/ci/<tool>/                   # one dir per CI tool, each with its own composer.json + vendor
   phpunit/phpunit.xml.dist           # bootstrap, <testsuite>, <source> include/exclude
 ```
@@ -48,14 +48,14 @@ preserved in ports**:
 | `Vendor\Tests\Unit\…`       | `tests/Tests/Unit/`       | Unit tests for a single class in isolation. The path **mirrors the `src` path** of the class under test (e.g. `src/View/Provider/ViewServiceProvider.php` → `tests/Tests/Unit/View/Provider/ServiceProviderTest.php`). | yes          |
 | `Vendor\Tests\Functional\…` | `tests/Tests/Functional/` | Functional/integration tests that boot the app or exercise several units together.                                                                                                                                     | yes          |
 | `Vendor\Tests\Abstract\…`   | `tests/Tests/Abstract/`   | Abstract base test cases (e.g. `<Repo>TestCase`) — **not** themselves tests.                                                                                                                                           | no           |
-| `Vendor\Tests\Classes\…`    | `tests/Tests/Classes/`    | Reusable real classes used **by** tests: doubles, fixtures, stub providers/entities/commands, sample attribute/trait/enum classes. Subdivided by concept (`Classes/Provider`, `Classes/Trait`, `Classes/Contract`, …). | no           |
+| `Vendor\Tests\Fixtures\…`   | `tests/Tests/Fixtures/`   | Reusable real classes used **by** tests: doubles, fixtures, stub providers/entities/commands, sample attribute/trait/enum classes. Subdivided by concept (`Fixtures/Provider`, `Fixtures/Trait`, `Fixtures/Contract`, …). | no           |
 | `Vendor\Tests\<X>` (root)   | `tests/Tests/*.php`       | Shared top-level helpers, e.g. `EnvClass` (a test `Env` subclass) used across suites.                                                                                                                                  | no           |
 
 Notes:
 
 - A repo only creates the sub-namespaces it needs — e.g. `application` (skeleton) currently has just `Functional`;
-  `sindri` has `Abstract`, `Classes`, `Unit`; `valkyrja` has all of them plus the root `EnvClass`.
-- Things in `Classes/` are production-shaped classes (named `*Class`, `*Provider`, etc. — never `*Test`) so the
+  `sindri` has `Abstract`, `Fixtures`, `Unit`; `valkyrja` has all of them plus the root `EnvClass`.
+- Things in `Fixtures/` are production-shaped classes (named `*Class`, `*Provider`, etc. — never `*Test`) so the
   architecture rules (PHPArkitect) can assert "testable classes are named appropriately and are not tests."
 - Rector fixture data is the one exception that lives **outside** `tests/Tests/` (see §2) — it is `require`d data, not
   autoloaded test code.
@@ -144,7 +144,7 @@ Run from the repo root via composer scripts (see [CI_TOOLS.md](CI_TOOLS.md) for 
 4. `composer phpcsfixer` (auto-fix) then `composer phpcsfixer-check` — it commonly reformats arrays (`=>` alignment) and
    enforces a trailing newline; apply its fixes before committing.
 5. `composer rector-check` — no changes suggested.
-6. `composer phpunit-coverage` — green and 100%.
+6. `composer phpunit-coverage` — green and 100% (line and branch).
 
 Other standing rules: every file ends with a trailing newline; American English in prose; improvements/bug-fixes target
 the lowest affected `??.x` branch, new features/deprecations target `master`.
@@ -155,7 +155,7 @@ the lowest affected `??.x` branch, new features/deprecations target `master`.
 
 | Repo                                                       | Shape                                                                                                | Coverage approach                                                                                                                                                                                   |
 |------------------------------------------------------------|------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `valkyrja` (framework)                                     | 27 modules, ~1140 src files                                                                          | Unit + functional under `tests/Tests`; providers via `ServiceProviderTestCase`; reusable doubles in `tests/Tests/Classes`; worker abstracts tested via faux-loop `run(config, requestCount)`. 100%. |
+| `valkyrja` (framework)                                     | 27 modules, ~1140 src files                                                                          | Unit + functional under `tests/Tests`; providers via `ServiceProviderTestCase`; reusable doubles in `tests/Tests/Fixtures`; worker abstracts tested via faux-loop `run(config, requestCount)`. 100%. |
 | `sindri`                                                   | AST readers + data-file generators                                                                   | Unit/functional over readers, generators, providers, commands. 100%.                                                                                                                                |
 | `application` (skeleton)                                   | Example app: Http/Cli apps, controllers, providers, commands, configs, data, models, ORM entity/repo | Functional tests booting the app (`App::app()` / `App::directory()`); resolve services from the booted container; views ship in `app/resources/views`. **`*.example.php` excluded from coverage.**  |
 | `ci/phpunit`                                               | Test-case helpers                                                                                    | 100%.                                                                                                                                                                                               |
