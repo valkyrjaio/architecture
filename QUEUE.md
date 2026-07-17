@@ -245,11 +245,11 @@ Producing and consuming are organized asymmetrically, for the same reason Http i
   `Http/Client`'s adapters. Pushing is cheap (serialize + send) and you push from anywhere, so the framework bundles
   support for any and all external pushes.
 - **Consumer *entry points* live in `Application/Entry`** — the bootable classes that select the config and drive
-  `JobHandler`. The **internal** ones (`Sync`/`Deferred`/`InMemory` consumption) and the default **`PullQueue`** (a plain
-  long-running loop, no server) are an easy map and sit right in `Application/Entry`. Only the **push** entries
-  (`PushQueue` / `PushWorkerQueue`) are per-web-server-runtime and live in that server's repo, exactly as the Http and
-  gRPC entries do — but they stay **thin**: they *compose* the reusable, per-processor **mapper** and **re-queuer**
-  (which live in the Queue module) rather than reimplementing them (see
+  `JobHandler`. The **default** ones — `Sync`/`Deferred`/`InMemory`, **`PullQueue`** (a plain loop, no server), and
+  **`PushQueue`** (CGI, on the language's built-in HTTP handler) — ship out of the box and sit right in
+  `Application/Entry`. Only **`PushWorkerQueue`** is per-web-server-runtime and lives in that server's repo, exactly as
+  the Http and gRPC worker entries do — but it stays **thin**: it *composes* the reusable, per-processor **mapper** and
+  **re-queuer** (which live in the Queue module) rather than reimplementing them (see
   [Push vs. pull](#push-vs-pull--who-initiates)).
 
 **Running a consumer is the dev's to wire — the framework ships entries, not a server.** It never ships an HTTP server
@@ -487,18 +487,21 @@ The real distinction is **who initiates the delivery**, not what server runs. Th
   reads the **response status** as the settlement (2xx = `ACK`/delete, non-2xx = redeliver). It's a *normal* HTTP
   request; the entry maps its **body** → `Job` (ignoring the headers). Because push needs a web server to *receive*
   those requests, it comes in **CGI** mode (**`PushQueue`** — one job per invocation) or **worker** mode
-  (**`PushWorkerQueue`** — a live server receiving pushes), on the *same* server you already run for HTTP.
+  (**`PushWorkerQueue`** — a live server receiving pushes). `PushQueue` (CGI) is **also an out-of-the-box default**: it
+  uses each language's built-in HTTP handler (Java `com.sun.net.httpserver` exchange, Go `net/http`, Node `http`, Python
+  WSGI, PHP CGI/FPM), so no external server is needed. Only `PushWorkerQueue` requires a real worker runtime.
   `getAttempts()` comes from a broker-set retry-count header.
 
 **Worker mode means a *web server*, and only push needs one.** Pull actively polls, so it is inherently persistent and
 never needs a server; push receives requests, so it does. That is the whole difference — and it's why `PullQueue`
 stands alone while push has both a CGI and a worker form.
 
-**For push, the server runtime and the processor are orthogonal — no server-per-processor explosion, but there *is* a
-per-runtime entry.** You reuse the *runtime*, never the *entry*: each web-server-runtime repo needs its own `PushQueue`
-/ `PushWorkerQueue`, exactly as gRPC added CGI/worker entries to Tomcat / Netty / Jetty (Java) and OpenSwoole /
-FrankenPHP (PHP) — because the entry maps and dispatches differently than the HTTP one. `PullQueue` has no such
-multiplication: it is a single plain loop, the same everywhere.
+**For push-worker, the server runtime and the processor are orthogonal — no server-per-processor explosion, but there
+*is* a per-runtime entry.** The built-in `PushQueue` (CGI) and `PullQueue` (loop) ship as defaults; only
+**`PushWorkerQueue`** is per-web-server-runtime — each such repo needs its own, exactly as gRPC added a worker entry to
+Tomcat / Netty / Jetty (Java) and OpenSwoole / FrankenPHP (PHP), because the entry maps and dispatches differently than
+the HTTP one. `PullQueue` and the CGI `PushQueue` have no such multiplication: they are single, built-in, the same
+everywhere.
 
 The **per-processor** logic is *not* baked into those entries — it is extracted into **reusable, server-agnostic
 classes** selected by `QueueConfig.processor`: a **mapper** (push: `ServerRequest → Job`; pull: the connect-and-poll
