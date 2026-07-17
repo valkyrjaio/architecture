@@ -228,3 +228,18 @@ strengthen tests to assert the generated content, and mirror these in PHP and TS
 - **Parse the generated file** in a test so malformed output / bad escaping is caught
   structurally, not just by substring. (Done in Java via `StaticJavaParser.parse` on the
   generated `AppHttpRoutingData`; ideally extend to a full compile, and to PHP/TS.)
+
+## VLID — cross-language parity
+
+**Cross-language change — mirror in every port (Go, PHP, Python, TypeScript).**
+VLID (`Type/Vlid`) is PHP-only today; port it here (code + tests). It is the source
+of the queue envelope `id` (a **VLID V1** — the longest, most-random version). Lock
+cross-language parity:
+
+- Port `Type/Vlid`, then add a conformance test: generate a VLID for **each version
+  V1–V4** from a **fixed input timestamp**.
+- Assert this port produces a byte-identical **non-random portion** vs the PHP
+  fixture — the encoded **microsecond timestamp** and the **version digit at
+  position 14** must match exactly. The random bits differ by design; exclude them.
+- This gate prevents timestamp-encoding / version-digit-placement drift from
+  silently breaking cross-language `id` interop.
