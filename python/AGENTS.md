@@ -91,8 +91,8 @@ Python nuances:
   (snake_case spelling of the cross-language §6 taxonomy); unit paths mirror
   `src/`.
 - **Naming:** files `test_*.py`; test classes/functions per pytest convention;
-  reusable doubles live in `tests/fixtures/` — production-shaped, never named like
-  tests.
+  reusable doubles live in `tests/fixtures/` — production-shaped, named with the
+  `Fixture` suffix, never named like tests.
 - **Framework:** `pytest`. PHPUnit → pytest mapping:
 
   | PHPUnit              | pytest                              |
