@@ -274,6 +274,23 @@
 - **Port the Type module to the other languages** (Go, Java, Python,
   TypeScript) — port the tests alongside the code for 1:1 parity.
 
+## VLID — cross-language parity
+
+**Cross-language change — mirror in every port (Go, Java, Python, TypeScript).**
+VLID (`Valkyrja/Type/Vlid`) is PHP-only today and is the source of the queue
+envelope `id` (a **VLID V1** — the longest, most-random version). Lock
+cross-language parity so the other ports can depend on it:
+
+- Add a conformance test: generate a VLID for **each version V1–V4** from a
+  **fixed input timestamp**. The resulting values become the shared cross-language
+  fixture.
+- Every port must produce a byte-identical **non-random portion** for that
+  timestamp — the encoded **microsecond timestamp** and the **version digit at
+  position 14** must match exactly. The random bits differ by design; exclude them
+  from the assertion.
+- This gate prevents timestamp-encoding / version-digit-placement drift from
+  silently breaking cross-language `id` interop.
+
 ## Rector
 
 - Need a test for the new rule

@@ -152,3 +152,20 @@ for name, method in inspect.getmembers(controller_class, predicate=inspect.isfun
 - [ ] Generate `AppHttpRoutingData`
 - [ ] Generate `AppCliRoutingData`
 - [ ] Move all file generation / scaffolding / `make:*` commands here
+
+---
+
+## VLID — cross-language parity
+
+**Cross-language change — mirror in every port (Go, Java, PHP, TypeScript).** VLID
+(`Type/Vlid`) is PHP-only today; port it here (code + tests). It is the source of the
+queue envelope `id` (a **VLID V1** — the longest, most-random version). Lock
+cross-language parity:
+
+- [ ] Port `Type/Vlid`, then add a conformance test: generate a VLID for **each
+      version V1–V4** from a **fixed input timestamp**.
+- [ ] Assert this port produces a byte-identical **non-random portion** vs the PHP
+      fixture — the encoded **microsecond timestamp** and the **version digit at
+      position 14** must match exactly. The random bits differ by design; exclude them.
+- [ ] This gate prevents timestamp-encoding / version-digit-placement drift from
+      silently breaking cross-language `id` interop.
