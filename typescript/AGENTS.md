@@ -71,8 +71,8 @@ TypeScript nuances:
   | `@dataProvider`        | `it.each([...])`             |
   | `setUp` / `tearDown`   | `beforeEach` / `afterEach`   |
 
-- **Fixtures:** reusable doubles in `tests/Tests/Fixtures/…` (e.g. a
-  `ServiceClass` with a static `make(container, args)` factory).
+- **Fixtures:** reusable doubles in `tests/Tests/Fixtures/…`, named `*Fixture`
+  (e.g. a `ServiceFixture` with a static `make(container, args)` factory).
 - **Coverage: 100% (line and branch), never dropping** — every code branch has a
   test.
 

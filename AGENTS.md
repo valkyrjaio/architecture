@@ -188,13 +188,14 @@ lacks).
 | Attribute / annotation | has the attribute marker | — | `Attribute\` | — |
 | CLI command | — | `*Command` | `Cli\Command\` | — |
 | Security | — | `*Security` | `Security\` | final |
-| Concrete exception | implements Throwable | `*Exception` | `Exception\` | — |
+| Concrete exception | implements Throwable | `*Exception` (Go: `*Error`) | `Exception\` | — |
 | Any throwable | extends/implements Throwable | — | `Throwable\` | — |
 | Base `*RuntimeException` / `*InvalidArgumentException` | — | as-is | `Abstract\` | abstract |
 | Type / Model / Entity | extends the base | — | `Type\` / `Model\` / `Entity\` | — |
 | Abstract class | is abstract | must **not** contain `Abstract` | `Abstract\` | abstract |
 | Enum | is an enum | must **not** contain `Enum` | `Enum\` | enum |
 | Trait | is a trait | must **not** contain `Trait` (src) | `Trait\` | trait |
+| Test fixture | reusable double in `Fixtures\` | `*Fixture` | `Fixtures\` | final |
 
 The relationships are **bidirectional**: everything in `Contract\` must be an
 interface *and* named `*Contract`; everything in `Enum\` must be an enum; every
@@ -203,8 +204,11 @@ final constant lives in `Constant\`; and so on. For `Abstract`, `Enum`, and
 abstract `Stream` is `Abstract\Stream`, never `AbstractStream`.
 
 Tests: concrete test classes are `final`, live in `Unit\`/`Functional\`, and are
-named `*Test`; reusable doubles live in `Fixtures\`, named `*Class`, never
-`*Test`. No class carries an `@author` docblock.
+named `*Test`; reusable doubles live in `Fixtures\`, named `*Fixture`, never
+`*Test`. A fixture that is itself an enum, trait, or contract keeps that type's
+naming (`*Enum` / `*Trait` / `*Contract`) — the type rule supersedes the fixture
+marker, just as the segment does for `Abstract`/`Enum`/`Trait` above. No class
+carries an `@author` docblock.
 
 ### Binding-key constants
 
@@ -249,7 +253,7 @@ across languages and must be preserved in ports:
 |----------------|--------------------------------------------------------------|
 | **Unit**       | one class in isolation; path mirrors the `src` path          |
 | **Functional** | boots the app / exercises several units together             |
-| **Fixtures**   | reusable real doubles/stubs used *by* tests (never `*Test`)  |
+| **Fixtures**   | reusable doubles used *by* tests, named `*Fixture` (never `*Test`) |
 | **Abstract**   | base test cases (not themselves tests)                       |
 
 Rules that hold everywhere: unit-test paths mirror `src`; test classes/files use

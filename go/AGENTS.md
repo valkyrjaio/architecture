@@ -65,7 +65,8 @@ Go nuances:
 
 - **Layout:** Go convention — `*_test.go` files co-located with source, in a
   `package <name>_test` (external) or same-package (internal) test package.
-  Reusable doubles live in a `fixtures` package mirroring the source tree.
+  Reusable doubles live in a `fixtures` package mirroring the source tree, named
+  with the `Fixture` suffix.
 - **Framework:** built-in `go test`.
 - **Coverage:** `go test -coverprofile` — **100% (statement and branch), never
   dropping**; every code branch has a test. (Go reports statement coverage

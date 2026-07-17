@@ -64,7 +64,8 @@ PHP nuances:
   `publishers()` entry registers the expected singleton). Each repo also defines
   `tests/Tests/Abstract/<Repo>TestCase.php`.
 - **Fixtures:** reusable, production-shaped doubles in `tests/Tests/Fixtures/…`,
-  named `*Class` / `*Provider` — never `*Test`.
+  named `*Fixture` — never `*Test`. A fixture that is itself an enum, trait, or
+  contract keeps that type's naming (`*Enum` / `*Trait` / `*Contract`).
 - **Coverage: 100% (line and branch), never dropping** — every code branch has a
   test — via `composer phpunit-coverage`. Recipes & gotchas:
   [`../TESTING_METHODOLOGY.md`](../TESTING_METHODOLOGY.md).
