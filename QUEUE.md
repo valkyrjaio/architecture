@@ -245,24 +245,24 @@ Producing and consuming are organized asymmetrically, for the same reason Http i
   `Http/Client`'s adapters. Pushing is cheap (serialize + send) and you push from anywhere, so the framework bundles
   support for any and all external pushes.
 - **Consumer *entry points* live in `Application/Entry`** — the bootable classes that select the config and drive
-  `JobHandler`. The **internal** ones (`Sync`/`Deferred`/`InMemory` consumption) are an easy map and sit right in
-  `Application/Entry`. A **runtime** entry (the push-worker / pull-worker for a given server type) lives in that
-  server's repo, exactly as the Http and gRPC entries do today — but it stays **thin**: it *composes* the reusable,
-  per-processor **mapper** and **re-queuer** (which live in the Queue module) rather than reimplementing them
-  (see [Push vs. pull](#push-vs-pull--who-initiates)).
+  `JobHandler`. The **internal** ones (`Sync`/`Deferred`/`InMemory` consumption) and the default **`PullQueue`** (a plain
+  long-running loop, no server) are an easy map and sit right in `Application/Entry`. Only the **push** entries
+  (`PushQueue` / `PushWorkerQueue`) are per-web-server-runtime and live in that server's repo, exactly as the Http and
+  gRPC entries do — but they stay **thin**: they *compose* the reusable, per-processor **mapper** and **re-queuer**
+  (which live in the Queue module) rather than reimplementing them (see
+  [Push vs. pull](#push-vs-pull--who-initiates)).
 
 **Running a consumer is the dev's to wire — the framework ships entries, not a server.** It never ships an HTTP server
-or a `queue:work` command; it ships the three entries (`PushQueue`, `WorkerPushQueue`, `PullWorkerQueue`) and you point
-a runtime at the bootstrap, exactly as Http ships CGI + worker entries and you point nginx/php-fpm or a
-Swoole/RoadRunner runtime at `index.php`:
+or a `queue:work` command; it ships the entries and you point a runtime at the bootstrap, exactly as Http ships CGI +
+worker entries and you point nginx/php-fpm or a Swoole/RoadRunner runtime at `index.php`:
 
-- **Push** (`PushQueue` / `WorkerPushQueue`) rides on your **existing HTTP server** — CGI out of the box, or your worker
+- **Pull** (`PullQueue`, the default) is a plain long-running loop run under the dev's process manager (systemd /
+  supervisor / a Docker `CMD` / a k8s `Deployment`) — **no server**, works in every language. Graceful shutdown (stop →
+  in-flight `→ RETRY`) and an optional bounded lifetime (`--max-jobs`/`--max-time`-style self-exit) let the supervisor
+  cycle the process for memory hygiene.
+- **Push** (`PushQueue` / `PushWorkerQueue`) rides on your **existing HTTP server** — CGI out of the box, or your worker
   runtime. The processor POSTs; the entry maps the body → `Job`. No queue-specific server (see
   [Push vs. pull](#push-vs-pull--who-initiates)).
-- **Pull** (`PullWorkerQueue`) is a poll loop run under the dev's process manager (systemd / supervisor / a Docker
-  `CMD` / a k8s `Deployment`), with graceful shutdown (stop → in-flight `→ RETRY`) and an optional bounded lifetime
-  (`--max-jobs`/`--max-time`-style self-exit) so the supervisor can cycle the process for memory hygiene. No HTTP
-  server involved.
 
 The dev hooks a runtime to the bootstrap; the framework owns everything from the entry inward.
 
@@ -476,34 +476,37 @@ QueueAdapter
 The real distinction is **who initiates the delivery**, not what server runs. The kernel is identical for both — a
 `Job` in, a `JobResult` out.
 
-- **Pull** — the framework *polls* the processor (SQS long-poll, AMQP consumer, Redis `BLPOP`, database poll). That's a
-  long-running client loop, so pull is **always a worker**: **`PullWorkerQueue`**. (There is no bare `PullQueue` —
-  polling with no loop makes no sense.) "Settle" acts on the held connection (delete / release-with-delay /
-  dead-letter).
+- **Pull** — the framework *polls* the processor (SQS long-poll, AMQP consumer, Redis `BLPOP`, database poll). This is
+  just a **long-running loop** — **`PullQueue`**, the out-of-the-box default. It boots the app + container **once** and
+  reuses them (child container per job), which *is* the persistent model already, so there's no separate
+  `PullWorkerQueue`. It needs **no server** — a plain process kept alive by the loop, run under a supervisor exactly as
+  Laravel's `queue:work` runs (a `while` loop in a plain CLI process, minus the CLI-command wrapper). This works in
+  **every language** (Go/Node are built for long-running loops; Java/Python/PHP run one trivially). "Settle" acts on the
+  held connection (delete / release-with-delay / dead-letter).
 - **Push** — the processor *sends* an **HTTP request** (Cloud Tasks, Pub/Sub push, SQS→HTTPS, any webhook broker) and
   reads the **response status** as the settlement (2xx = `ACK`/delete, non-2xx = redeliver). It's a *normal* HTTP
-  request; the entry maps its **body** → `Job` (ignoring the headers). Because it's just HTTP, it runs in either **CGI**
-  mode (**`PushQueue`** — one job per invocation) or **worker** mode (**`WorkerPushQueue`** — a live server receiving
-  pushes), on the *same* server you already run for HTTP. `getAttempts()` comes from a broker-set retry-count header.
+  request; the entry maps its **body** → `Job` (ignoring the headers). Because push needs a web server to *receive*
+  those requests, it comes in **CGI** mode (**`PushQueue`** — one job per invocation) or **worker** mode
+  (**`PushWorkerQueue`** — a live server receiving pushes), on the *same* server you already run for HTTP.
+  `getAttempts()` comes from a broker-set retry-count header.
 
-**The server runtime and the processor are orthogonal — so no server-per-processor explosion, but there *is* a
-per-runtime entry.** You reuse the *runtime*, never the *entry*: each server-runtime repo needs its own new Queue entry
-classes, exactly as gRPC added worker/CGI entries to Tomcat / Netty / Jetty (Java) and OpenSwoole / FrankenPHP (PHP) —
-because the entry maps and dispatches a delivery differently than the HTTP one.
+**Worker mode means a *web server*, and only push needs one.** Pull actively polls, so it is inherently persistent and
+never needs a server; push receives requests, so it does. That is the whole difference — and it's why `PullQueue`
+stands alone while push has both a CGI and a worker form.
 
-- **Push** — a **push-worker** entry (`WorkerPushQueue`) per runtime repo, plus the **CGI** push entry (`PushQueue`, out
-  of the box, like Http CGI / Java exchange). The runtime is unchanged; the entry grabs the request body and builds a
-  `Job`.
-- **Pull** — a **pull-worker** entry (`PullWorkerQueue`) per runtime repo, running the poll loop inside that runtime's
-  process/event model.
+**For push, the server runtime and the processor are orthogonal — no server-per-processor explosion, but there *is* a
+per-runtime entry.** You reuse the *runtime*, never the *entry*: each web-server-runtime repo needs its own `PushQueue`
+/ `PushWorkerQueue`, exactly as gRPC added CGI/worker entries to Tomcat / Netty / Jetty (Java) and OpenSwoole /
+FrankenPHP (PHP) — because the entry maps and dispatches differently than the HTTP one. `PullQueue` has no such
+multiplication: it is a single plain loop, the same everywhere.
 
 The **per-processor** logic is *not* baked into those entries — it is extracted into **reusable, server-agnostic
 classes** selected by `QueueConfig.processor`: a **mapper** (push: `ServerRequest → Job`; pull: the connect-and-poll
 client) and a **re-queuer** (the settlement / re-enqueue — `JobResult → Response` status for push, broker re-enqueue for
-pull). A server-type entry is thin runtime plumbing that *composes* them; it never reimplements mapping or re-queueing.
-So the totals are **M runtime entries + N mappers + N re-queuers, never M×N** — otherwise that per-processor logic would
-be copy-pasted across every runtime (exchange, Tomcat, Netty, Jetty for Java; CGI, FrankenPHP, RoadRunner, OpenSwoole
-for PHP).
+pull). A push entry is thin runtime plumbing that *composes* them; it never reimplements mapping or re-queueing. So the
+push totals are **M web-server entries + N mappers + N re-queuers, never M×N** — otherwise that per-processor logic
+would be copy-pasted across every runtime (exchange, Tomcat, Netty, Jetty for Java; CGI, FrankenPHP, RoadRunner,
+OpenSwoole for PHP).
 
 For **push**, the mapper takes a *normalized* Valkyrja **`ServerRequest`**, never a native runtime request — it
 **reuses Http's existing runtime→`ServerRequest` mapping** (Tomcat/Netty/OpenSwoole/… already produce one). So the push
