@@ -534,15 +534,30 @@ The underlying artifact is always the same: a `Map<string, Route>` available to 
 
 ## Exception → Status Mapping
 
-Exceptions reaching `ThrowableCaught` are translated to `ServiceResponse` objects with appropriate status. Default
-mappings (configurable per application):
+**The handler owns domain outcomes; the framework owns only the catch-all.** This mirrors HTTP exactly: just as an HTTP
+controller *returns* a response carrying `404`/`422`/`401`/`403`, a gRPC handler *returns* a `ServiceResponse` carrying
+the appropriate status — `Status.notFound(...)`, `Status.invalidArgument(...)`, `Status.unauthenticated(...)`,
+`Status.permissionDenied(...)`. The framework never infers domain semantics from the *type* of a thrown exception, and
+defines no `NotFoundException`/`ValidationException`/`UnauthorizedException`/`ForbiddenException` hierarchy to do so.
 
-- `NotFoundException` → `NOT_FOUND`
-- `ValidationException` → `INVALID_ARGUMENT`
-- `UnauthorizedException` → `UNAUTHENTICATED`
-- `ForbiddenException` → `PERMISSION_DENIED`
-- `CancelledException` → `CANCELLED` or `DEADLINE_EXCEEDED` (from reason)
-- Any uncaught `Throwable` → `INTERNAL`
+Only two mappings are built in:
+
+- `CancelledException` → `CANCELLED`, or `DEADLINE_EXCEEDED` when the carried `CancellationReason` says so.
+- Any other uncaught `Throwable` → `INTERNAL`.
+
+`CancelledException` is special precisely because it is *framework-thrown*, not a domain outcome: cooperative
+cancellation raises it from `throwIfCancelled()` / the two-question check, so the framework is entitled to map it.
+Everything else that escapes a handler is, by definition, an unhandled fault — the gRPC equivalent of a `500`.
+
+Because the catch-all is deliberately coarse, it is **overridable**: `ThrowableCaught` middleware can inspect the
+throwable and substitute any response it likes, and `SendingResponse` middleware can rewrite the final response. An
+application that *wants* a domain-exception→status table implements it as its own `ThrowableCaught` middleware; the
+framework does not presume one.
+
+> **Implementation note.** Where handlers are invoked reflectively (annotation/attribute dispatch), the reflection
+> wrapper must be unwrapped and the handler's own throwable rethrown. Rewrapping it (e.g. Java's
+> `InvocationTargetException` in a bare `RuntimeException`) hides `CancelledException` behind a type the mapping cannot
+> see, silently turning every cancellation into `INTERNAL` and defeating cooperative cancellation end-to-end.
 
 Language-native cancellation exceptions (`context.Canceled` in Go, `asyncio.CancelledError` in Python, etc.) are
 converted to `CancelledException` at the adapter boundary before reaching `ThrowableCaught`, so exception-handling code
