@@ -29,7 +29,7 @@ grpc/
     collection/     RouteCollection (+ contract)     — Map<method, Route>
     dispatcher/     Router (+ contract)
     collector/      AttributeRouteCollector (+ contract)
-    attribute/      @GrpcService, @GrpcMethod, @GrpcMiddleware
+    attribute/      @Service, @Method, @Middleware (Grpc- prefix dropped; see naming note)
     provider/       GrpcRouteProviderContract + provider pair
     throwable/      routing exceptions
   middleware/
@@ -117,15 +117,46 @@ it.
 
 ### 7. Registration: attributes → `Map<method, Route>`
 
-- `@GrpcService(service = "package.Service")` on a controller class.
-- `@GrpcMethod(name, clientStreaming, serverStreaming)` on each RPC handler method.
-- Repeatable `@GrpcMiddleware(name = X.class)`, dispatched to its stage by the middleware contract type
+- `@Service(service = "package.Service")` on a controller class.
+- `@Method(name, clientStreaming, serverStreaming)` on each RPC handler method.
+- Repeatable `@Middleware(name = X.class)`, dispatched to its stage by the middleware contract type
   it implements.
 
 A runtime-reflection `AttributeRouteCollector` builds a `Route` per method, keyed `"/service/name"`,
 with the annotated method wired as the reflective handler `(Container, Route) -> ServiceResponse`. This
 matches the CLI/HTTP collectors; it is **not** a compile-time processor. The map is populated at boot
 from the aggregated `getGrpcProviders()` route providers.
+
+> **Naming.** These attributes drop the `Grpc` prefix (`@Service`/`@Method`/`@Middleware`, not
+> `@GrpcService`/…). They are controller-facing and live in the protocol's own attribute namespace,
+> and a gRPC controller never imports the HTTP/CLI equivalents, so the short names never collide.
+> **Providers keep their prefix** (`GrpcRouteProviderContract`, `GrpcRoutingDataContract`, `GrpcConfig`)
+> because those *are* imported alongside their HTTP/CLI siblings (a component provider references all
+> three). Apply the same rule per language.
+
+### 7a. Middleware classification in the route-data cache
+
+`@Middleware(name = X.class)` names only the class; its **stage** is the set of stage contracts the
+class implements, discovered by an `isAssignableFrom`/`is_a` cascade — added to **every** stage it
+implements (independent `if`s, not `else if`; a class can serve multiple stages). At runtime the
+collector does this trivially. The **cache generator** must reproduce it, and how depends on whether
+the toolchain can inspect a type's hierarchy:
+
+- **Pre-classify at codegen** — generator resolves the middleware's full ancestry and emits typed
+  per-stage lists into the cached `Route`. Used by **PHP** (`is_a`, live autoload), **Python**
+  (reflection), **TypeScript** (ts-morph `getImplements`), and achievable in **Java** (JavaParser
+  symbol solver, `getAllAncestors`), **Kotlin** (KSP), **C#** (Roslyn), **Scala** (macros/reflection).
+  Resolve the *full* hierarchy, not the direct `implements` clause, so a middleware extending an
+  abstract base or a custom sub-contract still classifies.
+- **Runtime `withMiddleware`** — the cache emits the flat, unclassified class list and a
+  `Route.withMiddleware(List<Class>)` runs the cascade lazily when the route's supplier
+  materializes (once, on match — not per request). This is the fallback for toolchains that cannot
+  read the hierarchy at generation. **Go** needs this (structural, implicit interfaces — nothing to
+  read), unless middleware is required to *embed* the contract interface, which makes it declared.
+
+The discriminator is **nominal vs. structural typing**, not the language. Java pre-classifies (symbol
+solver) to stay consistent with PHP/TS/Python; only Go deviates to `withMiddleware`. Whichever a
+language picks, a class implementing several stage contracts must land in **all** their buckets.
 
 ### 8. `ServiceAdapter` contract
 
@@ -203,7 +234,7 @@ native gRPC library. Key points from the Java adapters (grpc-netty and grpc-serv
 
 100% line **and** branch coverage. Unit tests live in the port's unit tree mirroring the `grpc` source
 tree; end-to-end wiring is exercised by functional tests that boot the full stack from a
-`@GrpcService` controller and dispatch calls (including "unknown method → UNIMPLEMENTED" and
+`@Service` controller and dispatch calls (including "unknown method → UNIMPLEMENTED" and
 "per-route SendingResponse/Terminated middleware fires"). Reusable controllers/middleware are fixtures.
 
 ## Implementation order for the next port
