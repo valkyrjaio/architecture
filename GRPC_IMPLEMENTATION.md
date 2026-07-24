@@ -145,6 +145,28 @@ implementation is per-worker. Keep it in the core.
 - **Adding `getGrpcProviders` is invasive.** It joins `getCli`/`getHttpProviders` on the shared
   component/application provider contracts and the kernel, so **every** existing implementor must be
   updated. Keep it abstract (consistent with the siblings) rather than a defaulted method.
+  - Defaulting it on the contract *looks* like the cheap way out, but it privileges one protocol over
+    its siblings and encodes "gRPC is optional" into a contract that says no such thing about HTTP or
+    CLI. Keep the contract symmetric.
+  - The cost of abstract — an identical empty implementation in every component that contributes no
+    gRPC routes — is a **class** problem, not a contract problem. Solve it with a base class
+    (`application/provider/abstract_/ComponentProvider` in the Java port) that implements *all* the
+    provider methods as empty, and have components extend it and override only what they contribute.
+    Adding the next protocol then touches one base class instead of every component.
+  - Watch the duplication gate: adding one identical method to ~25 components is ~25 identical new
+    blocks, which trips new-code duplication analysis (SonarCloud's `new_duplicated_lines_density`).
+    The base class avoids the additions entirely rather than suppressing the warning.
+- **Reflective dispatch must rethrow the handler's own throwable.** Attribute/annotation routing invokes
+  handlers reflectively, and most languages wrap whatever the target threw (Java's
+  `InvocationTargetException`, PHP's `ReflectionException` paths, etc.). Wrapping that in a generic
+  runtime exception hides `CancelledException` from the status mapping, so every cancellation reports
+  `INTERNAL` and cooperative cancellation is dead for the primary handler path — with no test failure
+  to show for it, because unit tests that throw `CancelledException` *directly* bypass the collector.
+  Unwrap the reflection wrapper and rethrow the cause. Test through the reflective path, not around it.
+- **The framework maps only cancellation and the catch-all.** Domain outcomes (`NOT_FOUND`,
+  `INVALID_ARGUMENT`, …) are *returned* by the handler on the `ServiceResponse`, exactly as HTTP
+  handlers return status codes — there is no domain-exception hierarchy to map. See
+  "Exception → Status Mapping" in `GRPC.md`.
 - **`StatusCode` values are the wire codes 0–16** and match the native gRPC library's codes 1:1, so the
   adapter maps status with a single `fromCodeValue(status.code)`. Expose one accessor for the numeric
   value, not two.
