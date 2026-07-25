@@ -277,14 +277,15 @@ The kernel entry point, analogous to `ServiceHandler` (gRPC) / `RequestHandler` 
 
 Responsibilities:
 
-- Orchestrate the middleware stages (`JobReceived`, `Acking`, `Terminated`).
+- Orchestrate the middleware stages (`JobReceived`, `SettlingResult`, `ResultSettled`).
 - Delegate to `Router` for resolution and dispatch.
 - Run `ThrowableCaught` middleware when exceptions propagate.
 
 As in Http/Cli/gRPC, split the kernel so the **broker settlement** (ack/nack/extend) can happen between the
-"acking" stage and "terminated": `handle` (through `ThrowableCaught`) → `acking` (always-run) →
-[adapter settles with the broker] → `terminate` (always-run). A `run` convenience bundles
-`handle`+`acking`.
+`SettlingResult` stage and `ResultSettled`: `handle` (through `ThrowableCaught`) → `settlingResult` (always-run) →
+[adapter settles with the broker] → `resultSettled` (always-run). A `run` convenience bundles
+`handle`+`settlingResult`. Each middleware method matches its stage type name (`settlingResult`, `resultSettled`, …) so
+a single class can implement multiple middleware stages without method collisions.
 
 ### `Router`
 
@@ -298,7 +299,7 @@ Router
   dispatchRoute(Job, Route): JobResult  // dispatch a pre-resolved route
 ```
 
-A missing map entry routes to `JobNotMatched` (default terminal: `FAIL` → dead-letter) — the analog of gRPC's
+A missing map entry routes to `RouteNotMatched` (default terminal: `FAIL` → dead-letter) — the analog of gRPC's
 `UNIMPLEMENTED`.
 
 ### `Job` (immutable)
@@ -381,22 +382,24 @@ contract on the `Job`.)
 ```
 1. JobReceived      always runs; pre-router
 2. Router resolves job from map
-3a. JobMatched          runs if job found; pre-handler
+3a. RouteMatched        runs if job found; pre-handler
     User handler runs, produces JobResult
-3b. JobDispatched       runs if job was found; post-handler
+3b. RouteDispatched     runs if job was found; post-handler
  OR
-3c. JobNotMatched       runs if job not found
+3c. RouteNotMatched     runs if job not found
     Default terminal produces JobResult::fail() (unknown job → dead-letter)
 
 [if any above threw]
 4. ThrowableCaught      converts throwable → JobResult (default: RETRY within maxAttempts, else DEAD_LETTER)
 
-5. Acking               always runs (including error paths)
+5. SettlingResult       always runs (including error paths)
    Adapter settles (delete / release + retry_delay / dead-letter)
-6. Terminated           runs after settlement (metrics, events, cleanup)
+6. ResultSettled        runs after settlement (metrics, events, cleanup)
 ```
 
-All stages except `JobReceived` and `Acking` are optional; `Acking` and `Terminated` always run.
+`JobReceived`, `SettlingResult`, and `ResultSettled` are unconditional — they run on every job, including error paths. The
+remaining stages are conditional, running whenever their case applies: `RouteMatched`/`RouteDispatched` when the job
+resolves, `RouteNotMatched` when it doesn't, and `ThrowableCaught` when an earlier stage throws.
 
 ### Exception → outcome mapping
 
@@ -429,8 +432,8 @@ Adapters bridge an external processor to `JobHandler`. Responsibilities:
 2. Decode the message; build a `Job` (name, payload, attributes, id, attempts).
 3. Invoke `JobHandler.handle(job)` (via the worker base `dispatch`).
 4. **Settle** with the processor based on the `JobResult` outcome (see [The outcome is an enum](#the-outcome-is-an-enum)
-   and [Redelivery](#redelivery-re-queue-vs-processor-owned)). It slots between `acking` and `terminate` via the worker
-   base's settlement callback.
+   and [Redelivery](#redelivery-re-queue-vs-processor-owned)). It slots between `settlingResult` and `resultSettled` via
+   the worker base's settlement callback.
 
 Adapters may consume in **batches** and dispatch each message independently (each in its own child container), settling
 per message.
