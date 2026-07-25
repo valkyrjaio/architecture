@@ -183,7 +183,9 @@ Metadata
 ```
 
 Keys ending in `-bin` carry binary values (base64-encoded on the wire; decoded at the library boundary). The
-`string|bytes` union reflects this.
+`string|bytes` union reflects this. The value type is validated against the key's kind at the boundary — a `-bin` key
+requires bytes, every other key requires a string — so a mismatch is rejected up front rather than surfacing as a cast
+failure or a stringified byte array during the wire write.
 
 Metadata may share its underlying primitive with HTTP's `Headers` if the shapes align cleanly; if binary-value handling
 makes sharing awkward, they stay separate.
@@ -479,6 +481,10 @@ Adapters bridge an external gRPC server implementation to `ServiceHandler`. The 
 7. During streaming, drain the response's messages through the per-step cancellation check by iterating
    `call.cancellable(response.getMessages())`: cancellation is checked before each outbound message and iteration exits
    early once the call is cancelled. Messages are pulled, never pushed — there is no `write()` sink.
+
+Because the adapter buffers the inbound message stream before invoking `ServiceHandler.handle(call)`, it caps the number
+of buffered messages to bound memory for an unbounded (e.g. client-streaming) call, rejecting an over-limit call with
+`RESOURCE_EXHAUSTED`. The cap is configurable on the gRPC config as `maxInboundMessages` (default 1000).
 
 Adapters do **not** forcibly interrupt handler execution — that is not possible in any target language. They are signal
 translators, not enforcers.
