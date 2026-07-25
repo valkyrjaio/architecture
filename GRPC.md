@@ -90,7 +90,7 @@ ServiceCall
   getDeadline(): Deadline               // never null; may be Deadline::none()
   getCancellation(): CancellationToken  // never null; may be Token::never()
   getPeer(): Peer                       // never null; auth may be "insecure"
-  getMessages(): iterable<Message>      // decoded inbound messages (length 1 for unary/server-stream)
+  getMessages(): iterable<Message>      // decoded inbound; buffered list, or a live stream under the streaming model
   getRoute(): Route                     // resolved route metadata
 ```
 
@@ -246,6 +246,78 @@ AuthContext
   getPeerSubject(): ?string
   getTransportSecurityType(): ?string
 ```
+
+## Streaming and Call Shapes
+
+gRPC has four call shapes. Three are served by the **buffered model**; genuinely interactive bidirectional streaming
+uses the **streaming model**. The two models share the same `ServiceCall`/`ServiceResponse` contracts, middleware
+pipeline, and cancellation semantics — they differ only in *when* the handler is dispatched and *how* outbound messages
+leave it.
+
+| Shape | Inbound | Outbound | Model |
+|-------|---------|----------|-------|
+| Unary | 1 | 1 | Buffered |
+| Server streaming | 1 | N | Buffered |
+| Client streaming | N | 1 | Buffered |
+| Bidirectional streaming | N | M, interleaved | Streaming |
+
+A method's shape comes from its `clientStreaming` / `serverStreaming` flags (declared via `@Method` and carried on
+`Route`). Only a **bidirectional** method — both flags set — uses the streaming model; everything else uses the buffered
+model.
+
+### Buffered model (default)
+
+The common case: quick in, quick out. The adapter buffers the inbound message stream, and on half-close builds the
+`ServiceCall` once and invokes `ServiceHandler.handle(call)` once. The handler returns one `ServiceResponse`; the adapter
+drains its messages to the wire — lazily, through `call.cancellable(...)`, so a server-streaming handler yields its N
+messages one at a time — then closes with the status. `maxInboundMessages` caps the buffer and rejects an over-limit
+call with `RESOURCE_EXHAUSTED`. There is no per-call threading: the handler runs on the transport's callback path.
+
+This covers unary, server-streaming, and client-streaming. A bidirectional method always uses the streaming model below,
+even when a particular client happens to half-close before reading (a "batch" exchange) — the model is chosen from the
+method's declared shape, not the client's runtime behavior.
+
+### Streaming model (bidirectional)
+
+Buffer-then-dispatch cannot serve an *interactive* bidirectional call: the client waits for a server reply before
+sending its next message and never half-closes early, so a handler that only runs after half-close would deadlock until
+the deadline. A bidirectional method is therefore dispatched **immediately**, before half-close, and three things change:
+
+- **Inbound is a live stream.** `getMessages()` is backed by a bounded blocking queue that the transport fills as
+  messages arrive; iterating it yields each message as it arrives and ends when the client half-closes. Here
+  `maxInboundMessages` is the queue's high-water mark: the adapter applies backpressure (stops requesting from the
+  transport) when the queue is full and resumes as the handler drains, rather than rejecting.
+- **Outbound is a push sink.** The handler emits responses through a sink on the call — `send(Message)` — *while it is
+  still reading inbound*. Sends are serialized. This is the single place the framework pushes rather than pulls; it
+  exists only in the streaming model, and interactive streaming is impossible without it. The handler still returns a
+  terminal `ServiceResponse` carrying the final status and trailing metadata (its message list is empty — messages went
+  through the sink).
+- **The handler runs on a worker thread**, separate from the transport callback path that fills the inbound queue, so
+  reading inbound and emitting outbound proceed concurrently.
+
+```
+ServiceCall (streaming additions)
+  send(Message): void          // push one outbound message; serialized; streaming model only
+  isStreaming(): bool          // true when dispatched under the streaming model
+```
+
+### Middleware runs once per call, not per message
+
+In **both** models the pipeline runs once per call — exactly as it already does for a buffered multi-message
+(server-streaming) response:
+
+- `CallReceived → RouteMatched → RouteDispatched` run once, before the handler.
+- `SendingResponse` runs once, at the first outbound message (stream open).
+- `ResponseSent` runs once, at stream close — the connection closing *is* the response-sent moment.
+
+So a streaming call behaves exactly as you would expect a non-streaming multi-item response to: middleware fires once on
+the way in, the handler gathers and emits the message collection, and `ResponseSent` fires once at close. No stage runs
+per message.
+
+> **Future (not in the initial implementation):** we may add an opt-in for per-message middleware — a stage that fires
+> on each inbound and/or outbound message rather than once per call — for use cases like per-frame authorization, metering,
+> or transformation on a long-lived stream. It would be strictly opt-in so the default once-per-call semantics above stay
+> the norm; the design is deferred until a concrete need lands.
 
 ## Cancellation and Deadline Model
 
@@ -482,9 +554,11 @@ Adapters bridge an external gRPC server implementation to `ServiceHandler`. The 
    `call.cancellable(response.getMessages())`: cancellation is checked before each outbound message and iteration exits
    early once the call is cancelled. Messages are pulled, never pushed — there is no `write()` sink.
 
-Because the adapter buffers the inbound message stream before invoking `ServiceHandler.handle(call)`, it caps the number
-of buffered messages to bound memory for an unbounded (e.g. client-streaming) call, rejecting an over-limit call with
-`RESOURCE_EXHAUSTED`. The cap is configurable on the gRPC config as `maxInboundMessages` (default 1000).
+Under the buffered model the adapter buffers the inbound message stream before invoking `ServiceHandler.handle(call)`, so
+it caps the number of buffered messages to bound memory for an unbounded (e.g. client-streaming) call, rejecting an
+over-limit call with `RESOURCE_EXHAUSTED`. The cap is configurable on the gRPC config as `maxInboundMessages` (default
+1000). Under the streaming model the same setting bounds the live inbound queue and drives backpressure instead of
+rejecting — see [Streaming and Call Shapes](#streaming-and-call-shapes).
 
 Adapters do **not** forcibly interrupt handler execution — that is not possible in any target language. They are signal
 translators, not enforcers.
