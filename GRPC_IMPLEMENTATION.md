@@ -144,19 +144,28 @@ the toolchain can inspect a type's hierarchy:
 
 - **Pre-classify at codegen** — generator resolves the middleware's full ancestry and emits typed
   per-stage lists into the cached `Route`. Used by **PHP** (`is_a`, live autoload), **Python**
-  (reflection), **TypeScript** (ts-morph `getImplements`), and achievable in **Java** (JavaParser
-  symbol solver, `getAllAncestors`), **Kotlin** (KSP), **C#** (Roslyn), **Scala** (macros/reflection).
-  Resolve the *full* hierarchy, not the direct `implements` clause, so a middleware extending an
-  abstract base or a custom sub-contract still classifies.
+  (reflection), **TypeScript** (ts-morph `getImplements`), and **Java** — plus **Kotlin** (KSP),
+  **C#** (Roslyn), **Scala** (macros/reflection) when those ports arrive. Resolve the *full*
+  hierarchy, not the direct `implements` clause, so a middleware extending an abstract base or a
+  custom sub-contract still classifies.
+  - Java does this with a **source ancestry walk** (`MiddlewareClassifier`), not the JavaParser
+    symbol solver: it parses each middleware/base source, resolves its `implements`/`extends` names
+    through that file's imports, and recurses until it reaches one of the stage-contract FQNs.
+    Crucially it **matches the contracts by fully-qualified name and never parses them**, so the
+    framework contracts need not be resolvable — the generator keeps working before the target
+    module is published (the release-ordering reality of a separate sindri artifact). The symbol
+    solver would instead need the compiled/source contracts on its type-solver path; the FQN walk
+    does not.
 - **Runtime `withMiddleware`** — the cache emits the flat, unclassified class list and a
   `Route.withMiddleware(List<Class>)` runs the cascade lazily when the route's supplier
   materializes (once, on match — not per request). This is the fallback for toolchains that cannot
   read the hierarchy at generation. **Go** needs this (structural, implicit interfaces — nothing to
   read), unless middleware is required to *embed* the contract interface, which makes it declared.
 
-The discriminator is **nominal vs. structural typing**, not the language. Java pre-classifies (symbol
-solver) to stay consistent with PHP/TS/Python; only Go deviates to `withMiddleware`. Whichever a
-language picks, a class implementing several stage contracts must land in **all** their buckets.
+The discriminator is **nominal vs. structural typing**, not the language. Java pre-classifies (the
+source ancestry walk) to stay consistent with PHP/TS/Python; only Go deviates to `withMiddleware`.
+Whichever a language picks, a class implementing several stage contracts must land in **all** their
+buckets.
 
 ### 8. `ServiceAdapter` contract
 
