@@ -5,6 +5,41 @@ identify. Gaps are noted where a language lacks a strong equivalent for a role t
 
 ---
 
+## Dependency Isolation
+
+Every CI tool is **isolated from application code and from every other CI tool**. Concretely, each tool:
+
+- lives in its **own repository** and is published as its **own package** (the PHP tools are the `valkyrja/phpstan`,
+  `valkyrja/phpunit`, `valkyrja/rector`, … Composer packages; the other ports follow the same one-package-per-tool
+  shape), and
+- is installed into its **own per-tool directory** inside each consuming repo — `.github/ci/<tool>/`, each with its own
+  `composer.json` and `vendor/` (PHP) — so a tool resolves and pins its dependency graph in complete isolation.
+
+**Why it is done this way.** A CI tool's dependency graph must never influence — or be constrained by — the
+application's dependency graph. If CI tools were installed alongside application code (a shared `require-dev`), a tool's
+transitive dependency could clash with, or force a downgrade of, a real application dependency; and two tools sharing one
+graph could clash with each other. Giving every tool its own package **and** its own directory removes both classes of
+conflict: each tool resolves against nothing but itself. This isolation — keeping CI dependencies from clashing with
+application dependencies — is the original reason the tools were split apart in the first place, and it is the property
+every alternative below is measured against.
+
+### Rejected alternatives
+
+- **One shared `composer.json` for all CI tools** (a single `.github/ci/` project instead of per-tool directories) —
+  **rejected.** It reunites every tool's dependencies into one resolver graph, reintroducing exactly the tool-vs-tool
+  clash the split exists to prevent. Such clashes are *avoidable* only if every tool is always kept perfectly up to
+  date, but that is not a guarantee worth depending on — the isolated model makes the clash **structurally impossible**
+  rather than merely unlikely.
+- **Consolidating the per-tool repositories into a single CI repo** — **rejected**, for the same reason one level up. A
+  *flat* merge (one published package for the whole toolbox) would additionally force every consumer to pull tools it
+  does not use, breaking pull-only-what-you-need. The only conflict-safe consolidation would be a monorepo that *still*
+  publishes each tool as its own package via subtree splits (the Symfony/Laravel model); that preserves isolation but
+  adds a split-publish pipeline whose overhead is not currently justified. The per-repo, per-package model stands until
+  repository count becomes the dominant maintenance cost — and even then, only the monorepo-with-splits form is
+  acceptable, never a flat merge.
+
+---
+
 ## Role Categories
 
 | Role                         | Description                                                                              |
