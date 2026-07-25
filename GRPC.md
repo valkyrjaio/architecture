@@ -74,7 +74,7 @@ calls to `ServiceHandler.handle()`; everything downstream is pure Valkyrja.
 
 Responsibilities:
 
-- Orchestrate the middleware pipeline stages (`CallReceived`, `SendingResponse`, `Terminated`).
+- Orchestrate the middleware pipeline stages (`CallReceived`, `SendingResponse`, `ResponseSent`).
 - Delegate to `Router` for route resolution and handler dispatch.
 - Run `ThrowableCaught` middleware when exceptions propagate up.
 - Fast-exit on cancellation signals.
@@ -336,13 +336,13 @@ On cancellation detection, the pipeline collapses to:
 
 ```
 Normal:     CallReceived → Router (RouteMatched → handler → RouteDispatched)
-            → SendingResponse → [wire write] → Terminated
+            → SendingResponse → [wire write] → ResponseSent
 
 Cancelled:  CallReceived → [cancellation detected]
-            → SendingResponse → [wire write] → Terminated
+            → SendingResponse → [wire write] → ResponseSent
 ```
 
-`SendingResponse` and `Terminated` still run — they are cheap, and observability of cancelled calls is often more
+`SendingResponse` and `ResponseSent` still run — they are cheap, and observability of cancelled calls is often more
 valuable than observability of successful ones. Request-processing middleware (`RouteMatched`, `RouteNotMatched`,
 `RouteDispatched`, `ThrowableCaught`) is skipped.
 
@@ -391,7 +391,7 @@ The gRPC pipeline mirrors HTTP/CLI with gRPC-specific defaults.
 
 5. SendingResponse      always runs (including error/cancellation paths)
    Adapter writes messages and trailers to wire
-6. Terminated           runs after wire write complete
+6. ResponseSent           runs after wire write complete
 ```
 
 All stages except `CallReceived` and `SendingResponse` are optional. Middleware in each stage is resolved from the
@@ -452,7 +452,7 @@ to `ThrowableCaught`, which converts them to cancellation responses and rejoins 
 The net effect: `ThrowableCaught` handles all thrown exceptions uniformly; cancellation is never a special case in
 exception-handling code because the framework's own cancellation handling stays in the response-propagation path.
 
-### `Terminated` stage
+### `ResponseSent` stage
 
 Runs after the adapter has written the full response (all messages + trailing metadata + status) to the wire. Used for
 cleanup, async logging, metrics emission, and event publication that should not block the client.
@@ -504,6 +504,26 @@ translators, not enforcers.
 Each adapter is expected to be thin (roughly 30–60 lines of glue code). All protocol-framework integration — middleware,
 container, error mapping, observability — lives above the adapter in Valkyrja code that is unaware of which worker is
 running.
+
+### Packaging: the bridge in core, the gRPC library optional
+
+The **bridge** — the shared translation between the native gRPC library's call/metadata/status types and Valkyrja's
+`ServiceCall`/`ServiceResponse` — is **not** its own artifact. It lives in **framework core, in the application/entry
+namespace** (next to the `WorkerGrpc` entry base), and the **native gRPC library is declared an _optional_
+dependency**: Gradle `compileOnly` / Maven `<optional>true</optional>` / Composer `suggest`. It is compiled against but
+never propagated to consumers.
+
+This costs a non-gRPC application nothing. The optional dependency is not on its classpath, and because every target
+language loads classes lazily (JVM class loading, PSR-4 autoload, ES module resolution), the bridge is never loaded when
+the app doesn't use gRPC — no bloat, no error. A gRPC application supplies the gRPC library itself (its chosen server
+adapter already depends on it). The core message/routing/handler logic stays library-agnostic — **only the bridge file
+imports the native gRPC types** — which each language guards (e.g. an ArchUnit rule permitting the gRPC library in the
+bridge package only).
+
+Apply the same rule to the **server adapters** (Java: Netty/Tomcat/Jetty; PHP: RoadRunner/OpenSwoole/FrankenPHP): the
+server-runtime dependency is optional, and the developer adds the `implementation`/`require` for the one they run. A
+project needs no separate artifact per server — the adapters can ship together (in the application/entry namespace) with
+each server dependency optional, the same way a mail component ships many transports without requiring all of them.
 
 ### Adapter interface
 
