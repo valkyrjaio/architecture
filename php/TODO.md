@@ -256,17 +256,6 @@
 
 - Expand ApplicationTest
 
-## Application Entry — OpenSwoole worker
-
-- `OpenSwooleHttp::onRequest()` ignores the OpenSwoole `$request`/`$response`
-  passed by the server: it rebuilds the request from
-  `RequestFactory::fromGlobals()` and never writes the framework response back to
-  the Swoole `$response`, so it cannot actually serve a live request. Carried over
-  verbatim from the old `valkyrja/openswoole` repo when the worker entries were
-  folded into the framework (`Valkyrja\Application\Entry\OpenSwoole`). Convert the
-  OpenSwoole request/response to the framework request/response and emit through
-  the Swoole `$response`. Fix before archiving the standalone repo.
-
 ## Container
 
 - Add an EventCapableContainer that extends the Container and adds event
