@@ -288,6 +288,8 @@ Keep each branch and PR small and atomic — one focused change per PR.
 - **Component tags:** `[Documentation]`, `[CI]`, `[GitHub]`, `[Git]`,
   `[Composer]`, `[Functions]`, `[Deprecation]`, module tags like `[Container]` /
   `[Http]` / `[Cli]`, version tags like `[25.x]`, `[Release]`.
+- **Tag casing is exact** — write each tag exactly as listed above; initialisms
+  stay uppercase (`[CI]`, `[GitHub]`), never `[Ci]` / `[Github]`.
 - No body / co-author lines unless explicitly asked.
 - PR description follows the template — fill **Description**, **Types of
   changes**, and **Changes** (bold file/component — em dash — what changed).
