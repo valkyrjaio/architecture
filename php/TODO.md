@@ -11,8 +11,6 @@
 -----------------
 
 - Eventually test contracts as well to ensure they have the expected signatures
-- Move stable release badge before PHP version badge to match Java and
-  TypeScript
 
 - Add more routing tests for both cli and http, especially dynamic routes in
   http.
