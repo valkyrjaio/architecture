@@ -109,8 +109,21 @@ SpotBugs → `junit` (JaCoCo 100%). Use `./gradlew spotlessApply` to auto-format
 - **`sindri` (build tool)** uses the Trees API + JavaPoet as an annotation
   processor to read `@Handler`/`@Provides` and generate the four cache data
   classes. Dev-only; the framework has zero AST/build deps.
-- **`entry/*`** (jetty/netty/tomcat) are server adapters; Java's built-in
-  `HttpServer` is the zero-dependency default.
+- **Runtime entry adapters.** The worker entries for the servlet / embedded
+  runtimes live in `io.valkyrja.application.entry.<runtime>` (`jetty`, `netty`,
+  `tomcat`, plus the built-in JDK `exchange`), each a thin `WorkerHttp` /
+  `WorkerGrpc` subclass. Their runtime SDKs (jetty-server, netty-codec-http,
+  tomcat-embed-core, the grpc-servlet / grpc-netty transports) are declared
+  **`compileOnly`** — the **"optional adapter" philosophy** (the Gradle analog of
+  PHP's Composer `suggest`): non-transitive, absent from the published POM, so a
+  consumer pulls only the runtime it actually uses and adds that SDK's
+  `implementation` in its own build. Core still builds and is consumable with none
+  of them on the runtime classpath; the JDK `HttpServer` (`exchange`) needs no extra
+  dependency and is the zero-dependency default. Every CI build that compiles `src`
+  therefore also declares these `compileOnly`. Adapters whose `run()` starts a
+  blocking, non-daemon server are excluded from JaCoCo (they can't reach full branch
+  coverage without hanging the test JVM); the reusable logic they build on
+  (`WorkerHttp` / `WorkerGrpc` / `GrpcBridge`) is covered directly.
 
 More: [`README.md`](README.md), [`PROVIDER_CONTRACTS.md`](PROVIDER_CONTRACTS.md),
 [`TODO.md`](TODO.md).

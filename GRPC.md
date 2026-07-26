@@ -63,6 +63,12 @@ Two important properties:
 The library handles all of this framing. The framework and user code work with decoded message objects, metadata as
 structured maps, and status as a value type. Bytes never cross into framework territory.
 
+The message payload type is **language-agnostic** — the port's own any/object type (e.g. `Object` in Java, `mixed` in
+PHP), **not** the native gRPC/protobuf message class (`com.google.protobuf.Message`, etc.). The worker adapter
+translates native messages into this agnostic representation on the way in and back on the way out, exactly as HTTP and
+CLI keep their contracts worker-agnostic. Basing the payload on the native protobuf type would couple the core to
+protobuf and break the PHP and TypeScript ports, whose gRPC ecosystems don't share Java's protobuf runtime shape.
+
 ## Core Contracts
 
 The language-agnostic surface area is intentionally small: eight contracts total, plus the pipeline components.
