@@ -244,15 +244,20 @@ but not the wire. One **live end-to-end test** closes that gap by standing up a 
 
 `GrpcNettyEndToEndTest` (in the Java port's functional test tree) boots a real Netty gRPC server
 backed by `GrpcBridge.registry(app, data)` on an ephemeral port, connects a real Netty client, and
-drives both dispatch models over actual HTTP/2 — framing, flow control, headers, messages, and
-trailers included:
+drives **all four gRPC call types** over actual HTTP/2 — framing, flow control, headers, messages,
+and trailers included:
 
-- **Buffered path** — a client-streaming `Collect` call: send two messages, half-close, expect the
-  single handler response and `OK`.
-- **Streaming path** — a bidirectional `Echo` call (dispatched on a per-call virtual thread): send
-  three messages interleaved with `request(n)`, half-close, expect all three echoed back and `OK`.
+- **Unary (1 → 1, buffered)** — a `Ping` call: send one message, expect one response and `OK`.
+- **Server-streaming (1 → N, buffered)** — a `Fanout` call: send one message, expect several
+  responses and `OK`.
+- **Client-streaming (N → 1, buffered)** — a `Collect` call: send two messages, half-close, expect
+  the single handler response and `OK`.
+- **Bidirectional (N ↔ M, streaming model)** — an `Echo` call dispatched on a per-call virtual
+  thread: send three messages interleaved with `request(n)`, half-close, expect all three echoed
+  back and `OK`.
 
-Both use a raw `byte[]` marshaller (`GrpcBridge.ByteMarshaller`), so no generated protobuf is needed —
+The first three exercise the buffered dispatch path; the last exercises the streaming model. All use
+a raw `byte[]` marshaller (`GrpcBridge.ByteMarshaller`), so no generated protobuf is needed —
 the fallback registry handles any method. `grpc-netty-shaded` is a **test-only** dependency of the
 port's JUnit build; the published framework artifact keeps `io.grpc` `compileOnly`.
 
@@ -275,8 +280,9 @@ targets JDK 21, which is also what makes the streaming model's virtual-thread-pe
 available (see [`GRPC.md`](GRPC.md) → *Streaming and Call Shapes*).
 
 For a **new language port**, replicate the same shape: boot the port's native gRPC server against its
-bridge, drive a unary/client-streaming call and a bidirectional call with a raw-bytes codec, and run
-it in that language's official JDK/runtime container so the check is reproducible.
+bridge, drive one call of each of the four types (unary, server-streaming, client-streaming,
+bidirectional) with a raw-bytes codec, and run it in that language's official runtime container so the
+check is reproducible.
 
 ## Implementation order for the next port
 
