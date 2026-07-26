@@ -111,8 +111,12 @@ If a `composer.json` changed: `composer validate --strict` (root) or
   configured exactly as expected (`assertSame` lock on `getRules()`), plus branch
   tests for any custom expressions/rules. See
   [`../TESTING_METHODOLOGY.md`](../TESTING_METHODOLOGY.md) §2.
-- **Entry workers** (`entry/*`) have infinite `run()` loops that are currently
-  coverage-**deferred**; helper methods are testable.
+- **Entry workers** (the per-runtime `Application\Entry\<Runtime>` HTTP workers —
+  FrankenPHP, OpenSwoole, RoadRunner) reach **100% line + branch** coverage: each
+  `run()` wraps its irreducible runtime call (`frankenphp_handle_request`,
+  `$server->start()`, `Worker::create()`/`waitRequest()`) in a small overridable
+  seam marked `@codeCoverageIgnore`, and a `Tests\Fixtures` subclass overrides the
+  seams to drive the loop, its branches, and failure paths.
 
 More: [`README.md`](README.md), [`PROVIDER_CONTRACTS.md`](PROVIDER_CONTRACTS.md),
 [`TODO.md`](TODO.md).
