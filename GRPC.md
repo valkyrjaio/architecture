@@ -292,14 +292,21 @@ the deadline. A bidirectional method is therefore dispatched **immediately**, be
   exists only in the streaming model, and interactive streaming is impossible without it. The handler still returns a
   terminal `ServiceResponse` carrying the final status and trailing metadata (its message list is empty — messages went
   through the sink).
-- **The handler runs on a worker thread**, separate from the transport callback path that fills the inbound queue, so
-  reading inbound and emitting outbound proceed concurrently.
+- **The handler runs on its own concurrent execution unit**, separate from the transport callback path that fills the
+  inbound queue, so reading inbound and emitting outbound proceed concurrently. Each language realizes this with its
+  native per-call primitive — a **virtual thread** in Java, a **goroutine** in Go, an **async task/coroutine** in
+  TypeScript/Python — one cheap, scheduler-managed unit per streaming call. This is deliberately unbounded (as goroutines
+  are); an app that must cap concurrent streams layers a separate limit on top rather than sharing a bounded pool, which
+  would deadlock on the blocking reads.
 
 ```
 ServiceCall (streaming additions)
   send(Message): void          // push one outbound message; serialized; streaming model only
   isStreaming(): bool          // true when dispatched under the streaming model
 ```
+
+The adapter also captures the deadline, peer, and metadata on the transport thread (where the library binds the call
+context) before starting the execution unit, since those are not readable from the worker.
 
 ### Middleware runs once per call, not per message
 
