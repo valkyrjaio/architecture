@@ -83,6 +83,14 @@ These hold in **every** language. Do not violate them in a port.
   `::class` / `.class` / class objects / constructor references directly so
   `sindri` can resolve them statically. (Binding-*key* constants files are fine
   and expected — see §4.)
+- **Route middleware is appended, never deduplicated.** Across every protocol
+  (HTTP, CLI, gRPC), both the runtime collector and `sindri` codegen *append* each
+  registered middleware in order — they never dedupe. If the same middleware is
+  scheduled twice at a stage it runs twice (including the qualified- vs
+  simple-name spelling of one class); a duplicate is the developer's bug, not the
+  framework's to silently fix, and the generated cache must mirror reflection
+  exactly. Never add `distinct` / `array_unique` / `!contains` to middleware
+  collection.
 
 Full detail: [`SUMMARY.md`](SUMMARY.md) and [`README.md`](README.md).
 
