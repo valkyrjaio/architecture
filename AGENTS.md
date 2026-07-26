@@ -289,8 +289,10 @@ Keep each branch and PR small and atomic — one focused change per PR.
   `[Composer]`, `[Functions]`, `[Deprecation]`, module tags like `[Container]` /
   `[Http]` / `[Cli]`, version tags like `[25.x]`, `[Release]`.
 - No body / co-author lines unless explicitly asked.
-- PR description follows the template — fill **Description**, **Types of
-  changes**, and **Changes** (bold file/component — em dash — what changed).
+- PR description follows the
+  [PR template](https://github.com/valkyrjaio/.github/blob/master/.github/PULL_REQUEST_TEMPLATE.md)
+  — fill **Description**, **Types of changes**, and **Changes** (bold
+  file/component — em dash — what changed).
 
 ### Current working branch
 
