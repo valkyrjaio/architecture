@@ -12,6 +12,27 @@ so every ternary / `&&`/`||` short-circuit / optional-chain / `switch` arm is
 exercised both ways — line coverage can read 100% while a branch is half-tested.
 PHP and Java are enforcing the same (see their `TODO.md` files).
 
+### Centralize contract type guards (the `instanceof` equivalent)
+
+Runtime discrimination between contracts is done with inline structural checks —
+`'getStatusCode' in x`, `'getPath' in x`, `'writeMessages' in x` — scattered
+across dispatchers/handlers. Because TS has no `instanceof` for interface
+contracts, each of these is really an ad-hoc `instanceof`. Provide **one reusable
+guard per contract** (e.g. `ResponseContract.instanceOf`,
+`ServerRequestContract.instanceOf`, `RouteContract.instanceOf`,
+`OutputContract.instanceOf` — the `Contract.instanceOf(value)` namespace helper
+pattern already used by some contracts) and use it everywhere, so the
+discriminating property lives in a single place.
+
+This is a correctness issue, not just tidiness: `RequestHandler.dispatchRouter`
+detected a returned response with `'getPath' in requestAfterMiddleware`, but a
+`ServerRequest` has no `getPath`, so **every** request was misclassified as a
+response and returned without being dispatched (fixed in `valkyrja-ts#82` by
+checking `'getStatusCode'`). A shared `ResponseContract.instanceOf` guard would
+have kept the one true check in one place and prevented the bug class. Audit
+`Http`/`Cli` dispatch + middleware handlers for the same inline-`in` pattern and
+replace them with the contract guards.
+
 ## Port gaps (found while porting the Application tests)
 
 These are places where the TS port lags PHP. Tests currently assert the **current
