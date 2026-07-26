@@ -558,9 +558,11 @@ Adapters bridge an external gRPC server implementation to `ServiceHandler`. The 
 5. Invoke `ServiceHandler.handle(call)`.
 6. Translate the returned `ServiceResponse` into the library's native response API (call `.onNext()`, `return response`,
    `callback()`, etc. depending on the library).
-7. During streaming, drain the response's messages through the per-step cancellation check by iterating
+7. Drain the response's messages through the per-step cancellation check by iterating
    `call.cancellable(response.getMessages())`: cancellation is checked before each outbound message and iteration exits
-   early once the call is cancelled. Messages are pulled, never pushed — there is no `write()` sink.
+   early once the call is cancelled. In the **buffered model** outbound messages are pulled, never pushed. The
+   **streaming model** (see [Streaming and Call Shapes](#streaming-and-call-shapes)) is the deliberate exception: a
+   bidirectional handler pushes each reply through a `send()` sink while it is still reading inbound.
 
 Under the buffered model the adapter buffers the inbound message stream before invoking `ServiceHandler.handle(call)`, so
 it caps the number of buffered messages to bound memory for an unbounded (e.g. client-streaming) call, rejecting an

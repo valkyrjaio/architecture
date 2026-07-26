@@ -59,13 +59,13 @@ references generated protobuf types. At the adapter boundary a message is raw `b
 decode/encode. Basing the contracts on a native protobuf `Message` type would couple the core to
 protobuf and break cleanly in PHP/TS, so it is explicitly avoided.
 
-### 2. Cancellation is pull-based and checked at each step
+### 2. Cancellation is pull-based and checked at each step (buffered model)
 
-This replaces the push-`write()` language in earlier drafts of `GRPC.md` (now updated). There is no
-writable message sink. Outbound messages are a **pull-based iterable**; the adapter drains them
-through `call.cancellable(...)`, which checks cancellation between items and exits early. The same
-helper wraps a streaming handler's own generator. This maps cleanly onto Go channels, JS
-async-iterables, and PHP generators — all pull-based.
+In the **buffered model** (unary, server- and client-streaming) there is no writable message sink.
+Outbound messages are a **pull-based iterable**; the adapter drains them through
+`call.cancellable(...)`, which checks cancellation between items and exits early. This maps cleanly
+onto Go channels, JS async-iterables, and PHP generators — all pull-based. The **streaming
+(bidirectional) model** is the one deliberate exception — it adds a push sink; see decision 9.
 
 ### 3. The two-question check lives in the middleware-handler base
 
@@ -162,6 +162,33 @@ language picks, a class implementing several stage contracts must land in **all*
 
 `ServiceAdapter { start(ServiceHandler); stop() }` is part of the agnostic surface even though every
 implementation is per-worker. Keep it in the core.
+
+### 9. The streaming model for bidirectional calls
+
+Decision 5's `dispatch` covers the **buffered model** (unary, server- and client-streaming): buffer
+inbound, dispatch once on half-close, drain one `ServiceResponse`. That model cannot serve an
+*interactive* bidirectional call — the client waits for a reply before sending more and never
+half-closes early — so a **second dispatch path** exists for methods where **both** streaming flags
+are set (`isClientStreaming() && isServerStreaming()`); everything else stays buffered. The full
+contract is ratified in [`GRPC.md`](GRPC.md) → *Streaming and Call Shapes*; the Java realization:
+
+- **`WorkerGrpc.dispatchStreaming(app, data, callFactory, OutboundStream)`** dispatches the handler
+  **immediately** (not on half-close) on a **per-call concurrent execution unit** — a virtual thread
+  in Java, a goroutine in Go, an async task in JS/Python (see *Streaming and Call Shapes*).
+- **Inbound is a live stream** (`InboundMessageStream`, a bounded blocking queue) the transport feeds
+  as messages arrive; iteration blocks until the next message and ends on half-close **or** cancel.
+- **Outbound is a push sink** (`ServiceCall.send` → `OutboundStream`). `SendingResponse` fires **once**
+  at first emit (or at close if the handler emits nothing) against an OK shell whose initial metadata
+  becomes the headers; the handler returns a **terminal** `ServiceResponse` (status + trailing
+  metadata, no messages); `ResponseSent` fires **once** at close. So the pipeline still runs once per
+  call, exactly as a buffered multi-message response does.
+- **Flow control**: request the high-water (`maxInboundMessages`) up front and refill one per drained
+  message, so the queue never outgrows the bound (here it is an in-flight window, not a hard cap).
+- **Context is captured on the transport thread** (deadline/peer/metadata) before the worker starts —
+  the library binds the call context there, not on the worker unit.
+- **`send` is single-thread**: the transport is not thread-safe, so a concurrent `send` throws fast
+  rather than silently corrupting the wire. A handler that fans out to threads funnels emissions
+  back through one.
 
 ## Portable gotchas
 
