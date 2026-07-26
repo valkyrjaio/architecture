@@ -114,5 +114,16 @@ full gate, not a subset:
 - **Architecture-enforcement & security are known toolchain gaps** in TS
   (no strong ArchUnit/PHPArkitect equivalent, no dedicated taint scanner) —
   enforce those rules in review. See [`../CI_TOOLS.md`](../CI_TOOLS.md).
+- **Discriminate contracts with reusable type guards, not inline `in` checks.**
+  TS has no `instanceof` for interface contracts, so runtime discrimination
+  (request vs response vs route, etc.) is structural. Put the check in one place —
+  a `Contract.instanceOf(value)` (or `isX(value): value is X`) guard co-located
+  with the contract — and reuse it, instead of scattering ad-hoc `'prop' in x`
+  checks across dispatchers. One canonical guard per contract keeps the
+  discriminating property in a single spot, so a shape change updates one guard
+  rather than N call sites, and a wrong property can't silently misclassify at one
+  site (e.g. `RequestHandler.dispatchRouter` once used `'getPath' in x` to detect a
+  response, but requests have no `getPath`, so every request was treated as a
+  response — see [`TODO.md`](TODO.md)).
 
 More: [`README.md`](README.md), [`PROVIDER_CONTRACTS.md`](PROVIDER_CONTRACTS.md).
