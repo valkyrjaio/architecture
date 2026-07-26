@@ -183,9 +183,10 @@ Metadata
 ```
 
 Keys ending in `-bin` carry binary values (base64-encoded on the wire; decoded at the library boundary). The
-`string|bytes` union reflects this. The value type is validated against the key's kind at the boundary — a `-bin` key
-requires bytes, every other key requires a string — so a mismatch is rejected up front rather than surfacing as a cast
-failure or a stringified byte array during the wire write.
+`string|bytes` union reflects this. Both the key and the value are validated at the point of insertion — as HTTP does
+for header names — rather than surfacing an opaque transport error when the response is written: the key name must be a
+valid gRPC header name (lowercase letters, digits, `-`, `_`, `.`), and the value type must match the key's kind (a
+`-bin` key requires bytes, every other key requires a string).
 
 Metadata may share its underlying primitive with HTTP's `Headers` if the shapes align cleanly; if binary-value handling
 makes sharing awkward, they stay separate.

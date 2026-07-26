@@ -237,6 +237,47 @@ tree; end-to-end wiring is exercised by functional tests that boot the full stac
 `@Service` controller and dispatch calls (including "unknown method → UNIMPLEMENTED" and
 "per-route SendingResponse/Terminated middleware fires"). Reusable controllers/middleware are fixtures.
 
+Most tests drive the bridge with a mocked native call. That verifies translation and control flow
+but not the wire. One **live end-to-end test** closes that gap by standing up a real gRPC transport.
+
+### Live end-to-end verification (real transport, in Docker)
+
+`GrpcNettyEndToEndTest` (in the Java port's functional test tree) boots a real Netty gRPC server
+backed by `GrpcBridge.registry(app, data)` on an ephemeral port, connects a real Netty client, and
+drives both dispatch models over actual HTTP/2 — framing, flow control, headers, messages, and
+trailers included:
+
+- **Buffered path** — a client-streaming `Collect` call: send two messages, half-close, expect the
+  single handler response and `OK`.
+- **Streaming path** — a bidirectional `Echo` call (dispatched on a per-call virtual thread): send
+  three messages interleaved with `request(n)`, half-close, expect all three echoed back and `OK`.
+
+Both use a raw `byte[]` marshaller (`GrpcBridge.ByteMarshaller`), so no generated protobuf is needed —
+the fallback registry handles any method. `grpc-netty-shaded` is a **test-only** dependency of the
+port's JUnit build; the published framework artifact keeps `io.grpc` `compileOnly`.
+
+Run it in a clean JDK 21 container so the result does not depend on a developer's local toolchain
+(replace `<framework-repo>` with the checkout of the Java framework port):
+
+```bash
+docker run --rm \
+  -v "<framework-repo>":/work -w /work \
+  -v "$HOME/.gradle":/root/.gradle \
+  eclipse-temurin:21-jdk \
+  ./gradlew -p .github/ci/junit test \
+    --tests "io.valkyrja.functional.grpc.endtoend.GrpcNettyEndToEndTest" \
+    --console=plain --no-daemon
+```
+
+Expect `BUILD SUCCESSFUL`. Mounting `~/.gradle` is only a cache speed-up — omit it for a fully cold,
+from-scratch run. This was verified on `eclipse-temurin:21-jdk` with Docker 29.x; the framework
+targets JDK 21, which is also what makes the streaming model's virtual-thread-per-call realization
+available (see [`GRPC.md`](GRPC.md) → *Streaming and Call Shapes*).
+
+For a **new language port**, replicate the same shape: boot the port's native gRPC server against its
+bridge, drive a unary/client-streaming call and a bidirectional call with a raw-bytes codec, and run
+it in that language's official JDK/runtime container so the check is reproducible.
+
 ## Implementation order for the next port
 
 1. `message/*` value types + enums (+ tests).
