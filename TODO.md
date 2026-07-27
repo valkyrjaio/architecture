@@ -39,3 +39,24 @@ in every port — PHP, Java, TypeScript, Go, Python):
       equivalent (there is no post-exit stage — the process is dead).
 - [ ] Once gRPC is renamed, update the gRPC `Terminated` reference in `QUEUE.md`
       (the `Deferred` bridge host-hook list) to the new name.
+
+## Framework tests — request & command mapping fidelity
+
+Add framework-level tests (e2e / smoke / regression / integration — whatever
+fits) in **every port** (PHP is the reference, then Java, TypeScript, Go,
+Python) proving that an incoming request/command maps faithfully onto the
+framework's own objects, independent of routing:
+
+- **HTTP:** an incoming request's method (all types — GET, POST, PUT, PATCH,
+  DELETE, HEAD, OPTIONS, …), headers, query params, and body — plus a response's
+  status code, reason phrase, headers, and body — map correctly onto
+  `ServerRequest` / `Response`. Assert message round-trip fidelity, not merely
+  that a route matched.
+- **CLI:** an incoming command/input maps correctly — command name, arguments,
+  options, and every input shape — onto the `Input` / command objects.
+
+**Why:** a mapping defect (a dropped header, a wrong reason phrase, a mis-parsed
+option) is invisible to route-matching tests. The Java and TypeScript
+starter-app entry/worker end-to-end work surfaced exactly this class of bug —
+caught far from the source. Framework-level mapping tests shift that coverage
+left: sooner, and closer to where the mapping actually lives.
