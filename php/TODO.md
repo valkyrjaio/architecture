@@ -90,8 +90,42 @@ tests it ships.
   split into its own `path-coverage` Composer script there (root
   `phpunit-path-coverage`); the default `coverage` script no longer runs it. The
   other repos keep `--path-coverage` in their `coverage` script (fast enough).
-  TODO: once branch coverage is locked in, add a Cobertura-based branch gate so
-  it stays at 100% on future changes.
+  **Solved on valkyrja** — `phpunit-path-coverage-parallel` runs the suite as one
+  shard per component and merges with `phpcov`: **190s vs 1942s serially**
+  (10x, floor = the slowest shard). Speed is no longer the blocker for a gate.
+- **Do not gate branch coverage yet** — deliberate, revisit later. The reachable
+  gaps in valkyrja are closed (valkyrjaio/valkyrja-php#936, #939), but a handful
+  of branches remain that no *test* can reach, so a 100% gate would sit red. Each
+  needs a **source** change of the kind above, and each is a behavior decision
+  worth making on its own:
+    - `Cli\Interaction\Message\Answer::isValidResponse()` — the
+      `allowedResponses === []` clause is **dead code**: the constructor and
+      `withAllowedResponses()` both append `$defaultResponse`, so the array is
+      never empty. Removing it changes what "no allowed responses" means — decide
+      whether that was meant to accept anything.
+    - `Cli\Server\Support\Exiter::exit()` — the `exit($code)` arm ends the
+      process. Needs the seam treatment above.
+    - `Dispatch\Factory\DispatchFactory::fromReflection()` — exhaustive
+      `match (true)` over a union type; fold the last arm into `default`.
+    - `Http\Message\File\Factory\UploadedFileFactory::isValidSapiEnvironmentForUploads()`
+      — branches on `PHP_SAPI`, always `cli` under PHPUnit. Seam the SAPI lookup.
+    - `Http\Server\Handler\RequestHandler::getOutputDufferFlags()` — the
+      `defined('PHP_OUTPUT_HANDLER_REMOVABLE') ? … : -1` fallback is for HHVM 3.3
+      and is dead on every supported PHP; drop it.
+    - `Type\Enum\Trait\JsonSerializable` — a trait compiled into each using class,
+      whose per-class copies are conflated into one file entry. It reports 3/3 run
+      alone but 2/3 with the full `Type` suite, because a backed enum never runs
+      `return $this->name` and a pure enum never runs `return $this->value`.
+      Adding tests *lowers* it. No known remedy yet — investigate before gating.
+  Once those are resolved, add the Cobertura-based branch gate so branch coverage
+  stays at 100% on future changes.
+- **Never gate on *merged* branch data.** Xdebug builds a different branch map for
+  a function depending on whether it ran, so merging shard coverage unions two
+  incompatible maps and invents branches nothing can execute — it reported 9
+  missing branches for `Http\Routing\Processor\Processor`, which is at 100% in its
+  own shard (19 such phantom branches across 4 files). Merged **line** data is
+  affected too but only slightly (99.97% vs 100%, from `match (` lines). Gate per
+  shard, or on the serial run; use per-shard numbers when hunting real gaps.
 - **Java/TypeScript** also reach 100% branch — JaCoCo (`BRANCH`) and Vitest
   (istanbul/v8) measure decision coverage directly. (Flagged in their TODO.md.)
 
