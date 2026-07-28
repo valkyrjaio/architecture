@@ -67,7 +67,10 @@ PHP nuances:
   named `*Fixture` — never `*Test`. A fixture that is itself an enum, trait, or
   contract keeps that type's naming (`*Enum` / `*Trait` / `*Contract`).
 - **Coverage: 100% (line and branch), never dropping** — every code branch has a
-  test — via `composer phpunit-coverage`. Recipes & gotchas:
+  test — via `composer phpunit-coverage`. On **`valkyrja`** that script measures
+  lines only, because `--path-coverage` is too slow to bundle there; branches
+  need `composer phpunit-path-coverage-parallel` and are nobody's gate, so check
+  them before calling work done (see the CI tools section). Recipes & gotchas:
   [`../TESTING_METHODOLOGY.md`](../TESTING_METHODOLOGY.md).
 
 ---
@@ -87,6 +90,7 @@ root `composer.json` script shortcuts** — check that file first for exact name
 | Formatting               | PHP-CS-Fixer | `composer phpcsfixer` then `phpcsfixer-check`  |
 | Automated migration      | Rector       | `composer rector` / `rector-check`             |
 | Testing                  | PHPUnit      | `composer phpunit` / `phpunit-coverage`        |
+| Branch coverage (`valkyrja`) | PHPUnit  | `composer phpunit-path-coverage-parallel`      |
 
 ### CI gate (run before done)
 
@@ -98,6 +102,39 @@ full gate, not a subset:
 
 If a `composer.json` changed: `composer validate --strict` (root) or
 `composer validate --no-check-publish` (others).
+
+### Check branch coverage before done
+
+Every repo except `valkyrja` keeps `--path-coverage` inside its `coverage`
+script, so `phpunit-coverage` already reports branches there and the gate covers
+them. **On `valkyrja` it does not** — that script measures lines only, and
+nothing in CI gates branch coverage, so a new uncovered branch will not fail
+anything. **Check it yourself once the work is complete**, so nothing creeps in:
+
+```bash
+GAPS=1 composer phpunit-path-coverage-parallel
+```
+
+`GAPS=1` lists every file below 100% branch coverage, ranked by branches missing.
+Compare against the same command on your base branch and account for any file
+your change added to the list. This runs the suite as parallel per-component
+shards (~3 min); the serial `phpunit-path-coverage` is 10x slower.
+
+**Read per-shard numbers, never the merged ones, when deciding what is missing.**
+Xdebug builds a different branch map for a function depending on whether it ran,
+so merging shard data unions two incompatible maps and invents branches nothing
+can execute — it has reported 9 missing branches for a file that is at 100% in
+its own shard. Confirm any suspected gap against the owning shard first:
+
+```bash
+composer phpunit-path-coverage-shard Http
+```
+
+A genuine gap is closed by a test. A branch that no test can reach is closed by
+**changing the source**, not by excusing it — fold an exhaustive `match`'s last
+arm into `default`, wrap an irreducible syscall in an overridable seam, delete a
+condition that is provably dead. See the branch-coverage notes in
+[`TODO.md`](TODO.md) for the known categories and their remedies.
 
 ---
 
