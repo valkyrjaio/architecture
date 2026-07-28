@@ -25,9 +25,9 @@ coverage. Add/raise the coverage gate to require **100% branch coverage** (every
 coverage — a line can be fully covered while one side of a condition never runs.
 PHP is doing the equivalent via Cobertura `branch-rate` (see `architecture/php/TODO.md`).
 
-The branch-coverage pass has been completed for `valkyrja`: **1578/1582 branches
-(99.75%)**, with the only remaining gaps being the 4 irreducible branches listed
-under "Known unreachable lines" below. Several genuinely-dead branches were removed
+The branch-coverage pass has been completed for `valkyrja`: **1870/1872 branches
+(99.893%)**, with the only remaining gaps being the 2 irreducible branches listed
+under "Known unreachable branches" below. Several genuinely-dead branches were removed
 during the pass rather than left uncovered (`Answer.isValidResponse`,
 `QuestionWriter.writeQuestion`, `Response.sendHttpLine`, `UploadedFile.moveTo`'s
 stream-null guard, `MarshalUriFactory`/`UriFactory`/`Header`/`Value`/`Cookie`/
@@ -75,9 +75,8 @@ currently targets only the code that exists in the Java source; finish the port
 
 ### Test-port status
 
-Every module's unit tests are ported and JaCoCo line coverage is **99.83%**
-(5716/5726); the only uncovered lines are the provably-unreachable ones listed
-under "Known unreachable lines" below — all reachable source lines are covered.
+Every module's unit tests are ported and JaCoCo line coverage is **100%**
+(6798/6798) — every reachable source line is covered.
 
 **Done — one dedicated test file per code-bearing class.** PHP keeps a separate
 test file per class (e.g. `ParsedBodyParamCollectionTest`, `TextResponseTest`).
@@ -88,7 +87,7 @@ now have a dedicated `<Class>Test` covering 100% of that file, and the former
 grouped tests (`ConcreteParamCollectionsTest`, `TypedResponsesTest`,
 `TypedHeadersTest`, `FormatterVariantsTest`, `MessageVariantsTest`,
 `OutputVariantsTest`, `OptionParameterSubclassesTest`, the per-module
-`*ExceptionTest`s) were split out and removed. Suite: 1210 tests / 382 files.
+`*ExceptionTest`s) were split out and removed. Suite: 1629 tests / 435 files.
 
 **Deferred — no-bytecode classes.** The **146 pure interfaces** (abstract methods
 only) and **21 annotation markers** (`@interface`) have no executable code for
@@ -115,15 +114,21 @@ the resolved handler.
 ### JaCoCo exclusions (Java-only, non-unit-testable infra)
 
 - `**/benchmark/**` — performance harnesses.
-- `application/entry/ExchangeHttp`, `application/entry/ExchangeCgiHttp` — thin
-  `com.sun.net.httpserver` bootstrap adapters with no PHP equivalent; their
-  `run()` starts non-daemon server threads that cannot be exercised from a unit
-  test without leaking the server / hanging the test JVM.
+- `application/entry/{exchange,jetty,netty,tomcat}/**` — the worker-runtime entry
+  adapters, folded into the framework from the standalone `entry/*` repos. They are
+  bootstrap glue whose `run()` starts a persistent, non-daemon server that blocks
+  forever (`server.join()` / `awaitTermination()` / `await()`) with JVM shutdown
+  hooks, so they cannot reach full branch coverage from a unit test without leaking
+  the server / hanging the test JVM. The package globs also drop the anonymous inner
+  classes the HTTP adapters generate (handlers / servlets / channel initializers).
+  The reusable logic they build on (`WorkerHttp` / `WorkerGrpc` / `GrpcBridge`) is
+  covered directly, and each adapter is exercised end to end by a smoke test that
+  boots a real application and drives the full convert → dispatch → emit path.
 
 ### Known unreachable branches (coverage < 100% by construction)
 
-`valkyrja` is at **100% line coverage (5715/5715)** and **99.875% branch coverage
-(1596/1598)**. The 2 remaining branches are counted by JaCoCo but cannot be executed
+`valkyrja` is at **100% line coverage (6798/6798)** and **99.893% branch coverage
+(1870/1872)**. The 2 remaining branches are counted by JaCoCo but cannot be executed
 by any test without terminating the JVM — they are JaCoCo's two unavoidable cases:
 
 - **`log/logger/abstract_/Logger.java` L26** — the implicit `default` of the exhaustive
