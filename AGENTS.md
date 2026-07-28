@@ -173,6 +173,49 @@ live in a `Contract/` (or `.contract`) subpackage. The concrete implementation
 takes the bare name (`Container`, `Router`); shared behavior goes in an
 `Abstract/` base.
 
+### Application entry points
+
+Entry points are named for the runtime that drives them. The framework and the
+starter apps group them on **different axes**, so the same runtime lands in a
+different place in each — but both put the runtime in the **class name**, and that
+is the invariant, not the directory shape.
+
+**Framework — group by adapter, protocol in the class name.** One adapter serves
+several protocols, so the adapter is the segment and the protocol is the suffix:
+
+```
+Application/Entry/
+├── Http                        ← default, in-core; one per protocol (Cli, Grpc, …)
+├── Cli
+├── Abstract/                   ← App, and a WorkerX base per protocol
+│   ├── App
+│   └── WorkerHttp
+├── OpenSwoole/OpenSwooleHttp   ← and OpenSwooleGrpc, OpenSwoolePushWorkerQueue as they land
+├── RoadRunner/RoadRunnerHttp
+└── FrankenPhp/FrankenPhpHttp
+```
+
+Java spells the same tree `entry/netty/{NettyHttp, NettyGrpc}` and
+`entry/jetty/{JettyHttp, JettyGrpc}`, over an `abstract_/{App, WorkerHttp,
+WorkerGrpc}`.
+
+**Starter app and `template` — group by protocol, runtime in the class name.** The
+app's axis is the protocol module, which owns `Config`, the controllers, the routing
+data, and the providers; only the server driving them differs. So the protocol is the
+segment and the runtime is the prefix, and the default entry keeps the bare name `App`:
+
+|         | PHP                      | Java                |
+|---------|--------------------------|---------------------|
+| default | `App\Http\App`           | `app.http.App`      |
+| variant | `App\Http\OpenSwooleApp` | `app.http.JettyApp` |
+
+**Never nest a starter-app entry under the runtime** (`App\Http\OpenSwoole\App`). It
+yields several classes named `App` inside one protocol — a dozen once gRPC and Queue
+land — and the variant axis is not always an adapter, so it cannot be a segment:
+[`QUEUE.md`](QUEUE.md) ships non-adapter `PullQueue` / `PushQueue` defaults, which
+become `App\Queue\App` and `App\Queue\PushApp` alongside a per-runtime
+`App\Queue\OpenSwoolePushApp`.
+
 ### Structure taxonomy (enforced)
 
 A class's *kind* is encoded three ways at once — its **name suffix**, the

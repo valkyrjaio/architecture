@@ -146,6 +146,13 @@ Provide the entry points, mirroring HTTP's `Http`/`WorkerHttp` and gRPC's `Grpc`
 - If (and only if) the protocol can run on a zero-dependency in-core server, add one (HTTP's
   `Exchange*`). Most protocols cannot and rely entirely on external adapter modules.
 
+Name them on the two axes in
+[`AGENTS.md` § Application entry points](AGENTS.md#application-entry-points): the framework
+groups by **adapter** with the protocol in the class name (`Entry/OpenSwoole/OpenSwooleGrpc`),
+the starter app and `template` group by **protocol** with the runtime in the class name
+(`App\Grpc\App`, `App\Grpc\OpenSwooleApp`). A new module adds an `App\<Module>` namespace to
+the app, never a per-runtime one.
+
 ## Container mechanics to remember
 
 - **Publishers are deferred.** `publishers()` register lazy callbacks; a service is not "instantiated"
