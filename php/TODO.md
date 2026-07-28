@@ -19,6 +19,44 @@
         - dynamic routes in http
         - various paths for static http routes
 
+## Static analysis for the tests (PHPStan / Psalm)
+
+The tests are **deliberately excluded** from both static analyzers — `paths:` in
+`.github/ci/phpstan/phpstan.neon` lists only `../../../src` with `# - tests`
+commented out, and `psalm.xml` carries `<!--<directory name="tests" />-->`. (Rector
+already covers `tests`.) So a test file can carry real type errors and the full gate
+still reports green — the same class of blind spot TypeScript had before
+[valkyrja-ts#95](https://github.com/valkyrjaio/valkyrja-ts/pull/95). Java has no
+equivalent gap: `javac` compiles its tests as a precondition of running them.
+
+Enabling PHPStan at the configured level 9 over `tests/` yields **~1261 errors**.
+The shape matters more than the count:
+
+| Category | Count | Character |
+|---|---|---|
+| `argument.named` — PHPUnit's `@no-named-arguments` vs the suite's `assertSame(expected:, actual:)` style | ~418 | Policy conflict, not defects |
+| `staticMethod.alreadyNarrowedType` — `assertTrue(true)`-shaped assertions | ~112 | Mostly benign in tests |
+| Route handler `Closure(): null` vs the declared `callable(...): ResponseContract` | ~116 | Real: test doubles that don't match the signature |
+| `string\|false`, undefined property/method, protected access, `resource\|false` | ~120 | Genuine findings |
+
+So roughly 570 are suppressible by policy and the remainder is a real but
+substantial cleanup. Sequence it as:
+
+1. **Decide the named-argument question first** — either suppress `argument.named`
+   for `tests/` or drop the named-argument assertion style. This alone is a third of
+   the total and blocks any honest count.
+2. **Make the tests loadable.** PHPStan cannot currently analyze them at all:
+   `ValkyrjaTestCase` lives in `.github/ci/phpunit/vendor/valkyrja/phpunit`, which
+   `.github/ci/phpstan/autoload.php` does not require. Add that autoloader (and the
+   Psalm equivalent) before anything else.
+3. **Land the remaining fixes in their own commits**, grouped by category, so the
+   scope change stays reviewable — the approach used for the TypeScript port.
+4. **Add `tests/**` to the PHPStan/Psalm job path filters** in `ci.yml`, so a
+   test-only change doesn't skip the analyzers.
+
+Worth doing before the suite grows further — every language gate should check the
+tests it ships.
+
 ## Split the framework out of the main repo
 
 - Eventually split the framework out and keep the main (`valkyrja`) repo lighter.
