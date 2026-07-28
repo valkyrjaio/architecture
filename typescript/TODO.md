@@ -12,35 +12,6 @@ so every ternary / `&&`/`||` short-circuit / optional-chain / `switch` arm is
 exercised both ways — line coverage can read 100% while a branch is half-tested.
 PHP and Java are enforcing the same (see their `TODO.md` files).
 
-### Type-check, lint, and format the tests
-
-`tsconfig.json` sets `include` to `src/**/*` only, and ESLint/Prettier run over
-`src` (+`bin`). Nothing in the CI gate ever looks at `tests/**` — Vitest runs it
-through esbuild, which strips types without checking them. So a test file can
-carry real type errors and every check still reports green.
-
-This is not hypothetical. While porting the message-mapping fidelity tests
-(`valkyrja-ts#91`) a test passed `accept: ['text/html', 'application/xhtml+xml']`
-to a node `IncomingMessage` double. Node types `accept` as `string | undefined` —
-only `set-cookie` is `string[]` — so that is a genuine `TS2322`. It was caught
-only by running `tsc` over the tests through a throwaway config; the full gate
-(`typescript`, `eslint-check`, `prettier-check`, `vitest-coverage`) was green with
-the error in place.
-
-Add `tests/**` to the type-check, lint, and format scope:
-
-- **`tsconfig.json`** — include `tests/**/*`. The tests sit outside `rootDir`
-  (`src`), so this needs `rootDir` widened to the repo root, a separate
-  `tsconfig.tests.json` that the `typescript` script also runs, or a project
-  reference. A separate config is the smallest change and keeps the published
-  build's `rootDir` untouched.
-- **ESLint / Prettier** — extend the globs past `src`. Expect an initial pass to
-  surface existing findings across the suite; land them as their own commit so
-  the scope change stays reviewable.
-
-Worth doing before the remaining ports grow their test suites further — every
-language gate should check the tests it ships.
-
 ### Centralize contract type guards (the `instanceof` equivalent)
 
 Runtime discrimination between contracts is done with inline structural checks —
@@ -83,10 +54,6 @@ matches PHP ~1:1.
 - **`Config`/`CliConfig` use positional constructors** (11+ params); setting only
   `providers`/`callbacks` requires many `undefined`s. Consider an options-object
   constructor to match PHP named args.
-- **Tests are not type-checked or linted.** Moved to its own item under `TODOs`
-  above — see "Type-check, lint, and format the tests". It is a toolchain gap
-  rather than a place the port lags PHP, and it has now let a real type error
-  through a fully green gate.
 - **PHP route/listener providers expose `getControllerClasses()`/`getListenerClasses()`;**
   TS omits them by design (no reliable annotations) — fixtures reflect the TS
   contracts (`getRoutes()` / `getListeners()` only).
