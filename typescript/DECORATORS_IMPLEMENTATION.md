@@ -77,6 +77,11 @@ generator golden tests — see sindri-ts PR #62).
 
 ## Decorator strategy (design decisions to make first)
 
+> **These decisions have since been made and recorded.** See
+> [`DECORATORS.md`](DECORATORS.md) for the design rationale — which options were
+> tried and rejected, why class references must be thunked
+> (`[() => Provider, 'method']`), and what carries over to the Python port.
+
 TypeScript supports decorators two ways; **decide and document the choice**:
 
 1. **TC39 Stage-3 (standard) decorators** (TS 5+). Class/method/accessor/field

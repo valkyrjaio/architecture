@@ -126,4 +126,13 @@ full gate, not a subset:
   response, but requests have no `getPath`, so every request was treated as a
   response — see [`TODO.md`](TODO.md)).
 
-More: [`README.md`](README.md), [`PROVIDER_CONTRACTS.md`](PROVIDER_CONTRACTS.md).
+- **Never name a class in a decorator argument — thunk it.** A decorator argument
+  is evaluated at class-definition time, so `[Provider, 'method']` dereferences a
+  binding that may still be initializing (circular imports, or a class naming
+  itself) and throws `ReferenceError: Cannot access 'X' before initialization`.
+  Always write `[() => Provider, 'method']`; creating a closure captures the
+  binding without reading it. Full rationale, rejected alternatives, and the
+  Python implications: [`DECORATORS.md`](DECORATORS.md).
+
+More: [`README.md`](README.md), [`PROVIDER_CONTRACTS.md`](PROVIDER_CONTRACTS.md),
+[`DECORATORS.md`](DECORATORS.md).
