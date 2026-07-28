@@ -110,6 +110,26 @@ the resolved handler.
   bypassing the `Exiter` freeze/unfreeze seam (which exists precisely so tests
   can suppress the exit). PHP calls `Exiter::exit($code)`. Fixed to call
   `Exiter.exit(code)`; CLI entry tests now `Exiter.freeze()` around `run()`.
+- **Route collection never loaded the generated data** —
+  `HttpRoutingServiceProvider.publishRouteCollection` never called
+  `RouteCollection.setFromData` (nothing in the framework did), and gated attribute
+  collection on `isSingleton(RouteCollectorContract)`, which is always false because
+  `Container.setFromData` registers generated entries as deferred *callbacks*. Neither
+  route source was ever used outside debug mode, so an application booted with **zero
+  routes and answered every request with a 404**. Fixed to mirror PHP: debug mode
+  collects from the providers, otherwise the routes load from the generated routing
+  data, and `publishData` doubles as the `HttpRoutingDataContract` publisher so an app
+  with no generated cache still resolves a collected set.
+- **Log component never ported** — nothing published `LoggerContract`, yet
+  `HttpServerServiceProvider` resolves it to build `LogThrowableCaughtMiddleware`, so
+  any request reaching the throwable-caught path died with an unresolved-service
+  error *inside* `RequestHandler.handle`'s catch block — replacing the original error
+  and closing the connection with no response at all. Ported PHP's
+  `LogComponentProvider` / `LogServiceProvider` and wired them into the HTTP and CLI
+  application graphs. PHP defaults the logger to Monolog; Java has no Monolog or PSR
+  and must not take a required logging dependency, so the default is a
+  zero-dependency `FileLogger` writing a dated file to `Directory.logsStoragePath()` —
+  the same observable behavior. `NullLogger` stays available for apps that want it.
 
 ### JaCoCo exclusions (Java-only, non-unit-testable infra)
 

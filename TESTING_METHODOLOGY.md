@@ -113,12 +113,27 @@ Per `php/TODO.md`: **test that the expected rules exist and are configured exact
 - Exclude fixtures from formatting/standards: add `<exclude-pattern>*/tests/Fixture/*</exclude-pattern>` to the
   phpcodesniffer ruleset (fixtures are intentionally non-conforming).
 
-### Entry / worker packages (roadrunner, openswoole, frankenphp) — currently tabled
+### Entry / worker packages (roadrunner, openswoole, frankenphp, jetty, netty, tomcat) — solved
 
 `run()` is an infinite worker loop bound to a runtime-only dependency (`Worker::create()`, blocking `$server->start()`,
-`frankenphp_handle_request()`). These cannot be unit-tested as written. Helper methods (`getRequestFromX()`,
-`getSwooleServer()`, `getRequest()`) are testable. Full coverage needs a **test wrapper / injectable seam** (the
-framework's `WorkerHttp::run(config, requestCount)` faux-loop is the model to follow) — **deferred**.
+`frankenphp_handle_request()`, `server.join()`), so it cannot be unit-tested as written. The pattern below is now the
+established approach in PHP and Java, and every worker entry follows it:
+
+1. **Isolate each irreducible runtime call behind its own small overridable seam** — one method that does nothing but
+   make that call (`sendSwooleBody()`, `startServer()`, `waitForRequest()`, `readBody()`). Mark it excluded from
+   coverage (`@codeCoverageIgnore`; a JaCoCo package exclusion in Java) — it holds no logic to test.
+2. **Put every decision outside the seams.** Request marshaling, response emission, header folding and the dispatch
+   pipeline are ordinary methods, tested directly against synthetic input.
+3. **Drive the loop from a `Fixtures` subclass** that overrides the seams with doubles, so the worker's branches and
+   failure paths run without a live runtime.
+4. **Prove it end to end once.** A smoke test boots a real application and drives the whole per-request path —
+   convert the native request → dispatch → emit through the native response — with only the irreducible runtime call
+   doubled. The starter applications go further and start the real server, make a live HTTP request, and assert the
+   rendered response, each gated on that runtime being available so it skips cleanly where absent.
+
+The payoff is that the defects this shape hides get caught: a worker that ignored the runtime's request and rebuilt it
+from globals, and one that never wrote the response back to the runtime at all, both looked fine until a test made a
+real request.
 
 ---
 
