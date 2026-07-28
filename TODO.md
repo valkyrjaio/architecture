@@ -60,3 +60,31 @@ option) is invisible to route-matching tests. The Java and TypeScript
 starter-app entry/worker end-to-end work surfaced exactly this class of bug —
 caught far from the source. Framework-level mapping tests shift that coverage
 left: sooner, and closer to where the mapping actually lives.
+
+Per-port progress:
+
+- [x] **PHP** (reference) — [valkyrja-php#932](https://github.com/valkyrjaio/valkyrja-php/pull/932).
+      Three functional test classes under `tests/Tests/Functional/`:
+      `Http/Message/Request/RequestMappingTest`,
+      `Http/Message/Response/ResponseMappingTest`, and
+      `Cli/Interaction/Input/InputMappingTest`. Mirror those names in the
+      remaining ports.
+- [ ] **Java**
+- [ ] **TypeScript**
+- [ ] **Go**
+- [ ] **Python**
+
+The PHP pass pinned several current behaviors that look like defects rather than
+intent; assert them deliberately when porting, and raise them separately rather
+than silently diverging:
+
+- `InputFactory` treats `--` and a bare `-` as errors, not as an
+  end-of-options terminator.
+- `--opt value` does not attach the value to the option — the value lands as a
+  positional argument, so only `--opt=value` carries one.
+- An option spelled before the command name consumes that slot, so the default
+  command name stands and the later bare token becomes a positional argument.
+- `--opt=a=b` truncates the value to `a`.
+- The query and parsed-body param collections accept non-string scalars when
+  built from an array, but their narrowed string return type then raises an
+  error on read.
