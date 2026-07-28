@@ -204,6 +204,45 @@ frontend use without requiring it. Positioning stays: backend framework that hap
 
 ---
 
+## CLI argv conventions
+
+The one place the CLI input mapping legitimately differs per port. Each language's runtime hands
+`InputFactory::fromGlobals` a differently shaped argument vector, so the index the command name is
+read from — and whether a caller is spelled in the vector at all — is language-specific. The parsed
+result is identical everywhere: a caller, a command name, positional arguments, and options.
+
+| Language   | Runtime vector        | Vector shape                  | Caller                    | Command name |
+|------------|-----------------------|-------------------------------|---------------------------|--------------|
+| PHP        | `$argv`               | `[script, ...args]`           | index 0 (the script path) | index 1      |
+| Java       | `main(String[] args)` | `[...args]`                   | app name (not in vector)  | index 0      |
+| TypeScript | `process.argv`        | `[execPath, script, ...args]` | index 0 (after slicing)   | index 1      |
+| Go         | `os.Args`             | `[program, ...args]`          | _CLI input not yet ported_ | —           |
+| Python     | `sys.argv`            | `[script, ...args]`           | _CLI input not yet ported_ | —           |
+
+Go and Python already lead their vector with a path, so when their CLI input lands they follow the
+PHP row — caller at index 0, command name at index 1 — with no normalization needed.
+
+Rules that follow from this:
+
+- **Normalize to `[caller, ...args]` at the entry point, not in the factory.** Only Node deviates by
+  leading with the interpreter path, so its CLI entry passes `process.argv.slice(1)`. Every other
+  runtime's vector already has that shape. Java is the exception that cannot be normalized — its
+  vector genuinely has no caller slot — so its factory reads the command name from index 0 and takes
+  the caller from the configured application name.
+- **Match options before the command-name slot.** A port whose command-name slot can hold a real
+  user token (Java's index 0) must test `startsWith("-")` *first*, or an option spelled there is
+  swallowed as the command name. Ports whose index 0 is always a path (PHP, Go, Python, and
+  TypeScript after slicing) cannot reach that case, but ordering the checks the same way everywhere
+  keeps the ports legible and immune to a future entry-point change.
+- **Only the first positional slot can set the command name.** If an option occupies it, the default
+  command name stands and a later bare token becomes a positional argument — never a late-binding
+  command name.
+- **Test with the runtime's real vector shape.** A unit test that hands the factory a synthetic
+  PHP-shaped array will pass while the real entry point is off by one; assert through the entry
+  point, or with a vector shaped exactly as the runtime produces it.
+
+---
+
 ## Discussion Summary
 
 The port list was arrived at by evaluating developer audience size, architectural fit, and the framework's ability to
