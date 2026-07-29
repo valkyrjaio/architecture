@@ -50,6 +50,27 @@ feeds its dynamic route a `Processor`-computed regex with an end-to-end pin
 alongside it, and the gRPC generator has a golden like the other four. The rest of
 the suite has never been compared against PHP's.
 
+### Root build rewrites the standalone CI builds (starter app)
+
+In `valkyrja-starter-app-java`, `./gradlew useLatestVersions` at the root text-replaces version
+strings into all six standalone `.github/ci/*/build.gradle.kts` files — separate Gradle builds the
+root project does not own. The root's own `dependencyUpdates` report aggregates *every* project's
+dependencies, not just its own, so a single bad candidate there propagates to all six files at
+once.
+
+That is exactly how `io.netty:netty-codec-http:5.0.0.Alpha2` reached every CI build from one
+unfiltered report ([starter-app-java#53](https://github.com/valkyrjaio/valkyrja-starter-app-java/pull/53)).
+The filter gap itself is fixed —
+[#54](https://github.com/valkyrjaio/valkyrja-starter-app-java/pull/54) hoisted
+`rejectVersionIf` out of `subprojects { }` into `allprojects { }`, so the root's aggregate report is
+filtered too and prereleases no longer ride in this way. The coupling is what remains, and it is why
+a single root-level miss had a six-file blast radius rather than a one-file one.
+
+Decide whether the CI builds should be updated only by their own `useLatestVersions` runs — the
+update-dependencies workflow already visits each `.github/ci/*` directory separately, so the root's
+incidental rewrite is redundant as well as wide. Note that `app/build.gradle.kts` is *not* caught by
+it (`:app` has its own filtered report), so the blast radius is specifically the CI directories.
+
 ### Branch coverage in CI
 
 JaCoCo already measures **branch coverage** (its `BRANCH` counter), not just line
