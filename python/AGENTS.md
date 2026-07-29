@@ -147,6 +147,20 @@ full gate: `ruff format` + `ruff check` → `mypy` → `import-linter` → `band
 - **`sindri` (build tool)** resolves classes to source with `inspect.getfile()`,
   parses via stdlib `ast`, and emits the four cache data classes through
   `string.Template`. Dev-only; the framework has zero AST/build deps.
+- **Dynamic route regexes: `(?P<name>…)`, anchored, no delimiters, matched with
+  `fullmatch`.** Decided ahead of the port so it is built right the first time.
+  Python's `re` **cannot** use the `(?<name>…)` named-group spelling Java and
+  TypeScript emit — it raises `error: unknown extension ?<i` (verified on CPython
+  3.9 and 3.14). Named groups must be written `(?P<name>…)`, so
+  `Regex.START_CAPTURE_GROUP_NAME` is `?P<`, not `?<`; the rest of the group
+  syntax (`(`, `(?:`, `)`, `)?`, `>`) is identical. Anchors are `^` / `$` with
+  **no** delimiters — `re.compile` takes a bare pattern, and PHP's `/^…$/` would be
+  read as literal slashes (PHP needs them because `preg_match` requires them; see
+  [`../php/AGENTS.md`](../php/AGENTS.md)). `\/` is a valid escape for a literal
+  `/`, so `Regex.PATH` carries over unchanged. Match with **`re.fullmatch()`**, not
+  `re.match()`: `$` also matches just before a trailing newline, so `re.match` lets
+  `/users/42\n` satisfy a `^…$` route — `fullmatch` (or ending with `\Z`) closes
+  that. Read captured parameters with `m.group('name')` / `m.groupdict()`.
 
 ---
 
