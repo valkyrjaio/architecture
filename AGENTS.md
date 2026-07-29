@@ -423,9 +423,19 @@ The current working branch is always the current-year `??.x` branch (for 2026,
 `26.x`) — never `master`/`main`. If no current-year branch exists, use the
 previous year's `??.x`; if that does not exist either, fall back to `master`.
 
-Before starting work on that branch, first check it is not behind its remote (or
-the branch it should track). If it is behind, update it — or confirm with the
-user how to proceed — before doing any work.
+**Always `git fetch` before you branch.** The check below is not satisfiable from
+memory: `origin/<branch>` is a local cache, so comparing against it without
+fetching compares against whatever was true the last time you fetched. A stale
+remote-tracking ref reports "up to date" and a branch cut from it silently starts
+from old code — the conflict does not surface until later, on an open PR, and
+every review round trip until then is against the wrong base.
+
+So, in order: `git fetch`, then confirm the target branch is not behind its remote
+(or the branch it should track); if it is behind, update it — or confirm with the
+user how to proceed — and only then create the branch or worktree. Fetch **every
+time you start a branch**, not once per session: another agent's PR, a release, or
+a dependency-bump job may have merged while you were working, and in these repos
+they frequently do.
 
 ### Branch names
 
