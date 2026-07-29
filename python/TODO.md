@@ -36,6 +36,29 @@ Known starting point: the port does not exist yet beyond `template`. Do this as 
 port is written — per the canonical rule that code and tests land together — rather
 than as a later pass over a finished suite.
 
+## Reset the reused deps branch in the update-dependencies workflow
+
+`_python-update-dependencies.yml` reuses an open `deps/update-dependencies-*` branch across runs,
+committing each run's updates on top of the previous run's tree. Nothing a run writes to that
+branch can be walked back by a later run, so a bad version pinned once stays pinned until
+somebody deletes the branch by hand.
+
+Java hit this concretely. An unfiltered root `dependencyUpdates` report bumped
+`io.netty:netty-codec-http` to the 2015-era `5.0.0.Alpha2` prerelease and turned CI red
+([starter-app-java#53](https://github.com/valkyrjaio/valkyrja-starter-app-java/pull/53)). Fixing
+the filter ([#54](https://github.com/valkyrjaio/valkyrja-starter-app-java/pull/54)) did **not**
+repair the branch: `useLatestVersions` only ever upgrades, so the re-run reported the alpha as
+merely "exceeding" the latest and changed nothing. The PR had to be closed and the branch deleted.
+The Java workflow now resets the reused branch to the base commit before running the updates
+([.github#151](https://github.com/valkyrjaio/.github/pull/151)), so each run recomputes from
+scratch and the branch always holds exactly `base + today's updates`.
+
+Confirm first that this port's updater can actually strand a bad version the way
+`useLatestVersions` does — a tool that rewrites every constraint to "latest" on each run may
+already self-correct, in which case record that in `AGENTS.md` instead of adding the reset.
+
+Tradeoff to weigh: the reset discards any commit pushed onto the deps branch by hand.
+
 ## High priority — name test fixtures `fixtures`, not `classes`
 
 **Cross-language change — mirror this in every port (Go, Java, PHP, TypeScript)
