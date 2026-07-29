@@ -156,6 +156,23 @@ SpotBugs → `junit` (JaCoCo 100%). Use `./gradlew spotlessApply` to auto-format
   blocking, non-daemon server are excluded from JaCoCo (they can't reach full branch
   coverage without hanging the test JVM); the reusable logic they build on
   (`WorkerHttp` / `WorkerGrpc` / `GrpcBridge`) is covered directly.
+- **Dynamic route regexes: native anchors, and two test guards.** Java stores a
+  dynamic route's match regex as a Java-native anchored pattern (`^…$`), not the PHP
+  reference's PCRE-delimited `/^…$/` — `java.util.regex.Pattern` takes no delimiters
+  and would read those slashes as literal characters. TypeScript made the same move;
+  PHP keeps its delimiters. The consequence for `sindri` is structural: Java
+  precomputes that regex in `HttpRouteAttributeReader`, a layer **above** the
+  generator, whereas PHP and TypeScript compute it inside
+  `AstHttpDataFileGenerator` by calling the framework `Processor`. A
+  generator-level golden snapshot therefore sits on the production path in those
+  ports but cannot reach it in Java. Java consequently carries **two** guards where
+  the others carry one — its golden feeds the dynamic route a `Processor`-computed
+  regex, and `GenerateDataFromConfigCommandTest` additionally pins the full escaped
+  regex end-to-end. **This asymmetry is deliberate**; do not collapse it into
+  parity when lining the ports' test suites up side by side. A fragment assertion
+  (matching only `(?<id>…)`) is not a substitute for either: it survives the
+  framing changing on both sides of it, which is exactly how a delimiter change
+  once rode through a dependency bump unnoticed.
 
 More: [`README.md`](README.md), [`PROVIDER_CONTRACTS.md`](PROVIDER_CONTRACTS.md),
 [`TODO.md`](TODO.md).
