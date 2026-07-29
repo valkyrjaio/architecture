@@ -2,6 +2,32 @@
 
 ## TODOs
 
+### Set the repo description once gRPC and Queue land
+
+The older ports describe themselves as a framework "for web and console
+applications" — the two entry points that existed when that line was written.
+With gRPC and Queue landing as first-class protocols (see [`GRPC.md`](../GRPC.md)
+and [`QUEUE.md`](../QUEUE.md)), the wording becomes:
+
+> Valkyrja is a fast, light, and robust Go framework for multi-protocol
+> applications — HTTP, CLI, gRPC, and queues
+
+The abstract head ("multi-protocol applications") is meant to survive protocol
+five; the enumerated tail is what makes it concrete today. Do not apply it before
+both protocols land — the description would advertise what the port cannot do.
+
+There is no `valkyrja-go` repo yet, so unlike PHP/Java/TypeScript there is no
+stale string to replace: when the framework repo is created, use this wording from
+the start if it already has both protocols, and the "web and console" phrasing
+otherwise. The surfaces are the **GitHub About** text, **`README.md` line 7** (no
+adjectives — the mythology paragraph below it carries them), and the
+**"What's Included"** bullets.
+
+The org profile (`.github/profile/README.md` and `FULL_README.md`) carries the same
+sentence without the language word. It is shared across every port, so it changes
+only once **all** of them have both protocols — whichever port lands last owns
+that edit.
+
 ### Cross-language testing-gap audit
 
 Compare this port's test suite against the other languages' and either close each

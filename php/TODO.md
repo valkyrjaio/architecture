@@ -19,6 +19,34 @@
         - dynamic routes in http
         - various paths for static http routes
 
+## Update the repo description once gRPC and Queue land
+
+`valkyrja-php`'s GitHub About text still reads "Valkyrja is a fast, light, and
+robust PHP framework for web and console applications" — it names the two entry
+points that existed when it was written. Once **both** gRPC and Queue are
+implemented in this port, change it to:
+
+> Valkyrja is a fast, light, and robust PHP framework for multi-protocol
+> applications — HTTP, CLI, gRPC, and queues
+
+The abstract head ("multi-protocol applications") is meant to survive protocol
+five; the enumerated tail is what makes it concrete today. Do not apply it before
+both protocols land — the description would advertise what the port cannot do.
+
+Surfaces to change together:
+
+- **GitHub About** on `valkyrja-php` — the sentence above, verbatim.
+- **`README.md` line 7** — no adjectives here; the mythology paragraph two lines
+  below already carries "Fast, light, and robust":
+  `[Valkyrja][Valkyrja url] is a PHP framework for multi-protocol applications — HTTP, CLI, gRPC, and queues.`
+- **"What's Included"** — the "HTTP and CLI kernels" bullet, and every other
+  "HTTP and CLI" pairing in that list, must account for all four protocols.
+
+The org profile (`.github/profile/README.md` and `FULL_README.md`) carries the same
+sentence without the language word. It is shared across every port, so it changes
+only once **all** of them have both protocols — whichever port lands last owns
+that edit.
+
 ## Cross-language testing-gap audit
 
 Compare this port's test suite against the other languages' and either close each
