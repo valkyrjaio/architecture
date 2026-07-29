@@ -307,6 +307,24 @@ across languages and must be preserved in ports:
 | **Fixtures**   | reusable doubles used *by* tests, named `*Fixture` (never `*Test`) |
 | **Abstract**   | base test cases (not themselves tests)                       |
 
+### The test root
+
+The taxonomy above is nested under a **dedicated test root**, so tests are never
+siblings of the framework's own namespaces: PHP `Valkyrja\Tests\`, TypeScript
+`tests/Tests/`, Java `io.valkyrja.tests.`. The segment matters most where the
+namespace is a global identifier — without it, `io.valkyrja.fixtures.http.routing`
+reads exactly like a framework package.
+
+**Go is the only permitted deviation.** Go requires a test to live in the package
+it tests (`*_test.go` beside the source, in the same package or its `_test`
+sibling), so it has no separate test root; its reusable doubles still live in a
+`fixtures` package mirroring the source tree, with the `*Fixture` suffix. No other
+port may drop the test root.
+
+One narrow carve-out applies to languages with package-private access: a test that
+genuinely needs it sits in the source package instead, and only that test. PHP has
+no such concept, so its tree is uniform; Java's guide names the exception.
+
 Rules that hold everywhere: unit-test paths mirror `src`; test classes/files use
 the language's test-name convention; reusable doubles are production-shaped
 classes in `Fixtures`, never named like tests. **Every code branch is tested, all

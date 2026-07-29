@@ -297,7 +297,7 @@ docker run --rm \
   -v "$HOME/.gradle":/root/.gradle \
   eclipse-temurin:21-jdk \
   ./gradlew -p .github/ci/junit test \
-    --tests "io.valkyrja.functional.grpc.endtoend.GrpcNettyEndToEndTest" \
+    --tests "io.valkyrja.tests.functional.grpc.endtoend.GrpcNettyEndToEndTest" \
     --console=plain --no-daemon
 ```
 
