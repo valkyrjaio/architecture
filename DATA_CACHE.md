@@ -252,8 +252,9 @@ The build tool requires access to provider source files to extract bindings and 
 - **Go** — Go module system downloads full source via `go mod download`. No special requirement.
 - **Java** — Valkyrja publishes `-sources.jar` as a **required** build dependency, not optional. The build tool mandates
   it.
-- **TypeScript** — Valkyrja ships `.ts` source files alongside compiled `.js`. Not just `.d.ts` declaration files — full
-  source.
+- **TypeScript** — Valkyrja ships `.ts` source files only. Not just `.d.ts` declaration files — full source, and no
+  compiled `.js`: consumers compile the framework together with their own app, so the build tool and the runtime read one
+  and the same module graph.
 
 This is a framework policy decision. Source availability is a hard requirement for full cache generation. Third-party
 packages built on Valkyrja must follow the same policy.

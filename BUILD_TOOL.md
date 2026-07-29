@@ -2332,13 +2332,13 @@ the current dispatch-based routing — the existing serialization mechanism cann
 The build tool requires access to provider source files to extract bindings and handlers. Each language must ship source
 accordingly:
 
-| Language   | Source shipping  | Requirement                                                              |
-|------------|------------------|--------------------------------------------------------------------------|
-| PHP        | Composer package | Always present on disk — no special requirement                          |
-| Java       | Maven / Gradle   | Must publish `-sources.jar` as a **required** build dependency           |
-| Go         | Go modules       | Full source downloaded via `go mod download` — always present            |
-| Python     | pip package      | Always present on disk — no special requirement                          |
-| TypeScript | npm package      | Must ship `.ts` source files alongside compiled `.js` — not just `.d.ts` |
+| Language   | Source shipping  | Requirement                                                                                            |
+|------------|------------------|--------------------------------------------------------------------------------------------------------|
+| PHP        | Composer package | Always present on disk — no special requirement                                                        |
+| Java       | Maven / Gradle   | Must publish `-sources.jar` as a **required** build dependency                                         |
+| Go         | Go modules       | Full source downloaded via `go mod download` — always present                                          |
+| Python     | pip package      | Always present on disk — no special requirement                                                        |
+| TypeScript | npm package      | Must ship `.ts` source — not just `.d.ts` — and no compiled `.js`; consumers compile it with their app |
 
 Third-party packages built on Valkyrja must follow the same policy to support full cache generation for their bindings.
 

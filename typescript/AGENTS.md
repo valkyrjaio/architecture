@@ -107,8 +107,13 @@ full gate, not a subset:
 
 ## TypeScript-specific notes
 
-- **Framework source shipping:** must ship `.ts` source alongside compiled `.js`
-  (the cache-optional runtime relies on constructor references being available).
+- **Framework source shipping:** ships `.ts` source **only** — never compiled
+  `.js`. Consumers compile the framework together with their own app (a loader
+  such as `tsx`, or their bundler). Source must be present because the
+  cache-optional runtime relies on constructor references and `sindri` reads that
+  same source through the compiler API; publishing `.js` alongside it would split
+  those into two module graphs, so the runtime could load a different copy of a
+  class than the generated data cache references.
 - **`sindri` (build tool)** uses the TypeScript compiler API to generate the four
   cache data classes. Dev-only; the framework has zero AST/build deps.
 - **Architecture-enforcement & security are known toolchain gaps** in TS

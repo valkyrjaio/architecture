@@ -225,7 +225,7 @@ namespaced under `valkyrja` at the ecosystem level for discoverability — the n
 
 - PHP/Python/Go: source always available
 - Java: must publish `-sources.jar` as required build dependency
-- TypeScript: must ship `.ts` source alongside compiled `.js`
+- TypeScript: must ship `.ts` source only — consumers compile it with their app
 
 **Produced:** `BUILD_TOOL.md`
 
