@@ -130,11 +130,39 @@ its own shard. Confirm any suspected gap against the owning shard first:
 composer phpunit-path-coverage-shard Http
 ```
 
+**Branch coverage counts blocks entered, not edges taken — so an always-true
+guard reads 100%.** Xdebug marks a *basic block* covered when execution enters
+it. An `if` whose condition can never be false still runs entry → body →
+after-if, so every block is hit and the function reports full branch coverage;
+the never-taken edge is only visible in **path** coverage, which nothing gates.
+`GAPS=1` therefore never lists an always-true guard, and a file's absence from
+that list is not evidence its code is all reachable. A dead *sub-expression*
+does show up, because it forms a block nothing enters. Both shapes came from the
+same invariant in `Cli\Interaction`:
+
+| Dead code | branches | paths |
+|-----------|----------|-------|
+| `Answer::isValidResponse()`'s unreachable first clause | 8/9 — listed by `GAPS=1` | — |
+| `QuestionWriter::writeQuestion()`'s always-true `if`   | 3/3 — invisible to `GAPS=1` | 1/2 |
+
+Per-function branch and path counts, which no script reports, come from a
+`--coverage-php` dump:
+
+```php
+$cov = require 'coverage.cov';
+$fn  = $cov['codeCoverage']->functionCoverage()[$file][$function];
+// $fn->branches and $fn->paths; an entry is hit when ->hit !== []
+```
+
 A genuine gap is closed by a test. A branch that no test can reach is closed by
 **changing the source**, not by excusing it — fold an exhaustive `match`'s last
 arm into `default`, wrap an irreducible syscall in an overridable seam, delete a
-condition that is provably dead. See the branch-coverage notes in
-[`TODO.md`](TODO.md) for the known categories and their remedies.
+condition that is provably dead. Reaching an otherwise-unreachable state by
+subclassing to poke at `protected` state is *excusing* it: it locks in semantics
+the public API cannot produce, and the TypeScript port had exactly such a test
+pinning "empty allowed responses accepts anything" until the dead clause was
+removed. See the branch-coverage notes in [`TODO.md`](TODO.md) for the known
+categories and their remedies.
 
 ---
 
