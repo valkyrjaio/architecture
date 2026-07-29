@@ -110,6 +110,32 @@ every repo.** A change is not finished until, for the repo you touched:
   architecture, migration, tests), never a subset.
 - **Coverage is and stays 100%** — line *and* branch. It must never drop.
 
+### Coverage is per file, and you must measure it
+
+The 100% rule is **per file, not an aggregate**, and it binds both directions:
+
+- **Every file you add is at 100%** — line and branch — on its own, before the
+  change is done. A repo-wide percentage is not evidence: one fully untested new
+  class hides inside a large, well-covered codebase and barely moves the total.
+  This is not hypothetical. A new class landed at 65% line / 50% branch while the
+  repo-wide number only fell from 100% to 96%, and every local check passed.
+- **Every file you touch stays at 100%.** Adding a branch to an existing file
+  means adding the test for it in the same change.
+
+**A green gate is not proof of coverage.** No language's gate enforces a coverage
+floor today — each one generates a report and then ignores it, so a build at 55%
+passes exactly like one at 100%. Until that is fixed, **read the coverage report
+yourself** before calling a change done, and check the per-file numbers for the
+files you added or changed, not just the summary line.
+
+The only exception is an **explicitly documented** one: code that genuinely
+cannot be covered (a process-exiting call, a blocking server loop) is excluded in
+the coverage tool's own config, narrowly, with a comment saying why. Two rules
+about exclusions: an accepted gap must be *written down* where the tool reads it,
+never merely tolerated in silence; and never lower a threshold to accommodate a
+gap — a floor set to "whatever we happen to be at" legitimizes the gap and
+defeats the point. Cover the code, or exclude it narrowly and say why.
+
 Then:
 
 1. **Port code and its tests together**, never as a later pass. Mirror the source
@@ -328,8 +354,10 @@ no such concept, so its tree is uniform; Java's guide names the exception.
 Rules that hold everywhere: unit-test paths mirror `src`; test classes/files use
 the language's test-name convention; reusable doubles are production-shaped
 classes in `Fixtures`, never named like tests. **Every code branch is tested, all
-tests and the full CI gate pass, and coverage is 100% (line and branch) and never
-drops** — see the Definition of done in §3. Per-code-shape recipes and coverage
+tests and the full CI gate pass, and coverage is 100% (line and branch) — per
+file, for every file added or touched — and never drops** — see the Definition of
+done in §3, which also covers why a green gate is not proof of coverage and how
+an unreachable line may be excluded. Per-code-shape recipes and coverage
 gotchas:
 [`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md). Exact directory paths, test
 framework, and the PHPUnit→target mapping live in your Layer-2 guide.
