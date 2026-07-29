@@ -159,6 +159,27 @@ Then:
 9. **New repos are scaffolded from the language's `template` repo** — the source
    of truth for repo layout and file/class structure. Start from it; never
    hand-assemble a repo's structure. Your Layer-2 guide names the template repo.
+10. **Never comment transient state.** A comment in code or config must stay true
+    indefinitely. Do not write one to explain something temporary, or something
+    an automated process will later rewrite — a pinned version awaiting a
+    release, a workaround pending a fix, a value some job regenerates. Automation
+    rewrites values, not the prose around them, so the comment outlives what it
+    described and becomes an assertion that is now false. That is worse than no
+    comment, because the next reader trusts it.
+    **Put it in the PR description instead — nothing is lost.** The squash merge
+    writes the PR title as the commit subject and the *entire PR description* as
+    the commit body, so the explanation lives in git history permanently,
+    attached to the commit that introduced it and reachable by `git log` /
+    `git blame`. (This is also why the "no commit body" rule in §7 governs only
+    the commits you write; the merge commit's body comes from the PR.) The
+    explanation is better placed there anyway: pinned to when it was true,
+    instead of floating in a file where a later automated edit silently
+    falsifies it.
+    The test is whether the comment states a *decision or invariant* or a
+    *current condition*. "This job asserts only generated code, so its coverage
+    report is meaningless" is a decision — keep it. "Pinned ahead of the others
+    until the next release bumps it" is a condition — the release automation will
+    strand it, so it belongs in the PR.
 
 ---
 
@@ -387,7 +408,10 @@ Keep each branch and PR small and atomic — one focused change per PR.
   `[Http]` / `[Cli]`, version tags like `[25.x]`, `[Release]`.
 - **Tag casing is exact** — write each tag exactly as listed above; initialisms
   stay uppercase (`[CI]`, `[GitHub]`), never `[Ci]` / `[Github]`.
-- No body / co-author lines unless explicitly asked.
+- No body / co-author lines unless explicitly asked. This governs the commits
+  *you* write; the squash merge takes its subject from the PR title and its body
+  from the PR description, which is why that description is where durable
+  explanation belongs (see §3, rule 10).
 - PR description follows the
   [PR template](https://github.com/valkyrjaio/.github/blob/master/.github/PULL_REQUEST_TEMPLATE.md)
   — fill **Description**, **Types of changes**, and **Changes** (bold
