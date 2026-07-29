@@ -122,11 +122,14 @@ The 100% rule is **per file, not an aggregate**, and it binds both directions:
 - **Every file you touch stays at 100%.** Adding a branch to an existing file
   means adding the test for it in the same change.
 
-**A green gate is not proof of coverage.** No language's gate enforces a coverage
-floor today — each one generates a report and then ignores it, so a build at 55%
-passes exactly like one at 100%. Until that is fixed, **read the coverage report
-yourself** before calling a change done, and check the per-file numbers for the
-files you added or changed, not just the summary line.
+**A green gate is not proof of coverage.** Every repo *runs* coverage and
+publishes a report, but no language's gate currently **fails** on it — a build at
+55% passes exactly like one at 100%. That is the deliberate state for now, and
+gating may be added later; either way the 100% requirement above does not depend
+on a tool enforcing it. So **read the coverage report yourself** before calling a
+change done, and check the per-file numbers for the files you added or changed,
+not just the summary line. If gating does arrive, treat it as a backstop for what
+you missed — never as the thing that defines the rule.
 
 The only exception is an **explicitly documented** one: code that genuinely
 cannot be covered (a process-exiting call, a blocking server loop) is excluded in
