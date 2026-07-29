@@ -88,6 +88,43 @@ Go nuances:
 **Every check green, all tests pass, coverage 100%.** Run the full gate:
 `gofmt`/`goimports` (clean) → `golangci-lint run` → `go test -cover ./...`.
 
+### Pinned tool modules: upgrade with `go get tool`, never `go get -u tool`
+
+golangci-lint is pinned in an isolated tool module (`.github/ci/lint/go.mod`, the
+analog of PHP's per-tool `.github/ci/<tool>/composer.json`) and run via
+`go tool -modfile=…`, so its dependency graph never mixes with the framework's.
+That module is upgraded with **`go get tool`** — the `tool` meta-pattern with no
+`-u`.
+
+- **`-u` upgrades the tool's whole transitive graph, not just the tool.** MVS is
+  then free to select a dependency the tool's authors never built against, and
+  the pinned tool stops compiling. Without `-u`, each declared tool still moves
+  to its latest release, but its dependencies are resolved from *that release's*
+  own `go.mod` — which is exactly what pinning a tool means.
+- **A same-path breaking release is invisible to the toolchain.** Go's import
+  compatibility rule is a convention, not an enforced constraint: `go-header`
+  v1.0.0 rewrote its API (`Configuration`, `WithTemplate`, `WithValues`, `Target`
+  removed; `New` takes `*Settings`) while keeping the same module path, with no
+  `/v2` to signal it. Nothing stopped `-u` from pulling it into a golangci-lint
+  v2.12.2 that requires v0.5.0, and the lint job died with compile errors before
+  running a single linter.
+- **The tell: compile errors inside `$GOMODCACHE`, not lint findings.** Errors
+  pointing at `…/golangci-lint/v2@vX/pkg/golinters/<name>/…` mean an indirect
+  dependency outran the tool. That is not a problem with our code, and there is
+  no local lever to fix it — we import no linter's packages, so there is no call
+  site of ours to port. Pin the offending dependency back to what the tool
+  requires and wait for an upstream release that adopts the new API;
+  `go get tool` then picks it up on its own.
+- **Non-tool modules keep `go get -u ./...`** — there the module being upgraded
+  *is* the code under test, so upgrading its graph is the point.
+
+The reusable workflows enforce this
+([`_go-update-dependencies.yml`](https://github.com/valkyrjaio/.github/blob/master/.github/workflows/_go-update-dependencies.yml)).
+`_go-check-outdated-dependencies.yml` deliberately performs the very same upgrade
+so the two can never disagree — change them in lockstep, or the check reports
+every tool module as perpetually outdated for an upgrade the updater will not
+make.
+
 ---
 
 ## Go-specific notes
