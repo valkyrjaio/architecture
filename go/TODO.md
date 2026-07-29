@@ -2,6 +2,38 @@
 
 ## TODOs
 
+### Cross-language testing-gap audit
+
+Compare this port's test suite against the other languages' and either close each
+difference or record it in `AGENTS.md` as deliberate. Out of scope for the work
+that prompted it; tracked here so it is not lost.
+
+Prompted by a concrete miss: `sindri-java`'s golden snapshot never exercised the
+dynamic-route regex path, so a framework regex-format change rode through a
+dependency bump silently, while `sindri-ts` caught the equivalent change at once
+([sindri-java#54](https://github.com/valkyrjaio/sindri-java/pull/54)). Only that
+single gap was checked across ports — nobody has compared the suites broadly.
+
+What to look for:
+
+- Behavior a sibling port asserts that this one does not.
+- An assertion pinned to a fragment where a sibling pins the whole value — a
+  fragment survives the framing around it changing, which is exactly how the miss
+  above happened.
+- A generator, adapter, or component carrying snapshot/branch coverage on one
+  side and none here.
+- Test tooling that differs: what the static analyzers and formatters actually
+  cover, and whether the test tree is inside or outside that scope.
+
+Not every difference is a defect — some are forced by the language. Read the
+per-language notes in `AGENTS.md` before "aligning" anything; the dynamic route
+regex framing is the worked example (PHP must keep its PCRE delimiters, every
+other port must not).
+
+Known starting point: the port is a proof of concept and `http/routing` is still
+empty, so this is mostly forward-looking — the goal is that routing lands already
+carrying the tests the other ports have, rather than needing an audit afterwards.
+
 ### High priority — name test fixtures `fixtures`, not `classes`
 
 **Cross-language change — mirror this in every port (Java, PHP, Python,
