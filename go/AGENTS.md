@@ -90,5 +90,29 @@ Go nuances:
 
 ---
 
+## Go-specific notes
+
+- **Dynamic route regexes: `(?P<name>…)`, anchored, no delimiters, and RE2's
+  limits.** Decided ahead of the HTTP routing port so it is built right the first
+  time. Go's `regexp` is **RE2**, not PCRE, which constrains the shape three ways:
+  - **Named groups are `(?P<name>…)`.** Go 1.22+ also accepts the `(?<name>…)`
+    spelling Java and TypeScript emit, but `(?P<name>…)` is the portable form,
+    compiles on every toolchain, and matches Python's only option (see
+    [`../python/AGENTS.md`](../python/AGENTS.md)). Read parameters back with
+    `re.SubexpIndex(name)` against `FindStringSubmatch`.
+  - **No delimiters, and the anchors are load-bearing.** `regexp.Compile` takes a
+    bare pattern; PHP's `/^…$/` compiles but matches nothing, since the slashes
+    are literal (PHP needs them because `preg_match` requires them — see
+    [`../php/AGENTS.md`](../php/AGENTS.md)). Unlike Java's `Matcher.matches()`,
+    which implies a full match on its own, Go's `MatchString` *searches* — so the
+    `^` / `$` framing is what makes a route match exactly, not decoration.
+    `\/` compiles fine, so `Regex.PATH` carries over unchanged.
+  - **No lookahead, lookbehind, or backreferences.** RE2 rejects them outright
+    (`(?=` fails with "invalid or unsupported Perl syntax"). Any route-regex
+    feature built on them in PHP is unportable to Go, so keep parameter regexes to
+    plain character classes, quantifiers, and alternation.
+
+---
+
 More: [`README.md`](README.md), [`PROVIDER_CONTRACTS.md`](PROVIDER_CONTRACTS.md),
 [`TODO.md`](TODO.md), and the Go section of [`../CI_TOOLS.md`](../CI_TOOLS.md).
