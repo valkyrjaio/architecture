@@ -303,7 +303,8 @@ be added as non-breaking additions.
   information
 - Type checker resolves all type references to FQN via module resolution
 - `tsconfig.json` module resolution used to locate source files
-- Must ship `.ts` source files (not just `.d.ts`) alongside compiled `.js`
+- Must ship `.ts` source files (not just `.d.ts`) and no compiled `.js` —
+  consumers compile the framework together with their own app
 
 ### Build tool flow
 
