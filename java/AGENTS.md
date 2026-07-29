@@ -62,17 +62,31 @@ Java nuances:
 
 - **Location:** tests live in the **JUnit CI build**, not the main source tree:
   `.github/ci/junit/src/test/java/io/valkyrja/`.
-- **Packages mirror the PHP taxonomy** in a **parallel** package (prefer testing
-  through the public API):
-  - `io.valkyrja.unit.<ns>` — unit tests, `<Class>Test`
-  - `io.valkyrja.functional.<ns>` — functional tests
-  - `io.valkyrja.fixtures.<ns>` — reusable concrete doubles / marker types
-  - (use the repo's own root where applicable, e.g. `io.sindri.unit.*`)
+- **Packages mirror the PHP taxonomy** under the `tests` root (§6), in a
+  **parallel** package (prefer testing through the public API):
+  - `io.valkyrja.tests.unit.<ns>` — unit tests, `<Class>Test`
+  - `io.valkyrja.tests.functional.<ns>` — functional tests
+  - `io.valkyrja.tests.fixtures.<ns>` — reusable concrete doubles / marker types,
+    named `*Fixture`
+  - (use the repo's own root where applicable, e.g. `io.sindri.tests.unit.*`)
+- The `tests` segment is not optional. A Java package is a global identifier, so
+  without it a fixture package is indistinguishable by name from a framework one.
 - If a test genuinely needs package-private access, place just that test in the
-  source package instead.
+  source package instead — it stays outside `io.valkyrja.tests.*` by necessity,
+  and it is the only thing that may.
 - **Framework:** JUnit 5 (`junit-jupiter`) + **Mockito** for stubbing *contracts*;
   port concrete PHP `Fixtures` doubles to real Java classes under
-  `io.valkyrja.fixtures.*`.
+  `io.valkyrja.tests.fixtures.*`.
+- **Naming:** concrete test classes are `final` and named `*Test`; everything
+  under `fixtures` is `final` and suffixed `*Fixture` (enums, interfaces, and
+  records keep their own type naming, which supersedes the fixture marker). A
+  type suffix is kept and `Fixture` appended — `PassThroughMiddlewareFixture`,
+  matching PHP's `RouteMatchedMiddlewareFixture`.
+- **Enforcement:** ArchUnit, in `TestArchitectureTest` — a rule set distinct from
+  the `src` rules, which do not apply to the test tree and produce only false
+  positives if pointed at it (tests legitimately depend on `io.grpc`, unit paths
+  mirror `src` into `contract` packages, and a test of the `enum_` package is
+  named for it).
 - **Coverage:** **JaCoCo — 100% (line and branch), never dropping** — every code
   branch has a test. Exclude only Java-only, non-unit-testable infra (e.g.
   `**/benchmark/**`, some `entry/*` adapters).
@@ -93,6 +107,24 @@ exact task names.
 | Static analysis + security | SpotBugs + FindSecBugs      | (bytecode)                    |
 | Automated migration      | OpenRewrite                   | (recipe-based)                |
 | Testing + coverage       | JUnit 5 + JaCoCo              | `junit`                       |
+
+**Scope:** Spotless, ArchUnit, Error Prone, and SpotBugs all cover **both** `src`
+and the JUnit test tree — each CI build compiles the tests as well as `src`, and
+each job's `files:` filter watches both paths. Two deliberate exceptions:
+
+- **NullAway is `src`-only.** The tests pass `null` on purpose to reach the
+  defensive guards the framework exists to provide (§3 requires synthetic inputs
+  for guards normal input cannot reach), so enforcing it would mean deleting the
+  tests that hold branch coverage at 100%. Every other Error Prone check applies
+  to the tests.
+- **SpotBugs uses a separate filter for the tests**
+  (`spotbugs-exclude-test.xml`), so a JUnit or fixture idiom excluded there can
+  never loosen the framework's own analysis.
+
+Note that Java has **no** type-checking gap to close: `javac` compiles the tests
+as a precondition of running them, so an untyped test cannot exist. Do not port
+the TypeScript framing here — that gap exists because Vitest strips types without
+checking them.
 
 ### CI gate (run before done)
 

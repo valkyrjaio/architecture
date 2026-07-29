@@ -68,8 +68,9 @@ Kotlin nuances:
 ## Tests
 
 - **Layout:** mirror the Java port — tests in the JUnit CI build under
-  `io.valkyrja.{unit,functional,fixtures}`, parallel packages, class names
-  `<Class>Test`; reusable doubles in `io.valkyrja.fixtures.*`.
+  `io.valkyrja.tests.{unit,functional,fixtures}`, parallel packages, class names
+  `<Class>Test`; reusable doubles in `io.valkyrja.tests.fixtures.*`, suffixed
+  `*Fixture`.
 - **Framework:** JUnit 5; **MockK** for idiomatic Kotlin mocking (Mockito also
   interops).
 - **Coverage:** **Kover** (or JaCoCo) — **100% (line and branch), never
