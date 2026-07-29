@@ -182,6 +182,21 @@ categories and their remedies.
   `$server->start()`, `Worker::create()`/`waitRequest()`) in a small overridable
   seam marked `@codeCoverageIgnore`, and a `Tests\Fixtures` subclass overrides the
   seams to drive the loop, its branches, and failure paths.
+- **Dynamic route regexes keep their PCRE delimiters — never "fix" them away.**
+  `Regex::START` / `Regex::END` are `/^` and `$/`, so a cached route regex reads
+  `/^\/users\/(?<id>[0-9]+)$/`. That framing is **required**: `Matcher` calls
+  `preg_match($regex, $path)`, and PCRE takes a delimited pattern — hand it a bare
+  `^…$` and it errors ("Delimiter must not be alphanumeric, backslash, or NUL")
+  rather than simply failing to match. Every other port strips the delimiters,
+  because none of their engines take any — `java.util.regex.Pattern`,
+  `new RegExp(string)`, Python `re.compile`, Go `regexp.Compile` — and each records
+  that as a deliberate deviation in its own guide
+  ([`../java/AGENTS.md`](../java/AGENTS.md),
+  [`../typescript/AGENTS.md`](../typescript/AGENTS.md),
+  [`../python/AGENTS.md`](../python/AGENTS.md),
+  [`../go/AGENTS.md`](../go/AGENTS.md)). PHP is the odd one out **by necessity, not
+  by neglect**. Working across ports, do not strip PHP's delimiters to match the
+  others, and do not carry PHP's delimiters into a port that cannot use them.
 
 More: [`README.md`](README.md), [`PROVIDER_CONTRACTS.md`](PROVIDER_CONTRACTS.md),
 [`TODO.md`](TODO.md).
