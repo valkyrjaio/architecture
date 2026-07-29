@@ -130,6 +130,20 @@ the resolved handler.
   and must not take a required logging dependency, so the default is a
   zero-dependency `FileLogger` writing a dated file to `Directory.logsStoragePath()` —
   the same observable behavior. `NullLogger` stays available for apps that want it.
+- **Attribute collector ignored `@RouteHandler`** — `AttributeRouteCollector.buildHandler`
+  always built a handler that constructed the controller through
+  `clazz.getDeclaredConstructor().newInstance()`, so any controller with constructor
+  dependencies failed with `NoSuchMethodException: <init>()`. Swapping the construction
+  strategy alone would not have sufficed: an annotated controller method may take no
+  arguments at all, so invoking it as `(container, route)` fails on argument count too.
+  The annotation is the mechanism — it names a static
+  `(ContainerContract, RouteContract)` handler, typically on the route provider, which
+  resolves the controller from the container. PHP takes the handler straight off the
+  attribute in `updateHandler`, and Sindri already emitted the same handler into the
+  generated routing data; only the runtime collector disagreed. Fixed to honor
+  `@RouteHandler`, and the fallback now resolves the controller from the container
+  rather than reflecting a constructor. Reached in debug mode and as the no-cache
+  fallback.
 
 ### JaCoCo exclusions (Java-only, non-unit-testable infra)
 
