@@ -75,17 +75,26 @@ tests it ships.
   (`use function strpos;`) resolves it at compile time and the phantom branch
   disappears. The `@auto` php-cs-fixer ruleset now does this automatically via
   `native_function_invocation` + `global_namespace_import`. sindri is at **100%
-  line + 100% branch**; valkyrja is being driven to the same.
-- Two genuinely-unreachable categories remain and are handled, not excused:
+  line + 100% branch**; valkyrja is there too — no file has a branch a test cannot
+  reach, though confirming that means reading the numbers carefully (below).
+- Three genuinely-unreachable categories exist, and each is handled, not excused:
     - **Exhaustive `match($enum)` with no `default`** — PHP compiles in an
       `UnhandledMatchError` throw no input can reach. Fold the last arm into
       `default` (e.g. `default => 28` instead of `self::CONCEAL => 28`).
-    - **I/O syscalls a test intercepts via namespace-function shadowing**
-      (`header`/`flush`/`ob_flush`/`ob_get_level` in `Response`). Qualifying them
-      for coverage breaks the shadow. Wrap each in a protected seam method,
-      override the seam in a `Tests\Classes` fixture for behavior assertions, and
-      add one real-call test to cover the seam bodies (see
-      `ResponseSendRecorderClass`).
+    - **Calls a test cannot make** — I/O syscalls intercepted via namespace-function
+      shadowing (`header`/`flush`/`ob_flush`/`ob_get_level` in `Response`, where
+      qualifying them for coverage breaks the shadow), and calls that end the
+      process (`exit()` in `Exiter`). Wrap each in a protected seam method,
+      override the seam in a `Tests\Fixtures` fixture for behavior assertions, and
+      add one real-call test to cover the seam body (see
+      `ResponseSendRecorderFixture`). Only where no real call is possible at all —
+      `exit()` — does the seam body carry `@codeCoverageIgnore`.
+    - **A conditional inside a trait** — Xdebug emits one function entry per file
+      for a trait method, keyed by the *trait*, so every using class shares it and
+      class load order decides whose hits survive. Move the branch out of the trait
+      into a support class the trait delegates to; the trait keeps only the
+      delegation (`Trait\Arrayable` → `Support\Enumerable` is the pattern, and
+      `Trait\JsonSerializable` now follows it).
 - `--path-coverage` is **slow in CI on valkyrja** (the largest repo), so it is
   split into its own `path-coverage` Composer script there (root
   `phpunit-path-coverage`); the default `coverage` script no longer runs it. The
@@ -93,39 +102,38 @@ tests it ships.
   **Solved on valkyrja** — `phpunit-path-coverage-parallel` runs the suite as one
   shard per component and merges with `phpcov`: **190s vs 1942s serially**
   (10x, floor = the slowest shard). Speed is no longer the blocker for a gate.
-- **Do not gate branch coverage yet** — deliberate, revisit later. The reachable
-  gaps in valkyrja are closed (valkyrjaio/valkyrja-php#936, #939), but a handful
-  of branches remain that no *test* can reach, so a 100% gate would sit red. Each
-  needs a **source** change of the kind above, and each is a behavior decision
-  worth making on its own:
-    - `Cli\Interaction\Message\Answer::isValidResponse()` — the
-      `allowedResponses === []` clause is **dead code**: the constructor and
-      `withAllowedResponses()` both append `$defaultResponse`, so the array is
-      never empty. Removing it changes what "no allowed responses" means — decide
-      whether that was meant to accept anything.
-    - `Cli\Server\Support\Exiter::exit()` — the `exit($code)` arm ends the
-      process. Needs the seam treatment above.
-    - `Dispatch\Factory\DispatchFactory::fromReflection()` — exhaustive
-      `match (true)` over a union type; fold the last arm into `default`.
-    - `Http\Message\File\Factory\UploadedFileFactory::isValidSapiEnvironmentForUploads()`
-      — branches on `PHP_SAPI`, always `cli` under PHPUnit. Seam the SAPI lookup.
-    - `Http\Server\Handler\RequestHandler::getOutputDufferFlags()` — the
-      `defined('PHP_OUTPUT_HANDLER_REMOVABLE') ? … : -1` fallback is for HHVM 3.3
-      and is dead on every supported PHP; drop it.
-    - `Type\Enum\Trait\JsonSerializable` — a trait compiled into each using class,
-      whose per-class copies are conflated into one file entry. It reports 3/3 run
-      alone but 2/3 with the full `Type` suite, because a backed enum never runs
-      `return $this->name` and a pure enum never runs `return $this->value`.
-      Adding tests *lowers* it. No known remedy yet — investigate before gating.
-  Once those are resolved, add the Cobertura-based branch gate so branch coverage
-  stays at 100% on future changes.
-- **Never gate on *merged* branch data.** Xdebug builds a different branch map for
-  a function depending on whether it ran, so merging shard coverage unions two
-  incompatible maps and invents branches nothing can execute — it reported 9
-  missing branches for `Http\Routing\Processor\Processor`, which is at 100% in its
-  own shard (19 such phantom branches across 4 files). Merged **line** data is
-  affected too but only slightly (99.97% vs 100%, from `match (` lines). Gate per
-  shard, or on the serial run; use per-shard numbers when hunting real gaps.
+- **The source-side blockers are gone.** Every branch in valkyrja that no *test*
+  could reach has been closed by a source change, one PR per behavior decision:
+  `Answer::isValidResponse()`'s dead `allowedResponses === []` clause
+  (valkyrjaio/valkyrja-php#948), `DispatchFactory::fromReflection()`'s exhaustive
+  `match (true)` (#943), `RequestHandler::getOutputDufferFlags()`'s dead HHVM 3.3
+  `-1` fallback (#944), `UploadedFileFactory::isValidSapiEnvironmentForUploads()`'s
+  `PHP_SAPI` seam (#946), `Exiter::exit()`'s process-ending arm (#947), and
+  `Trait\JsonSerializable`'s trait-hosted conditional (#949) — the last one moved
+  into `Support\Enumerable` rather than contorted in place. The reachable gaps were
+  closed earlier in #936 and #939. Every file was verified in its **owning shard**,
+  before and after.
+- **The measurement is now the blocker, not the source.** Xdebug builds a different
+  branch map for a function depending on how much of the file ran, and it distorts
+  in *both* directions, so neither a merged nor a per-shard 100% gate is currently
+  safe:
+    - **Merged data invents branches.** Merging shard coverage unions two
+      incompatible maps — it reported 9 missing branches for
+      `Http\Routing\Processor\Processor`, which is at 100% in its own shard (19
+      such phantom branches across 4 files: `Processor`, `Api\Manager\Api`,
+      `Http\Message\Request\Request`, `Cli\Server\Provider\CliServerServiceProvider`).
+      Merged **line** data is affected too but only slightly (99.97% vs 100%, from
+      `match (` lines).
+    - **A shard inflates maps too, so per-shard is not a cure.** In the `Http`
+      shard `Http\Message\Uri\Uri` reads 62/67 with `getAuthority` at 7/9 and
+      `getPort` at 4/7 — but running `UriTest` alone those same functions carry
+      *smaller* maps and are 7/7 and 4/4. The 5 extra branches appear only because
+      more of the file was loaded, and nothing executes them. Narrowing to the
+      file's own test is what settles a suspected gap; the owning shard is only the
+      first step.
+  Until a run exists whose branch totals are stable, the Cobertura gate would sit
+  red on artifacts alone. Next step is to characterize the inflation (which
+  constructs grow a map, and whether a fixed run scope avoids it), then gate.
 - **Java/TypeScript** also reach 100% branch — JaCoCo (`BRANCH`) and Vitest
   (istanbul/v8) measure decision coverage directly. (Flagged in their TODO.md.)
 
