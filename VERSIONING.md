@@ -101,13 +101,40 @@ than it used to be.
 | `yearly`  | First release on a new `YY.x` branch — always `YY.0.0`        |
 | `rc`      | Release candidate for the next year, from `master` only       |
 
-`yearly` and `rc` are always manual. `auto` is the normal path, and the explicit
-`patch` / `feature` options remain as overrides for when the computed answer is
-wrong.
+`auto` is the normal path, and the explicit `patch` / `feature` options remain as
+overrides for when the computed answer is wrong.
 
 Stable releases must be dispatched from a `YY.x` branch. Dispatching one from
 `master` fails by design — `master` is where the next year is prepared, and `rc`
 is the only release type that comes from it.
+
+## Automation owns the year, never the year boundary
+
+`yearly` and `rc` are **manual only, always**, and this is the one rule in the
+release design worth defending hardest.
+
+The split follows the version format exactly. `FEATURE` and `PATCH` move on
+*evidence* — the commit log says what merged, so a machine can compute the answer.
+`YY` moves on a *decision*: that a year of accumulated breaking work hangs together
+well enough to ship. An RC is that same decision announced early. Nothing in a
+commit type expresses readiness, so nothing in the log can be read to produce it.
+
+Three further reasons the boundary stays human:
+
+- **RC numbers are a communication device.** `RC1`, `RC2`, `RC3` publish to the
+  language registries and their sequence tells consumers something. Automation
+  minting them on a schedule turns the numbers into noise.
+- **`master` is deliberately the least stable branch** — features, deprecations,
+  and breaking changes all target it. Giving the riskiest branch the most casual
+  release path inverts the risk ordering.
+- **A yearly code path cannot be trusted.** Anything that fires once every twelve
+  months has not been exercised since the last time, and it would fire during
+  precisely the window someone is hand-preparing the rollover.
+
+So the sweep below **never dispatches to `master`**, which leaves the RC path
+unreachable from automation by construction rather than by conditionals. That
+matters: a design that needs several conditions to all hold in order to *avoid*
+publishing is a design where being wrong publishes.
 
 ## Automatic releases
 
@@ -121,19 +148,25 @@ empty release. That is what makes a daily sweep safe across every supported
 branch: quiet branches cost a workflow run and produce nothing.
 
 Which branches it covers comes from the `SUPPORTED_VERSIONS` repository variable
-— a regex matched against the major, e.g. `2[6-9]`. The sweep enumerates `??.x`
-branches, keeps those whose major matches, and dispatches each one's own
-`release-new-version.yml` with `bump: auto`.
+— a **regex** matched against the major with bash `=~`, e.g. `2[6-9]`. Not a
+space-separated list; `SUPPORTED_LANGUAGES` is the space-separated one, and the two
+are easy to confuse. A value like `26 27` matches nothing, which aborts releases
+loudly and makes several other sweeps silently process zero branches.
+
+The sweep enumerates `??.x` branches, keeps those whose major matches, and
+dispatches each one's own `release-new-version.yml` with `bump: auto`.
 
 Two mechanical constraints shape that design, and both are worth knowing before
 changing it:
 
-- **Scheduled workflows only run from the default branch.** The sweep lives on
-  `master` even though it can never release from there.
-- **The release workflow derives its target from the ref it runs on**, and
-  rejects `master`. So the sweep cannot fan out in-process; it dispatches each
-  branch with `gh workflow run … --ref 26.x`, the same idiom the existing
-  cross-repo sweeps use.
+- **Scheduled workflows only run from the default branch**, which for these repos
+  is the current-year `YY.x` branch, not `master`.
+- **The release workflow derives its target from the ref it runs on.** So the sweep
+  cannot fan out in-process; it dispatches each branch with
+  `gh workflow run … --ref 26.x`, the same idiom the existing cross-repo sweeps use.
 
 A `workflow_dispatch` triggered with `GITHUB_TOKEN` does not create a run, so the
 sweep authenticates as the project's GitHub App.
+
+Before creating a new year's branch, widen `SUPPORTED_VERSIONS` first — the
+new-version workflow validates the *new* major against it and aborts otherwise.
