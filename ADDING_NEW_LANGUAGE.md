@@ -398,12 +398,12 @@ fixtures.
   gate green, coverage 100% (line and branch where supported) and never dropping.
 - **Every source file** carries the license header; every file ends with a
   trailing newline; American English throughout.
-- **Commits:** `[Tag] type: Imperative description.` (trailing period) — see
+- **Commits:** `[Root] type: Imperative description.` (trailing period) — see
   [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md). For adding a whole language's
-  workflows the sibling history uses the **language tag** (e.g. `[Go] feat:`);
+  workflows the sibling history uses the **language root** (e.g. `[Go] feat:`);
   the very first commit of a brand-new repo stays `[Initial] Initial commit.`,
   which needs no type since it is pushed directly and never sits in a PR.
-- **PR titles:** same tag and type, plus `(#123)` when an issue tracks the work,
+- **PR titles:** same root and type, plus `(#123)` when an issue tracks the work,
   **no** trailing period. Fill the PR template (Description, Types of changes,
   Changes — bold path — em dash — what changed).
 - **Branch targeting:** improvements/fixes → lowest affected `NN.x`; features →

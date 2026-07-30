@@ -322,9 +322,9 @@ These named a kind of change rather than a thing, so the type now carries them:
 | `[Release]`                      | `[v26.6.1]` or `[Process]`       |
 
 Freeing the root from the change kind is the point of the convention rather than a
-side effect of it. A documentation-only repo used to tag every commit
-`[Documentation]` regardless of subject, which conveyed nothing; it can now name
-what the change is actually about. The same applies to `ci` and `test` work, which
+side effect of it. A documentation-only repo used to put `[Documentation]` on every
+commit regardless of subject, which conveyed nothing; it can now name what the
+change is actually about. The same applies to `ci` and `test` work, which
 can finally be scoped: `[Http] ci:`, `[Container] test:`.
 
 `[Initial]` is the one exemption — the first commit of a brand-new repo stays

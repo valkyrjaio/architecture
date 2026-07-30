@@ -56,7 +56,7 @@ Cross-cutting architectural decisions that apply to all ports.
 | [`DATA_CACHE.md`](DATA_CACHE.md)                 | Cache architecture, provider contracts, build flows       |
 | [`BUILD_TOOL.md`](BUILD_TOOL.md)                 | Build tool design, Bin extraction, AST implementations    |
 | [`STATIC_METHODS.md`](STATIC_METHODS.md)         | Static interface methods — cross-language design and registry pattern |
-| [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md)   | Commit and PR title format, conventional types, tags      |
+| [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md)   | Commit and PR title format, conventional types, roots     |
 | [`VERSIONING.md`](VERSIONING.md)                 | Version scheme, bump mapping, release automation          |
 
 Language Contracts

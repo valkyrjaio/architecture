@@ -152,7 +152,7 @@ Then:
 6. **Run the full CI gate** for the language you touched before considering the
    work done — exact commands are in your language's Layer-2 guide.
 7. **One branch and one PR per change.** Create a new branch off the correct
-   target branch, then commit with the `[Tag] type:` message, push, and open a PR
+   target branch, then commit with the `[Root] type:` message, push, and open a PR
    (base = that target branch) with the template filled out. **Ask for
    confirmation before committing, before pushing, and before opening the PR.**
    Keep each branch/PR small and atomic. See §7.
@@ -396,7 +396,7 @@ the branch needs no prompt). Per change:
 
 1. **Branch** off the correct target branch with a `prefix/…` name (see **Branch
    names** below; e.g. `feature/contextual-bindings`).
-2. **Commit** — after confirmation — using the `[Tag] type:` message format.
+2. **Commit** — after confirmation — using the `[Root] type:` message format.
 3. **Push** the branch — after confirmation.
 4. **Open a PR** — after confirmation — with its **base set to that same target
    branch** and the PR template filled out (see below).
@@ -441,7 +441,7 @@ root kinds, and worked examples:
 - There is no `[Documentation]`, `[Deprecation]`, or `[Tests]` root — the types
   carry that, which frees the root to name what the change is actually about,
   including on `ci` and `test` work (`[Http] ci:`, `[Container] test:`).
-- **Tag casing is exact** — write each tag exactly as listed above; initialisms
+- **Root casing is exact** — write each root exactly as listed above; initialisms
   stay uppercase (`[CI]`, `[GitHub]`), never `[Ci]` / `[Github]`.
 - The type is not decoration: `feat`, `deprecate`, and `!` drive the middle
   version component and everything else is a patch, so the type you choose is
