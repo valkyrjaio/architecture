@@ -18,7 +18,7 @@ dictates, in **separate worktrees**, and **ask before committing / pushing /
 opening any PR**. Follow each repo's `AGENTS.md` and the architecture guides
 (`~/Dropbox/Sites/Valkyrja/architecture/AGENTS.md` + `typescript/AGENTS.md`) for
 naming, structure, testing (100% coverage), CI, and commit/PR conventions
-(`[Component] Message.` commits, no co-author lines).
+(`[Tag] type: Message.` commits, no co-author lines).
 
 ## Repos & local paths
 

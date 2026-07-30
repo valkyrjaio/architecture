@@ -56,6 +56,8 @@ Cross-cutting architectural decisions that apply to all ports.
 | [`DATA_CACHE.md`](DATA_CACHE.md)                 | Cache architecture, provider contracts, build flows       |
 | [`BUILD_TOOL.md`](BUILD_TOOL.md)                 | Build tool design, Bin extraction, AST implementations    |
 | [`STATIC_METHODS.md`](STATIC_METHODS.md)         | Static interface methods — cross-language design and registry pattern |
+| [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md)   | Commit and PR title format, conventional types, tags      |
+| [`VERSIONING.md`](VERSIONING.md)                 | Version scheme, bump mapping, release automation          |
 
 Language Contracts
 ------------------
@@ -243,8 +245,9 @@ Contributing
 Contributions to the architecture — new decision records, port planning
 updates, clarifications to existing decisions — are welcome. See
 [`CONTRIBUTING.md`][contributing url] for the submission process,
-[`REPOSITORY_NAMING.md`][repository naming url] for how repos are named, and
-[`VOCABULARY.md`][vocabulary url] for terminology used across the project.
+[`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md) for the commit and PR title
+format, [`REPOSITORY_NAMING.md`][repository naming url] for how repos are named,
+and [`VOCABULARY.md`][vocabulary url] for terminology used across the project.
 
 Architecture decisions should be recorded here *before* they land in code, so
 that per-language ports can reference the canonical decision rather than

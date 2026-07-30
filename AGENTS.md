@@ -152,7 +152,7 @@ Then:
 6. **Run the full CI gate** for the language you touched before considering the
    work done — exact commands are in your language's Layer-2 guide.
 7. **One branch and one PR per change.** Create a new branch off the correct
-   target branch, then commit with the `[Component]` message, push, and open a PR
+   target branch, then commit with the `[Tag] type:` message, push, and open a PR
    (base = that target branch) with the template filled out. **Ask for
    confirmation before committing, before pushing, and before opening the PR.**
    Keep each branch/PR small and atomic. See §7.
@@ -396,21 +396,56 @@ the branch needs no prompt). Per change:
 
 1. **Branch** off the correct target branch with a `prefix/…` name (see **Branch
    names** below; e.g. `feature/contextual-bindings`).
-2. **Commit** — after confirmation — using the `[Component]` message format.
+2. **Commit** — after confirmation — using the `[Tag] type:` message format.
 3. **Push** the branch — after confirmation.
 4. **Open a PR** — after confirmation — with its **base set to that same target
    branch** and the PR template filled out (see below).
 
 Keep each branch and PR small and atomic — one focused change per PR.
 
-- **Commit** (single line, trailing period required):
-  `[Component] Short imperative description.`
-- **PR title** (same tag, **no** trailing period): `[Component] Description`
-- **Component tags:** `[Documentation]`, `[CI]`, `[GitHub]`, `[Git]`,
-  `[Composer]`, `[Functions]`, `[Deprecation]`, module tags like `[Container]` /
-  `[Http]` / `[Cli]`, version tags like `[25.x]`, `[Release]`.
+Commits and PR titles carry a **root** for where the change lands and a **type**
+for what kind of change it is — neither may restate the other. Full rules, the
+root kinds, and worked examples:
+[`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md). The essentials:
+
+```
+[Root] type: Message.                 [Root] type!: Message.
+[Root] type(#123): Message.           [Root] type(#123)!: Message.
+```
+
+- **Working-branch commit** — single line, trailing period required; the issue
+  reference is permitted but not required. The period marks a ledger entry on a
+  working branch; a permanent subject line takes none, which covers both the
+  squashed PR title and any direct push to a protected branch.
+- **PR title** — same root and type, **no** trailing period, and the issue
+  reference is required when an issue exists.
+- **Types:** `feat`, `fix`, `deprecate`, `docs`, `test`, `refactor`, `perf`,
+  `style`, `build`, `ci`, `chore`, `revert`. Append `!` before the colon on
+  anything that breaks a public contract. No type marks a change as automated —
+  git records the author already.
+- **Roots** are an **open vocabulary** governed by two rules: a root names a
+  *thing*, never a kind of change or the actor that made it; and a root is never
+  the repo's own identity (`[PhpCsFixer]` says nothing inside the phpcsfixer repo,
+  everything inside the framework). That second rule is positional — `[Http]` is a
+  root here because HTTP lives here. Examples: a module (`[Http]`), a concept
+  (`[Provider]`, `[Middleware]`), `[Dependency]`, an external tool (`[Composer]`,
+  `[PhpCsFixer]`), a port (`[Java]`), `[Git]` / `[Workflow]` / `[GitHub]` /
+  `[Process]`, a version line (`[26.x]`), a release version (`[v26.6.1]`). Module
+  roots take their source directory's spelling (`[Orm]`, not `[ORM]`). Expect the
+  vocabulary to grow — when a repo has a thing worth naming, name it.
+- **Breadth is not a root.** A change touching 20 modules is still about something —
+  renaming every component throwable is `[Throwable]`, not `[All]`. One level down,
+  the same logic replaces stacking: middleware across HTTP and CLI is
+  `[Middleware]`, not `[Http][Cli]`. If no single root fits, the change is doing too
+  much; split it. Stack only to narrow in a cross-language repo (`[Java][Http]`).
+- There is no `[Documentation]`, `[Deprecation]`, or `[Tests]` root — the types
+  carry that, which frees the root to name what the change is actually about,
+  including on `ci` and `test` work (`[Http] ci:`, `[Container] test:`).
 - **Tag casing is exact** — write each tag exactly as listed above; initialisms
   stay uppercase (`[CI]`, `[GitHub]`), never `[Ci]` / `[Github]`.
+- The type is not decoration: `feat`, `deprecate`, and `!` drive the middle
+  version component and everything else is a patch, so the type you choose is
+  what determines the next release. See [`VERSIONING.md`](VERSIONING.md).
 - No body / co-author lines unless explicitly asked. This governs the commits
   *you* write; the squash merge takes its subject from the PR title and its body
   from the PR description, which is why that description is where durable
@@ -418,7 +453,9 @@ Keep each branch and PR small and atomic — one focused change per PR.
 - PR description follows the
   [PR template](https://github.com/valkyrjaio/.github/blob/master/.github/PULL_REQUEST_TEMPLATE.md)
   — fill **Description**, **Types of changes**, and **Changes** (bold
-  file/component — em dash — what changed).
+  file/component — em dash — what changed). When an issue tracks the work, put
+  `Closes #123` in the description: it becomes the squash commit body, so that is
+  both what closes the issue on merge and where the link durably lives.
 
 ### Current working branch
 
@@ -480,6 +517,8 @@ Read these in order when starting or extending a port:
 5. [`DATA_CACHE.md`](DATA_CACHE.md) — provider contracts & cache generation
 6. [`BUILD_TOOL.md`](BUILD_TOOL.md) — `sindri` implementation
 7. [`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md) — testing & 100% coverage
-8. `{language}/PROVIDER_CONTRACTS.md` — full contracts + examples
-9. `{language}/README.md` — port notes & priority order
-10. `{language}/AGENTS.md` — the Layer-2 agent guide for that language
+8. [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md) — commit & PR title format
+9. [`VERSIONING.md`](VERSIONING.md) — version scheme & release automation
+10. `{language}/PROVIDER_CONTRACTS.md` — full contracts + examples
+11. `{language}/README.md` — port notes & priority order
+12. `{language}/AGENTS.md` — the Layer-2 agent guide for that language
