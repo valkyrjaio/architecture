@@ -231,6 +231,22 @@ contract is ratified in [`GRPC.md`](GRPC.md) → *Streaming and Call Shapes*; th
 - **"No-deadline" needs a finite sentinel.** `Deadline.none().getRemaining()` returns a large but
   finite duration (the Java port uses ~100 years) so downstream arithmetic never overflows. Pick the
   same sentinel in every port.
+- **Outbound flow control is the one everybody forgets.** Inbound is easy to remember because a config
+  setting names it: you implement `maxInboundMessages`, so you think about how much the peer can push
+  at you. Outbound has no setting, no contract type, and no compile error — nothing prompts you — so
+  the drain ends up writing as fast as the handler yields, and a server-streaming response to a client
+  that has stopped reading grows the transport's write queue for the life of the call. The Java port
+  shipped without it ([valkyrja-java#81](https://github.com/valkyrjaio/valkyrja-java/issues/81)) and
+  the TypeScript port reproduced it — both from a contract that said nothing about outbound. Before
+  you write the drain, find your library's writability primitive — `isReady`/`setOnReadyHandler` in
+  grpc-java, a stream's `write` return value plus the `drain` event in `@grpc/grpc-js`, a blocking
+  channel send in Go, the worker's own mechanism under RoadRunner/OpenSwoole — and pause between
+  messages on it, in the push sink as well as the pull drain. Two things make it easy to get wrong:
+  it is **not** cancellation (unready pauses the drain, cancelled ends it, so it does not belong in
+  `call.cancellable(...)`), and it does **not** show up in a normal test, because a test client reads
+  as fast as the server writes — you need a client that stalls mid-call to see it at all. The
+  obligation is stated in [`GRPC.md`](GRPC.md) → *Worker Adapters*; the mechanism is deliberately
+  yours to pick.
 
 ## No "Exchange" (zero-dependency in-core server) for gRPC
 
