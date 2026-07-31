@@ -64,10 +64,10 @@ the application uses.
 $app = Application::create(
     new AppConfig(
         providers: [
-            HttpComponentProvider::class,       // framework component providers
-            ContainerComponentProvider::class,
-            EventComponentProvider::class,
-            CliComponentProvider::class,
+            new HttpComponentProvider(),       // framework component providers
+            new ContainerComponentProvider(),
+            new EventComponentProvider(),
+            new CliComponentProvider(),
             App\Providers\AppProvider::class,  // application providers
         ]
     )
@@ -204,7 +204,7 @@ that method by name. Sindri reads the method body from the same file — no cros
 
 ```php
 // publishers() points to methods on the same class
-public static function publishers(): array
+public function publishers(): array
 {
     return [
         RouterContract::class => [self::class, 'publishRouter'],
@@ -213,7 +213,7 @@ public static function publishers(): array
 
 public static function publishRouter(ContainerContract $c): void
 {
-    $c->setSingleton(RouterContract::class, new Router($c->make(DispatcherContract::class)));
+    $c->setSingleton(RouterContract::class, new Router($c->getSingleton(DispatcherContract::class)));
 }
 ```
 
@@ -266,7 +266,7 @@ route provider, or any other class — Sindri follows the callable reference to 
 ```
 Annotations live on:    the implementation method (show, store, index etc.)
 #[Handler] points to:   a callable (ClassName, methodName) — any class, anywhere
-Forge reads:            the handler method body from whichever file the callable resolves to
+Sindri reads:            the handler method body from whichever file the callable resolves to
 ```
 
 **PHP — handler on same controller:**
@@ -283,7 +283,7 @@ class UserController
         // actual implementation — not read by Sindri
     }
 
-    // Forge resolves [self::class, 'showHandler'] → this file → reads this method
+    // Sindri resolves [self::class, 'showHandler'] → this file → reads this method
     public static function showHandler(ContainerContract $c, array $args): ResponseContract
     {
         return $c->getSingleton(self::class)->show($args['id']);
@@ -304,7 +304,7 @@ class UserController
 
 class UserHttpRouteProvider implements HttpRouteProviderContract
 {
-    // Forge resolves callable → this file → reads this method + this file's imports
+    // Sindri resolves callable → this file → reads this method + this file's imports
     public static function showUser(ContainerContract $c, array $args): ResponseContract
     {
         return $c->getSingleton(UserController::class)->show($args['id']);
@@ -321,7 +321,7 @@ public class UserController {
     @Handler(clazz = UserController.class, method = "showHandler")
     public ResponseContract show(String id) { /* actual implementation */ }
 
-    // Forge resolves clazz + method → this file → reads this method
+    // Sindri resolves clazz + method → this file → reads this method
     public static ResponseContract showHandler(ContainerContract c, Map<String, Object> args) {
         return c.getSingleton(UserController.class).show((String) args.get("id"));
     }
@@ -338,7 +338,7 @@ class UserController:
     def show(self, id: str) -> ResponseContract:
         pass  # actual implementation — not read by Sindri
 
-    # Forge resolves callable → this file → reads this method
+    # Sindri resolves callable → this file → reads this method
     @staticmethod
     def show_handler(c: ContainerContract, args: dict) -> ResponseContract:
         return c.get_singleton(UserController).show(args['id'])
@@ -537,7 +537,7 @@ import com.sun.source.util.*;
 import javax.tools.*;
 import java.util.List;
 
-public class ForgeParser {
+public class SindriParser {
 
     /**
      * Parse a Java source file into an AST (CompilationUnitTree).
@@ -1000,9 +1000,9 @@ Framework constants  → shipped with framework source, maintained by Valkyrja
 Application constants → written by the developer, following the same pattern
 ```
 
-**Future enhancement:** Forge generating application constants automatically from the provider tree is a natural
+**Future enhancement:** Sindri generating application constants automatically from the provider tree is a natural
 extension — walk the application source, discover all contracts and service classes, derive their FQN strings, write the
-constants files. This is a quality-of-life feature to implement after the core forge functionality is stable.
+constants files. This is a quality-of-life feature to implement after the core sindri functionality is stable.
 
 ---
 

@@ -173,7 +173,7 @@ import type {ContainerContract} from '@valkyrja/container/manager/contract'
  * }
  *
  * publishUserRepository(c: ContainerContract): void {
- *     c.setSingleton(UserRepositoryClass, new UserRepository(c.make(DatabaseClass)))
+ *     c.setSingleton(UserRepositoryClass, new UserRepository(c.getSingleton(DatabaseClass)))
  * }
  */
 export interface ServiceProviderContract {

@@ -90,7 +90,7 @@ container.bind(
         RouterContract .class,
         c ->new
 
-Router(c.make(DispatcherContract.class))
+Router(c.getSingleton(DispatcherContract.class))
         );
 
         container.
@@ -99,7 +99,7 @@ singleton(
         RouterContract .class,
         c ->new
 
-Router(c.make(DispatcherContract.class))
+Router(c.getSingleton(DispatcherContract.class))
         );
 ```
 
@@ -113,13 +113,13 @@ Router(c.make(DispatcherContract.class))
 
 ```java
 public interface ComponentProviderContract {
-    static List<Class<? extends ServiceProviderContract>> getContainerProviders(ApplicationContract app);
+    List<ServiceProviderContract> getContainerProviders(ApplicationContract app);
 
-    static List<Class<? extends ListenerProviderContract>> getEventProviders(ApplicationContract app);
+    List<ListenerProviderContract> getEventProviders(ApplicationContract app);
 
-    static List<Class<? extends CliRouteProviderContract>> getCliProviders(ApplicationContract app);
+    List<CliRouteProviderContract> getCliProviders(ApplicationContract app);
 
-    static List<Class<? extends HttpRouteProviderContract>> getHttpProviders(ApplicationContract app);
+    List<HttpRouteProviderContract> getHttpProviders(ApplicationContract app);
 }
 ```
 
@@ -127,7 +127,7 @@ public interface ComponentProviderContract {
 
 ```java
 public interface ServiceProviderContract {
-    static Map<Class<?>, Consumer<ContainerContract>> publishers();
+    Map<Class<?>, Consumer<ContainerContract>> publishers();
 }
 ```
 

@@ -47,10 +47,10 @@ registers a callable that creates the type, and the framework calls it.
 
 ```java
 // Registered in a service provider
-container.bind(MyEntity.class, raw -> new MyEntity(raw));
+container.bind(MyEntity.class, (c, args) -> new MyEntity(args.get("raw")));
 
 // Framework resolves via container — no reflection, no convention
-MyEntity entity = container.make(MyEntity.class, raw);
+MyEntity entity = container.getService(MyEntity.class, Map.of("raw", raw));
 ```
 
 The developer owns the creation logic. If no factory is registered, the

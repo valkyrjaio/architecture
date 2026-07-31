@@ -153,7 +153,7 @@ register them. The keys are the service IDs the provider is responsible for;
 the container uses this map to defer loading until a service is first requested:
 
 ```php
-public static function publishers(): array
+public function publishers(): array
 {
     return [
         CacheContract::class => [self::class, 'publishCache'],
@@ -333,7 +333,7 @@ class TeamsNotifier implements NotifierContract
 // 3. Using a service provider
 class NotifierServiceProvider implements ServiceProviderContract
 {
-    public static function publishers(): array
+    public function publishers(): array
     {
         return [
             NotifierContract::class => [self::class, 'publishNotifier'],
@@ -352,19 +352,19 @@ class NotifierServiceProvider implements ServiceProviderContract
 // 4. The component provider
 class AppComponentProvider implements ComponentProviderContract
 {
-    public static function getComponentProviders(ApplicationContract $app): array
+    public function getComponentProviders(ApplicationContract $app): array
     {
         return [];  // no dependencies on other components
     }
 
-    public static function getContainerProviders(ApplicationContract $app): array
+    public function getContainerProviders(ApplicationContract $app): array
     {
-        return [NotifierServiceProvider::class];
+        return [new NotifierServiceProvider()];
     }
 
-    public static function getEventProviders(ApplicationContract $app): array { return []; }
-    public static function getHttpProviders(ApplicationContract $app): array  { return []; }
-    public static function getCliProviders(ApplicationContract $app): array   { return []; }
+    public function getEventProviders(ApplicationContract $app): array { return []; }
+    public function getHttpProviders(ApplicationContract $app): array  { return []; }
+    public function getCliProviders(ApplicationContract $app): array   { return []; }
 }
 ```
 
@@ -398,12 +398,12 @@ class SlackNotifier implements NotifierContract
 // 3. The component provider
 class AppComponentProvider implements ComponentProviderContract
 {
-    public static function getComponentProviders(ApplicationContract $app): array
+    public function getComponentProviders(ApplicationContract $app): array
     {
         return [];
     }
 
-    public static function getContainerProviders(ApplicationContract $app): array
+    public function getContainerProviders(ApplicationContract $app): array
     {
         $app->getContainer()->bindSingleton(
             NotifierContract::class,
@@ -413,9 +413,9 @@ class AppComponentProvider implements ComponentProviderContract
         return [];
     }
 
-    public static function getEventProviders(ApplicationContract $app): array { return []; }
-    public static function getHttpProviders(ApplicationContract $app): array  { return []; }
-    public static function getCliProviders(ApplicationContract $app): array   { return []; }
+    public function getEventProviders(ApplicationContract $app): array { return []; }
+    public function getHttpProviders(ApplicationContract $app): array  { return []; }
+    public function getCliProviders(ApplicationContract $app): array   { return []; }
 }
 ```
 
@@ -449,13 +449,13 @@ does not exist and any attempt to resolve it fails.
 
 ```php
 // ✅ cache-compatible — Sindri reads NotifierServiceProvider from the return literal
-public static function getContainerProviders(ApplicationContract $app): array
+public function getContainerProviders(ApplicationContract $app): array
 {
-    return [NotifierServiceProvider::class];
+    return [new NotifierServiceProvider()];
 }
 
 // ❌ cache-incompatible — Sindri cannot see the bindSingleton call
-public static function getContainerProviders(ApplicationContract $app): array
+public function getContainerProviders(ApplicationContract $app): array
 {
     $app->getContainer()->bindSingleton(
         NotifierContract::class,

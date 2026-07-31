@@ -30,13 +30,13 @@ The Ports
 
 Valkyrja is being ported to five languages in priority order:
 
-| # | Language       | Status                                | Build tool          |
-|---|----------------|---------------------------------------|---------------------|
-| 1 | **PHP**        | Production — reference implementation | `valkyrja-forge`    |
-| 2 | **Java**       | In progress                           | `io.valkyrja:forge` |
-| 3 | **Go**         | Proof of concept                      | `io/valkyrja/forge` |
-| 4 | **Python**     | Planned                               | `valkyrja-forge`    |
-| 5 | **TypeScript** | Planned                               | `@valkyrja/forge`   |
+| # | Language       | Status                                | Build tool           |
+|---|----------------|---------------------------------------|----------------------|
+| 1 | **PHP**        | Production — reference implementation | `valkyrja/sindri`    |
+| 2 | **Java**       | In progress                           | `io.valkyrja:sindri` |
+| 3 | **Go**         | Proof of concept                      | `io/valkyrja/sindri` |
+| 4 | **Python**     | Planned                               | `valkyrja-sindri`    |
+| 5 | **TypeScript** | Planned                               | `@valkyrja/sindri`   |
 
 Future languages under consideration: Kotlin (nearly free from Java), Scala,
 Rust, Ruby.
@@ -174,7 +174,7 @@ Key Decisions At a Glance
 
 - Separate repository and package per language — dev dependency only, never
   production
-- PHP `Bin` component extracted to `valkyrja-forge` — `nikic/php-parser` lives
+- PHP `Bin` component extracted to `valkyrja/sindri` — `nikic/php-parser` lives
   there, not in the framework
 - Build tool is itself a Valkyrja application — validates the cache-optional
   architecture
@@ -192,7 +192,7 @@ Priority items:
 2. Provider contract interfaces
 3. `publishers()` map migration
 4. `#[Handler]` and `#[Parameter]` attributes
-5. Bin extraction to `valkyrja-forge` — **must happen before handler logic
+5. Bin extraction to `valkyrja/sindri` — **must happen before handler logic
    ships** (existing `cache:generate` will break)
 
 Starting a New Port
@@ -224,19 +224,19 @@ Relationship to Framework Repositories
 architecture   ← you are here — decisions and roadmaps
      │
      ├── valkyrja-php                 ← PHP framework (runtime, zero build deps)
-     ├── valkyrja-forge-php           ← PHP build tool (nikic/php-parser)
+     ├── sindri-php                   ← PHP build tool (nikic/php-parser)
      ├── valkyrja-java                ← Java framework (runtime)
-     ├── valkyrja-forge-java          ← Java build tool (annotation processor)
+     ├── sindri-java                  ← Java build tool (annotation processor)
      ├── valkyrja-go                  ← Go framework (runtime)
-     ├── valkyrja-forge-go            ← Go build tool (go/analysis)
+     ├── sindri-go                    ← Go build tool (go/analysis)
      ├── valkyrja-python              ← Python framework (runtime)
-     ├── valkyrja-forge-python        ← Python build tool (ast + inspect)
+     ├── sindri-python                ← Python build tool (ast + inspect)
      ├── valkyrja-ts                  ← TypeScript framework (runtime)
-     └── valkyrja-forge-ts            ← TypeScript build tool (TS compiler API)
+     └── sindri-ts                    ← TypeScript build tool (TS compiler API)
 ```
 
 Each framework repository is runtime-only with zero AST or build tooling
-dependencies. Each build tool (`valkyrja-forge-*`) is a dev-only dependency
+dependencies. Each build tool (`sindri-*`) is a dev-only dependency
 containing all code generation logic for that language.
 
 Contributing

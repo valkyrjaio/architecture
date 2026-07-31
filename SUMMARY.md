@@ -307,7 +307,7 @@ level.
 
 Per-component constants files ship with the framework for all five languages — PHP holds `::class` strings, Java holds
 `.class` objects, Go/Python/TypeScript hold string literals. Application-defined constants follow the same pattern,
-written by the developer. Forge auto-generating application constants is a planned future enhancement.
+written by the developer. Sindri auto-generating application constants is a planned future enhancement.
 
 **No component provider constants class.** Provider class references must use `::class` / `.class` / class objects
 directly. A constants class would allow constant references that the build tool cannot resolve statically. Binding key

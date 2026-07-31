@@ -949,7 +949,7 @@ The callable in `#[Handler]` is the value written into the generated route objec
 ```php
 class UserController
 {
-    // Forge reads these annotations and constructs a Route object.
+    // Sindri reads these annotations and constructs a Route object.
     // The callable [SomeClass::class, 'theHandlerMethod'] is written
     // directly into the generated cache as-is — no body extraction.
     #[Route('GET', '/users/{id}')]
@@ -980,7 +980,7 @@ new \Valkyrja\Http\Routing\Data\HttpRoute(
 )
 ```
 
-**Forge reads — PHP:**
+**Sindri reads — PHP:**
 
 ```
 1. Find #[Route], #[Parameter], #[Handler] on the implementation method
@@ -996,7 +996,7 @@ new \Valkyrja\Http\Routing\Data\HttpRoute(
 ```java
 public class UserController {
 
-    // Forge reads annotations and constructs a Route object.
+    // Sindri reads annotations and constructs a Route object.
     // Callable written directly into generated cache — no body extraction.
     @Route(method = "GET", path = "/users/{id}")
     @Parameter(name = "id", pattern = "[0-9]+")
@@ -1023,7 +1023,7 @@ HandlerRef(UserController .class, "showHandler")  // written as-is
 )
 ```
 
-**Forge reads — Java:**
+**Sindri reads — Java:**
 
 ```
 1. Find @Route, @Parameter, @Handler on the implementation method
@@ -1039,7 +1039,7 @@ HandlerRef(UserController .class, "showHandler")  // written as-is
 ```python
 class UserController:
 
-    # Forge reads these decorators and constructs a Route object.
+    # Sindri reads these decorators and constructs a Route object.
     # The callable tuple is written directly into the generated cache — no body extraction.
     @route('GET', '/users/{id}')
     @parameter('id', pattern='[0-9]+')
@@ -1064,7 +1064,7 @@ HttpRoute(
 )
 ```
 
-**Forge reads — Python:**
+**Sindri reads — Python:**
 
 ```
 1. Find @route, @parameter, @handler decorators on the implementation method
@@ -1075,12 +1075,12 @@ HttpRoute(
 
 ---
 
-### The Forge Pattern (All Languages)
+### The Sindri Pattern (All Languages)
 
 ```
 Annotations / decorators carry literals.
-Forge reads literals.
-Forge writes literals into the generated cache data class.
+Sindri reads literals.
+Sindri writes literals into the generated cache data class.
 No method body extraction. No import resolution of the callable itself.
 
 Same as service bindings:

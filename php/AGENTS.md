@@ -20,9 +20,12 @@ otherwise.
   in `Contract/` with the `Contract` suffix; shared behavior in `Abstract/`.
 - **PHP version:** `>=8.4`. Every file starts with the license header and
   `declare(strict_types=1);`.
-- **Style:** concrete classes `final`; overrides marked `#[Override]`; classes
-  implementing `ServiceContract` expose a static
-  `make(ContainerContract $container, array $arguments = []): static` factory.
+- **Style:** concrete classes `final`; overrides marked `#[Override]`. A service
+  class implements its contract and carries no registration code — a service
+  provider registers it. A static
+  `make(ContainerContract $container, array $arguments = []): static` factory is
+  an optional alternative, not a house rule; the framework does not use one. See
+  [`README.md`](README.md).
 
 ### Exceptions
 

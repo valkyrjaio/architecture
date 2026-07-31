@@ -230,13 +230,13 @@ class ServiceProviderContract(ABC):
             }
 
         @handler(lambda c, args: c.set_singleton(
-            UserRepositoryClass, UserRepository(c.make(DatabaseClass))
+            UserRepositoryClass, UserRepository(c.get_singleton(DatabaseClass))
         ))
         @staticmethod
         def publish_user_repository(container: ContainerContract) -> None:
             container.set_singleton(
                 UserRepositoryClass,
-                UserRepository(container.make(DatabaseClass))
+                UserRepository(container.get_singleton(DatabaseClass))
             )
     """
 
@@ -280,7 +280,7 @@ class UserServiceProvider(ServiceProviderContract):
         """
         container.set_singleton(
             UserRepositoryClass,
-            UserRepository(container.make(DatabaseClass))
+            UserRepository(container.get_singleton(DatabaseClass))
         )
 ```
 

@@ -181,7 +181,7 @@ public interface ServiceProviderContract {
      *   public static void publishUserRepository(ContainerContract container) {
      *       container.setSingleton(
      *           UserRepositoryContract.class,
-     *           new UserRepository(container.make(DatabaseContract.class))
+     *           new UserRepository(container.getSingleton(DatabaseContract.class))
      *       );
      *   }
      */
@@ -223,7 +223,7 @@ public class UserServiceProvider implements ServiceProviderContract {
     public static void publishUserRepository(ContainerContract container) {
         container.setSingleton(
                 UserRepositoryContract.class,
-                new UserRepository(container.make(DatabaseContract.class))
+                new UserRepository(container.getSingleton(DatabaseContract.class))
         );
     }
 }

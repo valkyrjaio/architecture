@@ -92,10 +92,10 @@ class ContainerConstants:
 # bind and resolve via string constant
 container.bind(
     ContainerConstants.USER_REPOSITORY,
-    lambda c: UserRepository(c.make(ContainerConstants.DATABASE))
+    lambda c: UserRepository(c.get_singleton(ContainerConstants.DATABASE))
 )
 
-repo = container.make(ContainerConstants.USER_REPOSITORY)
+repo = container.get(ContainerConstants.USER_REPOSITORY)
 # UserRepository is only *used* when the lambda runs; without PEP 810 its top-level import still loads eagerly
 ```
 
@@ -164,11 +164,11 @@ def publishers() -> dict:
 
 
 @handler(lambda c, args: c.set_singleton(
-    UserRepositoryClass, UserRepository(c.make(DatabaseClass))
+    UserRepositoryClass, UserRepository(c.get_singleton(DatabaseClass))
 ))
 @staticmethod
 def publish_user_repository(container: ContainerContract) -> None:
-    container.set_singleton(UserRepositoryClass, UserRepository(container.make(DatabaseClass)))
+    container.set_singleton(UserRepositoryClass, UserRepository(container.get_singleton(DatabaseClass)))
 ```
 
 ### HttpRouteProviderContract
@@ -323,7 +323,7 @@ class UserServiceProvider(ServiceProviderContract):
     def publish_user_repository(c: ContainerContract) -> None:
         c.set_singleton(
             ContainerConstants.USER_REPOSITORY,
-            UserRepository(c.make(ContainerConstants.DATABASE))
+            UserRepository(c.get_singleton(ContainerConstants.DATABASE))
         )
 ```
 
@@ -342,14 +342,14 @@ class Container:
         # cache data already in lambda format — register as-is
         self._bindings.update(data)
 
-    def make(self, key: str):
+    def get_service(self, key: str):
         # always call the lambda — uniform, no conditional check needed
         callable_ref = self._bindings[key]()
         return callable_ref(self)
 
-    def singleton(self, key: str):
+    def get_singleton(self, key: str):
         if key not in self._singletons:
-            self._singletons[key] = self.make(key)
+            self._singletons[key] = self.get_service(key)
         return self._singletons[key]
 ```
 

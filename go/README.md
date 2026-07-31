@@ -87,7 +87,7 @@ if errors.As(err, &target) {
 
 ```go
 // (T, error) return is idiomatic Go — used throughout
-user, err := container.Make(UserRepositoryClass)
+user, err := container.Get(UserRepositoryClass)
 if err != nil {
 return nil, err
 }
@@ -120,14 +120,14 @@ const (
 container.Bind(
 RouterClass,
 func (c ContainerContract) any {
-return NewRouter(c.Make(DispatcherClass).(DispatcherContract))
+return NewRouter(c.GetSingleton(DispatcherClass).(DispatcherContract))
 },
 )
 
-container.Singleton(
+container.BindSingleton(
 RouterClass,
 func(c ContainerContract) any {
-return NewRouter(c.Make(DispatcherClass).(DispatcherContract))
+return NewRouter(c.GetSingleton(DispatcherClass).(DispatcherContract))
 },
 )
 ```
@@ -171,7 +171,7 @@ UserRepositoryClass: p.PublishUserRepository,
 }
 
 func (p *UserServiceProvider) PublishUserRepository(c ContainerContract) {
-c.SetSingleton(UserRepositoryClass, NewUserRepository(c.Make(DatabaseClass)))
+c.SetSingleton(UserRepositoryClass, NewUserRepository(c.GetSingleton(DatabaseClass)))
 }
 ```
 

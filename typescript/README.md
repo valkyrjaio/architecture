@@ -108,12 +108,12 @@ export const ContainerConstants = {
 ```typescript
 container.bind(
     ContainerConstants.ROUTER,
-    (c: ContainerContract) => new Router(c.make(ContainerConstants.DISPATCHER))
+    (c: ContainerContract) => new Router(c.getSingleton(ContainerConstants.DISPATCHER))
 )
 
-container.singleton(
+container.bindSingleton(
     ContainerConstants.ROUTER,
-    (c: ContainerContract) => new Router(c.make(ContainerConstants.DISPATCHER))
+    (c: ContainerContract) => new Router(c.getSingleton(ContainerConstants.DISPATCHER))
 )
 ```
 
@@ -166,7 +166,7 @@ ContainerContract
 ):
 void {
     c
-    .setSingleton(UserRepositoryClass, new UserRepository(c.make(DatabaseClass)))
+    .setSingleton(UserRepositoryClass, new UserRepository(c.getSingleton(DatabaseClass)))
 }
 ```
 
