@@ -1193,6 +1193,76 @@ requirement.
 | Python     | ✅ class object                 | ✅                   | ✅                   | Build tool not yet implemented                                 |
 | TypeScript | ✅ constructor ref              | ✅                   | ✅                   | Build tool not yet implemented                                 |
 
+### Without Cache, Declare Routes With `getRoutes()`
+
+An application that does not use the cache must declare its routes with `getRoutes()`. Do not declare the routes with
+attributes, annotations, or decorators.
+
+The two mechanisms do not cost the same at boot. `getRoutes()` gives the framework route objects that the route provider
+made. Attribute discovery is different. The framework must first load each controller class, then read the metadata from
+each class. The build tool reads the attributes one time and writes the result into the generated data. Thus the cache
+removes this work. Without the cache, the application does this work at each boot.
+
+```php
+// Cheap without cache — the route provider makes the routes.
+final class HttpRouteProvider implements HttpRouteProviderContract
+{
+    public function getRoutes(): array
+    {
+        return [
+            new Route('/version', 'version', [self::class, 'versionHandler']),
+        ];
+    }
+}
+```
+
+```php
+// Expensive without cache — the framework must read each controller to find the routes.
+class HomeController extends Controller
+{
+    #[Route(path: '/version', name: 'version', requestMethods: [RequestMethod::GET])]
+    #[RouteHandler([HttpRouteProvider::class, 'versionHandler'])]
+    public static function version(
+        ApplicationContract $app,
+        ResponseFactoryContract $responseFactory
+    ): TextResponseContract {
+        return $responseFactory->createTextResponse($app->getVersion());
+    }
+}
+```
+
+Both declarations stay correct without the cache. Only the boot cost is different.
+
+The same rule applies to the container and to events. The uncached path reads each service provider and each listener
+provider at boot.
+
+#### Measurements
+
+The cost is not the same in each language. It is a function of what the uncached path must do:
+
+| Language       | Uncached route discovery                                     | Measured cache benefit           |
+|----------------|--------------------------------------------------------------|----------------------------------|
+| **PHP**        | reflection over each controller from `getControllerClasses()` | **+41% throughput** per request  |
+| **Java**       | reflection over each controller (same shape as PHP)           | not yet measured                 |
+| **TypeScript** | `getRoutes()` only — no decorator support yet                  | ≈0 in derivation                 |
+
+The PHP number comes from the starter application on nginx with PHP-FPM, where each request pays a boot: 2,909 requests
+per second without the cache, and 4,110 requests per second with it.
+
+TypeScript shows almost no difference today because its uncached path only makes objects. It does no reflection. Route
+derivation there is approximately 1.4 microseconds for each route, so 1,000 routes cost approximately 1.4 milliseconds.
+When TypeScript decorators land, its uncached path must load each controller module and read `Symbol.metadata`. Thus the
+TypeScript numbers will move toward the PHP shape, and this rule will apply to TypeScript in the same way.
+
+#### Deployment Model Changes the Value
+
+The cache saves boot cost. Thus its value depends on how many requests each boot serves:
+
+- **Per-invocation runtimes** — CGI, lambda, CLI commands, cron jobs, and push queues. Each invocation pays a full boot.
+  The cache gives the largest benefit here.
+- **Worker runtimes** — worker-mode HTTP, gRPC, and long-lived pull queue workers. The first request pays the boot, and
+  all subsequent requests use the result. The cache gives almost no benefit here.
+
 ---
 
 ## PHP Cache CLI Command — Near-Term Breaking Change
