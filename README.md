@@ -261,10 +261,10 @@ Licensed under the [MIT license][MIT license url]. See
 
 [valkyrja url]: https://valkyrja.io
 
-[contributing url]: https://github.com/valkyrjaio/.github/blob/master/CONTRIBUTING.md
+[contributing url]: https://github.com/valkyrjaio/.github/blob/26.x/CONTRIBUTING.md
 
-[repository naming url]: https://github.com/valkyrjaio/.github/blob/master/REPOSITORY_NAMING.md
+[repository naming url]: https://github.com/valkyrjaio/.github/blob/26.x/REPOSITORY_NAMING.md
 
-[vocabulary url]: https://github.com/valkyrjaio/.github/blob/master/VOCABULARY.md
+[vocabulary url]: https://github.com/valkyrjaio/.github/blob/26.x/VOCABULARY.md
 
 [MIT license url]: https://opensource.org/licenses/MIT
