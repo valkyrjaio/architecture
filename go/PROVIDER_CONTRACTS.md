@@ -200,7 +200,7 @@ func (p *UserServiceProvider) PublishUserRepository(c ctnContract.ContainerContr
 	c.SetSingleton(
 		repoContract.UserRepositoryClass,
 		repositories.NewUserRepository(
-			c.Make(svcContract.DatabaseClass).(svcContract.DatabaseContract),
+			c.GetSingleton(svcContract.DatabaseClass).(svcContract.DatabaseContract),
 		),
 	)
 }
@@ -211,7 +211,7 @@ func PublishUserRepository(c ctnContract.ContainerContract) {
 	c.SetSingleton(
 		repoContract.UserRepositoryClass,
 		repositories.NewUserRepository(
-			c.Make(svcContract.DatabaseClass).(svcContract.DatabaseContract),
+			c.GetSingleton(svcContract.DatabaseClass).(svcContract.DatabaseContract),
 		),
 	)
 }

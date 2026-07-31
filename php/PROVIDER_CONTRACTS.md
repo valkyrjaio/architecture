@@ -184,7 +184,7 @@ interface ServiceProviderContract
      *   {
      *       $container->setSingleton(
      *           UserRepositoryContract::class,
-     *           new UserRepository($container->make(DatabaseContract::class))
+     *           new UserRepository($container->getSingleton(DatabaseContract::class))
      *       );
      *   }
      */
@@ -224,7 +224,7 @@ class UserServiceProvider implements ServiceProviderContract
     {
         $container->setSingleton(
             UserRepositoryContract::class,
-            new UserRepository($container->make(DatabaseContract::class))
+            new UserRepository($container->getSingleton(DatabaseContract::class))
         );
     }
 }

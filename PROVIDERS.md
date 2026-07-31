@@ -32,11 +32,11 @@ The top-level aggregator. One per component. Returns lists of the four leaf prov
 // PHP
 interface ComponentProviderContract
 {
-    public static function getComponentProviders(ApplicationContract $app): array;
-    public static function getContainerProviders(ApplicationContract $app): array;
-    public static function getEventProviders(ApplicationContract $app): array;
-    public static function getHttpProviders(ApplicationContract $app): array;
-    public static function getCliProviders(ApplicationContract $app): array;
+    public function getComponentProviders(ApplicationContract $app): array;
+    public function getContainerProviders(ApplicationContract $app): array;
+    public function getEventProviders(ApplicationContract $app): array;
+    public function getHttpProviders(ApplicationContract $app): array;
+    public function getCliProviders(ApplicationContract $app): array;
 }
 ```
 
@@ -50,11 +50,11 @@ manually ordering providers in the app config.
 ```php
 class HttpComponentProvider implements ComponentProviderContract
 {
-    public static function getComponentProviders(ApplicationContract $app): array
+    public function getComponentProviders(ApplicationContract $app): array
     {
         return [
-            ContainerComponentProvider::class,  // HTTP depends on Container
-            EventComponentProvider::class,       // HTTP depends on Event
+            new ContainerComponentProvider(),  // HTTP depends on Container
+            new EventComponentProvider(),       // HTTP depends on Event
         ];
     }
 
@@ -71,9 +71,9 @@ class AppConfig implements ConfigContract
     public static function getProviders(): array
     {
         return [
-            HttpComponentProvider::class,   // Container and Event loaded automatically
-            CliComponentProvider::class,
-            AppComponentProvider::class,    // application-defined
+            new HttpComponentProvider(),   // Container and Event loaded automatically
+            new CliComponentProvider(),
+            new AppComponentProvider(),    // application-defined
         ];
     }
 }
@@ -89,14 +89,14 @@ Registers container bindings. Returns a map of binding key to publisher method r
 // PHP
 interface ServiceProviderContract
 {
-    public static function publishers(): array;
+    public function publishers(): array;
 }
 ```
 
 ```java
 // Java
 public interface ServiceProviderContract {
-    static Map<Class<?>, Runnable> publishers();
+    Map<Class<?>, Consumer<ContainerContract>> publishers();
 }
 ```
 
@@ -131,12 +131,12 @@ earlier versions is removed — the publishers map is the sole source of truth f
 > intended for cache-based deployments must be declared through service providers returned from `getContainerProviders()`.
 > See `README_CONTAINER.md` for the full explanation.
 
-**`ServiceContract`** — an optional companion pattern for service classes. A class implementing `ServiceContract`
-defines a static `make()` factory that receives the container and returns an instance. Publisher methods can delegate to
-it directly:
+**The static `make()` factory** — an optional companion pattern for service classes. A publisher normally constructs the
+service inline, and the service class carries no registration code. A service class may instead define a static `make()`
+factory that receives the container and returns an instance. The publisher then delegates to it:
 
 ```php
-class UserRepository implements UserRepositoryContract, ServiceContract
+class UserRepository implements UserRepositoryContract
 {
     public static function make(ContainerContract $container, array $arguments = []): static
     {
@@ -154,12 +154,14 @@ public static function publishUserRepository(ContainerContract $container): void
 }
 ```
 
-This gives each class explicit ownership of its own instantiation. No reflection, no autowiring.
+This moves ownership of instantiation into the class. Use it when more than one caller must reuse the construction step.
+Otherwise construct the service in the publisher, which is what the reference implementation does. Neither form uses
+reflection or autowiring.
 
 ```php
 class HttpServiceProvider implements ServiceProviderContract
 {
-    public static function publishers(): array
+    public function publishers(): array
     {
         return [
             RouterContract::class            => [self::class, 'publishRouter'],
@@ -170,7 +172,7 @@ class HttpServiceProvider implements ServiceProviderContract
 
     public static function publishRouter(ContainerContract $c): void
     {
-        $c->setSingleton(RouterContract::class, new Router($c->make(DispatcherContract::class)));
+        $c->setSingleton(RouterContract::class, new Router($c->getSingleton(DispatcherContract::class)));
     }
 
     // ... other publisher methods

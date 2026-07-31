@@ -55,14 +55,14 @@ All bindings across all ports use closures as the factory mechanism:
 $container->bind(
     UserRepositoryContract::class,
     static fn(ContainerContract $c): UserRepository => new UserRepository(
-        $c->make(DatabaseContract::class)
+        $c->getSingleton(DatabaseContract::class)
     )
 );
 
-$container->singleton(
+$container->bindSingleton(
     UserRepositoryContract::class,
     static fn(ContainerContract $c): UserRepository => new UserRepository(
-        $c->make(DatabaseContract::class)
+        $c->getSingleton(DatabaseContract::class)
     )
 );
 ```
@@ -71,45 +71,39 @@ $container->singleton(
 
 ```java
 container.bind(
-        UserRepositoryContract .class,
-        c ->new
-
-UserRepository(
-        c.make(DatabaseContract.class)
+    UserRepositoryContract.class,
+    c -> new UserRepository(
+        c.getSingleton(DatabaseContract.class)
     )
-            );
+);
 
-            container.
-
-singleton(
-        UserRepositoryContract .class,
-        c ->new
-
-UserRepository(
-        c.make(DatabaseContract.class)
+container.bindSingleton(
+    UserRepositoryContract.class,
+    c -> new UserRepository(
+        c.getSingleton(DatabaseContract.class)
     )
-            );
+);
 ```
 
 **Go**
 
 ```go
 container.Bind(
-UserRepositoryClass,
-func (c ContainerContract) any {
-return NewUserRepository(
-c.Make(DatabaseClass),
-)
-},
+    UserRepositoryClass,
+    func(c ContainerContract) any {
+        return NewUserRepository(
+            c.GetSingleton(DatabaseClass),
+        )
+    },
 )
 
-container.Singleton(
-UserRepositoryClass,
-func(c ContainerContract) any {
-return NewUserRepository(
-c.Make(DatabaseClass),
-)
-},
+container.BindSingleton(
+    UserRepositoryClass,
+    func(c ContainerContract) any {
+        return NewUserRepository(
+            c.GetSingleton(DatabaseClass),
+        )
+    },
 )
 ```
 
@@ -118,12 +112,12 @@ c.Make(DatabaseClass),
 ```python
 container.bind(
     ContainerConstants.USER_REPOSITORY,
-    lambda c: UserRepository(c.make(ContainerConstants.DATABASE))
+    lambda c: UserRepository(c.get_singleton(ContainerConstants.DATABASE))
 )
 
-container.singleton(
+container.bind_singleton(
     ContainerConstants.ROUTER,
-    lambda c: Router(c.make(ContainerConstants.DISPATCHER))
+    lambda c: Router(c.get_singleton(ContainerConstants.DISPATCHER))
 )
 ```
 
@@ -133,14 +127,14 @@ container.singleton(
 container.bind(
     UserRepositoryClass,
     (c: ContainerContract) => new UserRepository(
-        c.make(DatabaseClass)
+        c.getSingleton(DatabaseClass)
     )
 )
 
-container.singleton(
+container.bindSingleton(
     UserRepositoryClass,
     (c: ContainerContract) => new UserRepository(
-        c.make(DatabaseClass)
+        c.getSingleton(DatabaseClass)
     )
 )
 ```
@@ -158,7 +152,7 @@ $container->bind(UserRepositoryContract::class, fn($c) => ...);
 
 ```java
 // .class — compile-time type token, cannot reference a non-existent class
-container.bind(UserRepositoryContract .class, c ->...);
+container.bind(UserRepositoryContract.class, c -> ...);
 ```
 
 **Python** — class objects as keys. `type` objects are hashable in Python and work natively as dict keys. This is
@@ -166,8 +160,8 @@ idiomatic, IDE-supported, and eliminates the need for string constants entirely:
 
 ```python
 # class object as key — hashable, IDE autocomplete works, cannot mistype
-container.bind(UserRepositoryContract, lambda c: UserRepository(c.make(Database)))
-container.make(UserRepositoryContract)  # same key, type-checked by mypy/pyright
+container.bind(UserRepositoryContract, lambda c: UserRepository(c.get_singleton(Database)))
+container.get(UserRepositoryContract)  # same key, type-checked by mypy/pyright
 ```
 
 The key must be the exact class object — subclasses are different keys, which is correct for a DI container (bind
@@ -175,8 +169,8 @@ against the contract, resolve against the contract):
 
 ```python
 container.bind(UserRepositoryContract, lambda c: UserRepository(...))  # contract as key
-container.make(UserRepositoryContract)  # ✅ resolves correctly
-container.make(UserRepository)  # ❌ KeyError — different object, intentional
+container.get(UserRepositoryContract)  # ✅ resolves correctly
+container.get(UserRepository)  # ❌ KeyError — different object, intentional
 ```
 
 **Go and TypeScript** — string constants required. Neither language has a usable class reference at runtime for this
@@ -197,7 +191,7 @@ container.Bind(UserRepositoryClass, func (c ContainerContract) any { ... })
 // TypeScript — string constant required for interface/contract bindings
 // (constructor references work for concrete classes but not interfaces)
 export const UserRepositoryClass = 'io.valkyrja.user.UserRepositoryContract'
-container.bind(UserRepositoryClass, (c) => new UserRepository(c.make(DatabaseClass)))
+container.bind(UserRepositoryClass, (c) => new UserRepository(c.getSingleton(DatabaseClass)))
 ```
 
 This is an honest reflection of each language's capabilities rather than a limitation to paper over.
@@ -368,7 +362,7 @@ class UserServiceProvider(ServiceProviderContract):
     def publish_user_repository(c: ContainerContract) -> None:
         c.set_singleton(
             'app.repositories.UserRepositoryContract',
-            UserRepository(c.make('app.services.DatabaseContract'))
+            UserRepository(c.get_singleton('app.services.DatabaseContract'))
         )
 ```
 
@@ -387,18 +381,18 @@ class Container:
         # cache data already in lambda format — register as-is
         self._bindings.update(data)
 
-    def make(self, key: str):
+    def get_service(self, key: str):
         # always call the lambda — uniform, no conditional check needed
         callable_ref = self._bindings[key]()
         return callable_ref(self)
 
-    def singleton(self, key: str):
+    def get_singleton(self, key: str):
         if key not in self._singletons:
-            self._singletons[key] = self.make(key)
+            self._singletons[key] = self.get_service(key)
         return self._singletons[key]
 ```
 
-**Forge** — reads the plain method reference from `publishers()` AST and writes it as a lambda in the generated cache
+**Sindri** — reads the plain method reference from `publishers()` AST and writes it as a lambda in the generated cache
 file, matching the container's internal format:
 
 ```python

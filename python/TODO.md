@@ -129,7 +129,7 @@ not ported yet, so build it this way from the start (no rename needed):
 # correct — string constant as key, no class object import forced
 container.bind(
     ContainerConstants.USER_REPOSITORY,
-    lambda c: UserRepository(c.make(ContainerConstants.DATABASE))
+    lambda c: UserRepository(c.get_singleton(ContainerConstants.DATABASE))
 )
 ```
 
@@ -217,9 +217,9 @@ for name, method in inspect.getmembers(controller_class, predicate=inspect.isfun
 
 ---
 
-## valkyrja-forge Python
+## sindri Python
 
-- [ ] Create `valkyrja-forge` as a separate PyPI package
+- [ ] Create `sindri` as a separate PyPI package
 - [ ] Dev dependency only — never in production
 - [ ] Implement `inspect.getfile(ProviderClass)` for class-to-file resolution
 - [ ] Implement `ast.parse()` + `ast.walk()` for provider tree walk

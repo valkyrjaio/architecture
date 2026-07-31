@@ -81,7 +81,7 @@ $container->bind(RouterContract::class);
 $container->bind(
     RouterContract::class,
     static fn(ContainerContract $c): RouterContract => new Router(
-        $c->make(DispatcherContract::class)
+        $c->getSingleton(DispatcherContract::class)
     )
 );
 ```
@@ -98,7 +98,7 @@ Service providers must return a `publishers()` map of service IDs to static meth
 from earlier versions is removed — the publishers map is the sole source of truth. Sindri reads this map via AST:
 
 ```php
-public static function publishers(): array
+public function publishers(): array
 {
     return [
         RouterContract::class => [self::class, 'publishRouter'],
@@ -114,13 +114,15 @@ public static function publishRouter(ContainerContract $container): void
 }
 ```
 
-### ServiceContract — optional class-level factory pattern
+### Static `make()` factory — an optional alternative
 
-Classes implementing `ServiceContract` define a static `make()` factory that publisher methods can delegate to. This
-gives each class explicit ownership of its instantiation — no reflection, no autowiring:
+The publisher callback above constructs the service inline. This is what the framework does everywhere. A service class
+implements its contract and carries no registration code.
+
+A service class may instead expose a static `make()` factory that the publisher delegates to:
 
 ```php
-class Router implements RouterContract, ServiceContract
+class Router implements RouterContract
 {
     public static function make(ContainerContract $container, array $arguments = []): static
     {
@@ -133,6 +135,10 @@ public static function publishRouter(ContainerContract $container): void
     $container->setSingleton(RouterContract::class, Router::make($container));
 }
 ```
+
+The signature matches the `callable` that `bind()` and `bindSingleton()` accept, so `[Router::class, 'make']` also works
+as a direct binding. Use this when a class owns a construction step that more than one caller must reuse. Otherwise
+construct the service in the publisher. Neither form uses reflection or autowiring.
 
 ### Binding methods available in publisher callbacks
 
@@ -258,11 +264,11 @@ interface ComponentProviderContract
      * Sindri uses this during the dependency resolution pass (Step 1a) to build
      * the full ordered, deduplicated component list before walking any providers.
      */
-    public static function getComponentProviders(ApplicationContract $app): array;
-    public static function getContainerProviders(ApplicationContract $app): array;
-    public static function getEventProviders(ApplicationContract $app): array;
-    public static function getCliProviders(ApplicationContract $app): array;
-    public static function getHttpProviders(ApplicationContract $app): array;
+    public function getComponentProviders(ApplicationContract $app): array;
+    public function getContainerProviders(ApplicationContract $app): array;
+    public function getEventProviders(ApplicationContract $app): array;
+    public function getCliProviders(ApplicationContract $app): array;
+    public function getHttpProviders(ApplicationContract $app): array;
 }
 ```
 
@@ -271,35 +277,35 @@ Example implementation:
 ```php
 class HttpComponentProvider implements ComponentProviderContract
 {
-    public static function getComponentProviders(ApplicationContract $app): array
+    public function getComponentProviders(ApplicationContract $app): array
     {
         return [
-            ContainerComponentProvider::class,  // HTTP depends on Container
-            EventComponentProvider::class,       // HTTP depends on Event
+            new ContainerComponentProvider(),  // HTTP depends on Container
+            new EventComponentProvider(),       // HTTP depends on Event
         ];
     }
 
-    public static function getContainerProviders(ApplicationContract $app): array
+    public function getContainerProviders(ApplicationContract $app): array
     {
         return [
-            HttpServiceProvider::class,
-            HttpMiddlewareProvider::class,
+            new HttpServiceProvider(),
+            new HttpMiddlewareProvider(),
         ];
     }
 
-    public static function getEventProviders(ApplicationContract $app): array
+    public function getEventProviders(ApplicationContract $app): array
     {
-        return [HttpListenersProvider::class];
+        return [new HttpListenersProvider()];
     }
 
-    public static function getCliProviders(ApplicationContract $app): array
+    public function getCliProviders(ApplicationContract $app): array
     {
         return [];
     }
 
-    public static function getHttpProviders(ApplicationContract $app): array
+    public function getHttpProviders(ApplicationContract $app): array
     {
-        return [HttpRoutesProvider::class];
+        return [new HttpRoutesProvider()];
     }
 }
 ```
@@ -339,10 +345,10 @@ file required.
 // AppConfig — this IS the build tool entry point
 new AppConfig(
     providers: [
-        HttpComponentProvider::class,
-        ContainerComponentProvider::class,
-        EventComponentProvider::class,
-        CliComponentProvider::class,
+        new HttpComponentProvider(),
+        new ContainerComponentProvider(),
+        new EventComponentProvider(),
+        new CliComponentProvider(),
         App\Providers\AppProvider::class,
     ]
 )
