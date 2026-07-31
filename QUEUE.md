@@ -126,12 +126,12 @@ Two rules make it portable, and everything else follows from them:
 | `name`                             | string                 | — (caller-supplied) | Routing key — the `Router` map key, read as `Job.getName()`. Plain string; never a code reference.                                                                                                    |
 | `producer`                        | string                 | auto-stamped        | Provenance `AppName lang/version` (AppName from config, `lang` hardcoded per port, `version` from `ApplicationInfo`). Trace-only — no consumer branches on it.                                        |
 | `attributes`                      | object (`str → [str]`) | `{}`                | The headers multi-map. Empty = `{}`.                                                                                                                                                                  |
-| `attempts`                        | int                    | `1`                 | 1-based delivery count. Framework-incremented on re-queue redelivery; normalized to `Job.getAttempts()` at consume.                                                                                   |
+| `attempts`                        | int                    | `1`                 | 1-based delivery count. Framework-incremented on re-queue redelivery; normalized to `Job.getAttempts()` at consume. The retry ramp multiplies by the count before that increment.                     |
 | `max_attempts`                    | int                    | `5`                 | Ceiling before dead-lettering. Producer-set; defaults from `QueueConfig`.                                                                                                                             |
 | `priority`                        | int                    | `0`                 | Higher runs sooner where the processor supports it.                                                                                                                                                   |
 | `delay_ms`                        | int                    | `0`                 | Initial hold before the job is eligible; `0` = immediate. Producer-authored intent, applied on first enqueue only.                                                                                    |
 | `retry_delay_ms`                  | int                    | config default      | Hold before a *retry* re-enqueue. Producer-set; defaults to a non-zero from `QueueConfig` (`0` allowed but BAD — immediate retry). Honored by durable adapters; internal adapters retry immediately. |
-| `retry_delay_multiply_by_attempt` | bool                   | `false`             | When `true`, the retry hold is `retry_delay_ms × (attempts − 1)` (linear ramp, self-bounding via `max_attempts`); `false` = fixed. No jitter, no policy object.                                       |
+| `retry_delay_multiply_by_attempt` | bool                   | `false`             | When `true`, the retry hold is `retry_delay_ms × attempts` (linear ramp, self-bounding via `max_attempts`); `false` = fixed. No jitter, no policy object.                                             |
 | `enqueued_at_ms`                  | int                    | stamped at enqueue  | Epoch **milliseconds** first enqueued. Authoritative.                                                                                                                                                 |
 | `enqueued_at_iso`                 | string                 | stamped at enqueue  | RFC 3339 UTC rendering of `enqueued_at_ms`. Informational only.                                                                                                                                       |
 | `modified_at_ms`                  | int                    | `= enqueued_at_ms`  | Epoch **milliseconds** the envelope was last re-written; initialized to the enqueue time, bumped on the re-queue redelivery path. Authoritative.                                                      |
@@ -342,9 +342,10 @@ JobResult   // ACK | RETRY | FAIL | DEAD_LETTER
 ```
 
 - **`ACK`** — success; remove from the queue.
-- **`RETRY`** — put back for redelivery after the `Job`'s `retry_delay_ms` (× the attempt if
-  `retry_delay_multiply_by_attempt` is set). Handler-returned; the framework converts it to
-  `DEAD_LETTER` once `attempts` reaches `max_attempts`.
+- **`RETRY`** — put the job back for redelivery after a hold. **The hold is the `Job`'s `retry_delay_ms`, fixed.** A
+  producer can opt into a linear ramp with `retry_delay_multiply_by_attempt`, which is `false` by default; the hold is
+  then `retry_delay_ms × attempts`, where `attempts` is the count on the delivery that failed. A handler returns this
+  outcome. The framework converts it to `DEAD_LETTER` once `attempts` reaches `max_attempts`.
 - **`FAIL`** — the handler gives up *on purpose* (non-retryable: bad payload, validation) → dead-letter now, no retries.
   Handler-returned.
 - **`DEAD_LETTER`** — the framework exhausted `max_attempts` on a retry chain → dead-letter. Framework-produced, not
@@ -452,8 +453,10 @@ Who actually performs a `RETRY` depends on the processor, and the adapter encaps
 - **Re-queue adapters** — framework-owned redelivery, for processors with no native retry (database, Redis, …). The
   adapter still holds the `Job` it dispatched, so on `RETRY` it builds a modified copy via
   `Job.with*()` (the `Job` is immutable) — `attempts` incremented, `modified_at` stamped — and re-enqueues it with the
-  hold from `retry_delay_ms` (× the attempt if `retry_delay_multiply_by_attempt`
-  is set; the producer's original `delay_ms` is not re-applied). `ACK` deletes; `FAIL` and `DEAD_LETTER`
+  hold from `retry_delay_ms`. **That hold is fixed.** A producer can opt into a linear ramp with
+  `retry_delay_multiply_by_attempt`, which is `false` by default; the hold is then `retry_delay_ms × attempts`, read
+  from the dispatched `Job` and not from the incremented copy. The producer's original `delay_ms` is not re-applied.
+  `ACK` deletes; `FAIL` and `DEAD_LETTER`
   (the latter when `attempts >= max_attempts`) route to the dead-letter destination. Here `attempts` and
   `modified_at` are envelope-authoritative.
 - **Processor-owned adapters** — native redelivery, where the processor owns the loop (SQS, AMQP, Cloud Tasks, Pub/Sub
