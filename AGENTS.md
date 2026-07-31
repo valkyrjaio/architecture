@@ -145,7 +145,9 @@ Then:
    repo's test layout and map the framework (e.g. PHPUnit → Vitest: `assertSame`
    → `toBe`, data providers → `it.each`, `setUp` → `beforeEach`).
 2. **End every file with a trailing newline.**
-3. **American English** in all prose and identifiers ("color", "normalize").
+3. **American English** in all prose and identifiers ("color", "normalize"), and
+   **Simplified Technical English** in documentation prose, with a code example
+   for every rule that has a code shape (see §8).
 4. **Every source file carries the license header** (see §5).
 5. **Target the right branch** (see §7) — improvements/bug fixes go to the lowest
    affected `??.x`, new features/deprecations go to `master`.
@@ -506,7 +508,135 @@ Full detail:
 
 ---
 
-## 8. Where to read more
+## 8. Documentation style — Simplified Technical English
+
+Write documentation prose in **ASD-STE100 Simplified Technical English (STE)**,
+the controlled English of aerospace maintenance manuals. Two groups read these
+documents: contributors whose first language is not English, and coding agents.
+Both groups fail on the same input — long sentences, passive voice, ambiguous
+pronouns, and one idea written two ways. STE removes that input.
+
+STE has two parts: a set of writing rules, and a dictionary of approved words.
+The dictionary is a licensed ASD document, so this project does not certify
+against it. Apply the writing rules in this section, and apply the dictionary's
+core discipline: **one word has one meaning, and one meaning has one word.**
+Technical names (`ContainerContract`, `sindri`, `26.x`) and technical verbs
+(`serialize`, `cache`) are always permitted — STE calls these Technical Names
+and Technical Verbs.
+
+### What the style governs
+
+It governs prose that this project writes for a reader:
+
+- Markdown documents — `AGENTS.md`, `README.md`, and every design document here.
+- Doc comments in source — docblock, Javadoc, TSDoc, docstring.
+- PR descriptions, issue text, and commit message text.
+- Strings the framework prints to a person — CLI help and exception messages.
+
+It does not govern:
+
+- Code, identifiers, file paths, commands, and program output.
+- Quoted material from another source. **Never edit a quote to make it
+  compliant.**
+- Fixed third-party text, such as the license header in §5.
+
+### The rules
+
+1. **One instruction per sentence.** Keep an instruction to 20 words or fewer,
+   and a description to 25 words or fewer.
+2. **Use the active voice.** Name the actor. Write "`sindri` reads the config",
+   not "the config is read".
+3. **Use simple tenses.** Prefer the simple present. Do not use an `-ing` form as
+   the verb of a sentence.
+4. **Keep the articles.** Write "the provider", not "provider".
+5. **Use three nouns or fewer in a noun cluster.** Break a longer cluster with a
+   preposition or a relative clause.
+6. **Use one term for one thing.** A contract is a "contract" in every document;
+   do not call it an "interface" in the next paragraph.
+7. **Repeat the noun instead of a pronoun** when more than one noun could be the
+   referent.
+8. **One topic per paragraph, six sentences or fewer.** Put three or more
+   conditions or steps in a vertical list.
+9. **Put the warning before the instruction.** State what breaks, then state what
+   to do.
+10. **No slang, no idiom, no humor.** They do not translate, and an agent reads
+    them as fact.
+
+Rules 1, 2, and 7 carry the most weight. This paragraph breaks all three:
+
+> Because the generated cache must mirror what reflection produces exactly, and
+> because a duplicate registration is considered to be the developer's error
+> rather than something that ought to be silently repaired by the framework,
+> middleware is appended by both the runtime collector and `sindri` without any
+> deduplication step being applied to it.
+
+The same content in STE:
+
+> The runtime collector and `sindri` append each middleware in order. Neither one
+> dedupes. A duplicate registration is the developer's error. The framework does
+> not correct the duplicate, because the generated cache must match reflection
+> exactly.
+
+**A shorter document is not the goal.** STE often makes a dense paragraph longer,
+because one run-on sentence becomes three plain ones. Count re-reads, not words.
+A paragraph that a reader understands on the first pass beats a shorter paragraph
+that the same reader must parse twice.
+
+This holds for a decision log too, where compression is most tempting. A reader
+opens a decision log to answer one question: what did we consider, and why did we
+reject it? A run-on sentence hides exactly that answer. **No section of a
+document is exempt** — a design record that a reader consults years later has the
+most to gain.
+
+### Code examples
+
+Every rule that has a code shape gets a code example. Prose states the rule; the
+example shows it. A reader who does not yet know the rule must be able to copy
+the example and be correct.
+
+- **State the rule in prose first.** An example never replaces the rule. The
+  prose carries the reason, and the reason is what a reader needs to apply the
+  rule to a case the example does not cover.
+- **One idea per example, 20 lines or fewer.** Split a longer example.
+- **Show the wrong form, then the right form**, when a rule is easy to break.
+  Mark each form, and say in a comment why it is wrong or right.
+- **Use real names from the framework.** Do not invent `Foo` or `Bar`.
+- **Tag every fence with its language** — `php`, `java`, `ts`, `go`, `python`,
+  `bash`. Highlighting and tooling read the tag.
+- **Show PHP first**, because PHP is the reference implementation. Add a second
+  example only for a language whose spelling differs. A Layer-2 guide shows only
+  its own language.
+- **Keep every example valid.** An example that does not compile teaches the
+  wrong thing. Copy from real source where you can, and link to the file instead
+  of pasting code longer than 20 lines.
+
+The taxonomy rule in §4 — "for `Abstract`, `Enum`, and `Trait` the segment
+carries the meaning, so the name must not repeat it" — takes this example:
+
+```php
+// Wrong — the class name repeats the segment.
+namespace Valkyrja\Log\Logger\Abstract;
+
+abstract class AbstractLogger implements LoggerContract {}
+```
+
+```php
+// Right — the segment says "abstract", so the name does not.
+namespace Valkyrja\Log\Logger\Abstract;
+
+abstract class Logger implements LoggerContract {}
+```
+
+### When you edit an existing document
+
+Rewrite the paragraph you touch, not the whole file. A large style-only rewrite
+hides the change that the PR is about, and it makes the diff impossible to
+review. A `docs:` PR may rewrite a full document for style alone, but then it
+changes nothing else.
+
+---
+
+## 9. Where to read more
 
 Read these in order when starting or extending a port:
 
