@@ -277,8 +277,10 @@ model.
 The common case: quick in, quick out. The adapter buffers the inbound message stream, and on half-close builds the
 `ServiceCall` once and invokes `ServiceHandler.handle(call)` once. The handler returns one `ServiceResponse`; the adapter
 drains its messages to the wire — lazily, through `call.cancellable(...)`, so a server-streaming handler yields its N
-messages one at a time — then closes with the status. `maxInboundMessages` caps the buffer and rejects an over-limit
-call with `RESOURCE_EXHAUSTED`. There is no per-call threading: the handler runs on the transport's callback path.
+messages one at a time, and pausing between pulls whenever the transport is not ready to accept the next one (see
+[Worker Adapters](#worker-adapters)) — then closes with the status. `maxInboundMessages` caps the **inbound** buffer and
+rejects an over-limit call with `RESOURCE_EXHAUSTED`; it says nothing about the outbound direction, which is bounded by
+the transport's writability instead. There is no per-call threading: the handler runs on the transport's callback path.
 
 This covers unary, server-streaming, and client-streaming. A bidirectional method always uses the streaming model below,
 even when a particular client happens to half-close before reading (a "batch" exchange) — the model is chosen from the
@@ -293,12 +295,19 @@ the deadline. A bidirectional method is therefore dispatched **immediately**, be
 - **Inbound is a live stream.** `getMessages()` is backed by a bounded blocking queue that the transport fills as
   messages arrive; iterating it yields each message as it arrives and ends when the client half-closes. Here
   `maxInboundMessages` is the queue's high-water mark: the adapter applies backpressure (stops requesting from the
-  transport) when the queue is full and resumes as the handler drains, rather than rejecting.
+  transport) when the queue is full and resumes as the handler drains, rather than rejecting. As its name says, the
+  setting bounds the **inbound** direction only — in both models. The outbound direction has no count-based bound and
+  is instead held in check by the transport's writability (below).
 - **Outbound is a push sink.** The handler emits responses through a sink on the call — `send(Message)` — *while it is
   still reading inbound*. Sends are serialized. This is the single place the framework pushes rather than pulls; it
   exists only in the streaming model, and interactive streaming is impossible without it. The handler still returns a
   terminal `ServiceResponse` carrying the final status and trailing metadata (its message list is empty — messages went
   through the sink).
+- **Outbound respects writability too.** Pushing does not exempt the sink from backpressure: `send` must not hand the
+  transport a message it will only queue. The adapter applies the same writability check the buffered drain applies —
+  the sink blocks or defers the emitting unit until the transport can take more, which throttles the handler at its
+  next `send` exactly as the pull model throttles it at its next yield. See
+  [Worker Adapters](#worker-adapters) for the obligation and why the mechanism stays adapter-local.
 - **The handler runs on its own concurrent execution unit**, separate from the transport callback path that fills the
   inbound queue, so reading inbound and emitting outbound proceed concurrently. Each language realizes this with its
   native per-call primitive — a **virtual thread** in Java, a **goroutine** in Go, an **async task/coroutine** in
@@ -408,7 +417,10 @@ All in framework code, no user involvement required:
 - `MiddlewareHandler` before invoking its wrapped middleware.
 - The adapter's message-drain loop: outbound messages are a pull-based iterable, drained through
   `call.cancellable(...)`, which checks cancellation before yielding each message and exits iteration early once the
-  call is cancelled. There is no push `write()` channel; the check lives at each pull step.
+  call is cancelled. There is no push `write()` channel; the check lives at each pull step. The same loop carries a
+  second, separate obligation — pausing while the transport is unready (see [Worker Adapters](#worker-adapters)) — which
+  is *not* a cancellation check and does not run through `call.cancellable(...)`: an unready transport suspends the
+  drain, a cancelled call ends it.
 
 Every orchestrator boundary runs the two-question check. Beyond `ServiceHandler` entry, a response is almost always
 already in hand — either produced by a short-circuiting middleware, by the user handler, or by earlier pipeline work —
@@ -443,6 +455,10 @@ mechanisms help without requiring explicit checks:
   each message is consumed for the wire, cancellation is checked and iteration exits early — so a streaming handler's
   message stream stops at the next item once the call is cancelled. This is a pull-based model by design: it maps
   cleanly onto Go channels, JS async-iterables, and PHP generators, which are all pull-based too.
+- **Backpressure arrives the same way.** Because the adapter pulls, a handler that yields faster than the peer reads is
+  throttled for free: the adapter stops pulling while the transport is unready, so the handler's generator simply
+  suspends at its next yield. This needs no cooperation from the handler and is not cancellation — the call is still
+  live and resumes on its own.
 - **Cancellable iteration helper.** `call.cancellable(iterable)` yields items from the source while checking
   cancellation between iterations — the single mechanism behind the per-step check above. Handlers wrap their own
   generators with it; the adapter drains the response's messages through it.
@@ -569,6 +585,18 @@ Adapters bridge an external gRPC server implementation to `ServiceHandler`. The 
    early once the call is cancelled. In the **buffered model** outbound messages are pulled, never pushed. The
    **streaming model** (see [Streaming and Call Shapes](#streaming-and-call-shapes)) is the deliberate exception: a
    bidirectional handler pushes each reply through a `send()` sink while it is still reading inbound.
+8. **Respect the transport's writability between outbound messages.** Cancellation is not the only reason to stop
+   pulling. Before writing each message the adapter checks whether the transport can accept one, and when it cannot,
+   **suspends** the drain until the transport signals it can take more — rather than pulling the next message and
+   handing the library something it will queue. This is mandatory in **both** models: the buffered model pauses between
+   pulls, the streaming model applies the same check inside the `send()` sink.
+
+**Cancellation and unwritability are different conditions with opposite effects.** A cancelled call means the peer is
+gone or no longer wants the result, so the drain **ends** — iteration exits early and the call closes. An unready
+transport means the peer is *alive but not reading*, so the drain **pauses** — no message is dropped, no status is
+produced, and the handler resumes exactly where it left off once the peer catches up. Conflating the two is a live
+defect in either direction: treating unwritability as cancellation truncates a perfectly good response, and treating it
+as "nothing to do" is the unbounded-buffering bug this requirement exists to prevent.
 
 Under the buffered model the adapter buffers the inbound message stream before invoking `ServiceHandler.handle(call)`, so
 it caps the number of buffered messages to bound memory for an unbounded (e.g. client-streaming) call, rejecting an
@@ -576,8 +604,34 @@ over-limit call with `RESOURCE_EXHAUSTED`. The cap is configurable on the gRPC c
 1000). Under the streaming model the same setting bounds the live inbound queue and drives backpressure instead of
 rejecting — see [Streaming and Call Shapes](#streaming-and-call-shapes).
 
+`maxInboundMessages` bounds the **inbound direction only** — the name is literal, and it is the only *count-based*
+bound in the design. **The outbound direction is bounded by the transport's writability signal**, honored per the drain
+requirement above; there is no outbound message-count setting and none is planned, because the transport already knows
+how much it has queued and a fixed count cannot. Nothing else bounds outbound: an adapter that drains as fast as the
+handler yields lets a server-streaming response to a stalled client grow the transport's write queue for the life of
+the call, however small `maxInboundMessages` is.
+
 Adapters do **not** forcibly interrupt handler execution — that is not possible in any target language. They are signal
 translators, not enforcers.
+
+### Outbound writability is an adapter obligation, not an agnostic contract
+
+Every target library exposes writability, and no two spell it alike — a poll plus a callback in one, a return value
+plus an event in another, a blocking send in a third, and a worker's own mechanism in the PHP runtimes. They differ in
+more than naming: some are level-triggered and some edge-triggered, some pause the producer by blocking it and some by
+declining the write. Hoisting one of those spellings onto `ServiceCall` would force the other ports to emulate it.
+
+So the contract **does not** define an agnostic readiness signal — `ServiceCall` exposes no writability accessor, and
+`call.cancellable(...)` deliberately checks cancellation only — and the underlying writability primitive joins the list
+in [Scope of What Is Not Portable](#scope-of-what-is-not-portable). **The obligation is portable even though the
+primitive is not**: honoring writability between outbound messages is a requirement of every worker adapter, not an
+optional optimization, and a port is incomplete without it. That is the reason it is written here rather than left to
+each adapter to discover — the earlier silence read as "there is nothing to do," and each port that implemented the
+documented drain faithfully reproduced the same unbounded write queue.
+
+If a spelling later proves genuinely portable across all five ports, it can be promoted onto the agnostic surface (a
+signal the drain awaits between messages, alongside the existing cancellation check) without changing the obligation
+stated above — only where it is satisfied.
 
 ### Target adapters by language
 
@@ -693,6 +747,10 @@ The following is unavoidably per-language and per-worker, and is not part of the
 - Worker-specific configuration (thread pools, coroutine settings, plugin registration).
 - The underlying cancellation/context primitive (Go `context.Context`, Java `io.grpc.Context`, JS `AbortSignal`, etc.) —
   Valkyrja's `CancellationToken` wraps these.
+- The underlying outbound-writability primitive (a readiness poll plus an on-ready callback, a write return value plus a
+  drain event, a blocking channel send, a worker's own flow-control mechanism). Unlike cancellation, no agnostic type
+  wraps these — but **the obligation to honor them is portable and required**; see
+  [Worker Adapters](#worker-adapters).
 
 Everything above the adapter layer — service map, middleware composition, container resolution, error mapping,
 cancellation model, context propagation, observability hooks — is standardized across all five languages.
@@ -713,7 +771,8 @@ gRPC in Valkyrja is architecturally indistinguishable from HTTP and CLI aside fr
 lookup), the `ServiceCall`/`ServiceResponse` contracts (typed messages instead of body bytes), and the addition of a
 `CancellationToken`/`Deadline` cooperation model. The framework contributes what it always contributes: middleware,
 container, dispatch, error handling, observability. The worker adapter contributes what it always contributes:
-translation between an external protocol server and the framework's internal contract. Cancellation is cooperative
+translation between an external protocol server and the framework's internal contract — and, in the outbound drain,
+honoring its transport's writability so neither direction of a call is unbounded. Cancellation is cooperative
 everywhere — the framework checks at orchestration boundaries and inside response writes; user handlers opt into deeper
 cooperation via helpers or explicit checks. No new cross-cutting concepts are introduced; the existing Valkyrja
 architecture extends naturally to a third protocol.
