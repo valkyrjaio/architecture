@@ -359,8 +359,6 @@ tests it ships.
 - Message Collections, make flattened variants.
 - #[MapRequestFormParams(Someclass::class)]
     - Auto maps the request params to the Someclass properties
-- Add Uri TODO filtering
-    - https://github.com/laminas/laminas-diactoros/blob/3.9.x/src/Uri.php
 - CacheResponse instead of creating a class that gets loaded, do a json file or
   some file so we can have parity between languages.
     - headers
