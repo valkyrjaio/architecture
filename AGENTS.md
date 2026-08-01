@@ -79,6 +79,13 @@ These hold in **every** language. Do not violate them in a port.
   `@handler` is a **metadata marker only**, never an active registrar.
 - **`AppConfig` is the build tool entry point.** No `valkyrja.yaml`. The app
   config class already lists the component providers; `sindri` reads it via AST.
+- **A component config holds only component-wide settings.** Each adapter gets
+  its own config contract and its own default class. The component's service
+  provider publishes each contract as a separate container binding. A component
+  config that holds every adapter config forces an application to construct
+  configuration for adapters that the application never resolves. An adapter
+  contract prefixes every property with the adapter name, so one application
+  config class can implement several adapter contracts. See §4.
 - **No provider-reference constants class.** Provider references use
   `::class` / `.class` / class objects / constructor references directly so
   `sindri` can resolve them statically. (Binding-*key* constants files are fine
@@ -372,6 +379,97 @@ Warning: a call on a *variable* class does not port, whatever the method returns
 PHP writes `$type::fromValue($value)`, and no other Valkyrja language can. The
 exemption above covers the declaration, not that call.
 [`STATIC_METHODS.md`](STATIC_METHODS.md) owns the replacement for it.
+
+### Component config
+
+A component gets one `ComponentNameConfigContract` for the settings that apply to
+the whole component. The default adapter is the most common such setting. Each
+adapter then gets its own `ComponentName<Adapter>ConfigContract`. Every contract
+has a default implementation that drops the `Contract` suffix (`CacheConfig`,
+`CacheRedisConfig`), and all of these live in the component's `Data\` segment.
+The component's service provider publishes each contract as its own container
+binding.
+
+Two rules make the shape work:
+
+1. **The component config does not hold the adapter configs.** The container
+   resolves an adapter config only when something asks for that adapter. An
+   application that uses one cache adapter never constructs the configuration for
+   the other cache adapters.
+2. **An adapter contract prefixes every property with the adapter name.** One
+   application config class can implement several adapter contracts at once.
+   Without the prefix, two adapters that both declare a `prefix` property
+   collide.
+
+```php
+// Wrong — the component config holds every adapter config. An application that
+// uses only the null cache still constructs the redis and the log configuration.
+interface CacheConfigContract
+{
+    public string $defaultCache { get; }
+    public CacheRedisConfig $redisCache { get; }
+    public CacheLogConfig $logCache { get; }
+    public CacheNullConfig $nullCache { get; }
+}
+```
+
+```php
+// Right — the component config holds the component-wide setting only.
+interface CacheConfigContract
+{
+    /** @var class-string<CacheContract> */
+    public string $defaultCache { get; }
+}
+
+// Right — each adapter has its own contract, and each property carries the
+// adapter prefix, so one class can implement several contracts at once.
+interface CacheRedisConfigContract
+{
+    public string $redisHost { get; }
+    public int $redisPort { get; }
+    public string $redisPrefix { get; }
+}
+
+interface CacheNullConfigContract
+{
+    public string $nullPrefix { get; }
+}
+```
+
+The application implements only the contracts for the adapters that it uses:
+
+```php
+final class AppConfig extends Config implements CacheConfigContract, CacheRedisConfigContract
+{
+    public function __construct(
+        public string $defaultCache = RedisCache::class,
+        public string $redisHost = 'cache.internal',
+        public int $redisPort = 6379,
+        public string $redisPrefix = 'app:',
+    ) {
+        parent::__construct();
+    }
+}
+```
+
+The service provider binds the application config when the application config
+implements the contract. If it does not, the service provider binds the
+framework default:
+
+```php
+public static function publishRedisConfig(ContainerContract $container): void
+{
+    $config = $container->getSingleton(ConfigContract::class);
+
+    if ($config instanceof CacheRedisConfigContract) {
+        $container->setSingleton(CacheRedisConfigContract::class, $config);
+
+        return;
+    }
+
+    $container->setSingleton(CacheRedisConfigContract::class, new CacheRedisConfig());
+}
+```
 
 ### Binding-key constants
 
