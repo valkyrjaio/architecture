@@ -1,809 +1,357 @@
-# Versioning
-------------
+# PHP
 
-- Major – Most Breaking Changes, New Features, etc. Yearly
-- Minor – New features or fixes that are breaking changes but must be
-  implemented before a major release
-- Patch – Fixes that are not breaking changes, documentation updates, small
-  automic fixes/changes that are not breaking
+Work items are tracked as issues in the repository that owns the work. This file is the
+index. A section with no issue link holds a decision already made, or a design record —
+not a task.
 
-# Changes for v26
------------------
+---
 
-- Eventually test contracts as well to ensure they have the expected signatures
+## Tracked as issues
 
-- Add more routing tests for both cli and http, especially dynamic routes in
-  http.
-    - Should ensure all possible perumations work
-        - options, arguments for cli
-        - dynamic routes in http
-        - various paths for static http routes
+### Testing
 
-## Update the repo description once gRPC and Queue land
+- **Every contract declares its expected method signatures** — [valkyrja-php#1035](https://github.com/valkyrjaio/valkyrja-php/issues/1035)
+- **One test per exception, replacing the grouped `ExceptionsTest` files** — [valkyrja-php#1036](https://github.com/valkyrjaio/valkyrja-php/issues/1036)
+- **Assert every Constant value** — [valkyrja-php#1037](https://github.com/valkyrjaio/valkyrja-php/issues/1037)
+- **Assert every Enum case value** — [valkyrja-php#1038](https://github.com/valkyrjaio/valkyrja-php/issues/1038)
+- **A full app example, exercised in the Functional tests** — [valkyrja-php#1039](https://github.com/valkyrjaio/valkyrja-php/issues/1039)
+- **Orm `ServiceProviderTest` — assert the DSN and options per PDO type** — [valkyrja-php#1040](https://github.com/valkyrjaio/valkyrja-php/issues/1040)
+- **Data tests — assert every getter after a `with`/`set`** — [valkyrja-php#1041](https://github.com/valkyrjaio/valkyrja-php/issues/1041)
+- **Use mocks instead of fixture classes where expectations suffice** — [valkyrja-php#1042](https://github.com/valkyrjaio/valkyrja-php/issues/1042)
+- **Test component — move the output out of `run()`, move it to `tests`** — [valkyrja-php#1043](https://github.com/valkyrjaio/valkyrja-php/issues/1043)
 
-`valkyrja-php`'s GitHub About text still reads "Valkyrja is a fast, light, and
-robust PHP framework for web and console applications" — it names the two entry
-points that existed when it was written. Once **both** gRPC and Queue are
-implemented in this port, change it to:
+### Http
 
-> Valkyrja is a fast, light, and robust PHP framework for multi-protocol
-> applications — HTTP, CLI, gRPC, and queues
+- **`RateLimiterMiddleware`** — [valkyrja-php#1024](https://github.com/valkyrjaio/valkyrja-php/issues/1024)
+- **Flattened Message collection variants** — [valkyrja-php#1025](https://github.com/valkyrjaio/valkyrja-php/issues/1025)
+- **`#[MapRequestFormParams]`** — [valkyrja-php#1026](https://github.com/valkyrjaio/valkyrja-php/issues/1026)
+- **The five factories become concrete classes** — [valkyrja-php#1027](https://github.com/valkyrjaio/valkyrja-php/issues/1027)
+- **Controller namespace with default controllers and actions** — [valkyrja-php#1028](https://github.com/valkyrjaio/valkyrja-php/issues/1028)
+- **Add the missing content types** — [valkyrja-php#1029](https://github.com/valkyrjaio/valkyrja-php/issues/1029)
+- **A handler closure on routes and listeners** (Http, Cli, Event) — [valkyrja-php#1030](https://github.com/valkyrjaio/valkyrja-php/issues/1030)
+- **Skip an empty routes or listeners block during data collection** — [valkyrja-php#1031](https://github.com/valkyrjaio/valkyrja-php/issues/1031)
+- **A default `ThrowableHandler` for Http and Cli** — [valkyrja-php#1032](https://github.com/valkyrjaio/valkyrja-php/issues/1032)
+- **`EventCapableContainer`** — [valkyrja-php#1033](https://github.com/valkyrjaio/valkyrja-php/issues/1033)
+- **A Writer class for output buffers and echo** — [valkyrja-php#1034](https://github.com/valkyrjaio/valkyrja-php/issues/1034)
 
-The abstract head ("multi-protocol applications") is meant to survive protocol
-five; the enumerated tail is what makes it concrete today. Do not apply it before
-both protocols land — the description would advertise what the port cannot do.
+### Cli
 
-Surfaces to change together:
+- **Hide commands from the list output** — [valkyrja-php#1044](https://github.com/valkyrjaio/valkyrja-php/issues/1044)
+- **A no-formatting global option** — [valkyrja-php#1045](https://github.com/valkyrjaio/valkyrja-php/issues/1045)
+- **Hide help and version from the list output** — [valkyrja-php#1046](https://github.com/valkyrjaio/valkyrja-php/issues/1046)
+- **Configurable global options (`APP_CLI_GLOBAL_OPTIONS`)** — [valkyrja-php#1048](https://github.com/valkyrjaio/valkyrja-php/issues/1048)
+- **`-v` date in local system time** — [valkyrja-php#1049](https://github.com/valkyrjaio/valkyrja-php/issues/1049)
+- **Consolidate `VersionCommand` and `ListCommand`** — [valkyrja-php#1050](https://github.com/valkyrjaio/valkyrja-php/issues/1050)
+- **`helpText` takes a callable returning a `Message`** — [valkyrja-php#1051](https://github.com/valkyrjaio/valkyrja-php/issues/1051)
+- **Progress bar** — [valkyrja-php#1052](https://github.com/valkyrjaio/valkyrja-php/issues/1052)
 
-- **GitHub About** on `valkyrja-php` — the sentence above, verbatim.
-- **`README.md` line 7** — no adjectives here; the mythology paragraph two lines
-  below already carries "Fast, light, and robust":
-  `[Valkyrja][Valkyrja url] is a PHP framework for multi-protocol applications — HTTP, CLI, gRPC, and queues.`
-- **"What's Included"** — the "HTTP and CLI kernels" bullet, and every other
-  "HTTP and CLI" pairing in that list, must account for all four protocols.
+### Type
 
-The org profile (`.github/profile/README.md` and `FULL_README.md`) carries the same
-sentence without the language word. It is shared across every port, so it changes
-only once **all** of them have both protocols — whichever port lands last owns
-that edit.
+- **`Resource` type** — [valkyrja-php#1053](https://github.com/valkyrjaio/valkyrja-php/issues/1053)
+- **`StreamResource` type** — [valkyrja-php#1054](https://github.com/valkyrjaio/valkyrja-php/issues/1054)
+- **`fromMixed` on each support helper** — [valkyrja-php#1077](https://github.com/valkyrjaio/valkyrja-php/issues/1077)
+- **A binding-key constant class per component** — [valkyrja-php#1055](https://github.com/valkyrjaio/valkyrja-php/issues/1055)
+- **Port the Type module to every language** — [architecture#143](https://github.com/valkyrjaio/architecture/issues/143)
 
-## Cross-language testing-gap audit
+### Orm
 
-Compare this port's test suite against the other languages' and either close each
-difference or record it in `AGENTS.md` as deliberate. Out of scope for the work
-that prompted it; tracked here so it is not lost.
+- **Model casting becomes closures, for cross-language compatibility** — [valkyrja-php#1056](https://github.com/valkyrjaio/valkyrja-php/issues/1056)
+- **`Statement::fetch()` returns null when no row is found** — [valkyrja-php#1057](https://github.com/valkyrjaio/valkyrja-php/issues/1057)
+- **`getXValue()` for every `getXField()`** — [valkyrja-php#1058](https://github.com/valkyrjaio/valkyrja-php/issues/1058)
+- **A defaultable service for Entity instead of entity matchers** — [valkyrja-php#1059](https://github.com/valkyrjaio/valkyrja-php/issues/1059)
+- **`QueryBuilderFactory::fromQuery` and the four variants** — [valkyrja-php#1060](https://github.com/valkyrjaio/valkyrja-php/issues/1060)
 
-Prompted by a concrete miss: `sindri-java`'s golden snapshot never exercised the
-dynamic-route regex path, so a framework regex-format change rode through a
-dependency bump silently, while `sindri-ts` caught the equivalent change at once
-([sindri-java#54](https://github.com/valkyrjaio/sindri-java/pull/54)). Only that
-single gap was checked across ports — nobody has compared the suites broadly.
+### Auth
 
-What to look for:
+- **Login by email code, with a configurable cache TTL** — [valkyrja-php#1061](https://github.com/valkyrjaio/valkyrja-php/issues/1061)
+- **Cli commands** — [valkyrja-php#1062](https://github.com/valkyrjaio/valkyrja-php/issues/1062)
+- **Http middleware** — [valkyrja-php#1063](https://github.com/valkyrjaio/valkyrja-php/issues/1063)
+- **Http controllers and their data objects** — [valkyrja-php#1064](https://github.com/valkyrjaio/valkyrja-php/issues/1064)
 
-- Behavior a sibling port asserts that this one does not.
-- An assertion pinned to a fragment where a sibling pins the whole value — a
-  fragment survives the framing around it changing, which is exactly how the miss
-  above happened.
-- A generator, adapter, or component carrying snapshot/branch coverage on one
-  side and none here.
-- Test tooling that differs: what the static analyzers and formatters actually
-  cover, and whether the test tree is inside or outside that scope.
+### Queue
 
-Not every difference is a defect — some are forced by the language. Read the
-per-language notes in `AGENTS.md` before "aligning" anything; the dynamic route
-regex framing is the worked example (PHP must keep its PCRE delimiters, every
-other port must not).
+Read [`../QUEUE.md`](../QUEUE.md) first. It carries the settled design.
 
-Known starting point: PHP's `sindri` goldens cover all four generators and pin a
-`Processor`-computed regex, so PHP is the yardstick the other ports are measured
-against — the open question is what PHP asserts that Java and TypeScript do not,
-and what they assert that PHP does not. The exclusion of `tests` from PHPStan and
-Psalm (below) is itself one of these gaps.
+- **Message, and the `QueueResult` enum** — [valkyrja-php#1065](https://github.com/valkyrjaio/valkyrja-php/issues/1065)
+- **Middleware** — [valkyrja-php#1066](https://github.com/valkyrjaio/valkyrja-php/issues/1066)
+- **Routing** — [valkyrja-php#1067](https://github.com/valkyrjaio/valkyrja-php/issues/1067)
+- **Server** — [valkyrja-php#1068](https://github.com/valkyrjaio/valkyrja-php/issues/1068)
 
-## Reset the reused deps branch in the update-dependencies workflow
+### Event
 
-`_php-update-dependencies.yml` reuses an open `deps/update-dependencies-*` branch across runs,
-committing each run's updates on top of the previous run's tree. Nothing a run writes to that
-branch can be walked back by a later run, so a bad version pinned once stays pinned until
-somebody deletes the branch by hand.
+- **Better template docblocks on `Dispatcher`** — [valkyrja-php#1069](https://github.com/valkyrjaio/valkyrja-php/issues/1069)
+- **Listener priority** — [valkyrja-php#1070](https://github.com/valkyrjaio/valkyrja-php/issues/1070)
+- **A stop-propagation abstract event** — [valkyrja-php#1071](https://github.com/valkyrjaio/valkyrja-php/issues/1071)
 
-Java hit this concretely. An unfiltered root `dependencyUpdates` report bumped
-`io.netty:netty-codec-http` to the 2015-era `5.0.0.Alpha2` prerelease and turned CI red
-([starter-app-java#53](https://github.com/valkyrjaio/valkyrja-starter-app-java/pull/53)). Fixing
-the filter ([#54](https://github.com/valkyrjaio/valkyrja-starter-app-java/pull/54)) did **not**
-repair the branch: `useLatestVersions` only ever upgrades, so the re-run reported the alpha as
-merely "exceeding" the latest and changed nothing. The PR had to be closed and the branch deleted.
-The Java workflow now resets the reused branch to the base commit before running the updates
-([.github#151](https://github.com/valkyrjaio/.github/pull/151)), so each run recomputes from
-scratch and the branch always holds exactly `base + today's updates`.
+### Types and static analysis
 
-Confirm first that this port's updater can actually strand a bad version the way
-`useLatestVersions` does — a tool that rewrites every constraint to "latest" on each run may
-already self-correct, in which case record that in `AGENTS.md` instead of adding the reset.
-Note that PHP's composite `||` constraints are already skipped by `update-dependencies` and
-maintained by hand, so they are unaffected either way.
+- **`array<array-key, X>` becomes `array<X>`** — [valkyrja-php#1072](https://github.com/valkyrjaio/valkyrja-php/issues/1072)
+- **Audit every string for `non-empty-string`** — [valkyrja-php#1073](https://github.com/valkyrjaio/valkyrja-php/issues/1073)
+- **The five recorded Psalm findings** — [valkyrja-php#1074](https://github.com/valkyrjaio/valkyrja-php/issues/1074)
+- **The two upstream Psalm issues** — [valkyrja-php#1075](https://github.com/valkyrjaio/valkyrja-php/issues/1075)
+- **A data object for a method with more than three parameters** — [valkyrja-php#1076](https://github.com/valkyrjaio/valkyrja-php/issues/1076)
+- **Analyze the tests with PHPStan and Psalm** — [valkyrja-php#1006](https://github.com/valkyrjaio/valkyrja-php/issues/1006)
 
-Tradeoff to weigh: the reset discards any commit pushed onto the deps branch by hand.
+### Tooling
 
-## Static analysis for the tests (PHPStan / Psalm)
+- **Characterize the Xdebug branch-map inflation, then gate on branch coverage** — [valkyrja-php#1078](https://github.com/valkyrjaio/valkyrja-php/issues/1078)
+- **PHP Code Sniffer requires docblocks on functions and methods** — [valkyrja-php#1079](https://github.com/valkyrjaio/valkyrja-php/issues/1079)
+- **A default filesystem, and `FlysystemFilesystemContract`** — [valkyrja-php#1080](https://github.com/valkyrjaio/valkyrja-php/issues/1080)
+- **Reset the reused deps branch in the update-dependencies workflow** — [.github#221](https://github.com/valkyrjaio/.github/issues/221)
 
-The tests are **deliberately excluded** from both static analyzers — `paths:` in
-`.github/ci/phpstan/phpstan.neon` lists only `../../../src` with `# - tests`
-commented out, and `psalm.xml` carries `<!--<directory name="tests" />-->`. (Rector
-already covers `tests`.) So a test file can carry real type errors and the full gate
-still reports green — the same class of blind spot TypeScript had before
-[valkyrja-ts#95](https://github.com/valkyrjaio/valkyrja-ts/pull/95). Java has no
-equivalent gap: `javac` compiles its tests as a precondition of running them.
+### Documentation and scaffolding
 
-Enabling PHPStan at the configured level 9 over `tests/` yields **~1261 errors**.
-The shape matters more than the count:
+- **Dedicated READMEs for `ServiceProvider`, `ComponentProvider`, and the rest** — [valkyrja-php#1081](https://github.com/valkyrjaio/valkyrja-php/issues/1081)
+- **Deprecate the application skeleton repo in favor of generator commands** — [valkyrja-php#1082](https://github.com/valkyrjaio/valkyrja-php/issues/1082)
+- **`.valkyrja.apps`, written by a `create:application` command** — [valkyrja-php#1083](https://github.com/valkyrjaio/valkyrja-php/issues/1083)
+- **Re-run the README drift checks, and add them to CI** — [valkyrja-php#1018](https://github.com/valkyrjaio/valkyrja-php/issues/1018)
 
-| Category | Count | Character |
-|---|---|---|
-| `argument.named` — PHPUnit's `@no-named-arguments` vs the suite's `assertSame(expected:, actual:)` style | ~418 | Policy conflict, not defects |
-| `staticMethod.alreadyNarrowedType` — `assertTrue(true)`-shaped assertions | ~112 | Mostly benign in tests |
-| Route handler `Closure(): null` vs the declared `callable(...): ResponseContract` | ~116 | Real: test doubles that don't match the signature |
-| `string\|false`, undefined property/method, protected access, `resource\|false` | ~120 | Genuine findings |
+### Validation
 
-So roughly 570 are suppressible by policy and the remainder is a real but
-substantial cleanup. Sequence it as:
+- **Allow a `UnitEnum` or a `BackedEnum` in valid values** — [valkyrja-php#1084](https://github.com/valkyrjaio/valkyrja-php/issues/1084)
 
-1. **Decide the named-argument question first** — either suppress `argument.named`
-   for `tests/` or drop the named-argument assertion style. This alone is a third of
-   the total and blocks any honest count.
-2. **Make the tests loadable.** PHPStan cannot currently analyze them at all:
-   `ValkyrjaTestCase` lives in `.github/ci/phpunit/vendor/valkyrja/phpunit`, which
-   `.github/ci/phpstan/autoload.php` does not require. Add that autoloader (and the
-   Psalm equivalent) before anything else.
-3. **Land the remaining fixes in their own commits**, grouped by category, so the
-   scope change stays reviewable — the approach used for the TypeScript port.
-4. **Add `tests/**` to the PHPStan/Psalm job path filters** in `ci.yml`, so a
-   test-only change doesn't skip the analyzers.
+### View
 
-Worth doing before the suite grows further — every language gate should check the
-tests it ships.
+- **A shared templating engine, so one template works in every port** — [architecture#142](https://github.com/valkyrjaio/architecture/issues/142). This needs a design document before any port starts. The proposed rename of Orka to Syn or Syni is part of that decision.
 
-## Split the framework out of the main repo
+### Cross-language
 
-- Eventually split the framework out and keep the main (`valkyrja`) repo lighter.
-  Not a task for now — captured here so it isn't lost. The `--path-coverage`
-  CI cost (below) is one symptom of how large the main repo has become.
+- **VLID conformance fixture** — [valkyrja-php#1015](https://github.com/valkyrjaio/valkyrja-php/issues/1015)
+- **Compare this port's test suite against the other ports** — [valkyrja-php#1016](https://github.com/valkyrjaio/valkyrja-php/issues/1016)
+- **Update the repo description once gRPC and Queue land** — [valkyrja-php#1017](https://github.com/valkyrjaio/valkyrja-php/issues/1017)
+- **Ship a standalone `sindri` Phar on each release** — [sindri-php#210](https://github.com/valkyrjaio/sindri-php/issues/210)
 
-## Branch coverage in CI
+---
 
-- **100% branch/path coverage IS achievable in PHP** — earlier notes here
-  claimed Xdebug's per-internal-call "exception edges" made it impossible; that
-  was wrong. The real cause of phantom uncovered branches is namespace function
-  resolution: an unqualified builtin call (e.g. `strpos()`) inside a namespace
-  compiles to a runtime "does `Ns\strpos` exist? → fall back to `\strpos`"
-  lookup, and Xdebug counts the never-taken namespace-local edge as an uncovered
-  branch (and it multiplies path counts). Importing the function
-  (`use function strpos;`) resolves it at compile time and the phantom branch
-  disappears. The `@auto` php-cs-fixer ruleset now does this automatically via
-  `native_function_invocation` + `global_namespace_import`. sindri is at **100%
-  line + 100% branch**; valkyrja is there too — no file has a branch a test cannot
-  reach, though confirming that means reading the numbers carefully (below).
-- Three genuinely-unreachable categories exist, and each is handled, not excused:
-    - **Exhaustive `match($enum)` with no `default`** — PHP compiles in an
-      `UnhandledMatchError` throw no input can reach. Fold the last arm into
-      `default` (e.g. `default => 28` instead of `self::CONCEAL => 28`).
-    - **Calls a test cannot make** — I/O syscalls intercepted via namespace-function
-      shadowing (`header`/`flush`/`ob_flush`/`ob_get_level` in `Response`, where
-      qualifying them for coverage breaks the shadow), and calls that end the
-      process (`exit()` in `Exiter`). Wrap each in a protected seam method,
-      override the seam in a `Tests\Fixtures` fixture for behavior assertions, and
-      add one real-call test to cover the seam body (see
-      `ResponseSendRecorderFixture`). Only where no real call is possible at all —
-      `exit()` — does the seam body carry `@codeCoverageIgnore`.
-    - **A conditional inside a trait** — Xdebug emits one function entry per file
-      for a trait method, keyed by the *trait*, so every using class shares it and
-      class load order decides whose hits survive. Move the branch out of the trait
-      into a support class the trait delegates to; the trait keeps only the
-      delegation (`Trait\Arrayable` → `Support\Enumerable` is the pattern, and
-      `Trait\JsonSerializable` now follows it).
-- `--path-coverage` is **slow in CI on valkyrja** (the largest repo), so it is
-  split into its own `path-coverage` Composer script there (root
-  `phpunit-path-coverage`); the default `coverage` script no longer runs it. The
-  other repos keep `--path-coverage` in their `coverage` script (fast enough).
-  **Solved on valkyrja** — `phpunit-path-coverage-parallel` runs the suite as one
-  shard per component and merges with `phpcov`: **190s vs 1942s serially**
-  (10x, floor = the slowest shard). Speed is no longer the blocker for a gate.
-- **The source-side blockers are gone.** Every branch in valkyrja that no *test*
-  could reach has been closed by a source change, one PR per behavior decision:
-  `Answer::isValidResponse()`'s dead `allowedResponses === []` clause
-  (valkyrjaio/valkyrja-php#948), `DispatchFactory::fromReflection()`'s exhaustive
-  `match (true)` (#943), `RequestHandler::getOutputDufferFlags()`'s dead HHVM 3.3
-  `-1` fallback (#944), `UploadedFileFactory::isValidSapiEnvironmentForUploads()`'s
-  `PHP_SAPI` seam (#946), `Exiter::exit()`'s process-ending arm (#947), and
-  `Trait\JsonSerializable`'s trait-hosted conditional (#949) — the last one moved
-  into `Support\Enumerable` rather than contorted in place. The reachable gaps were
-  closed earlier in #936 and #939. Every file was verified in its **owning shard**,
-  before and after.
-- **The measurement is now the blocker, not the source.** Xdebug builds a different
-  branch map for a function depending on how much of the file ran, and it distorts
-  in *both* directions, so neither a merged nor a per-shard 100% gate is currently
-  safe:
-    - **Merged data invents branches.** Merging shard coverage unions two
-      incompatible maps — it reported 9 missing branches for
-      `Http\Routing\Processor\Processor`, which is at 100% in its own shard (19
-      such phantom branches across 4 files: `Processor`, `Api\Manager\Api`,
-      `Http\Message\Request\Request`, `Cli\Server\Provider\CliServerServiceProvider`).
-      Merged **line** data is affected too but only slightly (99.97% vs 100%, from
-      `match (` lines).
-    - **A shard inflates maps too, so per-shard is not a cure.** In the `Http`
-      shard `Http\Message\Uri\Uri` reads 62/67 with `getAuthority` at 7/9 and
-      `getPort` at 4/7 — but running `UriTest` alone those same functions carry
-      *smaller* maps and are 7/7 and 4/4. The 5 extra branches appear only because
-      more of the file was loaded, and nothing executes them. Narrowing to the
-      file's own test is what settles a suspected gap; the owning shard is only the
-      first step.
-  Until a run exists whose branch totals are stable, the Cobertura gate would sit
-  red on artifacts alone. Next step is to characterize the inflation (which
-  constructs grow a map, and whether a fixed run scope avoids it), then gate.
-- **Java/TypeScript** also reach 100% branch — JaCoCo (`BRANCH`) and Vitest
-  (istanbul/v8) measure decision coverage directly. (Flagged in their TODO.md.)
+## Decisions and design records
 
-## Contract and Class name constants
+These are not tasks. Each one records a decision already made, or a design worked
+through. They stay here so the reasoning is not lost.
 
-- Add component constant class for bindings
-    - We don't need this for other language parity. The other languages would
-      have these files. We can add them later.
-    - Other languages (Go, Python, TypeScript) do not have support for class
-      names
-      like PHP and Java.
-    - We would need a constant class that has all the defined class names and
-      contracts for the component
+### Split the framework out of the main repo
 
-## Sindri
+Eventually split the framework out and keep the main (`valkyrja`) repo lighter. **Not a
+task for now** — captured so it is not lost. The `--path-coverage` CI cost is one symptom
+of how large the main repo has become.
 
-- Ship a standalone, downloadable executable on each release so Sindri can be
-  used without installing it as a project dependency.
-    - PHP: build a **Phar** (e.g. via `humbug/box`) from `bin/sindri`, make it
-      executable, and attach it to the GitHub release as a release asset so it
-      can be downloaded and run directly (`php sindri.phar ...` or `./sindri`).
-    - Mirror this across the other ports — Java ships a runnable **jar**,
-      TypeScript ships a standalone binary (Node SEA / `bun build --compile`).
-      See each language's `TODO.md` for the per-language task.
-- "init" (or some name) command
-    - Interactive – Stays open like Claude, and can allow a dev to just keep
-      running commands within the same "session"?
+### Branch coverage in CI — what was solved, and how
 
-## Env
+**100% branch and path coverage IS achievable in PHP.** Earlier notes claimed Xdebug's
+per-internal-call exception edges made it impossible. That was wrong.
 
-- Continue deprecating this.
-    - Need to figure out what is left first after moving certain functionality
-      to Sindri.
+The real cause of a phantom uncovered branch is namespace function resolution. An
+unqualified builtin call such as `strpos()` inside a namespace compiles to a runtime
+lookup — does `Ns\strpos` exist, and otherwise fall back to `\strpos`. Xdebug counts the
+never-taken namespace-local edge as an uncovered branch, and it multiplies path counts.
+Importing the function with `use function strpos;` resolves it at compile time, and the
+phantom branch disappears. The `@auto` php-cs-fixer ruleset now does this automatically,
+through `native_function_invocation` and `global_namespace_import`.
 
-# gRPC
+Three genuinely unreachable categories exist. Each one is handled, not excused.
 
-- Implement fully.
+- **An exhaustive `match($enum)` with no `default`.** PHP compiles in an
+  `UnhandledMatchError` throw that no input can reach. Fold the last arm into `default`.
+- **A call a test cannot make.** An I/O syscall intercepted by namespace-function
+  shadowing (`header`, `flush`, `ob_flush`, `ob_get_level` in `Response`, where
+  qualifying them for coverage breaks the shadow), and a call that ends the process
+  (`exit()` in `Exiter`). Wrap each one in a protected seam method, override the seam in
+  a `Tests\Fixtures` fixture for the behavior assertions, and add one real-call test to
+  cover the seam body. `ResponseSendRecorderFixture` is the pattern. Only where no real
+  call is possible at all, which is `exit()`, does the seam body carry
+  `@codeCoverageIgnore`.
+- **A conditional inside a trait.** Xdebug emits one function entry per file for a trait
+  method, keyed by the *trait*, so every using class shares it and class load order
+  decides whose hits survive. Move the branch out of the trait into a support class that
+  the trait delegates to. `Trait\Arrayable` to `Support\Enumerable` is the pattern, and
+  `Trait\JsonSerializable` now follows it.
 
-## Documentation
+**Speed is solved.** `--path-coverage` is slow in CI on `valkyrja`, the largest repo, so
+it is split into its own `path-coverage` Composer script there. The other repos keep
+`--path-coverage` in their `coverage` script. `phpunit-path-coverage-parallel` runs the
+suite as one shard per component and merges with `phpcov`: **190s against 1942s
+serially**, a 10x gain whose floor is the slowest shard.
 
-- dedicated Readme for ServiceProvider, ComponentProvider, etc.
+**The source-side blockers are gone.** Every branch that no *test* could reach has been
+closed by a source change, one pull request per behavior decision:
+`Answer::isValidResponse()`'s dead `allowedResponses === []` clause (#948),
+`DispatchFactory::fromReflection()`'s exhaustive `match (true)` (#943),
+`RequestHandler::getOutputDufferFlags()`'s dead HHVM 3.3 `-1` fallback (#944),
+`UploadedFileFactory::isValidSapiEnvironmentForUploads()`'s `PHP_SAPI` seam (#946),
+`Exiter::exit()`'s process-ending arm (#947), and `Trait\JsonSerializable`'s
+trait-hosted conditional (#949). The reachable gaps closed earlier, in #936 and #939.
 
-## Container
+**Java and TypeScript** both reach 100% branch, and both now gate on it.
 
-- ServiceProvider should have an attribute for the method (Provides)
-    - This can be something we add later, but at this time it's not required
+The one open action — characterize the measurement inflation, then gate — is
+[valkyrja-php#1078](https://github.com/valkyrjaio/valkyrja-php/issues/1078).
 
-## Auth
+### Container — a `Provides` attribute for provider methods
 
-- Add a login via email retriever. Code gets stored to cache, email sent, user
-  enters code, code is verified against cache.
-    - Cache TTL is a configurable value
-        - IE to the user this looks like code is valid for 5 minutes. After 5
-          minutes the cache is cleared automatically.
-            - Also cleared after successful retrieval for security reasons
+A `ServiceProvider` could carry an attribute on the method it provides. This can be added
+later. At this time it is not required.
 
-## ALL
+### Http — where middleware config lives
 
-- Change `array<array-key, blah>` to `array<blah>`
-- Check all strings and see if they should be non-empty-string
-- Rethink optional parameters, but maybe we can do this in v26
+Should middleware config be baked into Http and Cli, because they are so integral, or be
+its own config?
 
-## Http
+**Decided: keep it as it is, and make a single handler later.** The current shape
+preserves the ability to build one handler later and use the config data class to house
+the middleware, adding to the list through the matched route in `Router`.
 
-- RateLimiterMiddleware
-    - The lesson from the Ebay interview :)
-- Should config for middleware be baked into http and cli since they're so
-  integral, or should they be their own config. I am leaning toward the latter.
-    - If we keep as is then we have the ability to make a single handler later
-      and use the config data class to house the middlewares and add to the list
-      via the matched route in Router.
-    - Keep as is and make a single handler later.
+### Http — `RequestReceivedMiddleware` on a Route
 
-## PHP Code Sniffer
+An open question, not a decision. Request-received middleware on a route would let
+middleware that matters to certain routes run only for those routes, rather than on every
+request.
 
+### Event — a Subscriber for events
+
+Considered and rejected in the same breath. A subscriber is the same concept as a
+Controller for Cli and Http. But event dispatching should be very simple, because a
+developer usually does it on the fly when it is needed.
+
+### Cli, Http, and Queue — renaming Command to Route
+
+Considered at length, and rejected.
+
+A `Router` routes `Route` objects to a handler. In Http a route takes a request and goes
+to a handler for an action. In Cli it takes an input and goes to a handler for a command.
+In Queue it would take a payload and go to a handler for a queue.
+
+The vocabulary that follows from it:
+
+- **Action** — a class that handles one specific Http route as a whole.
+- **Command** — a class that handles one specific Cli route as a whole.
+- **Controller** — a class that handles several routes, for any protocol.
+
+A distinct per-protocol name such as `CommandRoute` and `ActionRoute` was considered and
+rejected. There is no `ActionRouter` or `CommandRouter`, because the namespace already
+distinguishes them. **This level of granularity is unnecessary.**
+
+What stands regardless of the naming: a Controller houses route definitions tied to
+single methods, which is right for a simple action or command. A complex one gets its own
+Action or Command file, so several methods can serve it without muddying the others.
+
+### Is returning null cheating?
+
+A worked-through position, not an open task.
+
+Every method could throw rather than return null. That gives parity with Java and Go. The
+convention that follows, for a single-item query:
+
+- `Create…` returns a new instance, or throws.
+- `Get…` returns an expected existing instance, or throws.
+- `Retrieve…` returns an expected existing instance, or throws.
+- `GetOrCreate…` returns an existing instance, or a new one if none exists, or throws.
+- `Find…` returns an existing instance if it exists, or null.
+
+For a collection query, `Get…` always returns a collection, empty when nothing matches.
+That is the only form that does not throw.
+
+The reasoning: take a caller who asks a phone system for an operator by name. If the
+operator exists, the system transfers the call. If the operator does not exist, the
+system throws, and the middleware for the application and that route handles the case
+specifically. The context is preserved. A null object instead continues as though nothing
+happened, which loses the context and still forces the caller to handle absence — now
+with an object that did not need to exist.
+
+A separate rule falls out of the same thinking. **Allow null only on a parameter that is
+an object.** An array defaults to `[]`, a string to `''`, a bool to `false`, an int to
+`0`, and a float to `0.0`.
+
+### Lifecycle
+
+The bootstrap design, recorded in full.
+
+An app is created with `Env::class` and a `Config` or `Data` object. It creates the
+container, and bootstraps from `Entry\App`.
+
+**With a `Config`,** setup runs normally. The config class is slimmed to Container,
+Event, Cli, and Http. The app iterates its components, and makes sure it calls the core
+ones — `ApplicationComponent`, `ContainerComponent`, `EventComponent`, `CliComponent`,
+`HttpComponent`, `DispatcherComponent`, `AttributeComponent`, `ReflectionComponent`. That
+is what happens now, except that no component holds a config class. The container sets
+`Config::class` as a singleton.
+
+**With a `Data` object,** the app splits the data apart and sets each part as a
+singleton: `ContainerData`, `EventData`, `CliData`, `HttpData`.
+
+The container then takes its data from the `ContainerData` singleton, and gains a
+`getData()` that mirrors today's `getCacheable()`. When `ContainerData` came from the
+passed `Data`, the container uses it directly. Otherwise the container falls back to the
+service-provider set, where the collector runs the code from `setupNotCached`.
+
+Event, Http, and Cli each get their data from the container and pass it into the
+constructor. The service provider has an entry to get the data, whether the data arrived
+with the cached data object or defaults to the collector path.
+
+### Debugging, profiling, and a debug bar
+
+Explored, then deliberately parked: **for the time being let us not focus attention here,
+and work on finishing the application and the tests.**
+
+What was considered. A `ProfilerCapableContract`. The ability for a service provider to
+log what it called, behind a debug flag, perhaps through the event dispatcher:
+
+```php
+if (debug) {
+    $this->event->dispatch(new DebugMethodCalled($this, __METHOD__));
+}
 ```
-  <!-- Require docblocks for functions/methods -->
-  <rule ref="Squiz.Commenting.FunctionComment.Missing"/>
-```
 
-## Tests
-
-- Add a full app example to tests and test it in Functional tests.
-- Orm
-    - Update ServiceProviderTest to check the DSN and Options passed in for each
-      Pdo type
-        - In the callable function do assertions
-        - Check default options as well as configured through env
-- Update all data tests to make sure all get methods return expected data after
-  a with/set is called, not just the corresponding get method for the with/set
-- Test all Exception classes for proper inheritance
-    - Do this in a separate test class for each exception instead of in one
-      massive file that's hard to read and keep track of. So break apart any
-      existing exceptions class tests
-- Every Constant value
-- Every Enum case value
-- Test all contracts to ensure they have all the expected methods!!!!
-    - See ModelTest.php for example
-- Test ALL manner of Http Controller Route types including all parameterized
-  options!!!!!!!!!!!!!!!!!!!!!!!
-- Update tests to not rely on classes made in classes namespace if a mock with
-  proper expectations can be used instead.
-    - Update middleware tests to use mocks
-
-## CI
-
-- Debug commit message checker workflow
-
-## Writer
-
-- Add a writer class for Ooutput buffers, and echo's etc. This way these things
-  can be mocked
-
-## Filesystem
-
-- Add a default filesystem so we can mock this in tests
-- Add contract for FlysystemFilesystemContract with getFlysystem pub method
-
-## Http, Cli, Event
-
-- Add handler (closure) to routes and listeners.
-- Either a handler or a dispatch object must exist
-- If handler have the preferred way of doing things be to call that handler as
-  the action then dispatch from the handler to a service handling that actions
-  logic, or if within an action class it would be a pubsf method of name
-  dispatch
-- Update data collection logic to check if routes/listeners, is empty
-    - if empty continue to next block
-
-## Http
-
-- Add RequestReceivedMiddleware to Route?
-    - This way certain middleware that only have to do for certain routes will
-      run, and not on every single request (when other routes wouldn't need that
-      particular request received middleware)
-- Message Collections, make flattened variants.
-- #[MapRequestFormParams(Someclass::class)]
-    - Auto maps the request params to the Someclass properties
-- CacheResponse instead of creating a class that gets loaded, do a json file or
-  some file so we can have parity between languages.
-    - headers
-    - status code
-    - status phrase
-    - contents
-    - etc
-    - The we build the response object with those details within the middleware
-      class
-- Factories to actual classes
-    - No longer abstract
-        - No more private methods
-        - Use static vs self
-    - RequestFactory
-    - HeaderFactory
-    - ServerRequestFactory
-    - UploadedFileFactory
-    - UriFactory
-
-## Cli
-
-- Option in config to hide certain commands from the output list
-    - Hidden commands?
-    - Secret commands?
-- No formatting cli global option
-- Hide help and version from list command output
-- Add OutputThrowableHandler
-    - What?!
-- See HelpCommand global options, make this configurable. Env key for
-  APP_CLI_GLOBAL_OPTIONS
-- `-v` date should maybe use local system date/time?
-    - Change CI release to UTC then
-        - No because we still want the Changelog to be in MST, imo
-- VersionCommand
-    - Add Env keys for title, etc
-        - Move out of Application.php
-    - ValkyrjaVersion (bin/valkyrja -v)
-    - AppVersion (cli -v)
-    - Should be one class, that takes env keys for the output.
-        - Same for ListCommand
-- Update helpText to take a (callable():Message)|Message
-    - `callable():Message` doesn't exactly work. May need to find a different
-      workaround for this
-- Progress bar
-    - https://stackoverflow.com/questions/2124195/command-line-progress-bar-in-php
-
-## Bin
-
-- .valkyrja.apps
-    - created by create:application command in bin
-    - HashMap of name => [namespace => capitalized-string, ...]
-
-## ThrowableHandler
-
-- Add a default ThrowableHandler that logs the exception displays the error on
-  screen
-    - One for Cli and one for Http
-
-## Application
-
-- Expand ApplicationTest
-
-## Container
-
-- Add an EventCapableContainer that extends the Container and adds event
-  dispatching to it
-
-## Type
-
-- Add Resource type with methods
-- Add StreamResource type
-    - Can use this for mocking anywhere fopen etc are used
-- Undo the UuidV1 int cast change me thinks
--
-- Add fromMixed(mixed $value) to each support helper class of each type.
-- **Port the Type module to the other languages** (Go, Java, Python,
-  TypeScript) — port the tests alongside the code for 1:1 parity.
-
-## VLID — cross-language parity
-
-**Cross-language change — mirror in every port (Go, Java, Python, TypeScript).**
-VLID (`Valkyrja/Type/Vlid`) is PHP-only today and is the source of the queue
-envelope `id` (a **VLID V1** — the longest, most-random version). Lock
-cross-language parity so the other ports can depend on it:
-
-- Add a conformance test: generate a VLID for **each version V1–V4** from a
-  **fixed input timestamp**. The resulting values become the shared cross-language
-  fixture.
-- Every port must produce a byte-identical **non-random portion** for that
-  timestamp — the encoded **microsecond timestamp** and the **version digit at
-  position 14** must match exactly. The random bits differ by design; exclude them
-  from the assertion.
-- This gate prevents timestamp-encoding / version-digit-placement drift from
-  silently breaking cross-language `id` interop.
-
-## Rector
-
-- Need a test for the new rule
-    - FindThis
-        - FindThisNot
-        - DontFindThis
-        - etc; find all variations and make a test class that can be parsed by
-          PhpParser then ran through the rule and output checked
-- Move this to a separate repo!!!
-
-## Psalm Type Fixing
-
-- Analyzer::incrementMixedCount
-- AssignmentAnalyzer
-    - Move $codebase->analyzer->incrementMixedCount($statements_analyzer->
-      getFilePath()) and all codeblock related to it inside of the other if
-      statement
-- /Valkyrja/Cli/Routing/Data/ArgumentParameter.php:152
-- /Valkyrja/Cli/Routing/Data/OptionParameter.php:294
-- /Valkyrja/Dispatch/Dispatcher/Dispatcher.php:76
-- /Valkyrja/Dispatch/Dispatcher/Dispatcher.php:186
-- /Valkyrja/Http/Message/Factory/RequestFactory.php:
-
-## Auth
-
-- Cli Commands
-    - Use new APP_NAMESPACE env to fill in template
-    - auth:make:authenticator
-- Http Middleware
-- Http Controllers
-    - `register(RegistrationAttempt): User`
-    - `forgotPassword(ForgotPasswordAttempt): User`
-    - `resetPassword(ResetPasswordAttempt): User`
-    - `lock(LockAttempt): User`
-    - `unlock(UnlockAttempt): User`
-    - Authentication
-    - Registration
-    - ForgotPassword
-    - ResetPassword
-    - Data
-- SessionTokens in DB so you can dismiss certain login sessions or log all out
-
-## Queue
-
-- Message
-    - `getQueueName`
-    - `getQueueData`
-    - Enum
-        - QueueResult
-            - Retry
-            - Complete
-            - Error
-- Middleware
-- Routing
-- Server
-
-## Cache
-
-- Add Psr Cache support via new PsrCache manager
-
-## Event
-
-- Update Dispatcher with better template docblocks for each method
-- Add Priority capability
-- Subscriber for event
-    - Is same concept as Controller for Cli/Http
-    - I don't think so now that I think of it. Event dispatching should be super
-      simplistic, especially since it's done usually on the fly when needed
-- Stop propagation abstract event
-
-## Application Skeleton Repository
-
-- I want to deprecate this whole fucking thing and keep everything within the
-  main framework.
-    - Have cli commands to generate the necessary files to get started.
-        - Really just need something to make `cli`, `public/index.php`
-        - Need a bin cli app for the framework as a whole that is an aside to
-          the one that a person would build
-
-## View
-
-- New Syn or something templating system that can be on parity with other
-  languages as well, so we have one templating engine for all languages with
-  templates able to be used across all the language frameworks for valkyrja
-- Change Orka to Syn? Sýn (f.): View, sight, vision.
-- Change Orka to Syni? Sýni (n.): Sight, look.
-
-## Http
-
-- Controller Namespace
-    - Similar to Command in Cli with default controllers and/or actions
-- Add the following content types:
-    - https://stackoverflow.com/questions/23714383/what-are-all-the-possible-values-for-http-content-type-header
-- Middleware docs inspiration:
-    - https://botman.io/2.0/middleware
-
-## ORM
-
-- **Change model casting to closures/callables** to ensure cross-language
-  compatibility for this feature.
-- Statement::fetch() should return null when no data found
-- `$this->getXValue()` for any `static::getXField()`
-- Use defaultable service for Entity instead of Entity Matchers??
-- QueryBuilderFactory::fromQuery(string $query): QueryBuilder
-    - SelectQueryBuilder::fromQuery(string $query): SelectQueryBuilder
-    - UpdateQueryBuilder::fromQuery(string $query): UpdateQueryBuilder
-    - InsertQueryBuilder::fromQuery(string $query): InsertQueryBuilder
-    - DeleteQueryBuilder::fromQuery(string $query): DeleteQueryBuilder
-- docs inspiration
-    - https://symfony.com/doc/current/doctrine.html#learn-more
-
-## Validation
-
-- Valid values
-    - Allow UnitEnum or BackedEnum
-
-## Debugging/Profiling/Debug Bar/Profiler
-
-- `ProfilerCapableContract`
-- Add ability within ServiceProviders to log what was called for later usage
-    - Add this ability within a lot of classes - Should be based on a debug flag
-    - Use the event dispatcher perhaps?
-        - ```php
-              if (debug) {
-                $this->event->dispatch(new DebugMethodCalled($this, __METHOD__));
-              }
-          ```
-    - It's either that or there's a class/trait that's used by all
-      classes/methods to log to
-    - Got one better:
-        - `DebugContainer`
-            - `get()`
-                - gets the instance from the service container like normal, but
-                  then creates a new instance of the `DebugClass` class that
-                  takes as an arg the class returned
-                    - This won't work because it'll break contracts and
-                      typehinting
-                    - It will have to be an anonymous class that extends the
-                      instance returned I think
-            - `DebugClass`
-                - `call`
-    - This needs to start with whatever needs debugging capabilities will have
-      to implement it themselves, perhaps. We'll have to really research this
-      one. But for the time being let's not focus attention here and work on
-      finishing the application, and the tests
-
-## Client
-
-- Add PSR
-
-## Log
-
-- Add file logger?
-
-## Modules Concept
-
-- Index.php file for each module
-- Composer.json for each module
-- Shared composer import from lib folder
-
-## Cli and Http and soon to be Queue
-
-- Rename current command to Route
-    - This makes sense since a Router routes Route objects to a handler
-    - in Http a Route takes a Request and goes to a handler for an Action
-    - in Cli a Route takes an Input and goes to a handler for a Command
-    - in Queue a Route takes an Payload and goes to a handler for a Queue
-    - *Action is a name for a class that handles one specific Http Route as a
-      whole
-    - *Controller is a name for a class that handles multiple Http Routes
-    - *Command is a name for a class that handles one specific Cli Route as a
-      whole
-    - *Controller is a name for a class that handles multiple Cli Routes
-    - *Queue is a name for a class that handles one specific Queue Route as a
-      whole
-    - *Controller is a name for a class that handles multiple Queue Routes
-    - CommandRoute? and ActionRoute?
-        - So to have a distinct name for each between Cli/Http and soon to be
-          Queue?
-        - You don't have an ActionRouter or CommandRouter, these are already
-          distinguished via the namespace
-        - I think this level of granularity is unnecessary
-    - Controller houses Route definitions tied to single methods
-        - For simple actions or commands this is fine.
-        - For complex actions or commands a separate Action/Command file would
-          be used
-        - This allows for multiple methods to be used for a single
-          Action/Command without muddying the others
-        - And has a singular place to find all defined routes.
-        - Separation of concerns
-
-## Blogging system built on Valkyrja
-
-## Test
-
-- Move output from run()
-- Move to tests directory
-
-## Add callable capability to Reflector
-
-- https://stackoverflow.com/questions/13071186/how-to-get-the-number-of-parameters-of-a-run-time-determined-callable
-
-## Lifecycle
-
-- App created with Env::class, and Config|Data object
-    - Create Container
-        - bootstrap stuff from Entry\App
-    - If Config, we do normal setup
-        - Config Class is slimmed down to only needing
-            - Container
-            - Event
-            - Cli
-            - Http
-        - App Components are iterated through
-            - Here we also ensure we call the core ones
-                - ApplicationComponent
-                - ContainerComponent
-                - EventComponent
-                - CliComponent
-                - HttpComponent
-                - DispatcherComponent
-                - AttributeComponent
-                - ReflectionComponent
-            - Iterate over components
-            - This is exactly what is done now, except that now no config
-              classes in any component
-            - $container->setSingleton(Config::class, Config)
-    - If Data passed
-        - Data is split apart and
-            - $container->setSingleton(ContainerData::class, Data->
-              ContainerData)
-            - $container->setSingleton(EventData::class, Data->EventData)
-            - $container->setSingleton(CliData::class, Data->CliData)
-            - $container->setSingleton(HttpData::class, Data->HttpData)
-    - Container->setData($container->getSingleton(ContainerData))
-        - Also add a getData() Same as getCacheable now
-        - Data
-            - Same as Cache
-        - If ContainerData was set in Data passed step
-            - Then it's just used
-            - Otherwise defaults to ServiceProvider set
-                - Collector is called
-                - Code from setupNotCached
-    - Event, Http, Cli in ServiceProvider
-        - Get Data from Container
-            - Pass into __construct
-        - ServiceProvider has an entry to get the Data (which was either passed
-          with the CachedData object)
-        - ORRRRRRRR a default entry is in ServiceProvider and
-            - Collector is called
-            - Code from setupNotCached
-
-## Psalm issues
-
-### Env
-
-- https://psalm.dev/r/36fd31ac0e
-
-### Container
-
-- https://psalm.dev/r/4431cf022b
-
-## Github
-
-- Composite action
-    - https://docs.github.com/en/actions/tutorials/creating-a-composite-action
-
-## All
-
-- Is null return cheating?
-    - Should we redefine all methods to not allow null returns but throw an
-      exception instead? This will give parity between PHP and other languages
-      (Java/Go)
-    - What about parameters that are optional?
-    - " Similar to my convention: Single item queries - Create... returns a new
-      instance, or throws; Get... returns an expected existing instance, or
-      throws; GetOrCreate... returns an existing instance, or new instance if
-      none exists, or throws; Find... returns an existing instance, if it
-      exists, or null. For collection queries - Get... always returns a
-      collection, which is empty if no matching items are found."
-        - For single item queries:
-            - `Create`... returns a new instance, or throws
-            - `Get`... returns an expected existing instance, or throws
-            - `Retrieve`... returns an expected existing instance, or throws
-            - `GetOrCreate`... returns an existing instance, or new instance if
-              none exists, or throws
-            - `Find`... returns an existing instance, if it exists, or null
-        - For collection queries:
-            - `Get`... always returns a collection, which is empty if no
-              matching[1] items are found
-                - [1] This is the only one that doesn't throw an exception.
-    - https://www.yegor256.com/2014/05/13/why-null-is-bad.html I agree, but
-      disagree at the same time. You should probably throw exceptions instead of
-      return null in most cases where a value is expected then handle said
-      exception specifically
-        - Take an example where a user calls into a system and asks for a phone
-          operator by name
-            - If the operator exists, we transfer the call
-            - If the operator doesn't exist, an exception is thrown
-                - The exception is handled in the middleware for the application
-                  and specifically this route, and we handle that case
-                  specifically; context is preserved
-        - When a nullobject is used instead we just continue like normal, which
-          is problematic to say the least. Context is lost, and anyway we have
-          to handle an exception or null instance case, but now we have a
-          nullObject floating around that didn't need to exist in the first
-          place
-            - Another example is a cli program where a specific command is
-              called
-                - if the command exists it gets called
-                    - if the command requires certain parameters either those
-                      params exist or an exception is thrown
-                        - if an exception is thrown then the middleware should
-                          catch that use case
-                - if not then an exception is thrown and the middleware catches
-                  it
-    - Only allow null on parameters that are object.
-        - array -> []
-        - string -> ''
-        - bool -> false
-        - int -> 0
-        - float -> 0.0
-        - etc
-- Data objects for methods/functions with more than 3 params?
-    - Repeated params across codebase should be a data object
-
-## Naming
-
-- `validate{Something}($value): void` = ensure `$value` is valid or throw
-  exception
-- `invalidate{Something}($value): void` = ensure `$value` is not valid or throw
-  exception
-- `isValid{Something}($value)` = check if `$value` is not valid
-- `modify{Something}($value): void` = modify `$value` by reference
-- `get{Something}($value)` = get a modified version of `$value` without
-  modifying `$value`
-- `set{Something}($value)` = set `$value` without modifying host
-- `with{Something}($value): self` = set `$value` on cloned host
-- `process{Something}(array $value): void` = process array `$value` by reference
-- `filter{Something}($value): void` = filter `$value` by reference
-- `getFiltered{Something}($value)` = get a filtered version of `$value` without
-  modifying `$value`
-- `parse{Something}($value): void` = parse `$value` by reference
-- `getParsed{Something}($value)` = get a parsed version of `$value` without
-  modifying `$value`
-
-## Benchmarking
-
-- fc07889: 5519.52, 4957.28
-- d414d51: 5541.12, 4938.62
+A `DebugContainer` whose `get()` returns the instance wrapped in a `DebugClass` was
+considered and found unworkable. The wrapper breaks the contract and the type hints. An
+anonymous class that extends the returned instance would be needed instead.
+
+The likely conclusion is that anything which needs debug capability has to implement it
+itself. This needs real research before anyone starts.
+
+### Documentation inspiration
+
+Links kept for whoever writes the corresponding documentation.
+
+- **Orm** — <https://symfony.com/doc/current/doctrine.html#learn-more>
+- **Http middleware** — <https://botman.io/2.0/middleware>
+- **Content types** — <https://stackoverflow.com/questions/23714383/what-are-all-the-possible-values-for-http-content-type-header>
+- **Uri filtering** — <https://github.com/laminas/laminas-diactoros/blob/3.9.x/src/Uri.php>
+- **Reflector, callable parameter counts** — <https://stackoverflow.com/questions/13071186/how-to-get-the-number-of-parameters-of-a-run-time-determined-callable>
+- **A GitHub composite action** — <https://docs.github.com/en/actions/tutorials/creating-a-composite-action>
+
+---
+
+## Open questions
+
+Each one needs a decision before it can become an issue.
+
+- **Rethink optional parameters.** Toward what?
+- **A `sindri` "init" command.** The name and the scope are both open. "Interactive —
+  stays open, and lets a developer keep running commands in one session" is the only
+  spec.
+- **Debug the commit message checker workflow.** Debug what?
+- **`OutputThrowableHandler`.** Recorded with no description.
+- **A file logger.** Java built a zero-dependency one. Does PHP want one, when Monolog is
+  the default?
+- **A modules concept** — an `index.php` and a `composer.json` for each module, with a
+  shared composer import from a lib folder. The goal is not stated.
+- **Continue deprecating Env.** The scope is unknown until the `sindri` work settles.
+- **Auth session tokens in the database**, so a developer can dismiss one login session
+  or log every session out.
+- **PSR Cache support through a new `PsrCache` manager**, and **PSR support in Client.**
+  Both raise the same question: does this framework want a PSR dependency?
+- **Undo the UuidV1 int cast change.** No commit is named.
+- **Expand `ApplicationTest`.** To cover what?
+- **Implement gRPC fully.** [`../GRPC.md`](../GRPC.md) and
+  [`../GRPC_IMPLEMENTATION.md`](../GRPC_IMPLEMENTATION.md) describe a very large body of
+  work. Break it into pieces before any of it becomes an issue.
+
+---
+
+## PHP version support
+
+**Warning: the two tables below disagree.** They differ on the bug-fix dates for versions
+26, 27, and 28, and on the PHP range for version 27. Do not use either one until somebody
+confirms which is correct. Both are kept here, unchanged, so the conflict is visible.
 
 <table width="100">
     <thead>
