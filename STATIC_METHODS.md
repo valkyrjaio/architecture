@@ -26,24 +26,34 @@ No other Valkyrja target language supports this:
 | **Go**         | No                       | No static methods at all; interfaces are instance-only   |
 | **Python**     | Partial                  | `typing.Protocol` can express it, but runtime-only check |
 
-Since no other language can enforce or dynamically dispatch static interface
-methods, **PHP is being updated to use instance methods throughout** — removing
-the PHP-specific static dispatch entirely so all ports look and behave the same.
+No other language can enforce or dynamically dispatch a static interface method.
+**PHP therefore removes the static method that the framework calls on a variable
+class.** This document covers that call, and it covers nothing else.
+
+A named constructor is not that call. A named constructor returns its own type,
+and the caller names the class. `StringT::fromValue($value)` ports to every
+language, so the data object keeps it. See "What a data object holds" in
+[`AGENTS.md`](AGENTS.md) §4.
 
 ---
 
 ## Two Categories of Static PHP Patterns
 
-### 1. Static Factory Methods (`from*`, `create*`)
+### 1. Construction Through a Variable Class
 
 PHP pattern:
 ```php
-$entity = MyEntity::fromValue($raw);
+// $type holds a class name. Only PHP can make this call.
+$instance = $type::fromValue($raw);
 ```
 
-These create new instances of a type from a raw value. The cross-language
-solution is **container-registered factories**: the developer explicitly
-registers a callable that creates the type, and the framework calls it.
+The framework holds the class in a variable, and it must create an instance of
+that class. The cross-language solution is **container-registered factories**:
+the developer explicitly registers a callable that creates the type, and the
+framework calls it.
+
+A direct call such as `StringT::fromValue($raw)` is not this pattern. The caller
+names the class, so every language can write it.
 
 ```java
 // Registered in a service provider
@@ -122,3 +132,6 @@ registry.
 The rule: **if PHP would call it statically on a variable class, every other
 language needs an explicit registration**. The developer declares how the
 framework finds or creates the value; the framework never guesses.
+
+Each row holds `$class`, not a class name. `StringT::fromValue($value)` names the
+class, so it needs no registration and it stays.
