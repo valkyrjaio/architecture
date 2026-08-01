@@ -400,7 +400,9 @@ the branch needs no prompt). Per change:
    names** below; e.g. `feature/contextual-bindings`).
 2. **Commit** — after confirmation — using the `[Root] type:` message format.
 3. **Push** the branch — after confirmation.
-4. **Open a PR** — after confirmation — with its **base set to that same target
+4. **Ask whether to add the `claude-review` label**, and add it only if the user
+   says so. See **Asking for a review** below.
+5. **Open a PR** — after confirmation — with its **base set to that same target
    branch** and the PR template filled out (see below).
 
 Keep each branch and PR small and atomic — one focused change per PR.
@@ -458,6 +460,32 @@ root kinds, and worked examples:
   file/component — em dash — what changed). When an issue tracks the work, put
   `Closes #123` in the description: it becomes the squash commit body, so that is
   both what closes the issue on merge and where the link durably lives.
+
+### Asking for a review
+
+The `claude-review` label starts an automated review of the pull request. **Ask
+the user before you add it, the same way you ask before a commit, a push, and a
+pull request.** A review spends the user's own Claude subscription, so the user
+decides, not you. Never add the label because the change looks worth reviewing.
+
+Add the label **as you open the pull request**, when the user asks for one:
+
+```bash
+gh pr create --base 26.x --label claude-review --title "…" --body-file …
+```
+
+Warning: the label does not start a review on a pull request that is already
+open. The trigger listens for `opened`, `ready_for_review`, `synchronize`, and
+`reopened`, so a label added later is read on the next one of those. To start a
+review then, close the pull request and reopen it:
+
+```bash
+gh pr close 123 && gh pr reopen 123
+```
+
+The label stays until it is removed. Each later push reviews the change again, so
+tell the user that a labeled pull request keeps costing usage while the label is
+on.
 
 ### Current working branch
 
