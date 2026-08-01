@@ -27,6 +27,37 @@ otherwise.
   an optional alternative, not a house rule; the framework does not use one. See
   [`README.md`](README.md).
 
+### Class references
+
+Reference a class with `::class`. Never write the name of a class as a string
+literal.
+
+PHP resolves `::class` against the `use` statements of the file, so the name is
+correct when the file compiles. A string literal is text. The IDE does not rename
+it, PHPStan and Psalm do not check it, and PHPArkitect does not see the
+dependency. A typo in a string survives every check in the gate and fails at run
+time.
+
+```php
+// Wrong — a rename leaves this string behind, and no tool reports it.
+$container->setSingleton('Valkyrja\Jwt\Contract\JwtContract', $container->getSingleton($default));
+```
+
+```php
+// Right — the name resolves through the use statement above.
+$container->setSingleton(JwtContract::class, $container->getSingleton($default));
+```
+
+The rule holds everywhere a class is named: a container binding key, a provider
+list, a test data provider, and an `@var` or `@param` annotation.
+
+A configuration format is the one exception, because NEON, YAML and JSON have no
+`::class`. Warning: a class name in a config file drifts from the code without a
+failure. Keep the authoritative list in PHP with `::class`, and assert that the
+config matches it. `valkyrja/phpstan` does this — `Rules::getRules()` holds each
+rule as `::class`, `rules.neon` registers the same rules for PHPStan, and a test
+fails when the two disagree.
+
 ### Exceptions
 
 `ValkyrjaThrowable` (interface) → abstract `ValkyrjaRuntimeException` /
