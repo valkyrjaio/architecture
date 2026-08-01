@@ -484,6 +484,15 @@ public static function publishRedisConfig(ContainerContract $container): void
 }
 ```
 
+### Method naming
+
+The prefix on a method name tells a reader what the method does, and whether the caller's
+own value changes. `validate` throws, `isValid` reports, `parse` changes the argument,
+`getParsed` returns a copy, `set` modifies the host, and `with` returns a clone.
+
+The full table, the per-language spelling, and the warning about in-place modification in
+a language without pass-by-reference: [`METHOD_NAMING.md`](METHOD_NAMING.md).
+
 ### Binding-key constants
 
 Per-component constants files (never one central file). String format
@@ -846,8 +855,9 @@ Read these in order when starting or extending a port:
 5. [`DATA_CACHE.md`](DATA_CACHE.md) — provider contracts & cache generation
 6. [`BUILD_TOOL.md`](BUILD_TOOL.md) — `sindri` implementation
 7. [`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md) — testing & 100% coverage
-8. [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md) — commit & PR title format
-9. [`VERSIONING.md`](VERSIONING.md) — version scheme & release automation
-10. `{language}/PROVIDER_CONTRACTS.md` — full contracts + examples
-11. `{language}/README.md` — port notes & priority order
-12. `{language}/AGENTS.md` — the Layer-2 agent guide for that language
+8. [`METHOD_NAMING.md`](METHOD_NAMING.md) — method name prefixes
+9. [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md) — commit & PR title format
+10. [`VERSIONING.md`](VERSIONING.md) — version scheme & release automation
+11. `{language}/PROVIDER_CONTRACTS.md` — full contracts + examples
+12. `{language}/README.md` — port notes & priority order
+13. `{language}/AGENTS.md` — the Layer-2 agent guide for that language

@@ -86,42 +86,6 @@ PHP nuances:
   **and is named `*Trait`**, whereas a src trait's name must *not* contain
   `Trait`.
 
-## Method naming
-
-A method's prefix states what the method does to its argument, and whether the caller
-gets a new value or a modified one. Use these prefixes consistently.
-
-| Prefix | Meaning |
-|---|---|
-| `validate{Something}($value): void` | Make sure `$value` is valid, or throw |
-| `invalidate{Something}($value): void` | Make sure `$value` is not valid, or throw |
-| `isValid{Something}($value)` | Check whether `$value` is valid |
-| `modify{Something}($value): void` | Modify `$value` by reference |
-| `get{Something}($value)` | Get a modified copy, without modifying `$value` |
-| `set{Something}($value)` | Set `$value`, without modifying the host |
-| `with{Something}($value): self` | Set `$value` on a cloned host |
-| `process{Something}(array $value): void` | Process `$value` by reference |
-| `filter{Something}($value): void` | Filter `$value` by reference |
-| `getFiltered{Something}($value)` | Get a filtered copy, without modifying `$value` |
-| `parse{Something}($value): void` | Parse `$value` by reference |
-| `getParsed{Something}($value)` | Get a parsed copy, without modifying `$value` |
-
-The pattern is regular. A bare verb modifies by reference and returns `void`. The same
-verb behind `get` returns a copy and leaves the argument alone.
-
-```php
-// Wrong — the name says "get", so the caller does not expect $value to change.
-public function getParsedPath(string &$value): void
-```
-
-```php
-// Right — "parse" modifies by reference; "getParsed" returns a copy.
-public function parsePath(string &$value): void
-public function getParsedPath(string $value): string
-```
-
----
-
 ---
 
 ## Tests
