@@ -192,6 +192,19 @@ Then:
     report is meaningless" is a decision — keep it. "Pinned ahead of the others
     until the next release bumps it" is a condition — the release automation will
     strand it, so it belongs in the PR.
+11. **Update the documentation in the same pull request.** A change to behavior,
+    to configuration, or to a public API also updates every document that
+    describes it. The component's `README.md` is the usual one, because each
+    component documents its configuration and its container bindings there.
+    Never leave the documents for a later sweep.
+    A document that describes the old behavior is worse than no document,
+    because the reader trusts it. This is the same failure that rule 10
+    describes for a comment: the file now asserts something that is false. A
+    later sweep also loses the reason for each edit, because the sweep is one
+    large commit that no longer sits next to the change it explains.
+    **The documentation is part of the definition of done.** A pull request that
+    changes an env constant, a config property, a container binding, or a
+    contract is not complete while a `README.md` still lists the old one.
 
 ---
 
