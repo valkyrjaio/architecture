@@ -10,35 +10,10 @@
 
 ## Middleware settlement-stage naming — align across entry verticals
 
-The queue design (`QUEUE.md`) settled a clearer convention for the two
-settlement middleware stages; propagate it to the other verticals. The stages
-form a matched before/after pair sharing one object:
+Every implemented port renamed the stage classes and their methods. Two documents
+still name stage 7 `Terminated`.
 
-- **Stage 6 — pre-action gerund ("about to do the irreversible thing"):**
-  Http/gRPC `SendingResponse`, Queue `SettlingResult`, Cli `ProcessExiting`.
-- **Stage 7 — post-action past participle ("it happened"):**
-  Http/gRPC `ResponseSent`, Queue `ResultSettled`. **Cli has no stage 7** — the
-  process is dead after exit, so nothing can run afterward; `ProcessExiting` is
-  its stage-6 equivalent, not a terminal stage.
-
-This also regularizes the framework's dominant Object+PastParticiple stage
-convention (`RequestReceived`, `RouteMatched`, `ThrowableCaught`, …); the old
-`Terminated`/`Exited` were the objectless outliers.
-
-**Each middleware method matches its stage type name** (e.g. `ResponseSent` →
-`responseSent()`), so one class can implement multiple middleware stages without
-method collisions — so the method renames alongside the type.
-
-Pending work (docs + the terminal middleware stage classes **and their methods**
-in every port — PHP, Java, TypeScript, Go, Python):
-
-- [ ] gRPC/Http: rename stage 7 type `Terminated` → `ResponseSent` (+ method) in
-      `GRPC.md`, `GRPC_IMPLEMENTATION.md`, and each port's stage class. Keep
-      `SendingResponse` for stage 6.
-- [ ] Cli: rename `Exited` → `ProcessExiting` (+ method); it is the stage-6
-      equivalent (there is no post-exit stage — the process is dead).
-- [ ] Once gRPC is renamed, update the gRPC `Terminated` reference in `QUEUE.md`
-      (the `Deferred` bridge host-hook list) to the new name.
+- [valkyrjaio/architecture#129](https://github.com/valkyrjaio/architecture/issues/129)
 
 ## README alignment and audit — every port
 

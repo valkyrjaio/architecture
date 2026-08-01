@@ -116,31 +116,12 @@ stream-null guard, `MarshalUriFactory`/`UriFactory`/`Header`/`Value`/`Cookie`/
 `RedirectResponse`/`JsonServerRequest` conditions, and the redundant `usedA` guard
 in `CheckCommandForTypoMiddleware.similarText`).
 
-### Response cache rework — port from PHP (DONE in PHP)
+### Response cache rework — port from PHP
 
-**This has been completed in PHP and needs to be ported to Java.** The response
-cache no longer generates/loads a source file; it serializes the response to JSON
-and reconstructs it. Apply the same change here:
+PHP serializes the response to JSON. This port still generates and loads a source
+file.
 
-1. **`http/server/CacheResponseMiddleware`** — on `terminated()`, serialize the
-   response to JSON: `class`, `statusCode`, `reasonPhrase`, `headers` (list of
-   `{name, value}`), `body`, and `uri` (redirects only). On `requestReceived()`,
-   reconstruct from the JSON by instantiating the stored response class with only
-   its `headers` argument (the one constructor arg shared by every response
-   subclass — all extend `Response`) and applying `withStatusCode` /
-   `withReasonPhrase` / `withBody` (+ `withUri` for redirects). No source-file
-   generation, no class-loading of a generated file. Keep the TTL/expiry/validity
-   logic as-is.
-2. **Delete** the now-unused file-generation classes:
-   - `http/server/generator/ResponseFileGenerator.java` (+ `contract/ResponseFileGeneratorContract`)
-   - `support/generator/abstract_/FileGenerator.java` (+ `contract/FileGeneratorContract`
-     and its status enum) — only consumed by `ResponseFileGenerator`
-   - their tests, and any README "File Generation" section.
-
-The existing `CacheResponseMiddleware` test is behavioral (round-trips every
-response type through the cache) and should pass unchanged once the JSON rework is
-in place. PHP reference commit: `[Http] Replace response-cache file generation with
-JSON serialization and remove FileGenerator.` (see `architecture/php/TODO.md`).
+- [valkyrjaio/valkyrja-java#102](https://github.com/valkyrjaio/valkyrja-java/issues/102)
 
 ### Incomplete ports (PHP → Java)
 
@@ -148,12 +129,9 @@ These exist in the PHP framework but are not yet ported to Java. Test coverage
 currently targets only the code that exists in the Java source; finish the port
 (with tests) to reach parity.
 
-- **Event** — missing vs PHP:
-  - `attribute/` — attribute-based listener support (`Listener`, `ListenerHandler`)
-  - `collector/` — `AttributesListenerCollector`
-  - event `ServiceProvider` (only `EventComponentProvider` exists)
-  - concrete event throwables — `EventInvalidArgumentException` /
-    `EventRuntimeException` are abstract with no concrete subclass yet
+- **Event** — the annotations, the collector, the service provider, and the concrete
+  throwables are missing.
+  [valkyrjaio/valkyrja-java#103](https://github.com/valkyrjaio/valkyrja-java/issues/103)
 
 ### Test-port status
 
