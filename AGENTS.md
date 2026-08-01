@@ -313,6 +313,66 @@ naming (`*Enum` / `*Trait` / `*Contract`) — the type rule supersedes the fixtu
 marker, just as the segment does for `Abstract`/`Enum`/`Trait` above. No class
 carries an `@author` docblock.
 
+### What a data object holds
+
+A data object holds data and the behavior of its own state. A message, a model,
+an entity, a type, and a config are all data objects.
+
+A data object does not hold a static method. A static method describes the type,
+not the state, so it belongs to another class. Three rules place it:
+
+- A **factory** takes construction. A named constructor such as `create` or
+  `fromArray` belongs on the `*Factory` for that type.
+- A **support class** takes a calculation or a rendering.
+- An **enum** is exempt. Every language gives an enum static members of its own
+  (PHP `from`, `cases`), and a method on an enum case reads that case.
+
+One static method stays on the data object: a named constructor that returns its
+own type. `Header::fromValue()` returns a `Header`, so `Header` keeps it. The
+rule removes a static method that returns something else — a field name, a table
+name, a format, or a validation result.
+
+```php
+// Wrong — the trait puts a rendering on the entity, and it returns a string.
+trait Dateable
+{
+    public static function getFormattedDate(): string
+    {
+        return DateFactory::getFormattedDate(static::getDateFormat());
+    }
+}
+```
+
+```php
+// Right — the factory renders the date. The entity does not repeat the factory.
+$date = DateFactory::getFormattedDate(DateFormat::DEFAULT);
+```
+
+```php
+// Right — the named constructor returns its own type, so the type keeps it.
+class StringT extends Type implements StringContract
+{
+    public static function fromValue(mixed $value): static
+    {
+        return new static(StringFactory::fromMixed($value));
+    }
+}
+```
+
+The rule reaches every segment that puts a static method on a data object. A
+`Contract\` interface declares the method, an `Abstract\` base holds a default,
+and a `Trait\` trait mixes the method in. Each one obeys the rule.
+
+Static metadata is the hard case. A method such as `getTableName` describes the
+type and carries no instance state. [`STATIC_METHODS.md`](STATIC_METHODS.md)
+records the replacement: a metadata registry that the developer fills in a
+service provider, keyed by class token.
+
+Warning: a call on a *variable* class does not port, whatever the method returns.
+PHP writes `$type::fromValue($value)`, and no other Valkyrja language can. The
+exemption above covers the declaration, not that call.
+[`STATIC_METHODS.md`](STATIC_METHODS.md) owns the replacement for it.
+
 ### Binding-key constants
 
 Per-component constants files (never one central file). String format
