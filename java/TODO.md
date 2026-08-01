@@ -15,106 +15,32 @@
 
 ## TODOs
 
-Missing badges for scrutinizer
+### Missing badges
+
+Only the Scrutinizer badge is absent, and Scrutinizer may not apply to a Java port.
+
+- [valkyrjaio/valkyrja-java#109](https://github.com/valkyrjaio/valkyrja-java/issues/109)
 
 ### Update the repo description once gRPC and Queue land
 
-`valkyrja-java`'s GitHub About text still reads "Valkyrja is a fast, light, and
-robust Java framework for web and console applications" — it names the two entry
-points that existed when it was written. Once **both** gRPC and Queue are
-implemented in this port, change it to:
+The About text is wrong today in a way this file did not record: it names PHP, not
+Java, and it lists three protocols rather than four.
 
-> Valkyrja is a fast, light, and robust Java framework for multi-protocol
-> applications — HTTP, CLI, gRPC, and queues
-
-The abstract head ("multi-protocol applications") is meant to survive protocol
-five; the enumerated tail is what makes it concrete today. Do not apply it before
-both protocols land — the description would advertise what the port cannot do.
-
-Surfaces to change together:
-
-- **GitHub About** on `valkyrja-java` — the sentence above, verbatim.
-- **`README.md` line 7** — no adjectives here; the mythology paragraph two lines
-  below already carries "Fast, light, and robust":
-  `[Valkyrja][Valkyrja url] is a Java framework for multi-protocol applications — HTTP, CLI, gRPC, and queues.`
-- **"What's Included"** — the "HTTP and CLI kernels" bullet, and every other
-  "HTTP and CLI" pairing in that list, must account for all four protocols.
-
-The org profile (`.github/profile/README.md` and `FULL_README.md`) carries the same
-sentence without the language word. It is shared across every port, so it changes
-only once **all** of them have both protocols — whichever port lands last owns
-that edit.
+- [valkyrjaio/valkyrja-java#107](https://github.com/valkyrjaio/valkyrja-java/issues/107)
 
 ### Cross-language testing-gap audit
 
-Compare this port's test suite against the other languages' and either close each
-difference or record it in `AGENTS.md` as deliberate. Out of scope for the work
-that prompted it; tracked here so it is not lost.
+The two known `sindri-java` gaps are closed. The rest of the suite has never been
+compared against PHP's.
 
-Prompted by a concrete miss: `sindri-java`'s golden snapshot never exercised the
-dynamic-route regex path, so a framework regex-format change rode through a
-dependency bump silently, while `sindri-ts` caught the equivalent change at once
-([sindri-java#54](https://github.com/valkyrjaio/sindri-java/pull/54)). Only that
-single gap was checked across ports — nobody has compared the suites broadly.
-
-What to look for:
-
-- Behavior a sibling port asserts that this one does not.
-- An assertion pinned to a fragment where a sibling pins the whole value — a
-  fragment survives the framing around it changing, which is exactly how the miss
-  above happened.
-- A generator, adapter, or component carrying snapshot/branch coverage on one
-  side and none here.
-- Test tooling that differs: what the static analyzers and formatters actually
-  cover, and whether the test tree is inside or outside that scope.
-
-Not every difference is a defect — some are forced by the language. Read the
-per-language notes in `AGENTS.md` before "aligning" anything; the dynamic route
-regex framing is the worked example (PHP must keep its PCRE delimiters, every
-other port must not).
-
-Known starting point: the two known `sindri-java` gaps are closed — the golden now
-feeds its dynamic route a `Processor`-computed regex with an end-to-end pin
-alongside it, and the gRPC generator has a golden like the other four. The rest of
-the suite has never been compared against PHP's.
+- [valkyrjaio/valkyrja-java#106](https://github.com/valkyrjaio/valkyrja-java/issues/106)
 
 ### Root build rewrites the standalone CI builds (starter app)
 
-In `valkyrja-starter-app-java`, `./gradlew useLatestVersions` at the root text-replaces version
-strings into all six standalone `.github/ci/*/build.gradle.kts` files — separate Gradle builds the
-root project does not own. The root's own `dependencyUpdates` report aggregates *every* project's
-dependencies, not just its own, so a single bad candidate there propagates to all six files at
-once.
+The filter gap is fixed. The coupling remains: one root-level miss reaches all six
+standalone CI builds at once.
 
-That is exactly how `io.netty:netty-codec-http:5.0.0.Alpha2` reached every CI build from one
-unfiltered report ([starter-app-java#53](https://github.com/valkyrjaio/valkyrja-starter-app-java/pull/53)).
-The filter gap itself is fixed —
-[#54](https://github.com/valkyrjaio/valkyrja-starter-app-java/pull/54) hoisted
-`rejectVersionIf` out of `subprojects { }` into `allprojects { }`, so the root's aggregate report is
-filtered too and prereleases no longer ride in this way. The coupling is what remains, and it is why
-a single root-level miss had a six-file blast radius rather than a one-file one.
-
-Decide whether the CI builds should be updated only by their own `useLatestVersions` runs — the
-update-dependencies workflow already visits each `.github/ci/*` directory separately, so the root's
-incidental rewrite is redundant as well as wide. Note that `app/build.gradle.kts` is *not* caught by
-it (`:app` has its own filtered report), so the blast radius is specifically the CI directories.
-
-### Branch coverage in CI
-
-JaCoCo already measures **branch coverage** (its `BRANCH` counter), not just line
-coverage. Add/raise the coverage gate to require **100% branch coverage** (every
-`if`/ternary/`&&`/`||`/`switch` arm exercised both ways), not only 100% line
-coverage — a line can be fully covered while one side of a condition never runs.
-PHP is doing the equivalent via Cobertura `branch-rate` (see `architecture/php/TODO.md`).
-
-The branch-coverage pass has been completed for `valkyrja`: **1870/1872 branches
-(99.893%)**, with the only remaining gaps being the 2 irreducible branches listed
-under "Known unreachable branches" below. Several genuinely-dead branches were removed
-during the pass rather than left uncovered (`Answer.isValidResponse`,
-`QuestionWriter.writeQuestion`, `Response.sendHttpLine`, `UploadedFile.moveTo`'s
-stream-null guard, `MarshalUriFactory`/`UriFactory`/`Header`/`Value`/`Cookie`/
-`RedirectResponse`/`JsonServerRequest` conditions, and the redundant `usedA` guard
-in `CheckCommandForTypoMiddleware.similarText`).
+- [valkyrjaio/valkyrja-starter-app-java#88](https://github.com/valkyrjaio/valkyrja-starter-app-java/issues/88)
 
 ### Response cache rework — port from PHP
 
@@ -149,11 +75,10 @@ grouped tests (`ConcreteParamCollectionsTest`, `TypedResponsesTest`,
 `OutputVariantsTest`, `OptionParameterSubclassesTest`, the per-module
 `*ExceptionTest`s) were split out and removed. Suite: 1629 tests / 435 files.
 
-**Deferred — no-bytecode classes.** The **146 pure interfaces** (abstract methods
-only) and **21 annotation markers** (`@interface`) have no executable code for
-JaCoCo to measure. PHP still has a test file per class, so eventually add
-structural/contract tests for these too (assert method signatures / annotation
-presence) to fully mirror PHP's per-class layout — not yet done.
+**Deferred — no-bytecode classes.** The **146 pure interfaces** and the **21
+annotation markers** have no executable code for JaCoCo to measure, so neither group
+has a test file.
+[valkyrjaio/valkyrja-java#110](https://github.com/valkyrjaio/valkyrja-java/issues/110)
 
 Note: Java static methods are not polymorphic, so PHP's static-override test
 fixtures (`WorkerHttpClass`, `CliClass`, `AppExceptionHandlerClass`) do not
@@ -242,31 +167,18 @@ were replaced with explicit ordered-map loops.
 
 ## Sindri
 
-- Ship a standalone, downloadable executable on each release so Sindri can be
-  used without adding it as a build dependency.
-    - Java: build a runnable **fat/uber jar** from `bin/sindri` (Gradle shadow
-      plugin, or the `jar` task with a `Main-Class` manifest and bundled
-      dependencies) and attach it to the GitHub release as a release asset so it
-      can be downloaded and run directly (`java -jar sindri.jar ...`).
-    - This mirrors PHP shipping a **Phar** and TypeScript shipping a standalone
-      binary on release — see each language's `TODO.md` for the per-language task.
+### Ship a standalone executable on each release
 
-- **(Optional) Move Sindri into an isolated `.github/ci/sindri/` build in the
-  application**, like the other CI tools (`junit`, `errorprone`, …), instead of
-  wiring it into the `:app` build. The application currently exposes Sindri via a
-  `sindri` dependency configuration + `JavaExec` tasks (`./gradlew sindri` /
-  `sindriHttp` / `sindriCli`) in `app/build.gradle.kts`.
-    - Java: low risk — Sindri parses source **syntactically** (no symbol solver),
-      so it never needs the app's compile/runtime classpath; an isolated build just
-      needs its own `io.valkyrja:sindri` dependency and a task whose `workingDir`
-      points at the app module so it finds `Config.java` and writes the `App*Data`
-      files in place. Verify the config path resolves from the isolated build dir.
-    - PHP: **needs verification first.** An isolated `ci/sindri` is a separate
-      Composer project, so it would not have the application's autoload / installed
-      dependencies on its include path, and `bin/sindri` may fail to locate the app
-      config or resolve provider/controller classes referenced from it. Confirm
-      Sindri can find and read the right config from outside the app's vendor tree
-      before adopting this layout in PHP.
+Java builds a runnable fat jar. No release carries a release asset today.
+
+- [valkyrjaio/sindri-java#90](https://github.com/valkyrjaio/sindri-java/issues/90)
+
+### (Optional) Move Sindri into an isolated `.github/ci/sindri/` build
+
+Low risk in Java, because Sindri parses source syntactically and never needs the app's
+classpath. PHP needs verification first.
+
+- [valkyrjaio/valkyrja-starter-app-java#90](https://github.com/valkyrjaio/valkyrja-starter-app-java/issues/90)
 
 ### Sindri generation bugs found comparing Java output to PHP (June 2026)
 
@@ -289,7 +201,8 @@ output badly diverging from PHP. Fixes are being made in `java/sindri`:
   (asserts the `DynamicRoute` supplier, the `Regex.ALPHA`→`[a-zA-Z]+` resolution, the computed
   `(?<value>…)` regex, populated `dynamicPaths()`/`regexes()`, and that the whole generated
   file parses as valid Java). **App port gap (separate):** the app's `HomeController` still
-  lacks the dynamic route PHP has — add it to the Java app to get matching output.
+  lacks the dynamic route PHP has.
+  [valkyrjaio/valkyrja-starter-app-java#89](https://github.com/valkyrjaio/valkyrja-starter-app-java/issues/89)
 - **[FIXED] `AppContainerData` missing framework providers (~36 of ~40 callbacks).**
   `fqnToFilePath` only resolved app-namespace source, so framework providers
   (`io.valkyrja.*`, reached via `HttpApplicationComponentProvider`) were skipped, and
@@ -301,44 +214,21 @@ output badly diverging from PHP. Fixes are being made in `java/sindri`:
   to Sindri's runtime classpath and to the application's `sindri` task configuration.
   Unit-verified in `resolvesFrameworkProvidersFromClasspath` (app source in a temp dir +
   a "framework" provider, two levels deep, resolved from the test classpath).
-  **Caveat:** not yet run end-to-end against the *real* valkyrja sources — that needs the
-  app to regenerate with this Sindri build, which happens after a Sindri release. The real
-  sources jar is confirmed on the classpath and contains the provider `.java`.
+  **Caveat:** not yet run end-to-end against the *real* valkyrja sources.
+  [valkyrjaio/sindri-java#91](https://github.com/valkyrjaio/sindri-java/issues/91)
 
 ### Test gaps to strengthen in ALL THREE languages (Java/PHP/TS)
 
-The bugs above slipped through because the end-to-end generate test
-(`GenerateDataFromConfigCommandTest`) only asserted the four `App*Data` files **exist**,
-not their **content** — so non-compiling/empty output passed. When fixing each bug,
-strengthen tests to assert the generated content, and mirror these in PHP and TS:
+The bugs above slipped through because the end-to-end generate test asserted only that
+the four `App*Data` files **exist**, not their content. Java has since strengthened its
+assertions. Mirror them in PHP and TypeScript.
 
-- **Assert generated `routes()` content**: a real `() -> new Route(...)` supplier with
-  the handler method-ref and request methods (not a bare name); the bare-name placeholder
-  must never appear. (Done in Java's `generatesExpectedHttpRoutingContent`.)
-- **Assert `paths()` includes `HEAD`** for default-method routes. (Done in Java.)
-- **Assert `AppContainerData` callbacks include framework-provider publishers**, not just
-  app-local ones — requires a fixture whose component provider pulls in a "framework"
-  provider resolved from outside the app namespace. (Done in Java's
-  `resolvesFrameworkProvidersFromClasspath`, including a two-levels-deep provider to guard
-  the recursion depth.)
-- **Assert dynamic-route output**: `DynamicRoute` supplier, populated `dynamicPaths()` and
-  `regexes()`, and that `Regex.*` parameter constants resolve. (Done in Java's
-  `generatesExpectedDynamicRouteContent`.)
-- **Parse the generated file** in a test so malformed output / bad escaping is caught
-  structurally, not just by substring. (Done in Java via `StaticJavaParser.parse` on the
-  generated `AppHttpRoutingData`; ideally extend to a full compile, and to PHP/TS.)
+- [valkyrjaio/sindri-php#211](https://github.com/valkyrjaio/sindri-php/issues/211)
+- [valkyrjaio/sindri-ts#105](https://github.com/valkyrjaio/sindri-ts/issues/105)
 
 ## VLID — cross-language parity
 
-**Cross-language change — mirror in every port (Go, PHP, Python, TypeScript).**
-VLID (`Type/Vlid`) is PHP-only today; port it here (code + tests). It is the source
-of the queue envelope `id` (a **VLID V1** — the longest, most-random version). Lock
-cross-language parity:
+VLID is PHP-only today. Port it here, then assert the non-random portion against the
+shared PHP fixture.
 
-- Port `Type/Vlid`, then add a conformance test: generate a VLID for **each version
-  V1–V4** from a **fixed input timestamp**.
-- Assert this port produces a byte-identical **non-random portion** vs the PHP
-  fixture — the encoded **microsecond timestamp** and the **version digit at
-  position 14** must match exactly. The random bits differ by design; exclude them.
-- This gate prevents timestamp-encoding / version-digit-placement drift from
-  silently breaking cross-language `id` interop.
+- [valkyrjaio/valkyrja-java#105](https://github.com/valkyrjaio/valkyrja-java/issues/105)
