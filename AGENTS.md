@@ -487,11 +487,15 @@ public static function publishRedisConfig(ContainerContract $container): void
 ### Method naming
 
 The prefix on a method name tells a reader what the method does, and whether the caller's
-own value changes. `validate` throws, `isValid` reports, `parse` changes the argument,
-`getParsed` returns a copy, `set` modifies the host, and `with` returns a clone.
+own value changes. `validate` reports a failure, `isValid` returns a boolean, `parse`
+changes the argument, `getParsed` returns a copy, `set` modifies the host, and `with`
+returns a clone.
 
-The full table, the per-language spelling, and the warning about in-place modification in
-a language without pass-by-reference: [`METHOD_NAMING.md`](METHOD_NAMING.md).
+Two per-language caveats matter most. A language without pass-by-reference cannot honor
+the in-place family for an immutable type. **Go reports a failure with a returned
+`error`, not a throw**, so a Go signature carries an extra return value.
+
+The full table and the per-language spelling: [`METHOD_NAMING.md`](METHOD_NAMING.md).
 
 ### Binding-key constants
 

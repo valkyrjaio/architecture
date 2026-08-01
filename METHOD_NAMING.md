@@ -22,11 +22,13 @@ A validation method examines a value and reports the result. It never changes th
 
 | Prefix | The method does | On failure |
 |---|---|---|
-| `validate{Something}` | Makes sure the value **is** valid | Throws |
-| `invalidate{Something}` | Makes sure the value **is not** valid | Throws |
+| `validate{Something}` | Makes sure the value **is** valid | Reports the failure |
+| `invalidate{Something}` | Makes sure the value **is not** valid | Reports the failure |
 | `isValid{Something}` | Checks whether the value is valid | Returns `false` |
 
-`validate` and `invalidate` return nothing. `isValid` returns a boolean.
+`isValid` returns a boolean. `validate` and `invalidate` report a failure the way the
+language does it — they throw in PHP, Java, TypeScript, Python, and Kotlin, and they
+return an `error` in Go. See [§4](#4-go-returns-an-error-it-does-not-throw).
 
 **Warning: `invalidate` does not mean "make invalid".** In many codebases `invalidate`
 clears a cache or expires a token. It does not do that here. It asserts that a value is
@@ -112,10 +114,13 @@ The convention is the same in every port. Only the casing and the parameter form
 | TypeScript | camelCase | `isValidPath` | `getParsedPath` | `withPath(): this` | Mutable argument only |
 | Kotlin | camelCase | `isValidPath` | `getParsedPath` | `withPath()` returns its own type | Mutable argument only |
 | Python | snake_case | `is_valid_path` | `get_parsed_path` | `with_path()` | Mutable argument only |
-| Go | PascalCase when exported | `IsValidPath` | `GetParsedPath` | `WithPath()` returns a new value | `ParsePath(path *string)` |
+| Go | PascalCase when exported | `IsValidPath` | `GetParsedPath` | `WithPath()` returns a new value | `ParsePath(path *string) error` |
 
-Two notes on the edges of the table.
+Three notes on the edges of the table.
 
+- **Go reports a failure differently.** The table shows the name, not the full signature.
+  Any Go method above that can fail also returns an `error`, which changes its return
+  type. [§4](#4-go-returns-an-error-it-does-not-throw) gives the signatures.
 - **Go exports by capitalization.** An exported method starts with an upper-case letter,
   so every prefix above is capitalized. Go's own idiom usually drops a `Get` prefix
   (`x.Name()` rather than `x.GetName()`). Valkyrja does not follow that idiom, because
@@ -155,7 +160,47 @@ it reads as redundant. Give the tag a description so the rule keeps it.
 
 ---
 
-## 4. Examples
+## 4. Go returns an error, it does not throw
+
+**Warning: Go has no exceptions. A Go method reports a failure with a returned `error`,
+so its signature does not match the other ports.**
+
+The prefix does not change. `ValidatePath` still means "make sure the path is valid, and
+report a failure". Only the mechanism changes.
+
+| Prefix | PHP, Java, TypeScript, Python, Kotlin | Go |
+|---|---|---|
+| `validate{Something}` | `validatePath(string $path): void`, throws | `ValidatePath(path string) error` |
+| `invalidate{Something}` | `invalidatePath(string $path): void`, throws | `InvalidatePath(path string) error` |
+| `isValid{Something}` | `isValidPath(string $path): bool` | `IsValidPath(path string) bool` |
+
+`isValid` is the same in every port, because a boolean is a boolean.
+
+Two rules follow from this.
+
+- **A `get` method that can fail returns a value and an error in Go.** PHP writes
+  `getParsedPath(string $path): string` and throws. Go writes
+  `GetParsedPath(path string) (string, error)`. A caller must be able to see the failure
+  in the signature.
+- **An in-place method that can fail returns an error.** PHP writes
+  `parsePath(string &$path): void` and throws. Go writes `ParsePath(path *string) error`.
+
+The naming for the failure value differs too. A concrete throwable is `*Exception` in
+every other port and **`*Error`** in Go. See [`THROWABLES.md`](THROWABLES.md).
+
+```php
+// Right — PHP reports the failure by throwing.
+public function getParsedPath(string $path): string;   // throws UriInvalidPathException
+```
+
+```go
+// Right — Go reports the same failure in the return values.
+func GetParsedPath(path string) (string, error)
+```
+
+---
+
+## 5. Examples
 
 Show the wrong form first, then the right form. PHP is the reference implementation, so
 every example is PHP unless a language spells it differently.
@@ -203,7 +248,7 @@ public function setPath(string $path): void
 }
 ```
 
-Validation — `validate` throws, `isValid` reports:
+Validation — `validate` reports a failure, `isValid` returns a boolean:
 
 ```php
 // Right — the prefix says which one the caller gets.
@@ -212,9 +257,16 @@ public function validatePath(string $path): void;   // throws UriInvalidPathExce
 public function isValidPath(string $path): bool;    // returns false
 ```
 
+```go
+// Right — Go reports the same failure as a returned error.
+func ValidatePath(path string) error
+
+func IsValidPath(path string) bool
+```
+
 ---
 
-## 5. What this document does not cover
+## 6. What this document does not cover
 
 Three naming rules live elsewhere. They govern a different axis and do not repeat here.
 
