@@ -98,24 +98,10 @@ PHP and Java are enforcing the same (see their `TODO.md` files).
 
 ### Centralize contract type guards (the `instanceof` equivalent)
 
-Runtime discrimination between contracts is done with inline structural checks —
-`'getStatusCode' in x`, `'getPath' in x`, `'writeMessages' in x` — scattered
-across dispatchers/handlers. Because TS has no `instanceof` for interface
-contracts, each of these is really an ad-hoc `instanceof`. Provide **one reusable
-guard per contract** (e.g. `ResponseContract.instanceOf`,
-`ServerRequestContract.instanceOf`, `RouteContract.instanceOf`,
-`OutputContract.instanceOf` — the `Contract.instanceOf(value)` namespace helper
-pattern already used by some contracts) and use it everywhere, so the
-discriminating property lives in a single place.
+Four dispatch sites still discriminate a contract with an inline structural check.
+One shared guard per contract keeps the discriminating property in one place.
 
-This is a correctness issue, not just tidiness: `RequestHandler.dispatchRouter`
-detected a returned response with `'getPath' in requestAfterMiddleware`, but a
-`ServerRequest` has no `getPath`, so **every** request was misclassified as a
-response and returned without being dispatched (fixed in `valkyrja-ts#82` by
-checking `'getStatusCode'`). A shared `ResponseContract.instanceOf` guard would
-have kept the one true check in one place and prevented the bug class. Audit
-`Http`/`Cli` dispatch + middleware handlers for the same inline-`in` pattern and
-replace them with the contract guards.
+- [valkyrjaio/valkyrja-ts#135](https://github.com/valkyrjaio/valkyrja-ts/issues/135)
 
 ## Port gaps (found while porting the Application tests)
 
@@ -126,6 +112,7 @@ matches PHP ~1:1.
 - **Event module not ported.** `ApplicationComponentProvider.getComponentProviders()`
   returns `[Container]` (PHP: `[Container, Event]`). No `EventComponentProvider`.
   Kernel `getProviders()` for the default config yields 2 providers (PHP: 3).
+  [valkyrjaio/valkyrja-ts#136](https://github.com/valkyrjaio/valkyrja-ts/issues/136)
 - **Log module not ported.** PHP's `CliApplicationComponentProvider` /
   `HttpApplicationComponentProvider` include `LogComponentProvider`; TS does not.
 - **View module not ported.** PHP's `HttpApplicationComponentProvider` includes
@@ -169,29 +156,19 @@ matches PHP ~1:1.
   `Manager/ProvidersAwareTest` is covered by the `Container` test instead.
 - **No `Provides` trait** — TS service providers implement `ServiceProviderContract`
   directly; PHP's `Provider/ProvidesTest` has no TS counterpart.
-- **`ChildContainer` does not inherit singleton *bindings* from the parent.** It
-  overrides `isAlias`/`isService`/`isSingletonInstance`/`isDeferred`/`isPublished`
-  (and the `get*WithoutChecks`) to fall back to the parent, but **not**
-  `isSingletonBinding` — so a `bindSingleton` on the parent is visible to the
-  child as a *service*, not a singleton binding. PHP inherits the binding.
-- **`Container.getFallback` ignores `InvalidReferenceMode`** — it always throws
-  `ContainerInvalidReferenceException`. PHP's `NEW_INSTANCE_OR_THROW_EXCEPTION`
-  mode instead tries to instantiate the requested class. The `mode` parameter is
-  currently a no-op.
+- **`ChildContainer` does not inherit singleton *bindings* from the parent.** A
+  parent `bindSingleton` is rebuilt on every `get` through the child.
+  [valkyrjaio/valkyrja-ts#133](https://github.com/valkyrjaio/valkyrja-ts/issues/133)
+- **`Container.getFallback` ignores `InvalidReferenceMode`** — the `mode` parameter
+  is a no-op, and the method always throws.
+  [valkyrjaio/valkyrja-ts#134](https://github.com/valkyrjaio/valkyrja-ts/issues/134)
 
 ### Event namespace (largely unported)
 
-Only `EventData` and the `ListenerContract` / `ListenerProviderContract`
-interfaces exist in TS. Missing (PHP has tests for all of these, with no TS
-target yet):
+Six of the ten pieces are missing. PHP has tests for all of them, with no TypeScript
+target yet.
 
-- `Listener` data class (`Data/Listener`)
-- `ListenerCollection` (`Collection/`)
-- the Event **Dispatcher** (`Dispatcher/`)
-- attribute-based listener **Collector** (`Collector/AttributesListenerCollector`)
-- Event **ComponentProvider** / **ServiceProvider** (`Provider/`) — this is the
-  missing `EventComponentProvider` referenced under the Application gap above
-- `Listener` / `ListenerHandler` **attributes** (`Attribute/`) — no TS attributes
+- [valkyrjaio/valkyrja-ts#136](https://github.com/valkyrjaio/valkyrja-ts/issues/136)
 
 ## Sindri
 
