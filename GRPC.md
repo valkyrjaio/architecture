@@ -280,7 +280,9 @@ drains its messages to the wire — lazily, through `call.cancellable(...)`, so 
 messages one at a time, and pausing between pulls whenever the transport is not ready to accept the next one (see
 [Worker Adapters](#worker-adapters)) — then closes with the status. `maxInboundMessages` caps the **inbound** buffer and
 rejects an over-limit call with `RESOURCE_EXHAUSTED`; it says nothing about the outbound direction, which is bounded by
-the transport's writability instead. There is no per-call threading: the handler runs on the transport's callback path.
+the transport's writability instead. The handler does not run on the transport's callback path. The adapter keeps that
+path free while the handler runs, exactly as the streaming model does — see [Worker Adapters](#worker-adapters) for the
+obligation and the reason.
 
 This covers unary, server-streaming, and client-streaming. A bidirectional method always uses the streaming model below,
 even when a particular client happens to half-close before reading (a "batch" exchange) — the model is chosen from the
@@ -290,7 +292,8 @@ method's declared shape, not the client's runtime behavior.
 
 Buffer-then-dispatch cannot serve an *interactive* bidirectional call: the client waits for a server reply before
 sending its next message and never half-closes early, so a handler that only runs after half-close would deadlock until
-the deadline. A bidirectional method is therefore dispatched **immediately**, before half-close, and three things change:
+the deadline. A bidirectional method is therefore dispatched **immediately**, before half-close. Two things then differ
+from the buffered model, and two shared rules take a different shape:
 
 - **Inbound is a live stream.** `getMessages()` is backed by a bounded blocking queue that the transport fills as
   messages arrive; iterating it yields each message as it arrives and ends when the client half-closes. Here
@@ -308,12 +311,13 @@ the deadline. A bidirectional method is therefore dispatched **immediately**, be
   the sink blocks or defers the emitting unit until the transport can take more, which throttles the handler at its
   next `send` exactly as the pull model throttles it at its next yield. See
   [Worker Adapters](#worker-adapters) for the obligation and why the mechanism stays adapter-local.
-- **The handler runs on its own concurrent execution unit**, separate from the transport callback path that fills the
-  inbound queue, so reading inbound and emitting outbound proceed concurrently. Each language realizes this with its
-  native per-call primitive — a **virtual thread** in Java, a **goroutine** in Go, an **async task/coroutine** in
-  TypeScript/Python — one cheap, scheduler-managed unit per streaming call. This is deliberately unbounded (as goroutines
-  are); an app that must cap concurrent streams layers a separate limit on top rather than sharing a bounded pool, which
-  would deadlock on the blocking reads.
+- **The handler runs on its own concurrent execution unit.** Requirement 9 keeps the handler off the callback path in
+  both models. The streaming model needs the separation for a second reason: one unit reads inbound and emits outbound,
+  so both proceed concurrently with the transport callback that fills the inbound queue. Each language realizes this
+  with its native per-call primitive — a **virtual thread** in Java, a **goroutine** in Go, an **async task/coroutine**
+  in TypeScript/Python — one cheap, scheduler-managed unit per streaming call. This is deliberately unbounded (as
+  goroutines are); an app that must cap concurrent streams layers a separate limit on top rather than sharing a bounded
+  pool, which would deadlock on the blocking reads.
 
 ```
 ServiceCall (streaming additions)
@@ -590,6 +594,22 @@ Adapters bridge an external gRPC server implementation to `ServiceHandler`. The 
    **suspends** the drain until the transport signals it can take more — rather than pulling the next message and
    handing the library something it will queue. This is mandatory in **both** models: the buffered model pauses between
    pulls, the streaming model applies the same check inside the `send()` sink.
+9. **Keep the handler off the path that delivers the transport's callbacks.** The adapter dispatches the handler, then
+   returns from the callback at once, so the path stays free while the handler runs. A thread-based port gives each
+   call its own execution unit — a **virtual thread** in Java, a **goroutine** in Go. An async port awaits inside the
+   handler, which yields the event loop and keeps the path free the same way. This is mandatory in **both** models.
+
+**A handler that occupies the callback path can deadlock its own drain.** Requirement 8 tells the adapter to suspend
+the drain until the transport can take more, and most libraries deliver that readiness signal on the callback path. A
+drain that suspends on that same path blocks the signal that would resume it. The two requirements are therefore one
+design: requirement 8 states when to suspend, and requirement 9 states where, so that the suspension can end. A free
+callback path also lets a cancellation reach a running handler, and it lets an adapter run on a direct executor without
+a blocking handler stalling the event loop.
+
+**Requirement 9 is an obligation, not a mechanism**, in the same way requirement 8 is. The obligation is that the
+handler must not occupy the callback path. A thread-based port meets the obligation with a per-call execution unit; an
+async port meets it by awaiting. Neither spelling reaches the agnostic surface — `ServiceCall` exposes no threading
+control, and a port chooses the primitive its runtime already has.
 
 **Cancellation and unwritability are different conditions with opposite effects.** A cancelled call means the peer is
 gone or no longer wants the result, so the drain **ends** — iteration exits early and the call closes. An unready
@@ -751,6 +771,9 @@ The following is unavoidably per-language and per-worker, and is not part of the
   drain event, a blocking channel send, a worker's own flow-control mechanism). Unlike cancellation, no agnostic type
   wraps these — but **the obligation to honor them is portable and required**; see
   [Worker Adapters](#worker-adapters).
+- The per-call execution primitive that keeps the handler off the transport's callback path (a virtual thread, a
+  goroutine, an async task, a worker's own dispatch). As with writability, no agnostic type wraps these — but **the
+  obligation to keep the callback path free is portable and required**; see [Worker Adapters](#worker-adapters).
 
 Everything above the adapter layer — service map, middleware composition, container resolution, error mapping,
 cancellation model, context propagation, observability hooks — is standardized across all five languages.
