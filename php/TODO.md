@@ -90,7 +90,6 @@ Read [`../QUEUE.md`](../QUEUE.md) first. It carries the settled design.
 - **The five recorded Psalm findings** — [valkyrja-php#1074](https://github.com/valkyrjaio/valkyrja-php/issues/1074)
 - **The two upstream Psalm issues** — [valkyrja-php#1075](https://github.com/valkyrjaio/valkyrja-php/issues/1075)
 - **A data object for a method with more than three parameters** — [valkyrja-php#1076](https://github.com/valkyrjaio/valkyrja-php/issues/1076)
-- **Analyze the tests with PHPStan and Psalm** — [valkyrja-php#1006](https://github.com/valkyrjaio/valkyrja-php/issues/1006)
 
 ### Tooling
 
