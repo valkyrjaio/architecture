@@ -205,6 +205,12 @@ Then:
     **The documentation is part of the definition of done.** A pull request that
     changes an env constant, a config property, a container binding, or a
     contract is not complete while a `README.md` still lists the old one.
+12. **A workflow caller in GitHub Actions obeys the organization's rule on
+    secrets.** The rule forbids `secrets: inherit` and states what a caller
+    passes instead. The rule governs every repo, because each repo has its own
+    callers in `.github/workflows/ci.yml`. Read the rule before you add or edit
+    a caller:
+    [`AGENTS.md` in `valkyrjaio/.github`](https://github.com/valkyrjaio/.github/blob/26.x/AGENTS.md).
 
 ---
 
