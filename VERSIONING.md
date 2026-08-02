@@ -15,6 +15,10 @@ YY.FEATURE.PATCH        e.g. 26.6.0
 Each year gets a maintenance branch named after it — `26.x` for 2026 — and every
 stable release is cut from one of those branches, never from `master`.
 
+This document covers how a version number is built and how a release is cut. For
+how long each version line takes patches, and for the runtime that each language
+port needs, see [`VERSION_SUPPORT.md`](VERSION_SUPPORT.md).
+
 ## Why the middle component serves two roles
 
 This is calendar versioning with a semantic tail. `YY` is the major, and it only

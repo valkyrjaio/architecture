@@ -59,6 +59,7 @@ Cross-cutting architectural decisions that apply to all ports.
 | [`METHOD_NAMING.md`](METHOD_NAMING.md)           | Method name prefixes — what a method does, and whether the caller's value changes |
 | [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md)   | Commit and PR title format, conventional types, roots     |
 | [`VERSIONING.md`](VERSIONING.md)                 | Version scheme, bump mapping, release automation          |
+| [`VERSION_SUPPORT.md`](VERSION_SUPPORT.md)       | Support policy, release schedule, per-language runtimes   |
 
 Language Contracts
 ------------------
