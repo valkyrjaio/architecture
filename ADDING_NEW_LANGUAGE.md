@@ -6,7 +6,7 @@ documents, to the `template` repo, to the reusable CI workflows and rulesets in
 `.github`, to the framework/build-tool repos themselves.
 
 > **How to read this.** The body (§0–§9) is written to be **language-agnostic** —
-> it describes the process and the invariants that hold for *any* port. Concrete,
+> it describes the process and the invariants that hold for _any_ port. Concrete,
 > language-specific quirks live in the **Findings log** (§10). Wherever the body
 > says "see Findings," expect that a real language hit a wrinkle there and yours
 > might too. When you finish a port, append your own findings — this is a living
@@ -19,21 +19,21 @@ documents, to the `template` repo, to the reusable CI workflows and rulesets in
 A language port is not one repo; it is a **set of repos plus org-level wiring**.
 Before touching anything, understand the moving parts:
 
-| Piece | Where it lives | Purpose |
-|-------|----------------|---------|
-| **Architecture docs** | `architecture/<lang>/` | Layer-2 decisions, provider contracts, agent guide, TODO |
-| **Template repo** | `valkyrjaio/project-template-<lang>` | The scaffold every new repo of that language is cloned from |
-| **Reusable workflows** | `valkyrjaio/.github/.github/workflows/_*-<lang>.yml` | The CI + release machinery every repo calls |
-| **Ruleset** | `valkyrjaio/.github/rulesets/<lang>/` | Required-status-check branch protection |
-| **Framework repo** | `valkyrjaio/valkyrja-<lang>` | The runtime (zero AST/build deps) |
-| **Build tool repo** | `valkyrjaio/sindri-<lang>` (naming varies) | Dev-only cache generator (AST / compiler API) |
-| **Application repo** | `valkyrjaio/application-<lang>` (naming varies) | The runnable example app users clone; wired against the *published* framework + build tool |
-| **Entry adapters** | `entry/*` in the framework repo | Server adapters for the language's ecosystem |
-| **Org config** | `SUPPORTED_LANGUAGES` var, org secrets | Publishing credentials, language enablement |
+| Piece                  | Where it lives                                       | Purpose                                                                                    |
+| ---------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| **Architecture docs**  | `architecture/<lang>/`                               | Layer-2 decisions, provider contracts, agent guide, TODO                                   |
+| **Template repo**      | `valkyrjaio/project-template-<lang>`                 | The scaffold every new repo of that language is cloned from                                |
+| **Reusable workflows** | `valkyrjaio/.github/.github/workflows/_*-<lang>.yml` | The CI + release machinery every repo calls                                                |
+| **Ruleset**            | `valkyrjaio/.github/rulesets/<lang>/`                | Required-status-check branch protection                                                    |
+| **Framework repo**     | `valkyrjaio/valkyrja-<lang>`                         | The runtime (zero AST/build deps)                                                          |
+| **Build tool repo**    | `valkyrjaio/sindri-<lang>` (naming varies)           | Dev-only cache generator (AST / compiler API)                                              |
+| **Application repo**   | `valkyrjaio/application-<lang>` (naming varies)      | The runnable example app users clone; wired against the _published_ framework + build tool |
+| **Entry adapters**     | `entry/*` in the framework repo                      | Server adapters for the language's ecosystem                                               |
+| **Org config**         | `SUPPORTED_LANGUAGES` var, org secrets               | Publishing credentials, language enablement                                                |
 
 **PHP is the reference implementation.** When any port disagrees with PHP on
 structure, naming, or tests, PHP wins unless an architecture doc says otherwise.
-For a *new* language, first pick the **closest existing port** to crib from — a
+For a _new_ language, first pick the **closest existing port** to crib from — a
 statically-typed/compiled language mirrors the compiled ports; a
 dynamic/interpreted one mirrors the interpreted ports. The `template` repos of all
 languages are near-identical in shape, so **diffing two of them is the fastest way
@@ -60,18 +60,18 @@ Then **decide and write down** (these become the Layer-2 docs in Phase 1):
 - **How code is shared across repos.** Every component repo contributes into one
   shared namespace; decide the language's mechanism for that (module/package
   system, namespace declaration, etc.). Get it right from repo #1 or you will
-  refactor every repo later. *(Some ecosystems have a subtle rule here — see
-  Findings.)*
+  refactor every repo later. _(Some ecosystems have a subtle rule here — see
+  Findings.)_
 - **Contracts mechanism** (native interface vs an abstract-base equivalent). Keep
   the `*Contract` name suffix regardless.
 - **Binding keys — string constants vs class/type references.** Decided by the
-  language's *import semantics*: **any language where merely naming a class forces
+  language's _import semantics_: **any language where merely naming a class forces
   its module to load must use string-constant keys**; only languages with a
   compile-time constant reference (no load) may use references. Get this wrong and
   the cold-start / cache design breaks.
 - **Throwable hierarchy → native roots.** Map the abstract branches onto the
-  language's native exception/error roots. Keep the parity name suffix — *though
-  the suffix word itself can differ per language (see Findings).*
+  language's native exception/error roots. Keep the parity name suffix — _though
+  the suffix word itself can differ per language (see Findings)._
 - **Structure-taxonomy segment spelling.** The taxonomy (`Contract`, `Provider`,
   `Factory`, `Constant`, `Exception`/error, `Throwable`, `Abstract`, `Enum`,
   `Type`, …) is defined in [`AGENTS.md`](AGENTS.md) §4. Spell each segment in the
@@ -91,10 +91,10 @@ Then **decide and write down** (these become the Layer-2 docs in Phase 1):
   CGI/serverless mode exists.
 
 > ⚠️ **Verify any "load-bearing" language feature actually exists and is stable
-> today.** A port was once designed around an *assumed-upcoming* language feature
+> today.** A port was once designed around an _assumed-upcoming_ language feature
 > that was later withdrawn and never shipped, forcing a rewrite of multiple docs
 > and the whole cold-start design. Before you lean on a feature, confirm it's real
-> and shipped; prefer designs that stay correct *without* the optimistic feature.
+> and shipped; prefer designs that stay correct _without_ the optimistic feature.
 > (See Findings for the specific case.)
 
 ---
@@ -110,9 +110,9 @@ canon. Create the folder with:
   examples (component/service/route/listener providers, handler markers, data
   classes).
 - **`AGENTS.md`** — the Layer-2 agent guide. Follow the sibling structure exactly:
-  *Layout & naming* → *Exceptions* → *Structure taxonomy* (segment spelling +
-  nuances) → *Tests* (framework + PHPUnit→target mapping) → *Build & CI tools*
-  (tool list, isolation, run commands) → *CI gate* → *language-specific notes*.
+  _Layout & naming_ → _Exceptions_ → _Structure taxonomy_ (segment spelling +
+  nuances) → _Tests_ (framework + PHPUnit→target mapping) → _Build & CI tools_
+  (tool list, isolation, run commands) → _CI gate_ → _language-specific notes_.
 - **`TODO.md`** — the port checklist.
 
 Then **update the shared docs** so the language is discoverable: add the language
@@ -121,7 +121,7 @@ and add its characteristics to [`PORTS.md`](PORTS.md).
 
 > **Keep the docs internally consistent.** Names drift over time and per-language
 > docs fall behind. When you add a language, reconcile stale names and broken
-> doc-links across *all* of that language's files, and make sure the
+> doc-links across _all_ of that language's files, and make sure the
 > cross-language canon and the Layer-2 doc agree — **the canon wins; fix the
 > Layer-2 doc.**
 
@@ -147,7 +147,7 @@ are a contract.**
 **each tool gets its own dependency manifest and committed lockfile, with any
 installed dependencies gitignored** — so tools never share dependency versions.
 Some ecosystems have no per-repo installed-deps directory (a global cache
-instead), and some collapse *all* tooling into a single binary so the whole
+instead), and some collapse _all_ tooling into a single binary so the whole
 `.github/ci/` reduces to one directory — see Findings.
 
 **Choose the tool set** to cover these roles, mapping from the reference
@@ -169,9 +169,9 @@ class carrying `VERSION` and `VERSION_BUILD_DATE_TIME` (the release workflow
 rewrites these). Use `.gitkeep` to hold otherwise-empty dirs.
 
 **Test skeleton.** Mirror the cross-language test taxonomy (unit / functional /
-fixtures / abstract) plus an abstract base test case — *adapted to the language's
+fixtures / abstract) plus an abstract base test case — _adapted to the language's
 idiom (some ecosystems co-locate tests rather than using a parallel tree; see
-Findings)*. **If the coverage gate can't pass an empty suite, add one tiny smoke
+Findings)_. **If the coverage gate can't pass an empty suite, add one tiny smoke
 test** so a freshly-cloned template is green.
 
 **Workflows** (`.github/workflows/`): `ci.yml` (calls the `_*-<lang>.yml`
@@ -183,7 +183,7 @@ language-specific `_*-<lang>.yml` may not exist yet — reference them and let
 pinning follow (see Phase 3 ordering note, and §8 on automatic ref-pinning).
 
 **VALIDATE THE GATE LOCALLY before committing.** Run the full CI gate through the
-root facade on the actual template. This is the one part you *can* verify without
+root facade on the actual template. This is the one part you _can_ verify without
 GitHub Actions, and it catches the real bugs (lint rules that fight idiomatic
 code, empty-suite coverage failures, task-runner env/path wiring). Don't skip it.
 
@@ -192,7 +192,7 @@ code, empty-suite coverage failures, task-runner env/path wiring). Don't skip it
 ## 4. Phase 3 — Reusable workflows in `.github`
 
 > **Base branch:** the active mainline of `.github` (and most repos) is **`NN.x`
-> (e.g. `26.x`)**, *not* `master` — `master` is frozen/stale. Branch from and PR
+> (e.g. `26.x`)**, _not_ `master` — `master` is frozen/stale. Branch from and PR
 > into `NN.x`. Confirm with `git log origin/NN.x` vs `origin/master`.
 
 **Tool workflows** — one `_<tool>-<lang>.yml` per CI tool. Mirror a sibling.
@@ -217,9 +217,9 @@ language-specific pieces:
   `_update-<lang>-info-files.yml`, `_update-<lang>-dependencies.yml`, and (if the
   ecosystem publishes — see below) `_<lang>-release-<registry>-publish.yml`.
 - The info-file and version-branch workflows rewrite the version into the info
-  file **and**, if the manifest carries a version field, the manifest. *(Some
+  file **and**, if the manifest carries a version field, the manifest. _(Some
   ecosystems encode the major version in the module path rather than a manifest
-  field — see Findings.)*
+  field — see Findings.)_
 
 **Publishing varies wildly by ecosystem** — plan for one of:
 
@@ -232,14 +232,14 @@ language-specific pieces:
   git tag, so there is no publish reusable, no credential, and no publish job.
 
 When a publish workflow exists it has **no caller in `.github`** — it is wired as
-a second **`publish` job (`needs: release`)** in each *framework/package* repo's
+a second **`publish` job (`needs: release`)** in each _framework/package_ repo's
 `release-new-version.yml`, **not** in the template (templates omit it). See the
 existing framework repos for the pattern, and Findings for per-ecosystem specifics.
 
 **Concurrency discipline (when multiple agents work in `.github` at once).** Keep
 each language branch **additive**: add `_*-<lang>.yml` and `rulesets/<lang>/`. The
 real rule for shared files (e.g. `_enforce-repo-settings.yml`): **don't co-edit a
-shared file that has *live* concurrent work touching it.** If a parallel port is
+shared file that has _live_ concurrent work touching it.** If a parallel port is
 still in flight on that file, do your shared-file edit as a separate later PR; if
 that port has already merged and never touched the file, bundling the edit into
 your PR is fine. When the local clone is shared with another agent, **work in a
@@ -269,7 +269,7 @@ sibling. Key fields:
 **Two wiring points — you need both:**
 
 1. **`_create-repo.yml`** applies `rulesets/<lang>/` to **new** repos
-   *automatically*, gated on the repo-name suffix being in the org
+   _automatically_, gated on the repo-name suffix being in the org
    **`SUPPORTED_LANGUAGES`** variable. Confirm the language suffix is in that var.
 2. **`_enforce-repo-settings.yml`** applies rulesets to **existing** repos via
    **hardcoded per-language blocks**. Add a `[[ "$REPO_NAME" =~ -<lang>$ ]]` block
@@ -277,8 +277,8 @@ sibling. Key fields:
    concurrency rule from §4.
 
 **Document the checks for contributors.** `.github/CONTRIBUTING.md` has a
-*Running CI Locally* section with a per-language subsection — fill in your
-language's (they start as *Coming soon.*) with a table of each CI check and the
+_Running CI Locally_ section with a per-language subsection — fill in your
+language's (they start as _Coming soon._) with a table of each CI check and the
 local command that runs it via the root facade. This is the human-facing twin of
 the ruleset's required status checks; **the two lists must stay in sync** (same
 checks, one for machines, one for humans).
@@ -294,8 +294,8 @@ With the scaffolding in place, port the runtime and its dev tooling. All three r
 below are **cloned from the `template`** and inherit its root facade, per-tool CI
 isolation, and workflow set.
 
-**Repo release ordering (chicken-and-egg).** The build tool depends on the *published*
-framework, and the `application` (Phase 6) depends on the *published* framework **and**
+**Repo release ordering (chicken-and-egg).** The build tool depends on the _published_
+framework, and the `application` (Phase 6) depends on the _published_ framework **and**
 build tool. So the natural order is **framework → build tool → application**. During
 development, don't wait on releases: wire the downstream repo to the local upstream with
 a composite/workspace build (the same pattern the adapters use — see
@@ -321,7 +321,7 @@ The build tool is the **dev-only cache generator** that keeps the framework AST-
 statically analyzes an application and emits pre-computed data classes the framework loads
 at boot, so dispatch needs **zero reflection**. It is **itself a Valkyrja application** —
 it uses the framework's own container and CLI — so it is built from the `template` like any
-other repo and depends on the *published* framework (it reads the framework's provider and
+other repo and depends on the _published_ framework (it reads the framework's provider and
 attribute/decorator contracts).
 
 - **Pipeline shape** (mirror the reference port's module layout): `Ast/` — readers that
@@ -394,7 +394,7 @@ fixtures.
 
 ## 8. Cross-cutting conventions (apply everywhere)
 
-- **Definition of done:** every code branch tested, all tests pass, the *full* CI
+- **Definition of done:** every code branch tested, all tests pass, the _full_ CI
   gate green, coverage 100% (line and branch where supported) and never dropping.
 - **Every source file** carries the license header; every file ends with a
   trailing newline; American English throughout.
@@ -407,7 +407,7 @@ fixtures.
   **no** trailing period. Fill the PR template (Description, Types of changes,
   Changes — bold path — em dash — what changed).
 - **Branch targeting:** improvements/fixes → lowest affected `NN.x`; features →
-  `master` *in principle*, but note `master` may be frozen and `NN.x` is the live
+  `master` _in principle_, but note `master` may be frozen and `NN.x` is the live
   line — check. Branch prefixes: `feature/`, `improvement/`, `fix/`, `docs/`.
 - **Ask before each write action** — before committing, before pushing, before
   opening a PR (creating a branch needs no prompt).
@@ -422,6 +422,7 @@ fixtures.
 ## 9. Master checklist
 
 **Phase 0 — decide**
+
 - [ ] Read the architecture canon + the closest existing language's `<lang>/`
 - [ ] Namespace root + casing; cross-repo namespace-sharing mechanism
 - [ ] Contracts mechanism; binding-key strategy (string vs reference)
@@ -431,11 +432,13 @@ fixtures.
 - [ ] **Verify every "load-bearing" language feature actually exists today**
 
 **Phase 1 — architecture docs**
+
 - [ ] `architecture/<lang>/{README,PROVIDER_CONTRACTS,AGENTS,TODO}.md`
 - [ ] Update top-level `README.md`, `AGENTS.md`, `PORTS.md` tables
 - [ ] Reconcile stale names / broken links; canon vs Layer-2 agreement
 
 **Phase 2 — template repo**
+
 - [ ] Metadata + editor/git config + version pin
 - [ ] Root facade with per-tool shortcut tasks
 - [ ] `.github/ci/<tool>/` isolation (manifest + committed lockfile, deps ignored)
@@ -443,28 +446,32 @@ fixtures.
 - [ ] All 8 workflows
 - [ ] **Run the full gate locally and make it green**
 
-**Phase 3 — .github reusables** *(branch off `NN.x`; worktree if shared)*
+**Phase 3 — .github reusables** _(branch off `NN.x`; worktree if shared)_
+
 - [ ] `_<tool>-<lang>.yml` per tool (`Z Reusable` names, lockfile-cached)
 - [ ] Release chain + `_update-<lang>-dependencies.yml` + publish workflow (if any)
 - [ ] Registry credential decided; org secret named (if publishing)
 - [ ] Additive branch; shared-file edits per the concurrency rule; PR into `NN.x`
 
 **Phase 4 — rulesets & enforcement**
+
 - [ ] `rulesets/<lang>/Required <Lang> PR Checks.json` (contexts match job names)
 - [ ] Language suffix in `SUPPORTED_LANGUAGES`
 - [ ] `-<lang>$` block in `_enforce-repo-settings.yml`
 - [ ] Fill in the `#### <Language>` section of `.github/CONTRIBUTING.md` (checks + local commands)
 
-**Phase 5 — framework/build-tool/adapters** *(order: framework → build tool → application)*
+**Phase 5 — framework/build-tool/adapters** _(order: framework → build tool → application)_
+
 - [ ] `valkyrja-<lang>` + `sindri-<lang>` from the template
 - [ ] Ports in component order, code+tests together, 100% coverage
 - [ ] `publish` job wired into the framework repo's `release-new-version.yml` (if publishing)
 - [ ] Build tool: `Ast → Generate → Generator` pipeline; cache classes extend framework base
-      data classes; `bin`/CLI distribution; depends on the *published* framework
+      data classes; `bin`/CLI distribution; depends on the _published_ framework
 - [ ] `entry/*` adapters
 
 **Phase 6 — application starter repo**
-- [ ] `application-<lang>` from the template, against *published* framework + build tool
+
+- [ ] `application-<lang>` from the template, against _published_ framework + build tool
 - [ ] Per-protocol sub-apps (`App`, `Config`+`.example`, `Controller`(+`Abstract`), `Provider` set, `Data` cache, CLI `Command`)
 - [ ] `.example` twins + install-hook seeding; `sindri:<proto>` regen shortcuts
 - [ ] `.github/ci` + workflow parity with the template
@@ -475,10 +482,11 @@ fixtures.
 ## 10. Findings log
 
 Concrete, language-specific wrinkles that arose per port. Treat each as a
-*possibility to check for* in your language — the analogous issue may or may not
+_possibility to check for_ in your language — the analogous issue may or may not
 apply. Append a section when you finish a port.
 
 ### Python
+
 - **The withdrawn-feature trap (origin of §1's warning).** The port was designed
   around **PEP 690 implicit lazy imports**, which was **withdrawn and never
   shipped**. The container/cold-start design was reframed around string-constant
@@ -504,6 +512,7 @@ apply. Append a section when you finish a port.
   `_update-workflow-refs.yml` repins on release.
 
 ### Go
+
 - **Semantic Import Versioning (SIV) is the dominant Go-only concern.** Any major
   ≥ 2 must live in the module path (`.../valkyrja-go/v26`), so the annual `NN.0.0`
   scheme forces a `/vNN` suffix in `go.mod` and every internal import; a major bump
@@ -544,4 +553,5 @@ apply. Append a section when you finish a port.
   concurrency rule).
 
 ### <next language>
+
 - _(to be added)_

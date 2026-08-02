@@ -25,7 +25,7 @@ TypeScript **deltas**. PHP is the reference implementation; mirror it.
   an `abstract class` implementing the contract; concrete classes extend it.
   Binding keys are `static readonly` string constants (no `::class` equivalent);
   provider class lists use **constructor references** (`Array<new () =>
-  Contract>`) for direct runtime instantiation.
+Contract>`) for direct runtime instantiation.
 
 ### Exceptions
 
@@ -62,14 +62,14 @@ TypeScript nuances:
   `include: ['src/**/*.ts']`).
 - **PHPUnit → Vitest mapping:**
 
-  | PHPUnit                | Vitest                       |
-  |------------------------|------------------------------|
-  | `assertSame`           | `expect().toBe`              |
-  | `assertTrue/False`     | `expect().toBe(true/false)`  |
-  | `assertInstanceOf`     | `expect().toBeInstanceOf`    |
-  | `expectException`      | `expect(() => …).toThrow`    |
-  | `@dataProvider`        | `it.each([...])`             |
-  | `setUp` / `tearDown`   | `beforeEach` / `afterEach`   |
+  | PHPUnit              | Vitest                      |
+  | -------------------- | --------------------------- |
+  | `assertSame`         | `expect().toBe`             |
+  | `assertTrue/False`   | `expect().toBe(true/false)` |
+  | `assertInstanceOf`   | `expect().toBeInstanceOf`   |
+  | `expectException`    | `expect(() => …).toThrow`   |
+  | `@dataProvider`      | `it.each([...])`            |
+  | `setUp` / `tearDown` | `beforeEach` / `afterEach`  |
 
 - **Fixtures:** reusable doubles in `tests/Tests/Fixtures/…`, named `*Fixture`
   (e.g. a `ServiceFixture` with a static `make(container, args)` factory).
@@ -84,13 +84,13 @@ Each tool runs from its own `.github/ci/<tool>/`; the root `package.json` expose
 script shortcuts (`cd .github/ci/<tool> && npm run …`). Check `package.json` for
 exact names.
 
-| Role            | Tool                       | Command(s)                          |
-|-----------------|----------------------------|-------------------------------------|
-| Type checking   | `tsc --noEmit`             | `npm run typescript` / `build`      |
-| Static analysis | ESLint + typescript-eslint | `npm run eslint` / `eslint-check`   |
+| Role            | Tool                                       | Command(s)                            |
+| --------------- | ------------------------------------------ | ------------------------------------- |
+| Type checking   | `tsc --noEmit`                             | `npm run typescript` / `build`        |
+| Static analysis | ESLint + typescript-eslint                 | `npm run eslint` / `eslint-check`     |
 | Formatting      | Prettier (Biome is the arch-preferred alt) | `npm run prettier` / `prettier-check` |
-| Dead code       | Knip                       | (as configured)                     |
-| Testing         | Vitest                     | `npm run vitest` / `vitest-coverage`|
+| Dead code       | Knip                                       | (as configured)                       |
+| Testing         | Vitest                                     | `npm run vitest` / `vitest-coverage`  |
 
 Prettier config: 4-space indent, single quotes, `printWidth: 120`, trailing
 commas `all`.

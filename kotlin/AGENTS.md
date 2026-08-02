@@ -57,7 +57,7 @@ Kotlin nuances:
 - **Reserved words → trailing underscore, for JVM/Java parity.** Use
   **`abstract_`** and **`enum_`** as package segments (matching Java, since the two
   share packages). `abstract`/`enum` are Kotlin soft-keywords and could be
-  backtick-escaped, but `_` keeps parity with the Java port. The §4 *name* rules
+  backtick-escaped, but `_` keeps parity with the Java port. The §4 _name_ rules
   still hold (no `Abstract`/`Enum` in the class name).
 - **No traits** — no `trait` segment.
 - **Attributes → annotations** in an `annotation` package.
@@ -83,13 +83,13 @@ Kotlin nuances:
 Build system is **Gradle (Kotlin DSL)** on the JVM (Java 21). Each tool runs from
 `.github/ci/<tool>/` as in the Java port.
 
-| Role                     | Tool                    | Notes                          |
-|--------------------------|-------------------------|--------------------------------|
-| Formatting               | ktlint (via Spotless)   | Kotlin official style          |
-| Static analysis / style  | detekt                  | Kotlin static analysis         |
-| Architecture enforcement | Konsist                 | ArchUnit analog                |
-| Automated migration      | OpenRewrite             | shared with Java               |
-| Testing + coverage       | JUnit 5 + Kover         | 100% line and branch           |
+| Role                     | Tool                  | Notes                  |
+| ------------------------ | --------------------- | ---------------------- |
+| Formatting               | ktlint (via Spotless) | Kotlin official style  |
+| Static analysis / style  | detekt                | Kotlin static analysis |
+| Architecture enforcement | Konsist               | ArchUnit analog        |
+| Automated migration      | OpenRewrite           | shared with Java       |
+| Testing + coverage       | JUnit 5 + Kover       | 100% line and branch   |
 
 - **Build tool (`sindri-kotlin`):** KSP (Kotlin Symbol Processing) — or the shared
   Java annotation processor — reads `@Handler`/`@Provides` and generates the four

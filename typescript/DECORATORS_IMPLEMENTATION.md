@@ -57,7 +57,7 @@ generator golden tests — see sindri-ts PR #62).
     path, left untouched): `HttpRouteAttributeReader.buildRouteExpr()` builds a
     `new DynamicRoute(...)` with arguments in an order that does NOT match the
     framework constructor (`DynamicRoute(path, name, regex, parameters, handler,
-    requestMethods, ...)`) — it omits `regex` and puts `parameters` where `regex`
+requestMethods, ...)`) — it omits `regex` and puts `parameters` where `regex`
     belongs; and `AstHttpDataFileGenerator.getRoutesAsContent()` compensates by
     **appending the computed regex as the last argument**, which is also wrong.
     These must be fixed so attribute-generated `DynamicRoute` expressions are
@@ -91,10 +91,10 @@ TypeScript supports decorators two ways; **decide and document the choice**:
 Key constraints, established during investigation:
 
 - **Sindri reads decorators from source via AST (ts-morph) — it never executes
-  them.** So the *generator* side needs no runtime decorator support; the readers
+  them.** So the _generator_ side needs no runtime decorator support; the readers
   just need the decorator syntax to be present and parseable.
 - The **app runs via `node --experimental-strip-types`**. Decorators are syntax
-  (not types), so they survive type-stripping — but whether they *execute* at
+  (not types), so they survive type-stripping — but whether they _execute_ at
   runtime depends on Node's native decorator support. **Do a small spike first**
   to determine the runtime story and pick one of:
   - **(a) Scan-only markers** — the decorators are simple no-op/metadata

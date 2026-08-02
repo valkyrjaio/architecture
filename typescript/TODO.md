@@ -73,7 +73,7 @@ matches PHP ~1:1.
   standalone `ProvidersAware`, and the `Provides` trait. Each needs a decision: mirror
   PHP, or record the difference as deliberate.
   [valkyrjaio/valkyrja-ts#149](https://github.com/valkyrjaio/valkyrja-ts/issues/149)
-- **`ChildContainer` does not inherit singleton *bindings* from the parent.** A
+- **`ChildContainer` does not inherit singleton _bindings_ from the parent.** A
   parent `bindSingleton` is rebuilt on every `get` through the child.
   [valkyrjaio/valkyrja-ts#133](https://github.com/valkyrjaio/valkyrja-ts/issues/133)
 - **`Container.getFallback` ignores `InvalidReferenceMode`** — the `mode` parameter

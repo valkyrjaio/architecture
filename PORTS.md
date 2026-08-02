@@ -194,13 +194,13 @@ frontend use without requiring it. Positioning stays: backend framework that hap
 
 ## Language Comparison Summary
 
-|              | Concurrency               | Annotations             | `class` ref       | Works without cache | Worker mode |
-|--------------|---------------------------|-------------------------|-------------------|---------------------|-------------|
-| PHP          | FPM / FrankenPHP / Swoole | ✅ Attributes            | ✅ `::class`       | ✅ always            | ✅ yes       |
-| Java         | Virtual threads (Loom)    | ✅ Annotations           | ✅ `.class`        | ✅ always            | ✅ yes       |
-| Go           | Goroutines (native)       | ❌ none                  | ❌ string const    | ✅ always            | ✅ always    |
-| Python 3.14+ | asyncio / ASGI            | ✅ Decorators (metadata) | string const      | ✅ always            | ✅ yes       |
-| TypeScript   | Node.js event loop        | ⚠️ experimental         | ✅ constructor ref | ✅ always            | ✅ yes       |
+|              | Concurrency               | Annotations              | `class` ref        | Works without cache | Worker mode |
+| ------------ | ------------------------- | ------------------------ | ------------------ | ------------------- | ----------- |
+| PHP          | FPM / FrankenPHP / Swoole | ✅ Attributes            | ✅ `::class`       | ✅ always           | ✅ yes      |
+| Java         | Virtual threads (Loom)    | ✅ Annotations           | ✅ `.class`        | ✅ always           | ✅ yes      |
+| Go           | Goroutines (native)       | ❌ none                  | ❌ string const    | ✅ always           | ✅ always   |
+| Python 3.14+ | asyncio / ASGI            | ✅ Decorators (metadata) | string const       | ✅ always           | ✅ yes      |
+| TypeScript   | Node.js event loop        | ⚠️ experimental          | ✅ constructor ref | ✅ always           | ✅ yes      |
 
 ---
 
@@ -211,13 +211,13 @@ The one place the CLI input mapping legitimately differs per port. Each language
 read from — and whether a caller is spelled in the vector at all — is language-specific. The parsed
 result is identical everywhere: a caller, a command name, positional arguments, and options.
 
-| Language   | Runtime vector        | Vector shape                  | Caller                    | Command name |
-|------------|-----------------------|-------------------------------|---------------------------|--------------|
-| PHP        | `$argv`               | `[script, ...args]`           | index 0 (the script path) | index 1      |
-| Java       | `main(String[] args)` | `[...args]`                   | app name (not in vector)  | index 0      |
-| TypeScript | `process.argv`        | `[execPath, script, ...args]` | index 0 (after slicing)   | index 1      |
-| Go         | `os.Args`             | `[program, ...args]`          | _CLI input not yet ported_ | —           |
-| Python     | `sys.argv`            | `[script, ...args]`           | _CLI input not yet ported_ | —           |
+| Language   | Runtime vector        | Vector shape                  | Caller                     | Command name |
+| ---------- | --------------------- | ----------------------------- | -------------------------- | ------------ |
+| PHP        | `$argv`               | `[script, ...args]`           | index 0 (the script path)  | index 1      |
+| Java       | `main(String[] args)` | `[...args]`                   | app name (not in vector)   | index 0      |
+| TypeScript | `process.argv`        | `[execPath, script, ...args]` | index 0 (after slicing)    | index 1      |
+| Go         | `os.Args`             | `[program, ...args]`          | _CLI input not yet ported_ | —            |
+| Python     | `sys.argv`            | `[script, ...args]`           | _CLI input not yet ported_ | —            |
 
 Go and Python already lead their vector with a path, so when their CLI input lands they follow the
 PHP row — caller at index 0, command name at index 1 — with no normalization needed.
@@ -230,7 +230,7 @@ Rules that follow from this:
   vector genuinely has no caller slot — so its factory reads the command name from index 0 and takes
   the caller from the configured application name.
 - **Match options before the command-name slot.** A port whose command-name slot can hold a real
-  user token (Java's index 0) must test `startsWith("-")` *first*, or an option spelled there is
+  user token (Java's index 0) must test `startsWith("-")` _first_, or an option spelled there is
   swallowed as the command name. Ports whose index 0 is always a path (PHP, Go, Python, and
   TypeScript after slicing) cannot reach that case, but ordering the checks the same way everywhere
   keeps the ports legible and immune to a future entry-point change.
@@ -291,7 +291,7 @@ disappears at execution. Forces the framework to work where static types are a d
 ### The Paradigm Coverage
 
 | Paradigm characteristic               | Covered by                             |
-|---------------------------------------|----------------------------------------|
+| ------------------------------------- | -------------------------------------- |
 | Dynamic typing                        | PHP, Python                            |
 | Static typing, compiled               | Java, Go, TypeScript                   |
 | Annotations / attributes              | PHP, Java, Python                      |
@@ -311,7 +311,7 @@ Because the five ports cover every paradigm combination, any future language por
 and documented:
 
 | Future port | Maps onto                                                                                                                     |
-|-------------|-------------------------------------------------------------------------------------------------------------------------------|
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | **Kotlin**  | Java — identical JVM, all exceptions unchecked by default, annotation processor available                                     |
 | **C#**      | Java + TypeScript hybrid — compiled, static types, attributes like Java, nullable reference types like TypeScript strict mode |
 | **Swift**   | Go + TypeScript — compiled binary, no JVM, protocol-oriented (like Go interfaces), type erasure in generics                   |

@@ -145,7 +145,7 @@ construct the service in the publisher. Neither form uses reflection or autowiri
 Publisher callbacks have access to the full container binding API:
 
 | Method                        | Use                                                                   |
-|-------------------------------|-----------------------------------------------------------------------|
+| ----------------------------- | --------------------------------------------------------------------- |
 | `setSingleton(id, instance)`  | Register an already-constructed singleton — most common in publishers |
 | `bindSingleton(id, callable)` | Register a deferred singleton with a callable factory                 |
 | `bind(id, callable)`          | Register a per-call service (fresh instance every resolution)         |

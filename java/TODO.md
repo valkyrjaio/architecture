@@ -99,7 +99,7 @@ the resolved handler.
   `HttpRoutingServiceProvider.publishRouteCollection` never called
   `RouteCollection.setFromData` (nothing in the framework did), and gated attribute
   collection on `isSingleton(RouteCollectorContract)`, which is always false because
-  `Container.setFromData` registers generated entries as deferred *callbacks*. Neither
+  `Container.setFromData` registers generated entries as deferred _callbacks_. Neither
   route source was ever used outside debug mode, so an application booted with **zero
   routes and answered every request with a 404**. Fixed to mirror PHP: debug mode
   collects from the providers, otherwise the routes load from the generated routing
@@ -108,7 +108,7 @@ the resolved handler.
 - **Log component never ported** — nothing published `LoggerContract`, yet
   `HttpServerServiceProvider` resolves it to build `LogThrowableCaughtMiddleware`, so
   any request reaching the throwable-caught path died with an unresolved-service
-  error *inside* `RequestHandler.handle`'s catch block — replacing the original error
+  error _inside_ `RequestHandler.handle`'s catch block — replacing the original error
   and closing the connection with no response at all. Ported PHP's
   `LogComponentProvider` / `LogServiceProvider` and wired them into the HTTP and CLI
   application graphs. PHP defaults the logger to Monolog; Java has no Monolog or PSR
@@ -214,7 +214,7 @@ output badly diverging from PHP. Fixes are being made in `java/sindri`:
   to Sindri's runtime classpath and to the application's `sindri` task configuration.
   Unit-verified in `resolvesFrameworkProvidersFromClasspath` (app source in a temp dir +
   a "framework" provider, two levels deep, resolved from the test classpath).
-  **Caveat:** not yet run end-to-end against the *real* valkyrja sources.
+  **Caveat:** not yet run end-to-end against the _real_ valkyrja sources.
   [valkyrjaio/sindri-java#91](https://github.com/valkyrjaio/sindri-java/issues/91)
 
 ### Test gaps to strengthen in ALL THREE languages (Java/PHP/TS)

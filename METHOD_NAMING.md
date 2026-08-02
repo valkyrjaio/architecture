@@ -20,11 +20,11 @@ each language.
 
 A validation method examines a value and reports the result. It never changes the value.
 
-| Prefix | The method does | On failure |
-|---|---|---|
-| `validate{Something}` | Makes sure the value **is** valid | Reports the failure |
+| Prefix                  | The method does                       | On failure          |
+| ----------------------- | ------------------------------------- | ------------------- |
+| `validate{Something}`   | Makes sure the value **is** valid     | Reports the failure |
 | `invalidate{Something}` | Makes sure the value **is not** valid | Reports the failure |
-| `isValid{Something}` | Checks whether the value is valid | Returns `false` |
+| `isValid{Something}`    | Checks whether the value is valid     | Returns `false`     |
 
 `isValid` returns a boolean. `validate` and `invalidate` report a failure the way the
 language does it — they throw in PHP, Java, TypeScript, Python, and Kotlin, and they
@@ -32,27 +32,27 @@ return an `error` in Go. See [§4](#4-go-returns-an-error-it-does-not-throw).
 
 **Warning: `invalidate` does not mean "make invalid".** In many codebases `invalidate`
 clears a cache or expires a token. It does not do that here. It asserts that a value is
-*not* valid, and throws when the value is valid. Do not use the name for anything else.
+_not_ valid, and throws when the value is valid. Do not use the name for anything else.
 
 ### Transformation that returns a copy
 
 A `get` method returns a new value. The argument is unchanged.
 
-| Prefix | The method returns |
-|---|---|
-| `get{Something}` | A modified copy of the value |
+| Prefix                   | The method returns           |
+| ------------------------ | ---------------------------- |
+| `get{Something}`         | A modified copy of the value |
 | `getFiltered{Something}` | A filtered copy of the value |
-| `getParsed{Something}` | A parsed copy of the value |
+| `getParsed{Something}`   | A parsed copy of the value   |
 
 ### Transformation in place
 
 These methods change the value the caller passed in. They return nothing.
 
-| Prefix | The method does |
-|---|---|
-| `modify{Something}` | Modifies the value |
-| `filter{Something}` | Filters the value |
-| `parse{Something}` | Parses the value |
+| Prefix               | The method does        |
+| -------------------- | ---------------------- |
+| `modify{Something}`  | Modifies the value     |
+| `filter{Something}`  | Filters the value      |
+| `parse{Something}`   | Parses the value       |
 | `process{Something}` | Processes a collection |
 
 **The pattern is regular.** A bare verb changes the argument and returns nothing. The
@@ -67,10 +67,10 @@ this family. It does not translate to every port.
 These two change an object's own state. They are the pair a reader confuses most often,
 so the difference matters.
 
-| Prefix | The host | Returns |
-|---|---|---|
-| `set{Something}` | **Is modified** | Nothing, or the host itself for chaining |
-| `with{Something}` | **Is not modified** | A **new** instance carrying the value |
+| Prefix            | The host            | Returns                                  |
+| ----------------- | ------------------- | ---------------------------------------- |
+| `set{Something}`  | **Is modified**     | Nothing, or the host itself for chaining |
+| `with{Something}` | **Is not modified** | A **new** instance carrying the value    |
 
 `with` is the immutable form. It clones the host, sets the value on the clone, and
 returns the clone. The original is untouched, so a caller that holds a reference to it
@@ -85,13 +85,13 @@ modify the caller's variable. Most Valkyrja languages cannot do this for every t
 
 PHP takes a parameter by reference with `&`. No other Valkyrja language has that.
 
-| Language | Can modify the caller's value | How |
-|---|---|---|
-| PHP | Any type | `&$value` |
-| Java | A mutable object only | Mutate the object the reference points to |
-| TypeScript | A mutable object only | Mutate the object the reference points to |
-| Python | A mutable object only | Mutate the object the reference points to |
-| Go | Any type | A pointer parameter, `*T` |
+| Language   | Can modify the caller's value | How                                       |
+| ---------- | ----------------------------- | ----------------------------------------- |
+| PHP        | Any type                      | `&$value`                                 |
+| Java       | A mutable object only         | Mutate the object the reference points to |
+| TypeScript | A mutable object only         | Mutate the object the reference points to |
+| Python     | A mutable object only         | Mutate the object the reference points to |
+| Go         | Any type                      | A pointer parameter, `*T`                 |
 
 A string, a number, and a boolean are immutable in Java, TypeScript, and Python. A method
 there cannot change the caller's string.
@@ -107,14 +107,14 @@ caller finds out at runtime.
 
 The convention is the same in every port. Only the casing and the parameter form change.
 
-| Language | Case | `isValid` | `getParsed` | `with` | In place |
-|---|---|---|---|---|---|
-| PHP | camelCase | `isValidPath` | `getParsedPath` | `withPath(): static` | `parsePath(string &$path): void` |
-| Java | camelCase | `isValidPath` | `getParsedPath` | `withPath()` returns its own type | Mutable argument only |
-| TypeScript | camelCase | `isValidPath` | `getParsedPath` | `withPath(): this` | Mutable argument only |
-| Kotlin | camelCase | `isValidPath` | `getParsedPath` | `withPath()` returns its own type | Mutable argument only |
-| Python | snake_case | `is_valid_path` | `get_parsed_path` | `with_path()` | Mutable argument only |
-| Go | PascalCase when exported | `IsValidPath` | `GetParsedPath` | `WithPath()` returns a new value | `ParsePath(path *string) error` |
+| Language   | Case                     | `isValid`       | `getParsed`       | `with`                            | In place                         |
+| ---------- | ------------------------ | --------------- | ----------------- | --------------------------------- | -------------------------------- |
+| PHP        | camelCase                | `isValidPath`   | `getParsedPath`   | `withPath(): static`              | `parsePath(string &$path): void` |
+| Java       | camelCase                | `isValidPath`   | `getParsedPath`   | `withPath()` returns its own type | Mutable argument only            |
+| TypeScript | camelCase                | `isValidPath`   | `getParsedPath`   | `withPath(): this`                | Mutable argument only            |
+| Kotlin     | camelCase                | `isValidPath`   | `getParsedPath`   | `withPath()` returns its own type | Mutable argument only            |
+| Python     | snake_case               | `is_valid_path` | `get_parsed_path` | `with_path()`                     | Mutable argument only            |
+| Go         | PascalCase when exported | `IsValidPath`   | `GetParsedPath`   | `WithPath()` returns a new value  | `ParsePath(path *string) error`  |
 
 Three notes on the edges of the table.
 
@@ -168,11 +168,11 @@ so its signature does not match the other ports.**
 The prefix does not change. `ValidatePath` still means "make sure the path is valid, and
 report a failure". Only the mechanism changes.
 
-| Prefix | PHP, Java, TypeScript, Python, Kotlin | Go |
-|---|---|---|
-| `validate{Something}` | `validatePath(string $path): void`, throws | `ValidatePath(path string) error` |
+| Prefix                  | PHP, Java, TypeScript, Python, Kotlin        | Go                                  |
+| ----------------------- | -------------------------------------------- | ----------------------------------- |
+| `validate{Something}`   | `validatePath(string $path): void`, throws   | `ValidatePath(path string) error`   |
 | `invalidate{Something}` | `invalidatePath(string $path): void`, throws | `InvalidatePath(path string) error` |
-| `isValid{Something}` | `isValidPath(string $path): bool` | `IsValidPath(path string) bool` |
+| `isValid{Something}`    | `isValidPath(string $path): bool`            | `IsValidPath(path string) bool`     |
 
 `isValid` is the same in every port, because a boolean is a boolean.
 

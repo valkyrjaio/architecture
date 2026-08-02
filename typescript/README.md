@@ -1,7 +1,7 @@
 # TypeScript / Node.js Port — Implementation Notes
 
 > Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `DISPATCH.md`,
-`DATA_CACHE.md`, `BUILD_TOOL.md`, `CONTRACTS_TYPESCRIPT.md`
+> `DATA_CACHE.md`, `BUILD_TOOL.md`, `CONTRACTS_TYPESCRIPT.md`
 > Port order: Container → Dispatch → Event → Application → CLI → HTTP → Bin
 
 ---

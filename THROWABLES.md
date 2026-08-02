@@ -14,7 +14,7 @@ The `*` in `ComponentName*` represents a language-native suffix. The suffix is c
 frameworks in that ecosystem use:
 
 | Language   | Suffix       | Major frameworks                                 |
-|------------|--------------|--------------------------------------------------|
+| ---------- | ------------ | ------------------------------------------------ |
 | PHP        | `*Exception` | Laravel, Symfony                                 |
 | Java       | `*Exception` | Spring                                           |
 | Kotlin     | `*Exception` | same roots as Java                               |
@@ -33,7 +33,7 @@ Only the suffix differs for Go. Cross-port legibility is preserved at the stem l
 **Examples across ports:**
 
 | PHP / Java / Python / TypeScript | Go                          |
-|----------------------------------|-----------------------------|
+| -------------------------------- | --------------------------- |
 | `ContainerNotFoundException`     | `ContainerNotFoundError`    |
 | `HttpRoutingNotFoundException`   | `HttpRoutingNotFoundError`  |
 | `RequestInvalidMethodException`  | `RequestInvalidMethodError` |
@@ -42,7 +42,7 @@ Only the suffix differs for Go. Cross-port legibility is preserved at the stem l
 ### The Four Levels
 
 | Level                 | Convention                     | Notes                                                                 |
-|-----------------------|--------------------------------|-----------------------------------------------------------------------|
+| --------------------- | ------------------------------ | --------------------------------------------------------------------- |
 | Framework base        | `Valkyrja*`                    | abstract · extends language root                                      |
 | Component             | `ComponentName*`               | abstract · always present · extends `Valkyrja*`                       |
 | Subcomponent (unique) | `SubComponent*`                | name is unique across the entire framework                            |
@@ -221,22 +221,22 @@ ValkyrjaRuntimeException (abstract)
 ## Contributor Decision Tree
 
 1. **Is the subcomponent name shared across multiple components?**
-    - Yes → `ParentComponentSubComponent*`
-    - No → `SubComponent*`
+   - Yes → `ParentComponentSubComponent*`
+   - No → `SubComponent*`
 
 2. **Does the subcomponent have 2+ exceptions of the same category?**
-    - Yes → add abstract `*RuntimeException` / `*InvalidArgumentException`
-    - No → extend framework base directly
+   - Yes → add abstract `*RuntimeException` / `*InvalidArgumentException`
+   - No → extend framework base directly
 
 3. **Does each throw site need its own exception?**
-    - Always yes → concrete, named for the problem, never throw an abstract
+   - Always yes → concrete, named for the problem, never throw an abstract
 
 ---
 
 ## Language Root Mapping
 
 | Concept                  | PHP                         | Java                       | Go                  | Python          | TypeScript |
-|--------------------------|-----------------------------|----------------------------|---------------------|-----------------|------------|
+| ------------------------ | --------------------------- | -------------------------- | ------------------- | --------------- | ---------- |
 | Throwable                | `\Throwable`                | `Throwable`                | `error` (interface) | `BaseException` | `Error`    |
 | RuntimeException         | `\RuntimeException`         | `RuntimeException`         | `error` (struct)    | `RuntimeError`  | `Error`    |
 | InvalidArgumentException | `\InvalidArgumentException` | `IllegalArgumentException` | `error` (struct)    | `ValueError`    | `Error`    |

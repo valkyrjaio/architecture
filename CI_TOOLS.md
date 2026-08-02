@@ -27,12 +27,12 @@ every alternative below is measured against.
 
 - **One shared `composer.json` for all CI tools** (a single `.github/ci/` project instead of per-tool directories) —
   **rejected.** It reunites every tool's dependencies into one resolver graph, reintroducing exactly the tool-vs-tool
-  clash the split exists to prevent. Such clashes are *avoidable* only if every tool is always kept perfectly up to
+  clash the split exists to prevent. Such clashes are _avoidable_ only if every tool is always kept perfectly up to
   date, but that is not a guarantee worth depending on — the isolated model makes the clash **structurally impossible**
   rather than merely unlikely.
 - **Consolidating the per-tool repositories into a single CI repo** — **rejected**, for the same reason one level up. A
-  *flat* merge (one published package for the whole toolbox) would additionally force every consumer to pull tools it
-  does not use, breaking pull-only-what-you-need. The only conflict-safe consolidation would be a monorepo that *still*
+  _flat_ merge (one published package for the whole toolbox) would additionally force every consumer to pull tools it
+  does not use, breaking pull-only-what-you-need. The only conflict-safe consolidation would be a monorepo that _still_
   publishes each tool as its own package via subtree splits (the Symfony/Laravel model); that preserves isolation but
   adds a split-publish pipeline whose overhead is not currently justified. The per-repo, per-package model stands until
   repository count becomes the dominant maintenance cost — and even then, only the monorepo-with-splits form is
@@ -43,7 +43,7 @@ every alternative below is measured against.
 ## Role Categories
 
 | Role                         | Description                                                                              |
-|------------------------------|------------------------------------------------------------------------------------------|
+| ---------------------------- | ---------------------------------------------------------------------------------------- |
 | **Architecture enforcement** | Validates structural rules — dependency direction, layer boundaries, package constraints |
 | **Static analysis**          | Bug detection, type inference, code correctness without execution                        |
 | **Security analysis**        | Vulnerability scanning, OWASP patterns, taint analysis                                   |
@@ -57,7 +57,7 @@ every alternative below is measured against.
 ## PHP
 
 | Tool         | Role                       | Notes                                                            |
-|--------------|----------------------------|------------------------------------------------------------------|
+| ------------ | -------------------------- | ---------------------------------------------------------------- |
 | PHPArkitect  | Architecture enforcement   | Enforces layer boundaries, dependency direction, naming rules    |
 | PHPStan      | Static analysis            | Type inference, null safety, dead code, level 0–9 strictness     |
 | Psalm        | Static analysis + security | Type safety, taint analysis for security vulnerabilities         |
@@ -73,7 +73,7 @@ stronger on type inference, Psalm is stronger on security taint analysis.
 ## Java
 
 | Tool                          | Role                       | Notes                                                                                          |
-|-------------------------------|----------------------------|------------------------------------------------------------------------------------------------|
+| ----------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------- |
 | ArchUnit                      | Architecture enforcement   | Enforces package dependencies, layer rules, naming conventions as JUnit tests                  |
 | ErrorProne + NullAway         | Static analysis            | Google's compiler plugin — 400+ bug patterns caught at compile time. NullAway adds null safety |
 | SpotBugs + FindSecBugs        | Static analysis + security | Bytecode analysis post-compilation. FindSecBugs adds OWASP/CWE security checks                 |
@@ -93,7 +93,7 @@ upgrades, dependency updates, and automated refactoring with a recipe-based syst
 ## Go
 
 | Tool              | Role                      | Notes                                                                                                                                              |
-|-------------------|---------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
+| ----------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | golangci-lint     | Everything except testing | Meta-linter bundling 50+ tools: staticcheck, go vet, errcheck, gosec, revive, go-cleanarch and more. One binary, one config file (`.golangci.yml`) |
 | go test           | Testing                   | Built into the language — no separate tool needed                                                                                                  |
 | gofmt / goimports | Formatting                | Built into the language — gofmt is the standard, goimports adds import management                                                                  |
@@ -131,7 +131,7 @@ linters:
 ## Python
 
 | Tool          | Role                         | Notes                                                                                                                            |
-|---------------|------------------------------|----------------------------------------------------------------------------------------------------------------------------------|
+| ------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | import-linter | Architecture enforcement     | Enforces import boundaries and layer contracts. Less powerful than PHPArkitect/ArchUnit — documented gap                         |
 | Ruff          | Static analysis + formatting | Replaces flake8, black, isort, and many flake8 plugins. Written in Rust — 10-100x faster. Single tool for linting and formatting |
 | mypy          | Type checking                | Static type analysis against PEP 484 type hints. Validates type correctness across the entire codebase                           |
@@ -168,7 +168,7 @@ testpaths = ["tests"]
 ## TypeScript
 
 | Tool                       | Role                | Notes                                                                                                                                 |
-|----------------------------|---------------------|---------------------------------------------------------------------------------------------------------------------------------------|
+| -------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | `tsc --noEmit`             | Type checking       | The TypeScript compiler itself — full type-aware analysis across all files                                                            |
 | ESLint + typescript-eslint | Static analysis     | Type-aware linting rules: no-floating-promises, no-unsafe-*, exhaustive checks. The backbone of production-grade TypeScript CI        |
 | Biome                      | Formatting          | Prettier replacement written in Rust — significantly faster, single binary for format + basic lint                                    |
@@ -203,15 +203,15 @@ are needed.
 
 ## Gaps Summary
 
-| Role                     | PHP               | Java                    | Go                       | Python                     | TypeScript                        |
-|--------------------------|-------------------|-------------------------|--------------------------|----------------------------|-----------------------------------|
+| Role                     | PHP                | Java                     | Go                        | Python                     | TypeScript                        |
+| ------------------------ | ------------------ | ------------------------ | ------------------------- | -------------------------- | --------------------------------- |
 | Architecture enforcement | ✅ PHPArkitect     | ✅ ArchUnit              | ✅ go-cleanarch           | ⚠️ import-linter (limited) | ⚠️ eslint-plugin-import (limited) |
-| Static analysis          | ✅ PHPStan + Psalm | ✅ ErrorProne + SpotBugs | ✅ golangci-lint          | ✅ mypy + Ruff              | ✅ tsc + typescript-eslint         |
-| Security                 | ✅ Psalm taint     | ✅ FindSecBugs           | ✅ gosec                  | ✅ Bandit                   | ⚠️ no dedicated tool              |
-| Formatting               | ✅ PHP-CS-Fixer    | ✅ Spotless              | ✅ gofmt (built-in)       | ✅ Ruff                     | ✅ Biome                           |
-| Automated migration      | ✅ Rector          | ✅ OpenRewrite           | —                        | —                          | —                                 |
-| Dead code                | —                 | —                       | ✅ unused (golangci-lint) | —                          | ✅ Knip                            |
-| Testing                  | ✅ PHPUnit         | ✅ JUnit 5               | ✅ go test (built-in)     | ✅ pytest                   | ✅ Vitest                          |
+| Static analysis          | ✅ PHPStan + Psalm | ✅ ErrorProne + SpotBugs | ✅ golangci-lint          | ✅ mypy + Ruff             | ✅ tsc + typescript-eslint        |
+| Security                 | ✅ Psalm taint     | ✅ FindSecBugs           | ✅ gosec                  | ✅ Bandit                  | ⚠️ no dedicated tool              |
+| Formatting               | ✅ PHP-CS-Fixer    | ✅ Spotless              | ✅ gofmt (built-in)       | ✅ Ruff                    | ✅ Biome                          |
+| Automated migration      | ✅ Rector          | ✅ OpenRewrite           | —                         | —                          | —                                 |
+| Dead code                | —                  | —                        | ✅ unused (golangci-lint) | —                          | ✅ Knip                           |
+| Testing                  | ✅ PHPUnit         | ✅ JUnit 5               | ✅ go test (built-in)     | ✅ pytest                  | ✅ Vitest                         |
 
 **Key gaps:**
 

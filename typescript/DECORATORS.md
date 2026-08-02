@@ -13,16 +13,16 @@ This is the **design record**. For the implementation task list see
 
 The difficulty with decorators in TypeScript is **not** that decorators are a
 weaker feature than PHP attributes or Java annotations. It is that the four
-languages *encode a class reference differently*:
+languages _encode a class reference differently_:
 
-| Language | Reference inside the attribute / decorator | Evaluated eagerly? | Safe in a cycle |
-|----------|--------------------------------------------|--------------------|-----------------|
-| **PHP** | `HttpRouteProvider::class` — a **compile-time string literal** | No | ✅ |
-| **Java** | `HttpRouteProvider.class` — a **constant-pool entry**, resolved lazily by the classloader | No | ✅ |
-| **TypeScript** | `[HttpRouteProvider, 'method']` — a **live binding dereferenced at class-definition time** | **Yes** | ❌ |
-| **Python** | `[HomeController, 'method']` — a **live attribute read at import time** | **Yes** | ❌ |
+| Language       | Reference inside the attribute / decorator                                                 | Evaluated eagerly? | Safe in a cycle |
+| -------------- | ------------------------------------------------------------------------------------------ | ------------------ | --------------- |
+| **PHP**        | `HttpRouteProvider::class` — a **compile-time string literal**                             | No                 | ✅              |
+| **Java**       | `HttpRouteProvider.class` — a **constant-pool entry**, resolved lazily by the classloader  | No                 | ✅              |
+| **TypeScript** | `[HttpRouteProvider, 'method']` — a **live binding dereferenced at class-definition time** | **Yes**            | ❌              |
+| **Python**     | `[HomeController, 'method']` — a **live attribute read at import time**                    | **Yes**            | ❌              |
 
-PHP and Java store *inert data*. TypeScript and Python evaluate a *real value*.
+PHP and Java store _inert data_. TypeScript and Python evaluate a _real value_.
 Everything below follows from that single difference.
 
 `#[Route]` in PHP is inert until `ReflectionAttribute::newInstance()` is called;
@@ -33,7 +33,7 @@ a Java annotation is inert until reflected. A TypeScript decorator is an
 
 > **Never name a class in a decorator argument.**
 
-It is not about "same class vs. different class", and not about *where* handlers
+It is not about "same class vs. different class", and not about _where_ handlers
 live. It is only about whether the argument expression dereferences a class
 binding that has not finished initializing.
 
@@ -41,25 +41,25 @@ binding that has not finished initializing.
 
 ## 2. Evidence (all verified, Node 24.15.0)
 
-| Observation | Result |
-|---|---|
-| Decorator syntax under `node --experimental-strip-types` / `--experimental-transform-types` | ❌ `SyntaxError` — Node strips types but does not lower decorators |
-| Decorator syntax under the repos' Vitest 4 (Rolldown/oxc) | ❌ `SyntaxError` |
-| Decorator syntax under `tsx` / esbuild | ✅ executes |
-| Stage-3 `context.metadata` → `Class[Symbol.metadata]` | ✅ round-trips (this is the NestJS mechanism) |
-| `tsc` output for a decorated class | **Lowered to `__esDecorate(...)` calls — NOT stripped.** Production runs them too |
-| Decorator *argument* evaluation timing | At class definition, **before** the class exists and without any instantiation |
-| `@RouteHandler([HomeController, 'x'])` *inside* `HomeController` | ❌ `ReferenceError: Cannot access '_HomeController' before initialization` |
-| Cross-module cycle (controller names provider, provider imports controller) | ❌ TDZ **if the provider module evaluates first**; works if the controller does — i.e. order-dependent, therefore unusable |
-| Wrapping the class in a closure *inside* `getControllerClasses()` | ❌ No effect — a method body already defers; the eager dereference is in the decorator |
-| `[() => Class, 'method']` (thunk) | ✅ Works in **every** case above, including self-reference |
-| Distinguishing a thunk from a class at runtime | ✅ Arrow functions have `prototype === undefined`; classes have an object prototype |
+| Observation                                                                                 | Result                                                                                                                     |
+| ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Decorator syntax under `node --experimental-strip-types` / `--experimental-transform-types` | ❌ `SyntaxError` — Node strips types but does not lower decorators                                                         |
+| Decorator syntax under the repos' Vitest 4 (Rolldown/oxc)                                   | ❌ `SyntaxError`                                                                                                           |
+| Decorator syntax under `tsx` / esbuild                                                      | ✅ executes                                                                                                                |
+| Stage-3 `context.metadata` → `Class[Symbol.metadata]`                                       | ✅ round-trips (this is the NestJS mechanism)                                                                              |
+| `tsc` output for a decorated class                                                          | **Lowered to `__esDecorate(...)` calls — NOT stripped.** Production runs them too                                          |
+| Decorator _argument_ evaluation timing                                                      | At class definition, **before** the class exists and without any instantiation                                             |
+| `@RouteHandler([HomeController, 'x'])` _inside_ `HomeController`                            | ❌ `ReferenceError: Cannot access '_HomeController' before initialization`                                                 |
+| Cross-module cycle (controller names provider, provider imports controller)                 | ❌ TDZ **if the provider module evaluates first**; works if the controller does — i.e. order-dependent, therefore unusable |
+| Wrapping the class in a closure _inside_ `getControllerClasses()`                           | ❌ No effect — a method body already defers; the eager dereference is in the decorator                                     |
+| `[() => Class, 'method']` (thunk)                                                           | ✅ Works in **every** case above, including self-reference                                                                 |
+| Distinguishing a thunk from a class at runtime                                              | ✅ Arrow functions have `prototype === undefined`; classes have an object prototype                                        |
 
 ### Production is not exempt
 
 `tsc` lowers decorators into `__esDecorate` calls that still run at class
 definition, so a compiled production build carries the identical hazard. What it
-does *not* do is duplicate work: decorators only write to a per-class
+does _not_ do is duplicate work: decorators only write to a per-class
 `Symbol.metadata` object, and the only reader — `AttributeRouteCollector` — runs
 solely on the debug path. In cached mode the generated data stays authoritative
 and the metadata is simply never read.
@@ -92,22 +92,22 @@ reference — the true analogue of PHP's `::class`.
   action**; controller signatures stay clean; **no extra class**.
 - Sindri unwraps the arrow body to the identifier, so generated output is
   byte-identical to the non-thunk form.
-- **Thunk-only** — the bare `[Class, 'method']` form is deliberately *not*
+- **Thunk-only** — the bare `[Class, 'method']` form is deliberately _not_
   accepted. It appears to work whenever module order happens to favour it, then
   fails with an opaque TDZ error when an unrelated import reorders the graph.
   One shape that always works beats two shapes where one is a trap.
 
 ### ❌ Rejected
 
-| Option | Why rejected |
-|---|---|
-| **Handlers moved into the controller** | Impossible — the decorator would name the class it lives in (self-TDZ). Also loses the separation the handlers were extracted for. |
-| **Plain string** (`['App\Http\Provider\HttpRouteProvider', 'method']`) | Semantically closest to PHP, but a handler is a *callable*; a string forces a name→class registry plus a call convention. Large machinery for no gain over the thunk. |
-| **Closure around the whole tuple** (`() => [Class, 'method']`) | A closure of a closure. The handler is already a callable, so this reads as double-wrapping, and any closure taking the handler's parameters would duplicate the signature. |
-| **Separate `RouteHandlerProvider` class** | Works, but adds a third class per component and makes the route provider inconsistent with service/event providers unless they all gain one. Rejected as structural noise. |
-| **`@Route` on the provider's handler methods** | Works and removes the reference entirely — but forfeits class-wide annotations (`@Path`, `@Name`) and the principle of *annotating the thing actually being used*. Routes belong next to the controller action, as in PHP/Java. |
-| **Controller method *is* the handler** | Works, but forces every controller method to take `(container, route)`, defeating the reason the handler middleman exists — to keep controller methods expressed in terms of what they actually need. |
-| **AOT-strip decorators in production** | Non-standard, and creates dev/prod divergence. |
+| Option                                                                 | Why rejected                                                                                                                                                                                                                    |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Handlers moved into the controller**                                 | Impossible — the decorator would name the class it lives in (self-TDZ). Also loses the separation the handlers were extracted for.                                                                                              |
+| **Plain string** (`['App\Http\Provider\HttpRouteProvider', 'method']`) | Semantically closest to PHP, but a handler is a _callable_; a string forces a name→class registry plus a call convention. Large machinery for no gain over the thunk.                                                           |
+| **Closure around the whole tuple** (`() => [Class, 'method']`)         | A closure of a closure. The handler is already a callable, so this reads as double-wrapping, and any closure taking the handler's parameters would duplicate the signature.                                                     |
+| **Separate `RouteHandlerProvider` class**                              | Works, but adds a third class per component and makes the route provider inconsistent with service/event providers unless they all gain one. Rejected as structural noise.                                                      |
+| **`@Route` on the provider's handler methods**                         | Works and removes the reference entirely — but forfeits class-wide annotations (`@Path`, `@Name`) and the principle of _annotating the thing actually being used_. Routes belong next to the controller action, as in PHP/Java. |
+| **Controller method _is_ the handler**                                 | Works, but forces every controller method to take `(container, route)`, defeating the reason the handler middleman exists — to keep controller methods expressed in terms of what they actually need.                           |
+| **AOT-strip decorators in production**                                 | Non-standard, and creates dev/prod divergence.                                                                                                                                                                                  |
 
 ---
 
@@ -130,7 +130,7 @@ become compile errors — neither was caught by the previous
 accepted any `string`.
 
 > Keep a comment at both sites recording which fix does what. A future reader who
-> assumes the thunk is load-bearing for *typing* may "simplify" it away and
+> assumes the thunk is load-bearing for _typing_ may "simplify" it away and
 > silently reintroduce the TDZ.
 
 ---

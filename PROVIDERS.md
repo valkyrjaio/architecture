@@ -127,7 +127,7 @@ this from AST and writes each value as a lambda in the generated `AppContainerDa
 earlier versions is removed — the publishers map is the sole source of truth for what a service provider registers.
 
 > **Cache compatibility:** Bindings registered imperatively inside `getContainerProviders()` (e.g. calling
-`$container->bindSingleton()` directly) are invisible to Sindri and will not appear in the generated cache. All bindings
+> `$container->bindSingleton()` directly) are invisible to Sindri and will not appear in the generated cache. All bindings
 > intended for cache-based deployments must be declared through service providers returned from `getContainerProviders()`.
 > See `README_CONTAINER.md` for the full explanation.
 

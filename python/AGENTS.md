@@ -11,8 +11,8 @@ Python idiom. Authoritative port detail: [`README.md`](README.md),
 > **Cold-start note — the lazy-import plan changed.** PEP 690 (implicit lazy
 > imports) was **withdrawn** and never shipped; Python 3.14 does **not** lazy-load
 > imports by default. Its successor, **PEP 810 (explicit lazy imports)**, is still
-> under discussion and unshipped — treat lazy imports as a *possible future
-> optimization*, not a guarantee. The container design does **not** depend on it:
+> under discussion and unshipped — treat lazy imports as a _possible future
+> optimization_, not a guarantee. The container design does **not** depend on it:
 > correctness rests on string-constant binding keys + lambda-wrapped values (see
 > Layout & naming), which avoid eager imports in any Python version. If explicit
 > lazy imports land, they would only further defer provider-module loading in the
@@ -29,8 +29,8 @@ Python idiom. Authoritative port detail: [`README.md`](README.md),
 - **Package root:** `valkyrja` (lowercase). Components map to snake_case
   subpackages (`valkyrja.container`, `valkyrja.http`, `valkyrja.event`,
   `valkyrja.cli`).
-- **Namespace package (PEP 420):** the `valkyrja` root is an *implicit namespace
-  package* — **no `__init__.py` at `src/valkyrja/`** in any repo, so every
+- **Namespace package (PEP 420):** the `valkyrja` root is an _implicit namespace
+  package_ — **no `__init__.py` at `src/valkyrja/`** in any repo, so every
   component repo contributes into the shared `valkyrja` namespace (the direct
   analog of PHP's `Valkyrja\` PSR-4 spread across repos). Sub-packages
   (`valkyrja/container/`, …) are regular packages with `__init__.py`.
@@ -96,7 +96,7 @@ Python nuances:
 - **Framework:** `pytest`. PHPUnit → pytest mapping:
 
   | PHPUnit              | pytest                              |
-  |----------------------|-------------------------------------|
+  | -------------------- | ----------------------------------- |
   | `assertSame`         | `assert a == b` (`is` for identity) |
   | `assertTrue/False`   | `assert x` / `assert not x`         |
   | `assertInstanceOf`   | `assert isinstance(...)`            |

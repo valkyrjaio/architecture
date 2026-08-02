@@ -458,13 +458,13 @@ because they do not exist.
 
 ## Cross-Language Summary
 
-|                | Keyword                   | Typing                        | Enforcement             | Abstract class   | Multiple contracts      | Runtime reflection                    |
-|----------------|---------------------------|-------------------------------|-------------------------|------------------|-------------------------|---------------------------------------|
-| **PHP**        | `interface`               | Nominal                       | Runtime (fatal error)   | `abstract class` | ✅ multiple `implements` | ✅ `instanceof`, `ReflectionClass`     |
-| **Java**       | `interface`               | Nominal                       | Compile time            | `abstract class` | ✅ multiple `implements` | ✅ `instanceof`, reflection API        |
+|                | Keyword                   | Typing                        | Enforcement             | Abstract class   | Multiple contracts       | Runtime reflection                    |
+| -------------- | ------------------------- | ----------------------------- | ----------------------- | ---------------- | ------------------------ | ------------------------------------- |
+| **PHP**        | `interface`               | Nominal                       | Runtime (fatal error)   | `abstract class` | ✅ multiple `implements` | ✅ `instanceof`, `ReflectionClass`    |
+| **Java**       | `interface`               | Nominal                       | Compile time            | `abstract class` | ✅ multiple `implements` | ✅ `instanceof`, reflection API       |
 | **Go**         | `interface`               | Structural                    | Compile time (at usage) | embedded struct  | ✅ implicit, automatic   | ⚠️ `reflect.TypeOf()` only via values |
-| **Python**     | `ABC` + `@abstractmethod` | Structural (+ optional hints) | Runtime (`TypeError`)   | same `ABC` class | ✅ multiple inheritance  | ✅ `isinstance()`, `__mro__`           |
-| **TypeScript** | `interface`               | Structural                    | Compile time            | `abstract class` | ✅ multiple `implements` | ❌ erased at runtime                   |
+| **Python**     | `ABC` + `@abstractmethod` | Structural (+ optional hints) | Runtime (`TypeError`)   | same `ABC` class | ✅ multiple inheritance  | ✅ `isinstance()`, `__mro__`          |
+| **TypeScript** | `interface`               | Structural                    | Compile time            | `abstract class` | ✅ multiple `implements` | ❌ erased at runtime                  |
 
 ---
 

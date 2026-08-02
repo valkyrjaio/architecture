@@ -258,15 +258,15 @@ AuthContext
 
 gRPC has four call shapes. Three are served by the **buffered model**; genuinely interactive bidirectional streaming
 uses the **streaming model**. The two models share the same `ServiceCall`/`ServiceResponse` contracts, middleware
-pipeline, and cancellation semantics — they differ only in *when* the handler is dispatched and *how* outbound messages
+pipeline, and cancellation semantics — they differ only in _when_ the handler is dispatched and _how_ outbound messages
 leave it.
 
-| Shape | Inbound | Outbound | Model |
-|-------|---------|----------|-------|
-| Unary | 1 | 1 | Buffered |
-| Server streaming | 1 | N | Buffered |
-| Client streaming | N | 1 | Buffered |
-| Bidirectional streaming | N | M, interleaved | Streaming |
+| Shape                   | Inbound | Outbound       | Model     |
+| ----------------------- | ------- | -------------- | --------- |
+| Unary                   | 1       | 1              | Buffered  |
+| Server streaming        | 1       | N              | Buffered  |
+| Client streaming        | N       | 1              | Buffered  |
+| Bidirectional streaming | N       | M, interleaved | Streaming |
 
 A method's shape comes from its `clientStreaming` / `serverStreaming` flags (declared via `@Method` and carried on
 `Route`). Only a **bidirectional** method — both flags set — uses the streaming model; everything else uses the buffered
@@ -290,7 +290,7 @@ method's declared shape, not the client's runtime behavior.
 
 ### Streaming model (bidirectional)
 
-Buffer-then-dispatch cannot serve an *interactive* bidirectional call: the client waits for a server reply before
+Buffer-then-dispatch cannot serve an _interactive_ bidirectional call: the client waits for a server reply before
 sending its next message and never half-closes early, so a handler that only runs after half-close would deadlock until
 the deadline. A bidirectional method is therefore dispatched **immediately**, before half-close. Two things then differ
 from the buffered model, and two shared rules take a different shape:
@@ -301,8 +301,8 @@ from the buffered model, and two shared rules take a different shape:
   transport) when the queue is full and resumes as the handler drains, rather than rejecting. As its name says, the
   setting bounds the **inbound** direction only — in both models. The outbound direction has no count-based bound and
   is instead held in check by the transport's writability (below).
-- **Outbound is a push sink.** The handler emits responses through a sink on the call — `send(Message)` — *while it is
-  still reading inbound*. Sends are serialized. This is the single place the framework pushes rather than pulls; it
+- **Outbound is a push sink.** The handler emits responses through a sink on the call — `send(Message)` — _while it is
+  still reading inbound_. Sends are serialized. This is the single place the framework pushes rather than pulls; it
   exists only in the streaming model, and interactive streaming is impossible without it. The handler still returns a
   terminal `ServiceResponse` carrying the final status and trailing metadata (its message list is empty — messages went
   through the sink).
@@ -335,7 +335,7 @@ In **both** models the pipeline runs once per call — exactly as it already doe
 
 - `CallReceived → RouteMatched → RouteDispatched` run once, before the handler.
 - `SendingResponse` runs once, at the first outbound message (stream open).
-- `ResponseSent` runs once, at stream close — the connection closing *is* the response-sent moment.
+- `ResponseSent` runs once, at stream close — the connection closing _is_ the response-sent moment.
 
 So a streaming call behaves exactly as you would expect a non-streaming multi-item response to: middleware fires once on
 the way in, the handler gathers and emits the message collection, and `ResponseSent` fires once at close. No stage runs
@@ -423,7 +423,7 @@ All in framework code, no user involvement required:
   `call.cancellable(...)`, which checks cancellation before yielding each message and exits iteration early once the
   call is cancelled. There is no push `write()` channel; the check lives at each pull step. The same loop carries a
   second, separate obligation — pausing while the transport is unready (see [Worker Adapters](#worker-adapters)) — which
-  is *not* a cancellation check and does not run through `call.cancellable(...)`: an unready transport suspends the
+  is _not_ a cancellation check and does not run through `call.cancellable(...)`: an unready transport suspends the
   drain, a cancelled call ends it.
 
 Every orchestrator boundary runs the two-question check. Beyond `ServiceHandler` entry, a response is almost always
@@ -613,7 +613,7 @@ control, and a port chooses the primitive its runtime already has.
 
 **Cancellation and unwritability are different conditions with opposite effects.** A cancelled call means the peer is
 gone or no longer wants the result, so the drain **ends** — iteration exits early and the call closes. An unready
-transport means the peer is *alive but not reading*, so the drain **pauses** — no message is dropped, no status is
+transport means the peer is _alive but not reading_, so the drain **pauses** — no message is dropped, no status is
 produced, and the handler resumes exactly where it left off once the peer catches up. Conflating the two is a live
 defect in either direction: treating unwritability as cancellation truncates a perfectly good response, and treating it
 as "nothing to do" is the unbounded-buffering bug this requirement exists to prevent.
@@ -624,7 +624,7 @@ over-limit call with `RESOURCE_EXHAUSTED`. The cap is configurable on the gRPC c
 1000). Under the streaming model the same setting bounds the live inbound queue and drives backpressure instead of
 rejecting — see [Streaming and Call Shapes](#streaming-and-call-shapes).
 
-`maxInboundMessages` bounds the **inbound direction only** — the name is literal, and it is the only *count-based*
+`maxInboundMessages` bounds the **inbound direction only** — the name is literal, and it is the only _count-based_
 bound in the design. **The outbound direction is bounded by the transport's writability signal**, honored per the drain
 requirement above; there is no outbound message-count setting and none is planned, because the transport already knows
 how much it has queued and a fixed count cannot. Nothing else bounds outbound: an adapter that drains as fast as the
@@ -725,9 +725,9 @@ The underlying artifact is always the same: a `Map<string, Route>` available to 
 ## Exception → Status Mapping
 
 **The handler owns domain outcomes; the framework owns only the catch-all.** This mirrors HTTP exactly: just as an HTTP
-controller *returns* a response carrying `404`/`422`/`401`/`403`, a gRPC handler *returns* a `ServiceResponse` carrying
+controller _returns_ a response carrying `404`/`422`/`401`/`403`, a gRPC handler _returns_ a `ServiceResponse` carrying
 the appropriate status — `Status.notFound(...)`, `Status.invalidArgument(...)`, `Status.unauthenticated(...)`,
-`Status.permissionDenied(...)`. The framework never infers domain semantics from the *type* of a thrown exception, and
+`Status.permissionDenied(...)`. The framework never infers domain semantics from the _type_ of a thrown exception, and
 defines no `NotFoundException`/`ValidationException`/`UnauthorizedException`/`ForbiddenException` hierarchy to do so.
 
 Only two mappings are built in:
@@ -735,13 +735,13 @@ Only two mappings are built in:
 - `CancelledException` → `CANCELLED`, or `DEADLINE_EXCEEDED` when the carried `CancellationReason` says so.
 - Any other uncaught `Throwable` → `INTERNAL`.
 
-`CancelledException` is special precisely because it is *framework-thrown*, not a domain outcome: cooperative
+`CancelledException` is special precisely because it is _framework-thrown_, not a domain outcome: cooperative
 cancellation raises it from `throwIfCancelled()` / the two-question check, so the framework is entitled to map it.
 Everything else that escapes a handler is, by definition, an unhandled fault — the gRPC equivalent of a `500`.
 
 Because the catch-all is deliberately coarse, it is **overridable**: `ThrowableCaught` middleware can inspect the
 throwable and substitute any response it likes, and `SendingResponse` middleware can rewrite the final response. An
-application that *wants* a domain-exception→status table implements it as its own `ThrowableCaught` middleware; the
+application that _wants_ a domain-exception→status table implements it as its own `ThrowableCaught` middleware; the
 framework does not presume one.
 
 > **Implementation note.** Where handlers are invoked reflectively (annotation/attribute dispatch), the reflection

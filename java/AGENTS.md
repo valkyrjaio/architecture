@@ -47,7 +47,7 @@ Java nuances:
 
 - **Reserved words → trailing underscore.** `abstract` and `enum` are Java
   keywords and cannot be package names — use **`abstract_`** and **`enum_`** for
-  those segments. The §4 *name* rules still hold (an abstract class's name must
+  those segments. The §4 _name_ rules still hold (an abstract class's name must
   not contain `Abstract`; an enum's must not contain `Enum`).
 - **No traits.** Java has no trait construct, so there is no `trait` segment —
   share behavior via abstract classes or interface `default` methods.
@@ -74,7 +74,7 @@ Java nuances:
 - If a test genuinely needs package-private access, place just that test in the
   source package instead — it stays outside `io.valkyrja.tests.*` by necessity,
   and it is the only thing that may.
-- **Framework:** JUnit 5 (`junit-jupiter`) + **Mockito** for stubbing *contracts*;
+- **Framework:** JUnit 5 (`junit-jupiter`) + **Mockito** for stubbing _contracts_;
   port concrete PHP `Fixtures` doubles to real Java classes under
   `io.valkyrja.tests.fixtures.*`.
 - **Naming:** concrete test classes are `final` and named `*Test`; everything
@@ -99,14 +99,14 @@ Build system is **Gradle (Kotlin DSL)**. Each tool runs from its own
 `.github/ci/<tool>/` via delegated tasks. Check the root `build.gradle.kts` for
 exact task names.
 
-| Role                     | Tool                          | Task                          |
-|--------------------------|-------------------------------|-------------------------------|
-| Formatting               | Spotless (Google Java Format) | `spotlessApply` / `spotlessCheck` |
-| Architecture enforcement | ArchUnit                      | `archunit`                    |
-| Static analysis          | ErrorProne + NullAway         | (compile-time)                |
-| Static analysis + security | SpotBugs + FindSecBugs      | (bytecode)                    |
-| Automated migration      | OpenRewrite                   | (recipe-based)                |
-| Testing + coverage       | JUnit 5 + JaCoCo              | `junit`                       |
+| Role                       | Tool                          | Task                              |
+| -------------------------- | ----------------------------- | --------------------------------- |
+| Formatting                 | Spotless (Google Java Format) | `spotlessApply` / `spotlessCheck` |
+| Architecture enforcement   | ArchUnit                      | `archunit`                        |
+| Static analysis            | ErrorProne + NullAway         | (compile-time)                    |
+| Static analysis + security | SpotBugs + FindSecBugs        | (bytecode)                        |
+| Automated migration        | OpenRewrite                   | (recipe-based)                    |
+| Testing + coverage         | JUnit 5 + JaCoCo              | `junit`                           |
 
 **Scope:** Spotless, ArchUnit, Error Prone, and SpotBugs all cover **both** `src`
 and the JUnit test tree — each CI build compiles the tests as well as `src`, and

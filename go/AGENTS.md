@@ -99,7 +99,7 @@ That module is upgraded with **`go get tool`** — the `tool` meta-pattern with 
 - **`-u` upgrades the tool's whole transitive graph, not just the tool.** MVS is
   then free to select a dependency the tool's authors never built against, and
   the pinned tool stops compiling. Without `-u`, each declared tool still moves
-  to its latest release, but its dependencies are resolved from *that release's*
+  to its latest release, but its dependencies are resolved from _that release's_
   own `go.mod` — which is exactly what pinning a tool means.
 - **A same-path breaking release is invisible to the toolchain.** Go's import
   compatibility rule is a convention, not an enforced constraint: `go-header`
@@ -116,7 +116,7 @@ That module is upgraded with **`go get tool`** — the `tool` meta-pattern with 
   requires and wait for an upstream release that adopts the new API;
   `go get tool` then picks it up on its own.
 - **Non-tool modules keep `go get -u ./...`** — there the module being upgraded
-  *is* the code under test, so upgrading its graph is the point.
+  _is_ the code under test, so upgrading its graph is the point.
 
 The reusable workflows enforce this
 ([`_go-update-dependencies.yml`](https://github.com/valkyrjaio/.github/blob/master/.github/workflows/_go-update-dependencies.yml)).
@@ -141,7 +141,7 @@ make.
     bare pattern; PHP's `/^…$/` compiles but matches nothing, since the slashes
     are literal (PHP needs them because `preg_match` requires them — see
     [`../php/AGENTS.md`](../php/AGENTS.md)). Unlike Java's `Matcher.matches()`,
-    which implies a full match on its own, Go's `MatchString` *searches* — so the
+    which implies a full match on its own, Go's `MatchString` _searches_ — so the
     `^` / `$` framing is what makes a route match exactly, not decoration.
     `\/` compiles fine, so `Regex.PATH` carries over unchanged.
   - **No lookahead, lookbehind, or backreferences.** RE2 rejects them outright

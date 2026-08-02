@@ -14,7 +14,7 @@
 
 ### 1. API Module
 
-*13 files, 12 directories*
+_13 files, 12 directories_
 
 ```
 ├── Constant/
@@ -45,7 +45,7 @@
 
 ### 2. Application Module
 
-*26 files, 16 directories*
+_26 files, 16 directories_
 
 ```
 ├── Constant/
@@ -96,7 +96,7 @@
 
 ### 3. Attribute Module
 
-*10 files, 10 directories*
+_10 files, 10 directories_
 
 ```
 ├── Collector/
@@ -122,7 +122,7 @@
 
 ### 4. Auth Module
 
-*72 files, 23 directories*
+_72 files, 23 directories_
 
 ```
 ├── Authenticator/
@@ -194,7 +194,7 @@
 
 ### 5. Broadcast Module
 
-*13 files, 10 directories*
+_13 files, 10 directories_
 
 ```
 ├── Broadcaster/
@@ -223,7 +223,7 @@
 
 ### 6. Cache Module
 
-*12 files, 10 directories*
+_12 files, 10 directories_
 
 ```
 ├── Manager/
@@ -251,7 +251,7 @@
 
 ### 7. CLI Module
 
-*172 files, 85 directories — **Large Module***
+_172 files, 85 directories — **Large Module**_
 
 ```
 ├── Interaction/
@@ -327,7 +327,7 @@
 
 ### 8. Container Module
 
-*17 files, 12 directories*
+_17 files, 12 directories_
 
 ```
 ├── Manager/
@@ -362,7 +362,7 @@
 
 ### 9. Crypt Module
 
-*14 files, 8 directories*
+_14 files, 8 directories_
 
 ```
 ├── Manager/
@@ -390,7 +390,7 @@
 
 ### 10. Dispatch Module
 
-*35 files, 12 directories*
+_35 files, 12 directories_
 
 ```
 ├── Data/
@@ -441,7 +441,7 @@
 
 ### 11. Event Module
 
-*20 files, 17 directories*
+_20 files, 17 directories_
 
 ```
 ├── Attribute/
@@ -485,7 +485,7 @@
 
 ### 12. Filesystem Module
 
-*17 files, 10 directories*
+_17 files, 10 directories_
 
 ```
 ├── Manager/
@@ -518,7 +518,7 @@
 
 ### 13. HTTP Module
 
-*297 files, 158 directories — **Largest Module***
+_297 files, 158 directories — **Largest Module**_
 
 ```
 ├── Client/
@@ -608,7 +608,7 @@
 
 ### 14. JWT Module
 
-*10 files, 9 directories*
+_10 files, 9 directories_
 
 ```
 ├── Enum/
@@ -633,7 +633,7 @@
 
 ### 15. Log Module
 
-*12 files, 10 directories*
+_12 files, 10 directories_
 
 ```
 ├── Enum/
@@ -661,7 +661,7 @@
 
 ### 16. Mail Module
 
-*17 files, 10 directories*
+_17 files, 10 directories_
 
 ```
 ├── Data/
@@ -694,7 +694,7 @@
 
 ### 17. ORM Module
 
-*90 files, 32 directories — **Complex Module***
+_90 files, 32 directories — **Complex Module**_
 
 ```
 ├── Constant/
@@ -772,7 +772,7 @@
 
 ### 18. Reflection Module
 
-*9 files, 8 directories*
+_9 files, 8 directories_
 
 ```
 ├── Provider/
@@ -795,7 +795,7 @@
 
 ### 19. Session Module
 
-*28 files, 17 directories*
+_28 files, 17 directories_
 
 ```
 ├── Manager/
@@ -846,7 +846,7 @@
 
 ### 20. SMS Module
 
-*12 files, 10 directories*
+_12 files, 10 directories_
 
 ```
 ├── Data/
@@ -874,7 +874,7 @@
 
 ### 21. Support Module
 
-*6 files, 6 directories*
+_6 files, 6 directories_
 
 ```
 ├── Generator/
@@ -892,7 +892,7 @@
 
 ### 22. Throwable Module
 
-*7 files, 7 directories*
+_7 files, 7 directories_
 
 ```
 ├── Contract/
@@ -912,7 +912,7 @@
 
 ### 23. Type Module
 
-*168 files, 83 directories — **Large Type System***
+_168 files, 83 directories — **Large Type System**_
 
 ```
 ├── Abstract/
@@ -988,7 +988,7 @@
 
 ### 24. Validation Module
 
-*33 files, 16 directories*
+_33 files, 16 directories_
 
 ```
 ├── Constant/
@@ -1043,7 +1043,7 @@
 
 ### 25. View Module
 
-*58 files, 26 directories*
+_58 files, 26 directories_
 
 ```
 ├── Factory/

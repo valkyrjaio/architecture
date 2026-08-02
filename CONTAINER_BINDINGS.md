@@ -6,7 +6,7 @@ Every class, interface, and contract in Valkyrja needs a stable, unique identifi
 Languages differ in what they use as that key:
 
 | Language   | Binding key type            | Notes                                                          |
-|------------|-----------------------------|----------------------------------------------------------------|
+| ---------- | --------------------------- | -------------------------------------------------------------- |
 | PHP        | `::class` — FQN string      | compiler-verified                                              |
 | Java       | `.class` — `Class<T>` token | compiler-verified                                              |
 | Python     | string constant             | class object forces import, defeating Python 3.14 lazy loading |
@@ -457,7 +457,7 @@ mechanism that works uniformly for both interface and class bindings.
 ### Binding Methods
 
 | Method                        | Description                                                                                     |
-|-------------------------------|-------------------------------------------------------------------------------------------------|
+| ----------------------------- | ----------------------------------------------------------------------------------------------- |
 | `bind(id, callable)`          | Binds a service ID to a callable factory. Returns a fresh instance on every `getService()` call |
 | `bindSingleton(id, callable)` | Same as `bind()` but singleton-scoped — callable invoked once, result cached                    |
 | `bindAlias(alias, id)`        | Maps one service ID to another already registered                                               |
@@ -469,7 +469,7 @@ The recommended callable convention is `[ClassName::class, 'make']` pointing to 
 ### Inspection Methods
 
 | Method                    | Description                                          |
-|---------------------------|------------------------------------------------------|
+| ------------------------- | ---------------------------------------------------- |
 | `has(id)`                 | PSR-11 — true if registered in any form              |
 | `isSingleton(id)`         | True if binding OR resolved instance exists          |
 | `isSingletonBinding(id)`  | True if callable binding exists but not yet resolved |
@@ -483,7 +483,7 @@ child containers to distinguish "registered but not yet built" from "already liv
 ### Resolution Methods
 
 | Method              | Description                                                                             |
-|---------------------|-----------------------------------------------------------------------------------------|
+| ------------------- | --------------------------------------------------------------------------------------- |
 | `get(id)`           | PSR-11 — works across all three types, slightly slower due to additional lookup         |
 | `getSingleton(id)`  | Resolves a singleton — creates and caches on first access, returns cached on subsequent |
 | `getService(id)`    | Resolves a service — always returns a fresh instance                                    |

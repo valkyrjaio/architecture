@@ -83,7 +83,7 @@ PHP nuances:
 - Attributes carry `#[Attribute]` and live in `Attribute\`; non-attributes must
   not be attributed.
 - **Test traits invert the src trait rule:** in tests a trait lives in `Trait\`
-  **and is named `*Trait`**, whereas a src trait's name must *not* contain
+  **and is named `*Trait`**, whereas a src trait's name must _not_ contain
   `Trait`.
 
 ---
@@ -115,16 +115,16 @@ Every tool is isolated under `.github/ci/<tool>/` with its own `composer.json`;
 binaries live at `.github/ci/<tool>/vendor/bin/`. **Always drive them through the
 root `composer.json` script shortcuts** — check that file first for exact names.
 
-| Role                     | Tool         | Command(s)                                     |
-|--------------------------|--------------|------------------------------------------------|
-| Architecture enforcement | PHPArkitect  | `composer phparkitect`                         |
-| Static analysis          | PHPStan      | `composer phpstan`                             |
-| Static analysis + taint  | Psalm        | `composer psalm` (`psalm-check`, `psalm-stats`)|
-| Code standards           | PHP CodeSniffer | `composer phpcodesniffer`                   |
-| Formatting               | PHP-CS-Fixer | `composer phpcsfixer` then `phpcsfixer-check`  |
-| Automated migration      | Rector       | `composer rector` / `rector-check`             |
-| Testing                  | PHPUnit      | `composer phpunit` / `phpunit-coverage`        |
-| Branch coverage (`valkyrja`) | PHPUnit  | `composer phpunit-path-coverage-parallel`      |
+| Role                         | Tool            | Command(s)                                      |
+| ---------------------------- | --------------- | ----------------------------------------------- |
+| Architecture enforcement     | PHPArkitect     | `composer phparkitect`                          |
+| Static analysis              | PHPStan         | `composer phpstan`                              |
+| Static analysis + taint      | Psalm           | `composer psalm` (`psalm-check`, `psalm-stats`) |
+| Code standards               | PHP CodeSniffer | `composer phpcodesniffer`                       |
+| Formatting                   | PHP-CS-Fixer    | `composer phpcsfixer` then `phpcsfixer-check`   |
+| Automated migration          | Rector          | `composer rector` / `rector-check`              |
+| Testing                      | PHPUnit         | `composer phpunit` / `phpunit-coverage`         |
+| Branch coverage (`valkyrja`) | PHPUnit         | `composer phpunit-path-coverage-parallel`       |
 
 ### CI gate (run before done)
 
@@ -165,19 +165,19 @@ composer phpunit-path-coverage-shard Http
 ```
 
 **Branch coverage counts blocks entered, not edges taken — so an always-true
-guard reads 100%.** Xdebug marks a *basic block* covered when execution enters
+guard reads 100%.** Xdebug marks a _basic block_ covered when execution enters
 it. An `if` whose condition can never be false still runs entry → body →
 after-if, so every block is hit and the function reports full branch coverage;
 the never-taken edge is only visible in **path** coverage, which nothing gates.
 `GAPS=1` therefore never lists an always-true guard, and a file's absence from
-that list is not evidence its code is all reachable. A dead *sub-expression*
+that list is not evidence its code is all reachable. A dead _sub-expression_
 does show up, because it forms a block nothing enters. Both shapes came from the
 same invariant in `Cli\Interaction`:
 
-| Dead code | branches | paths |
-|-----------|----------|-------|
-| `Answer::isValidResponse()`'s unreachable first clause | 8/9 — listed by `GAPS=1` | — |
-| `QuestionWriter::writeQuestion()`'s always-true `if`   | 3/3 — invisible to `GAPS=1` | 1/2 |
+| Dead code                                              | branches                    | paths |
+| ------------------------------------------------------ | --------------------------- | ----- |
+| `Answer::isValidResponse()`'s unreachable first clause | 8/9 — listed by `GAPS=1`    | —     |
+| `QuestionWriter::writeQuestion()`'s always-true `if`   | 3/3 — invisible to `GAPS=1` | 1/2   |
 
 Per-function branch and path counts, which no script reports, come from a
 `--coverage-php` dump:
@@ -192,7 +192,7 @@ A genuine gap is closed by a test. A branch that no test can reach is closed by
 **changing the source**, not by excusing it — fold an exhaustive `match`'s last
 arm into `default`, wrap an irreducible syscall in an overridable seam, delete a
 condition that is provably dead. Reaching an otherwise-unreachable state by
-subclassing to poke at `protected` state is *excusing* it: it locks in semantics
+subclassing to poke at `protected` state is _excusing_ it: it locks in semantics
 the public API cannot produce, and the TypeScript port had exactly such a test
 pinning "empty allowed responses accepts anything" until the dead clause was
 removed. See the branch-coverage notes in [`TODO.md`](TODO.md) for the known

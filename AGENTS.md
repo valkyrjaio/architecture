@@ -34,14 +34,14 @@ Valkyrja is a single framework ported to five languages in priority order. PHP i
 the **reference implementation**; every other port mirrors its structure,
 naming, and tests.
 
-| # | Language       | Status                                | Package root / namespace |
-|---|----------------|---------------------------------------|--------------------------|
-| 1 | **PHP**        | Production — reference implementation  | `Valkyrja\`              |
-| 2 | **Java**       | In progress                           | `io.valkyrja`            |
-| 3 | **Go**         | Proof of concept                      | `io/valkyrja`            |
-| 4 | **Python**     | Planned                               | `valkyrja`               |
-| 5 | **TypeScript** | Planned                               | `@valkyrjaio/valkyrja`   |
-| 6 | **Kotlin**     | Planned (JVM — nearly free from Java) | `io.valkyrja`            |
+| #   | Language       | Status                                | Package root / namespace |
+| --- | -------------- | ------------------------------------- | ------------------------ |
+| 1   | **PHP**        | Production — reference implementation | `Valkyrja\`              |
+| 2   | **Java**       | In progress                           | `io.valkyrja`            |
+| 3   | **Go**         | Proof of concept                      | `io/valkyrja`            |
+| 4   | **Python**     | Planned                               | `valkyrja`               |
+| 5   | **TypeScript** | Planned                               | `@valkyrjaio/valkyrja`   |
+| 6   | **Kotlin**     | Planned (JVM — nearly free from Java) | `io.valkyrja`            |
 
 Each language has parallel repos: the **framework** (runtime, zero build/AST
 dependencies), **sindri** (the dev-only build tool that generates the cache), an
@@ -88,10 +88,10 @@ These hold in **every** language. Do not violate them in a port.
   config class can implement several adapter contracts. See §4.
 - **No provider-reference constants class.** Provider references use
   `::class` / `.class` / class objects / constructor references directly so
-  `sindri` can resolve them statically. (Binding-*key* constants files are fine
+  `sindri` can resolve them statically. (Binding-_key_ constants files are fine
   and expected — see §4.)
 - **Route middleware is appended, never deduplicated.** Across every protocol
-  (HTTP, CLI, gRPC), both the runtime collector and `sindri` codegen *append* each
+  (HTTP, CLI, gRPC), both the runtime collector and `sindri` codegen _append_ each
   registered middleware in order — they never dedupe. If the same middleware is
   scheduled twice at a stage it runs twice (including the qualified- vs
   simple-name spelling of one class); a duplicate is the developer's bug, not the
@@ -108,14 +108,14 @@ Full detail: [`SUMMARY.md`](SUMMARY.md) and [`README.md`](README.md).
 **Definition of done — non-negotiable, across the board, in every language and
 every repo.** A change is not finished until, for the repo you touched:
 
-- **Every code branch is tested** — *branch* coverage, not just line coverage.
+- **Every code branch is tested** — _branch_ coverage, not just line coverage.
   Every path, guard, and error branch gets a test (use synthetic inputs to reach
   defensive guards that normal input can't). ("Branch" here means a code
   path, not a git branch.)
 - **All tests pass.**
-- **Every CI check passes** — the *full* gate (static analysis, formatting,
+- **Every CI check passes** — the _full_ gate (static analysis, formatting,
   architecture, migration, tests), never a subset.
-- **Coverage is and stays 100%** — line *and* branch. It must never drop.
+- **Coverage is and stays 100%** — line _and_ branch. It must never drop.
 
 ### Coverage is per file, and you must measure it
 
@@ -129,7 +129,7 @@ The 100% rule is **per file, not an aggregate**, and it binds both directions:
 - **Every file you touch stays at 100%.** Adding a branch to an existing file
   means adding the test for it in the same change.
 
-**A green gate is not proof of coverage.** Every repo *runs* coverage and
+**A green gate is not proof of coverage.** Every repo _runs_ coverage and
 publishes a report, but no language's gate currently **fails** on it — a build at
 55% passes exactly like one at 100%. That is the deliberate state for now, and
 gating may be added later; either way the 100% requirement above does not depend
@@ -141,7 +141,7 @@ you missed — never as the thing that defines the rule.
 The only exception is an **explicitly documented** one: code that genuinely
 cannot be covered (a process-exiting call, a blocking server loop) is excluded in
 the coverage tool's own config, narrowly, with a comment saying why. Two rules
-about exclusions: an accepted gap must be *written down* where the tool reads it,
+about exclusions: an accepted gap must be _written down_ where the tool reads it,
 never merely tolerated in silence; and never lower a threshold to accommodate a
 gap — a floor set to "whatever we happen to be at" legitimizes the gap and
 defeats the point. Cover the code, or exclude it narrowly and say why.
@@ -166,7 +166,7 @@ Then:
    confirmation before committing, before pushing, and before opening the PR.**
    Keep each branch/PR small and atomic. See §7.
 8. **Cross-language changes propagate.** If a change affects more than one port,
-   make it in every affected language in the *same* batch (code and tests
+   make it in every affected language in the _same_ batch (code and tests
    together) and cross-link the sibling PRs. See §7.
 9. **New repos are scaffolded from the language's `template` repo** — the source
    of truth for repo layout and file/class structure. Start from it; never
@@ -179,7 +179,7 @@ Then:
     described and becomes an assertion that is now false. That is worse than no
     comment, because the next reader trusts it.
     **Put it in the PR description instead — nothing is lost.** The squash merge
-    writes the PR title as the commit subject and the *entire PR description* as
+    writes the PR title as the commit subject and the _entire PR description_ as
     the commit body, so the explanation lives in git history permanently,
     attached to the commit that introduced it and reachable by `git log` /
     `git blame`. (This is also why the "no commit body" rule in §7 governs only
@@ -187,8 +187,8 @@ Then:
     explanation is better placed there anyway: pinned to when it was true,
     instead of floating in a file where a later automated edit silently
     falsifies it.
-    The test is whether the comment states a *decision or invariant* or a
-    *current condition*. "This job asserts only generated code, so its coverage
+    The test is whether the comment states a _decision or invariant_ or a
+    _current condition_. "This job asserts only generated code, so its coverage
     report is meaningless" is a decision — keep it. "Pinned ahead of the others
     until the next release bumps it" is a condition — the release automation will
     strand it, so it belongs in the PR.
@@ -277,7 +277,7 @@ data, and the providers; only the server driving them differs. So the protocol i
 segment and the runtime is the prefix, and the default entry keeps the bare name `App`:
 
 |         | PHP                      | Java                |
-|---------|--------------------------|---------------------|
+| ------- | ------------------------ | ------------------- |
 | default | `App\Http\App`           | `app.http.App`      |
 | variant | `App\Http\OpenSwooleApp` | `app.http.JettyApp` |
 
@@ -290,7 +290,7 @@ become `App\Queue\App` and `App\Queue\PushApp` alongside a per-runtime
 
 ### Structure taxonomy (enforced)
 
-A class's *kind* is encoded three ways at once — its **name suffix**, the
+A class's _kind_ is encoded three ways at once — its **name suffix**, the
 **segment** (namespace/package/directory) it lives in, and its **modifier** — and
 all three must agree. This is the machine-verified spec (PHP's PHPArkitect
 `Rules` is the reference; Java ArchUnit and Kotlin Konsist mirror it; where a
@@ -299,31 +299,31 @@ review). PHP segment spellings are shown; **each Layer-2 guide gives the
 per-language spelling** (case + reserved-word handling + constructs a language
 lacks).
 
-| Kind | Identified by | Name | Segment | Modifier |
-|------|---------------|------|---------|----------|
-| Contract | is an interface | `*Contract` | `Contract\` | interface |
-| Service provider | implements `ServiceProviderContract` | `*ServiceProvider` | `Provider\` | — |
-| Component provider | implements `ComponentProviderContract` | `*ComponentProvider` | `Provider\` | — |
-| Route provider | implements `Http`/`CliRouteProviderContract` | `*RouteProvider` | `Provider\` | — |
-| Listener provider | implements `ListenerProviderContract` | `*ListenerProvider` | `Provider\` | — |
-| Factory | — | `*Factory` | `Factory\` | — |
-| Constant | — | `*Constant` | `Constant\` | final |
-| Attribute / annotation | has the attribute marker | — | `Attribute\` | — |
-| CLI command | — | `*Command` | `Cli\Command\` | — |
-| Security | — | `*Security` | `Security\` | final |
-| Concrete exception | implements Throwable | `*Exception` (Go: `*Error`) | `Exception\` | — |
-| Any throwable | extends/implements Throwable | — | `Throwable\` | — |
-| Base `*RuntimeException` / `*InvalidArgumentException` | — | as-is | `Abstract\` | abstract |
-| Type / Model / Entity | extends the base | — | `Type\` / `Model\` / `Entity\` | — |
-| Abstract class | is abstract | must **not** contain `Abstract` | `Abstract\` | abstract |
-| Enum | is an enum | must **not** contain `Enum` | `Enum\` | enum |
-| Trait | is a trait | must **not** contain `Trait` (src) | `Trait\` | trait |
-| Test fixture | reusable double in `Fixtures\` | `*Fixture` | `Fixtures\` | final |
+| Kind                                                   | Identified by                                | Name                               | Segment                        | Modifier  |
+| ------------------------------------------------------ | -------------------------------------------- | ---------------------------------- | ------------------------------ | --------- |
+| Contract                                               | is an interface                              | `*Contract`                        | `Contract\`                    | interface |
+| Service provider                                       | implements `ServiceProviderContract`         | `*ServiceProvider`                 | `Provider\`                    | —         |
+| Component provider                                     | implements `ComponentProviderContract`       | `*ComponentProvider`               | `Provider\`                    | —         |
+| Route provider                                         | implements `Http`/`CliRouteProviderContract` | `*RouteProvider`                   | `Provider\`                    | —         |
+| Listener provider                                      | implements `ListenerProviderContract`        | `*ListenerProvider`                | `Provider\`                    | —         |
+| Factory                                                | —                                            | `*Factory`                         | `Factory\`                     | —         |
+| Constant                                               | —                                            | `*Constant`                        | `Constant\`                    | final     |
+| Attribute / annotation                                 | has the attribute marker                     | —                                  | `Attribute\`                   | —         |
+| CLI command                                            | —                                            | `*Command`                         | `Cli\Command\`                 | —         |
+| Security                                               | —                                            | `*Security`                        | `Security\`                    | final     |
+| Concrete exception                                     | implements Throwable                         | `*Exception` (Go: `*Error`)        | `Exception\`                   | —         |
+| Any throwable                                          | extends/implements Throwable                 | —                                  | `Throwable\`                   | —         |
+| Base `*RuntimeException` / `*InvalidArgumentException` | —                                            | as-is                              | `Abstract\`                    | abstract  |
+| Type / Model / Entity                                  | extends the base                             | —                                  | `Type\` / `Model\` / `Entity\` | —         |
+| Abstract class                                         | is abstract                                  | must **not** contain `Abstract`    | `Abstract\`                    | abstract  |
+| Enum                                                   | is an enum                                   | must **not** contain `Enum`        | `Enum\`                        | enum      |
+| Trait                                                  | is a trait                                   | must **not** contain `Trait` (src) | `Trait\`                       | trait     |
+| Test fixture                                           | reusable double in `Fixtures\`               | `*Fixture`                         | `Fixtures\`                    | final     |
 
 The relationships are **bidirectional**: everything in `Contract\` must be an
-interface *and* named `*Contract`; everything in `Enum\` must be an enum; every
+interface _and_ named `*Contract`; everything in `Enum\` must be an enum; every
 final constant lives in `Constant\`; and so on. For `Abstract`, `Enum`, and
-`Trait` the *segment* carries the meaning, so the **name must not repeat it** — an
+`Trait` the _segment_ carries the meaning, so the **name must not repeat it** — an
 abstract `Stream` is `Abstract\Stream`, never `AbstractStream`.
 
 Tests: concrete test classes are `final`, live in `Unit\`/`Functional\`, and are
@@ -388,7 +388,7 @@ type and carries no instance state. [`STATIC_METHODS.md`](STATIC_METHODS.md)
 records the replacement: a metadata registry that the developer fills in a
 service provider, keyed by class token.
 
-Warning: a call on a *variable* class does not port, whatever the method returns.
+Warning: a call on a _variable_ class does not port, whatever the method returns.
 PHP writes `$type::fromValue($value)`, and no other Valkyrja language can. The
 exemption above covers the declaration, not that call.
 [`STATIC_METHODS.md`](STATIC_METHODS.md) owns the replacement for it.
@@ -536,12 +536,12 @@ supports it; override methods are marked (`#[Override]` / `@Override` /
 Every framework repo mirrors the same test taxonomy — the layout is consistent
 across languages and must be preserved in ports:
 
-| Kind           | Holds                                                         |
-|----------------|--------------------------------------------------------------|
-| **Unit**       | one class in isolation; path mirrors the `src` path          |
-| **Functional** | boots the app / exercises several units together             |
-| **Fixtures**   | reusable doubles used *by* tests, named `*Fixture` (never `*Test`) |
-| **Abstract**   | base test cases (not themselves tests)                       |
+| Kind           | Holds                                                              |
+| -------------- | ------------------------------------------------------------------ |
+| **Unit**       | one class in isolation; path mirrors the `src` path                |
+| **Functional** | boots the app / exercises several units together                   |
+| **Fixtures**   | reusable doubles used _by_ tests, named `*Fixture` (never `*Test`) |
+| **Abstract**   | base test cases (not themselves tests)                             |
 
 ### The test root
 
@@ -612,7 +612,7 @@ root kinds, and worked examples:
   anything that breaks a public contract. No type marks a change as automated —
   git records the author already.
 - **Roots** are an **open vocabulary** governed by two rules: a root names a
-  *thing*, never a kind of change or the actor that made it; and a root is never
+  _thing_, never a kind of change or the actor that made it; and a root is never
   the repo's own identity (`[PhpCsFixer]` says nothing inside the phpcsfixer repo,
   everything inside the framework). That second rule is positional — `[Http]` is a
   root here because HTTP lives here. Examples: a module (`[Http]`), a concept
@@ -635,7 +635,7 @@ root kinds, and worked examples:
   version component and everything else is a patch, so the type you choose is
   what determines the next release. See [`VERSIONING.md`](VERSIONING.md).
 - No body / co-author lines unless explicitly asked. This governs the commits
-  *you* write; the squash merge takes its subject from the PR title and its body
+  _you_ write; the squash merge takes its subject from the PR title and its body
   from the PR description, which is why that description is where durable
   explanation belongs (see §3, rule 10).
 - PR description follows the
@@ -698,7 +698,7 @@ they frequently do.
 The `prefix` and the PR's base branch are both set by the change type:
 
 | Change type     | Target (base) branch                           | Branch prefix  |
-|-----------------|------------------------------------------------|----------------|
+| --------------- | ---------------------------------------------- | -------------- |
 | Improvement     | Lowest major affected `??.x`                   | `improvement/` |
 | Bug fix         | Lowest major affected `??.x`                   | `fix/`         |
 | New feature     | `master`                                       | `feature/`     |

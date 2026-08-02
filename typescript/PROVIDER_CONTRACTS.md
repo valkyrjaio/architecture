@@ -41,7 +41,7 @@ Cache is a cold-start optimization, not a correctness requirement.
 TypeScript has full generic type support for all return types:
 
 | Method                    | Return type                                      | Reasoning                                             |
-|---------------------------|--------------------------------------------------|-------------------------------------------------------|
+| ------------------------- | ------------------------------------------------ | ----------------------------------------------------- |
 | `getContainerProviders()` | `ServiceProviderContract[]`                      | Provider instances returned directly                  |
 | `getEventProviders()`     | `ListenerProviderContract[]`                     | Provider instances returned directly                  |
 | `getCliProviders()`       | `CliRouteProviderContract[]`                     | Provider instances returned directly                  |

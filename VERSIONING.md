@@ -6,11 +6,11 @@ Every repo in the project shares one version scheme:
 YY.FEATURE.PATCH        e.g. 26.6.0
 ```
 
-| Component | Meaning                                                       | Bumped by     |
-|-----------|---------------------------------------------------------------|---------------|
-| `YY`      | Two-digit year — the major line, one per year                  | manually only |
-| `FEATURE` | New capability, deprecation, or breaking change                | automatically |
-| `PATCH`   | Everything else                                                | automatically |
+| Component | Meaning                                         | Bumped by     |
+| --------- | ----------------------------------------------- | ------------- |
+| `YY`      | Two-digit year — the major line, one per year   | manually only |
+| `FEATURE` | New capability, deprecation, or breaking change | automatically |
+| `PATCH`   | Everything else                                 | automatically |
 
 Each year gets a maintenance branch named after it — `26.x` for 2026 — and every
 stable release is cut from one of those branches, never from `master`.
@@ -43,18 +43,18 @@ The consequence to understand: a consumer on `^26.1` will pick up a breaking
 ## How the bump is computed
 
 Releases read the commit subjects on the version branch since the last tag.
-Because squash merges take their subject from the PR title, those subjects *are*
+Because squash merges take their subject from the PR title, those subjects _are_
 the conventional PR titles — no API calls, no commit-body parsing.
 
-| Found in the window                             | Bump       |
-|-------------------------------------------------|------------|
-| any `feat`, any `deprecate`, or any `!`         | `FEATURE`  |
-| any other type                                  | `PATCH`    |
-| nothing, or only release-version roots          | no release |
+| Found in the window                     | Bump       |
+| --------------------------------------- | ---------- |
+| any `feat`, any `deprecate`, or any `!` | `FEATURE`  |
+| any other type                          | `PATCH`    |
+| nothing, or only release-version roots  | no release |
 
 A release run commits its own bookkeeping — the version file, the application
 info, the CHANGELOG — and then tags the last of those commits, so they ship
-*inside* the release they describe rather than trailing it:
+_inside_ the release they describe rather than trailing it:
 
 ```
 v26.6.1 → [v26.6.1] chore: Update version for the release.
@@ -97,13 +97,13 @@ than it used to be.
 
 `release-new-version.yml` takes a single `bump` input:
 
-| Option    | Effect                                                      |
-|-----------|-------------------------------------------------------------|
-| `auto`    | Compute from commit types since the last tag (**default**)   |
-| `patch`   | Force a patch bump                                           |
-| `feature` | Force a feature bump                                         |
-| `yearly`  | First release on a new `YY.x` branch — always `YY.0.0`        |
-| `rc`      | Release candidate for the next year, from `master` only       |
+| Option    | Effect                                                     |
+| --------- | ---------------------------------------------------------- |
+| `auto`    | Compute from commit types since the last tag (**default**) |
+| `patch`   | Force a patch bump                                         |
+| `feature` | Force a feature bump                                       |
+| `yearly`  | First release on a new `YY.x` branch — always `YY.0.0`     |
+| `rc`      | Release candidate for the next year, from `master` only    |
 
 `auto` is the normal path, and the explicit `patch` / `feature` options remain as
 overrides for when the computed answer is wrong.
@@ -118,8 +118,8 @@ is the only release type that comes from it.
 release design worth defending hardest.
 
 The split follows the version format exactly. `FEATURE` and `PATCH` move on
-*evidence* — the commit log says what merged, so a machine can compute the answer.
-`YY` moves on a *decision*: that a year of accumulated breaking work hangs together
+_evidence_ — the commit log says what merged, so a machine can compute the answer.
+`YY` moves on a _decision_: that a year of accumulated breaking work hangs together
 well enough to ship. An RC is that same decision announced early. Nothing in a
 commit type expresses readiness, so nothing in the log can be read to produce it.
 
@@ -137,7 +137,7 @@ Three further reasons the boundary stays human:
 
 So the sweep below **never dispatches to `master`**, which leaves the RC path
 unreachable from automation by construction rather than by conditionals. That
-matters: a design that needs several conditions to all hold in order to *avoid*
+matters: a design that needs several conditions to all hold in order to _avoid_
 publishing is a design where being wrong publishes.
 
 ## Automatic releases
@@ -173,4 +173,4 @@ A `workflow_dispatch` triggered with `GITHUB_TOKEN` does not create a run, so th
 sweep authenticates as the project's GitHub App.
 
 Before creating a new year's branch, widen `SUPPORTED_VERSIONS` first — the
-new-version workflow validates the *new* major against it and aborts otherwise.
+new-version workflow validates the _new_ major against it and aborts otherwise.

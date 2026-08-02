@@ -71,7 +71,7 @@ modules exactly.
   stage, an always-run "sending" stage, and an always-run "terminated" stage. Each stage method takes
   the inbound (and response, where one exists) plus the stage handler as `next`.
 - **Handler contracts + result records** — the per-stage handler interface, and small result records
-  for stages that can either continue *or* short-circuit with a response.
+  for stages that can either continue _or_ short-circuit with a response.
 - **Abstract `Handler` base** — holds the ordered middleware, resolves each from the container,
   advances the chain, and (where the protocol has a cooperative cancellation model) centralizes the
   cancellation check so every request-processing stage inherits it. A middleware that returns without
@@ -122,7 +122,7 @@ Two provider kinds, following the existing pairs:
 
 - **Service providers** publish the module's services into the container via a `publishers()` map
   (kernel handler, `Router`, `RouteCollection`, collector, and the stage handlers). Publish the stage
-  handlers as **singletons** so the `Router` and the kernel handler resolve the *same* instances —
+  handlers as **singletons** so the `Router` and the kernel handler resolve the _same_ instances —
   otherwise per-route middleware in the "sending"/"terminated" stages silently never fires.
 - **Component providers** group the service providers and declare the module's route providers.
 
@@ -130,9 +130,10 @@ Two provider kinds, following the existing pairs:
 
 Route providers are aggregated by the application. Adding a new module means adding a `get<Module>
 Providers` method to the shared `ComponentProviderContract` and `ApplicationContract`, a backing field
-+ method in the kernel, a delegating override in the child application, and — because these are
-abstract to keep every provider explicit — a `return []` in **every** existing implementor. It is
-mechanical but wide; do it in one pass and compile to confirm.
+
+- method in the kernel, a delegating override in the child application, and — because these are
+  abstract to keep every provider explicit — a `return []` in **every** existing implementor. It is
+  mechanical but wide; do it in one pass and compile to confirm.
 
 ### Application entry
 
@@ -140,7 +141,7 @@ Provide the entry points, mirroring HTTP's `Http`/`WorkerHttp` and gRPC's `Grpc`
 
 - A **single-shot** entry for embedding/tests (bootstrap + handle one unit of work).
 - A **worker base** for persistent runtimes: `bootstrap(config)` once, then `dispatch(app, data,
-  inbound, …)` per unit of work, creating an isolated child container each time so state never bleeds
+inbound, …)` per unit of work, creating an isolated child container each time so state never bleeds
   between units. If the adapter must write between "sending" and "terminated", pass it a **writer
   callback** so the write slots into the middle while the child container stays alive.
 - If (and only if) the protocol can run on a zero-dependency in-core server, add one (HTTP's
@@ -156,14 +157,14 @@ the app, never a per-runtime one.
 ## Container mechanics to remember
 
 - **Publishers are deferred.** `publishers()` register lazy callbacks; a service is not "instantiated"
-  until first resolved. When gating on an *optional* registered-but-unmaterialized service, use the
+  until first resolved. When gating on an _optional_ registered-but-unmaterialized service, use the
   container's `has(...)` availability check, **not** an "is instantiated" check.
 - **`getSingleton` is strict.** Resolving a class that was never published throws. User-supplied
   middleware must be registered (published) by the application, exactly as in the existing modules.
 
 ## Adapters
 
-Adapters live in **separate entry modules/repos** depending on the *published* framework plus the
+Adapters live in **separate entry modules/repos** depending on the _published_ framework plus the
 native driver/server library. They translate the native call into the module's inbound type, invoke
 the kernel handler, and translate the outbound type back. They are thin (translation only) and never
 re-implement framework concerns. During development, verify an adapter compiles against the local
