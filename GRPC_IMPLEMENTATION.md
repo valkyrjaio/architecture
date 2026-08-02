@@ -71,7 +71,7 @@ onto Go channels, JS async-iterables, and PHP generators — all pull-based. The
 
 `Cancellation.checkAndFinalize(call, response?)` (pre-check before delegating to the wrapped
 middleware, post-check on its return) is implemented once on the **abstract `Handler` base** and used
-by every *request-processing* stage handler (`CallReceived`, `RouteMatched`, `RouteNotMatched`,
+by every _request-processing_ stage handler (`CallReceived`, `RouteMatched`, `RouteNotMatched`,
 `RouteDispatched`, `ThrowableCaught`). The two **always-run** stages (`SendingResponse`,
 `Terminated`) deliberately do **not** apply it — per the fast-exit path they run even for cancelled
 calls. Do not leave the check only in the `Router`, or the "every middleware is cancellation-correct
@@ -111,7 +111,7 @@ A single-shot `Grpc.handle(config, call)` also exists for embedding/tests (boots
 
 Per-route `SendingResponse`/`Terminated`/`ThrowableCaught` middleware are registered by the `Router`
 onto the stage-handler instances it holds, and later invoked by the `ServiceHandler`. The provider
-wiring must publish those handlers as **container singletons** so both resolve the *same* instance —
+wiring must publish those handlers as **container singletons** so both resolve the _same_ instance —
 otherwise per-route middleware in those stages silently never fires. Add a functional test that proves
 it.
 
@@ -131,7 +131,7 @@ from the aggregated `getGrpcProviders()` route providers.
 > `@GrpcService`/…). They are controller-facing and live in the protocol's own attribute namespace,
 > and a gRPC controller never imports the HTTP/CLI equivalents, so the short names never collide.
 > **Providers keep their prefix** (`GrpcRouteProviderContract`, `GrpcRoutingDataContract`, `GrpcConfig`)
-> because those *are* imported alongside their HTTP/CLI siblings (a component provider references all
+> because those _are_ imported alongside their HTTP/CLI siblings (a component provider references all
 > three). Apply the same rule per language.
 
 ### 7a. Middleware classification in the route-data cache
@@ -146,13 +146,13 @@ the toolchain can inspect a type's hierarchy:
   per-stage lists into the cached `Route`. Used by **PHP** (`is_a`, live autoload), **Python**
   (reflection), **TypeScript** (ts-morph `getImplements`), and achievable in **Java** (JavaParser
   symbol solver, `getAllAncestors`), **Kotlin** (KSP), **C#** (Roslyn), **Scala** (macros/reflection).
-  Resolve the *full* hierarchy, not the direct `implements` clause, so a middleware extending an
+  Resolve the _full_ hierarchy, not the direct `implements` clause, so a middleware extending an
   abstract base or a custom sub-contract still classifies.
 - **Runtime `withMiddleware`** — the cache emits the flat, unclassified class list and a
   `Route.withMiddleware(List<Class>)` runs the cascade lazily when the route's supplier
   materializes (once, on match — not per request). This is the fallback for toolchains that cannot
   read the hierarchy at generation. **Go** needs this (structural, implicit interfaces — nothing to
-  read), unless middleware is required to *embed* the contract interface, which makes it declared.
+  read), unless middleware is required to _embed_ the contract interface, which makes it declared.
 
 The discriminator is **nominal vs. structural typing**, not the language. Java pre-classifies (symbol
 solver) to stay consistent with PHP/TS/Python; only Go deviates to `withMiddleware`. Whichever a
@@ -167,14 +167,14 @@ implementation is per-worker. Keep it in the core.
 
 Decision 5's `dispatch` covers the **buffered model** (unary, server- and client-streaming): buffer
 inbound, dispatch once on half-close, drain one `ServiceResponse`. That model cannot serve an
-*interactive* bidirectional call — the client waits for a reply before sending more and never
+_interactive_ bidirectional call — the client waits for a reply before sending more and never
 half-closes early — so a **second dispatch path** exists for methods where **both** streaming flags
 are set (`isClientStreaming() && isServerStreaming()`); everything else stays buffered. The full
-contract is ratified in [`GRPC.md`](GRPC.md) → *Streaming and Call Shapes*; the Java realization:
+contract is ratified in [`GRPC.md`](GRPC.md) → _Streaming and Call Shapes_; the Java realization:
 
 - **`WorkerGrpc.dispatchStreaming(app, data, callFactory, OutboundStream)`** dispatches the handler
   **immediately** (not on half-close) on a **per-call concurrent execution unit** — a virtual thread
-  in Java, a goroutine in Go, an async task in JS/Python (see *Streaming and Call Shapes*).
+  in Java, a goroutine in Go, an async task in JS/Python (see _Streaming and Call Shapes_).
 - **Inbound is a live stream** (`InboundMessageStream`, a bounded blocking queue) the transport feeds
   as messages arrive; iteration blocks until the next message and ends on half-close **or** cancel.
 - **Outbound is a push sink** (`ServiceCall.send` → `OutboundStream`). `SendingResponse` fires **once**
@@ -192,8 +192,8 @@ contract is ratified in [`GRPC.md`](GRPC.md) → *Streaming and Call Shapes*; th
 
 ## Portable gotchas
 
-- **Deferred publishers vs. availability checks.** Provider `publishers()` register as *deferred
-  callbacks*; a service is not "a singleton" until first resolved. When gating on an optional
+- **Deferred publishers vs. availability checks.** Provider `publishers()` register as _deferred
+  callbacks_; a service is not "a singleton" until first resolved. When gating on an optional
   registered-but-unmaterialized service (e.g. the route collector inside `publishRouteCollection`), use
   the container's `has(...)`-style "is anything registered" check, **not** an "is instantiated"
   check, or controller-scanned routes are silently dropped.
@@ -203,12 +203,12 @@ contract is ratified in [`GRPC.md`](GRPC.md) → *Streaming and Call Shapes*; th
 - **Adding `getGrpcProviders` is invasive.** It joins `getCli`/`getHttpProviders` on the shared
   component/application provider contracts and the kernel, so **every** existing implementor must be
   updated. Keep it abstract (consistent with the siblings) rather than a defaulted method.
-  - Defaulting it on the contract *looks* like the cheap way out, but it privileges one protocol over
+  - Defaulting it on the contract _looks_ like the cheap way out, but it privileges one protocol over
     its siblings and encodes "gRPC is optional" into a contract that says no such thing about HTTP or
     CLI. Keep the contract symmetric.
   - The cost of abstract — an identical empty implementation in every component that contributes no
     gRPC routes — is a **class** problem, not a contract problem. Solve it with a base class
-    (`application/provider/abstract_/ComponentProvider` in the Java port) that implements *all* the
+    (`application/provider/abstract_/ComponentProvider` in the Java port) that implements _all_ the
     provider methods as empty, and have components extend it and override only what they contribute.
     Adding the next protocol then touches one base class instead of every component.
   - Watch the duplication gate: adding one identical method to ~25 components is ~25 identical new
@@ -219,10 +219,10 @@ contract is ratified in [`GRPC.md`](GRPC.md) → *Streaming and Call Shapes*; th
   `InvocationTargetException`, PHP's `ReflectionException` paths, etc.). Wrapping that in a generic
   runtime exception hides `CancelledException` from the status mapping, so every cancellation reports
   `INTERNAL` and cooperative cancellation is dead for the primary handler path — with no test failure
-  to show for it, because unit tests that throw `CancelledException` *directly* bypass the collector.
+  to show for it, because unit tests that throw `CancelledException` _directly_ bypass the collector.
   Unwrap the reflection wrapper and rethrow the cause. Test through the reflective path, not around it.
 - **The framework maps only cancellation and the catch-all.** Domain outcomes (`NOT_FOUND`,
-  `INVALID_ARGUMENT`, …) are *returned* by the handler on the `ServiceResponse`, exactly as HTTP
+  `INVALID_ARGUMENT`, …) are _returned_ by the handler on the `ServiceResponse`, exactly as HTTP
   handlers return status codes — there is no domain-exception hierarchy to map. See
   "Exception → Status Mapping" in `GRPC.md`.
 - **`StatusCode` values are the wire codes 0–16** and match the native gRPC library's codes 1:1, so the
@@ -245,7 +245,7 @@ contract is ratified in [`GRPC.md`](GRPC.md) → *Streaming and Call Shapes*; th
   it is **not** cancellation (unready pauses the drain, cancelled ends it, so it does not belong in
   `call.cancellable(...)`), and it does **not** show up in a normal test, because a test client reads
   as fast as the server writes — you need a client that stalls mid-call to see it at all. The
-  obligation is stated in [`GRPC.md`](GRPC.md) → *Worker Adapters*; the mechanism is deliberately
+  obligation is stated in [`GRPC.md`](GRPC.md) → _Worker Adapters_; the mechanism is deliberately
   yours to pick.
 
 ## No "Exchange" (zero-dependency in-core server) for gRPC
@@ -257,18 +257,18 @@ gRPC mandates HTTP/2 with trailers. gRPC's in-core entries are therefore `Grpc` 
 
 ## Adapters
 
-Adapters live in **separate entry modules/repos** that depend on the *published* framework plus a
+Adapters live in **separate entry modules/repos** that depend on the _published_ framework plus a
 native gRPC library. Key points from the Java adapters (grpc-netty and grpc-servlet):
 
 - **Generic dispatch via a fallback handler registry.** Rather than per-service generated stubs, the
-  adapter registers a fallback registry that resolves *any* `/service/method` to a generic
+  adapter registers a fallback registry that resolves _any_ `/service/method` to a generic
   `ServerMethodDefinition` with an **identity `byte[]` marshaller** and a handler that buffers inbound
   messages, builds a `ServiceCall`, calls `WorkerGrpc.dispatch`, and writes the `ServiceResponse` back
   (initial metadata → messages (drained through `call.cancellable`) → status + trailers).
-- **The bridge is transport-agnostic.** It depends only on the native gRPC *API* (not the transport),
+- **The bridge is transport-agnostic.** It depends only on the native gRPC _API_ (not the transport),
   so the same bridge code serves every transport (Netty, servlet). Only the server bootstrap differs
   (`NettyServerBuilder` vs `ServletServerBuilder` → a `GrpcServlet` in an embedded servlet container).
-- **Build/release ordering.** Entry modules pin the *published* framework version, so their CI cannot
+- **Build/release ordering.** Entry modules pin the _published_ framework version, so their CI cannot
   compile the adapter until the framework is released with gRPC and the dependency is bumped. During
   development, verify the adapter compiles against the local framework with a build-tool composite
   build (e.g. Gradle `--include-build`), then release the framework, then bump + green the adapters.
@@ -320,7 +320,7 @@ docker run --rm \
 Expect `BUILD SUCCESSFUL`. Mounting `~/.gradle` is only a cache speed-up — omit it for a fully cold,
 from-scratch run. This was verified on `eclipse-temurin:21-jdk` with Docker 29.x; the framework
 targets JDK 21, which is also what makes the streaming model's virtual-thread-per-call realization
-available (see [`GRPC.md`](GRPC.md) → *Streaming and Call Shapes*).
+available (see [`GRPC.md`](GRPC.md) → _Streaming and Call Shapes_).
 
 For a **new language port**, replicate the same shape: boot the port's native gRPC server against its
 bridge, drive one call of each of the four types (unary, server-streaming, client-streaming,

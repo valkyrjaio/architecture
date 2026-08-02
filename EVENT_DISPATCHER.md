@@ -169,14 +169,14 @@ class UserCreatedEvent implements EventContract {
 
 ## Method Availability Per Language
 
-| Method                                   | PHP | Java | Go | Python | TypeScript |
-|------------------------------------------|-----|------|----|--------|------------|
-| `dispatch(event)`                        | ✅   | ✅    | ✅  | ✅      | ✅          |
-| `dispatchIfHasListeners(event)`          | ✅   | ✅    | ✅  | ✅      | ✅          |
-| `dispatchById(id, args)`                 | ✅   | ✅    | ❌  | ❌      | ❌          |
-| `dispatchByIdIfHasListeners(id, args)`   | ✅   | ✅    | ❌  | ❌      | ❌          |
-| `dispatchListeners(event, ...listeners)` | ✅   | ✅    | ✅  | ✅      | ✅          |
-| `dispatchListener(event, listener)`      | ✅   | ✅    | ✅  | ✅      | ✅          |
+| Method                                   | PHP | Java | Go  | Python | TypeScript |
+| ---------------------------------------- | --- | ---- | --- | ------ | ---------- |
+| `dispatch(event)`                        | ✅  | ✅   | ✅  | ✅     | ✅         |
+| `dispatchIfHasListeners(event)`          | ✅  | ✅   | ✅  | ✅     | ✅         |
+| `dispatchById(id, args)`                 | ✅  | ✅   | ❌  | ❌     | ❌         |
+| `dispatchByIdIfHasListeners(id, args)`   | ✅  | ✅   | ❌  | ❌     | ❌         |
+| `dispatchListeners(event, ...listeners)` | ✅  | ✅   | ✅  | ✅     | ✅         |
+| `dispatchListener(event, listener)`      | ✅  | ✅   | ✅  | ✅     | ✅         |
 
 `dispatchById` and `dispatchByIdIfHasListeners` require constructing an event object from a string identifier — possible
 in PHP via `new $eventId(...$arguments)` and in Java via reflection, but not expressible without a developer-maintained

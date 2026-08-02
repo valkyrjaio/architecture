@@ -160,7 +160,7 @@ Three genuinely unreachable categories exist. Each one is handled, not excused.
   call is possible at all, which is `exit()`, does the seam body carry
   `@codeCoverageIgnore`.
 - **A conditional inside a trait.** Xdebug emits one function entry per file for a trait
-  method, keyed by the *trait*, so every using class shares it and class load order
+  method, keyed by the _trait_, so every using class shares it and class load order
   decides whose hits survive. Move the branch out of the trait into a support class that
   the trait delegates to. `Trait\Arrayable` to `Support\Enumerable` is the pattern, and
   `Trait\JsonSerializable` now follows it.
@@ -171,7 +171,7 @@ it is split into its own `path-coverage` Composer script there. The other repos 
 suite as one shard per component and merges with `phpcov`: **190s against 1942s
 serially**, a 10x gain whose floor is the slowest shard.
 
-**The source-side blockers are gone.** Every branch that no *test* could reach has been
+**The source-side blockers are gone.** Every branch that no _test_ could reach has been
 closed by a source change, one pull request per behavior decision:
 `Answer::isValidResponse()`'s dead `allowedResponses === []` clause (#948),
 `DispatchFactory::fromReflection()`'s exhaustive `match (true)` (#943),

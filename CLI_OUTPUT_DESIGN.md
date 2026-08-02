@@ -25,7 +25,7 @@ structure:
 Each slot is resolved from `CliConfig` with sensible defaults:
 
 | Slot                  | Source                            | Default                              |
-|-----------------------|-----------------------------------|--------------------------------------|
+| --------------------- | --------------------------------- | ------------------------------------ |
 | `app-name`            | `CliConfig::$appName`             | `Valkyrja Application`               |
 | `app-version`         | `CliConfig::$appVersion`          | `1.0.0`                              |
 | `app-icon`            | `CliConfig::$appIcon`             | Valkyrie icon (see below)            |
@@ -117,7 +117,7 @@ sees first and is the slot most worth customizing.
 and three context lines:
 
 1. The framework relationship: `Built on Valkyrja v{version} (date:
-   {build-date})`
+{build-date})`
 2. The runtime language: `Running on PHP {version}`
 3. The project root path
 
@@ -166,7 +166,7 @@ Running migration 2026_01_15_000003_create_posts_table.........Fail
 **Rules:**
 
 - Each step line starts with a verb and a subject (e.g., `Running
-  migration X`).
+migration X`).
 - Dot leaders (`.....`) fill the space between the step description
   and the status label. Status labels are aligned to the same column
   across all steps.
@@ -208,7 +208,7 @@ Status Semantics
 Each of the four status labels has precise meaning:
 
 | Status    | Meaning                                                 | Detail lines expected?                 |
-|-----------|---------------------------------------------------------|----------------------------------------|
+| --------- | ------------------------------------------------------- | -------------------------------------- |
 | `Success` | The step completed cleanly                              | No                                     |
 | `Skipped` | The step was intentionally not performed                | Yes — explain why                      |
 | `Warning` | The step completed but encountered a non-blocking issue | Yes — explain the issue                |
@@ -231,7 +231,7 @@ When a color-capable terminal is detected, the following color
 assignments apply:
 
 | Element                  | Color                       |
-|--------------------------|-----------------------------|
+| ------------------------ | --------------------------- |
 | Banner frame characters  | Default                     |
 | Application icon         | Default (or app-specified)  |
 | `Success` status label   | Green                       |
@@ -252,7 +252,7 @@ Exit Codes
 CLI exit codes are determined by the worst status in the work output:
 
 | Worst status | Exit code |
-|--------------|-----------|
+| ------------ | --------- |
 | All Success  | `0`       |
 | Skipped      | `0`       |
 | Warning      | `0`       |
@@ -487,7 +487,7 @@ CLI customization. All banner slots and several behavior toggles are
 exposed as properties:
 
 | Property            | Type     | Default                | Description                        |
-|---------------------|----------|------------------------|------------------------------------|
+| ------------------- | -------- | ---------------------- | ---------------------------------- |
 | `$appName`          | `string` | `Valkyrja Application` | Top-row application name           |
 | `$appVersion`       | `string` | `1.0.0`                | Top-row application version        |
 | `$appIcon`          | `string` | Valkyrie (see above)   | Multi-line icon string             |

@@ -248,7 +248,7 @@ Documented per-language notes including:
 ## Documents Produced
 
 | File                      | Contents                                                                   |
-|---------------------------|----------------------------------------------------------------------------|
+| ------------------------- | -------------------------------------------------------------------------- |
 | `PORTS.md`                | Language port list, per-language characteristics, comparison table         |
 | `THROWABLES.md`           | Exception naming convention, hierarchy, language mapping, decision tree    |
 | `CONTAINER_BINDINGS.md`   | Closure bindings, string constants, per-component constants files          |

@@ -37,7 +37,7 @@ A major benefit of the closure-based handler approach over dispatch is that the 
 type-hinted and enforced at the language level. Each handler type has its own specific signature:
 
 | Handler type   | Parameters                                | Return type        |
-|----------------|-------------------------------------------|--------------------|
+| -------------- | ----------------------------------------- | ------------------ |
 | HTTP route     | `ContainerContract`, `map<string, mixed>` | `ResponseContract` |
 | CLI route      | `ContainerContract`, `map<string, mixed>` | `OutputContract`   |
 | Event listener | `ContainerContract`, `map<string, mixed>` | `any` / `mixed`    |
@@ -511,12 +511,12 @@ In Java, Go, and TypeScript the enforcement is even stronger — these are compi
 wrong handler signature never reaches a running binary.
 
 |                      | PHP (dispatch) | PHP (handler)      | Java               | Go                 | Python             | TypeScript         |
-|----------------------|----------------|--------------------|--------------------|--------------------|--------------------|--------------------|
-| Enforcement          | ❌ none         | ⚠️ PHPStan         | ✅ compiler         | ✅ compiler         | ⚠️ mypy            | ✅ compiler         |
+| -------------------- | -------------- | ------------------ | ------------------ | ------------------ | ------------------ | ------------------ |
+| Enforcement          | ❌ none        | ⚠️ PHPStan         | ✅ compiler        | ✅ compiler        | ⚠️ mypy            | ✅ compiler        |
 | When caught          | Runtime        | CI                 | Compile            | Compile            | CI                 | Compile            |
-| HTTP return type     | ❌              | `ResponseContract` | `ResponseContract` | `ResponseContract` | `ResponseContract` | `ResponseContract` |
-| CLI return type      | ❌              | `OutputContract`   | `OutputContract`   | `OutputContract`   | `OutputContract`   | `OutputContract`   |
-| Listener return type | ❌              | `mixed`            | `Object`           | `any`              | `Any`              | `unknown`          |
+| HTTP return type     | ❌             | `ResponseContract` | `ResponseContract` | `ResponseContract` | `ResponseContract` | `ResponseContract` |
+| CLI return type      | ❌             | `OutputContract`   | `OutputContract`   | `OutputContract`   | `OutputContract`   | `OutputContract`   |
+| Listener return type | ❌             | `mixed`            | `Object`           | `any`              | `Any`              | `unknown`          |
 
 ---
 
@@ -810,7 +810,7 @@ Resolution is always the same call regardless of whether the entry is a lazy sup
 supplier:
 
 | Language   | Resolution call          |
-|------------|--------------------------|
+| ---------- | ------------------------ |
 | PHP        | `($routes[$name])()`     |
 | Java       | `routes.get(name).get()` |
 | Go         | `routes[name]()`         |
@@ -922,7 +922,7 @@ This is identical to how service bindings work:
 // service binding — callable written as a literal
 SomeServiceId::class => [SomeServiceProvider::class, 'publishSomeClass']
 
-// route — callable written as a literal  
+// route — callable written as a literal
 new Route('/users/{id}', 'user.show', [SomeClass::class, 'theHandlerMethod'])
 ```
 

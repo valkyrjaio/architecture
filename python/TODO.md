@@ -106,9 +106,9 @@ not ported yet, so build it this way from the start (no rename needed):
 - [ ] Implement `ValkyrjaRuntimeException(RuntimeError, ABC)` — abstract
 - [ ] Implement `ValkyrjaInvalidArgumentException(ValueError, ABC)` — abstract, parity name, extends `ValueError`
 - [ ] Every component ships `ComponentRuntimeException` and `ComponentInvalidArgumentException` — abstract, always
-  present
+      present
 - [ ] Naming: `ComponentName*`, shared subcomponents `ParentComponentSubComponent*`, unique subcomponents
-  `SubComponent*`
+      `SubComponent*`
 - [ ] Only concrete specific exceptions are thrown — never abstract base exceptions
 
 ---
@@ -116,12 +116,12 @@ not ported yet, so build it this way from the start (no rename needed):
 ## Container Bindings
 
 - [ ] Add per-component string constants files (required — same as Go and TypeScript)
-    - [ ] `container/container_constants.py`
-    - [ ] `http/http_constants.py`
-    - [ ] `http/routing/http_routing_constants.py`
-    - [ ] `cli/cli_constants.py`
-    - [ ] `event/event_constants.py`
-    - [ ] *(remaining components)*
+  - [ ] `container/container_constants.py`
+  - [ ] `http/http_constants.py`
+  - [ ] `http/routing/http_routing_constants.py`
+  - [ ] `cli/cli_constants.py`
+  - [ ] `event/event_constants.py`
+  - [ ] _(remaining components)_
 - [ ] Add `class_()` FQN helper (trailing underscore — `class` is reserved)
 - [ ] All bindings use string constant keys and closure-based factories
 
@@ -140,11 +140,11 @@ container.bind(
 - [ ] Implement `ComponentProviderContract(ABC)` with `@staticmethod @abstractmethod` methods
 - [ ] Implement `ServiceProviderContract(ABC)` with `publishers()` returning `dict[str, Callable]`
 - [ ] Implement `HttpRouteProviderContract(ABC)` with `get_controller_classes() -> list[type]` +
-  `get_routes() -> list[RouteContract]`
+      `get_routes() -> list[RouteContract]`
 - [ ] Implement `CliRouteProviderContract(ABC)` with `get_controller_classes() -> list[type]` +
-  `get_routes() -> list[RouteContract]`
+      `get_routes() -> list[RouteContract]`
 - [ ] Implement `ListenerProviderContract(ABC)` with `get_listener_classes() -> list[type]` +
-  `get_listeners() -> list[ListenerContract]`
+      `get_listeners() -> list[ListenerContract]`
 - [ ] All provider list methods return simple list/dict literals — no conditional logic
 
 ---
@@ -152,7 +152,7 @@ container.bind(
 ## Handler Contracts
 
 - [ ] Implement `@handler` decorator as **metadata marker only** — attaches `_valkyrja_handler` to method, does NOT
-  self-register
+      self-register
 
 ```python
 def handler(closure):
@@ -165,9 +165,9 @@ def handler(closure):
 
 - [ ] Implement `@parameter` decorator — attaches `_valkyrja_parameters` list to method
 - [ ] Define type aliases:
-    - [ ] `HttpHandlerFunc = Callable[[ContainerContract, dict[str, Any]], ResponseContract]`
-    - [ ] `CliHandlerFunc = Callable[[ContainerContract, dict[str, Any]], OutputContract]`
-    - [ ] `ListenerHandlerFunc = Callable[[ContainerContract, dict[str, Any]], Any]`
+  - [ ] `HttpHandlerFunc = Callable[[ContainerContract, dict[str, Any]], ResponseContract]`
+  - [ ] `CliHandlerFunc = Callable[[ContainerContract, dict[str, Any]], OutputContract]`
+  - [ ] `ListenerHandlerFunc = Callable[[ContainerContract, dict[str, Any]], Any]`
 - [ ] Implement `HttpHandlerContract(ABC)` with `get_handler() -> HttpHandlerFunc`
 - [ ] Implement `CliHandlerContract(ABC)` with `get_handler() -> CliHandlerFunc`
 - [ ] Implement `ListenerHandlerContract(ABC)` with `get_handler() -> ListenerHandlerFunc`
@@ -203,7 +203,7 @@ for name, method in inspect.getmembers(controller_class, predicate=inspect.isfun
 ```
 
 - [ ] With cache: framework loads cache data files directly — never calls `get_controller_classes()`, never scans
-  `_valkyrja_handler`
+      `_valkyrja_handler`
 - [ ] Implement CGI entry point: `valkyrja.cgi.run(app)`
 - [ ] Implement ASGI worker entry point: `valkyrja.worker.run(app)`
 

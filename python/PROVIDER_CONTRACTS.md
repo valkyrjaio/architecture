@@ -3,7 +3,7 @@
 ## Overview
 
 **Minimum Python version: 3.14+** for modern typing and language features. Note: PEP 690 lazy imports were
-**withdrawn** and never shipped — these contracts do **not** rely on them (see *Imports and Cold Start* below).
+**withdrawn** and never shipped — these contracts do **not** rely on them (see _Imports and Cold Start_ below).
 
 Python provider contracts differ from PHP/Java in several ways:
 
@@ -20,9 +20,9 @@ Python provider contracts differ from PHP/Java in several ways:
 
 ## Imports and Cold Start — No Lazy Imports (PEP 690 Withdrawn)
 
-> **PEP 690 (implicit lazy imports) was withdrawn and never shipped. Python 3.14 does *not* lazy-load imports.** An
+> **PEP 690 (implicit lazy imports) was withdrawn and never shipped. Python 3.14 does _not_ lazy-load imports.** An
 > earlier draft of these contracts assumed it would. Its successor, **PEP 810 (explicit lazy imports)**, is still under
-> discussion and unshipped. Treat lazy imports as a *possible future optimization*, not a mechanism these contracts
+> discussion and unshipped. Treat lazy imports as a _possible future optimization_, not a mechanism these contracts
 > rely on.
 
 Because there are no lazy imports today, a top-level `from valkyrja.http.provider import HttpContainerProvider`
@@ -36,7 +36,7 @@ they rely on two things that hold in every Python version:
 - **String binding keys avoid importing the bound class.** A string-literal key loads nothing; a class-object key would
   force the import. This is plain Python, independent of any lazy-import feature.
 
-What is *not* avoided today: once a provider module is imported (no cache, or because the cache file references it), its
+What is _not_ avoided today: once a provider module is imported (no cache, or because the cache file references it), its
 top-level imports load eagerly. A future PEP 810 `lazy import` could defer those per-name — and the contracts would need
 no change to benefit — but they are correct without it. For cold-start-sensitive (e.g. Lambda) workloads, the Go or
 TypeScript port is the escape valve.
@@ -61,17 +61,17 @@ bindings free of forced class imports.
 
 Provider list methods return **instances**, not class objects:
 
-| Method                      | Return type                                      | Reasoning                                                        |
-|-----------------------------|--------------------------------------------------|------------------------------------------------------------------|
-| `get_container_providers()` | `list[ServiceProviderContract]`                  | Returns provider instances called directly by the framework      |
-| `get_event_providers()`     | `list[ListenerProviderContract]`                 | Returns provider instances called directly by the framework      |
-| `get_cli_providers()`       | `list[CliRouteProviderContract]`                 | Returns provider instances called directly by the framework      |
-| `get_http_providers()`      | `list[HttpRouteProviderContract]`                | Returns provider instances called directly by the framework      |
-| `get_controller_classes()`  | `list[type]`                                     | Returns class objects carrying `@handler` decorated methods      |
-| `get_listener_classes()`    | `list[type]`                                     | Returns class objects carrying `@handler` decorated methods      |
-| `get_routes()`              | `list[RouteContract]`                            | Returns concrete route data objects                              |
-| `get_listeners()`           | `list[ListenerContract]`                         | Returns concrete listener data objects                           |
-| `publishers()`              | `dict[str, Callable[[ContainerContract], None]]` | Maps binding key to publisher function reference                 |
+| Method                      | Return type                                      | Reasoning                                                   |
+| --------------------------- | ------------------------------------------------ | ----------------------------------------------------------- |
+| `get_container_providers()` | `list[ServiceProviderContract]`                  | Returns provider instances called directly by the framework |
+| `get_event_providers()`     | `list[ListenerProviderContract]`                 | Returns provider instances called directly by the framework |
+| `get_cli_providers()`       | `list[CliRouteProviderContract]`                 | Returns provider instances called directly by the framework |
+| `get_http_providers()`      | `list[HttpRouteProviderContract]`                | Returns provider instances called directly by the framework |
+| `get_controller_classes()`  | `list[type]`                                     | Returns class objects carrying `@handler` decorated methods |
+| `get_listener_classes()`    | `list[type]`                                     | Returns class objects carrying `@handler` decorated methods |
+| `get_routes()`              | `list[RouteContract]`                            | Returns concrete route data objects                         |
+| `get_listeners()`           | `list[ListenerContract]`                         | Returns concrete listener data objects                      |
+| `publishers()`              | `dict[str, Callable[[ContainerContract], None]]` | Maps binding key to publisher function reference            |
 
 `list[type]` is used for controller and listener class lists because those classes do not implement a provider contract
 — they carry `@handler` decorators. `list[type]` is the honest and accurate type for any list of Python class objects.

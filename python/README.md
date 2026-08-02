@@ -1,7 +1,7 @@
 # Python Port — Implementation Notes
 
 > Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `DISPATCH.md`, `DATA_CACHE.md`, `BUILD_TOOL.md`,
-`PROVIDER_CONTRACTS.md`
+> `PROVIDER_CONTRACTS.md`
 > Port order: Container → Dispatch → Event → Application → CLI → HTTP → Bin
 
 ---
@@ -240,7 +240,7 @@ port relies on.
 
 ### Why the architecture still holds
 
-The container design does **not** depend on lazy imports for correctness — it only *benefits* from them if they arrive:
+The container design does **not** depend on lazy imports for correctness — it only _benefits_ from them if they arrive:
 
 - **String-constant binding keys** avoid importing the bound class at key-definition time. This is plain Python, true in
   every version: a string literal loads nothing, whereas a class-object key forces the import.
@@ -253,7 +253,7 @@ The container design does **not** depend on lazy imports for correctness — it 
   {'app.repositories.UserRepositoryContract': lambda: ...}  # string literal — nothing loads
   ```
 
-- **Lambda-wrapped values** defer *when the provider method is referenced* from cache-load time to first resolution.
+- **Lambda-wrapped values** defer _when the provider method is referenced_ from cache-load time to first resolution.
   Also version-independent — a name inside a lambda body is not evaluated until the lambda runs:
 
   ```python

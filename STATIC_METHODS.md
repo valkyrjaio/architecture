@@ -18,8 +18,8 @@ $entity = $class::fromValue($raw);
 
 No other Valkyrja target language supports this:
 
-| Language       | Static interface methods | Notes                                                   |
-|----------------|--------------------------|----------------------------------------------------------|
+| Language       | Static interface methods | Notes                                                    |
+| -------------- | ------------------------ | -------------------------------------------------------- |
 | **PHP**        | Yes                      | Reference implementation — being changed for consistency |
 | **Java**       | No                       | Static interface methods exist but cannot be overridden  |
 | **TypeScript** | No                       | Same limitation as Java                                  |
@@ -42,6 +42,7 @@ language, so the data object keeps it. See "What a data object holds" in
 ### 1. Construction Through a Variable Class
 
 PHP pattern:
+
 ```php
 // $type holds a class name. Only PHP can make this call.
 $instance = $type::fromValue($raw);
@@ -69,6 +70,7 @@ container throws a resolution error — explicit failure, not silent fallback.
 ### 2. Static Metadata (`getTable`, `getPrimaryKey`, etc.)
 
 PHP pattern:
+
 ```php
 $table = MyEntity::getTable();
 $key   = MyEntity::getPrimaryKey();
@@ -124,10 +126,10 @@ registry.
 ## Summary
 
 | PHP pattern                 | Cross-language equivalent                           |
-|-----------------------------|------------------------------------------------------|
-| `$class::fromValue($value)` | Container-registered factory                         |
-| `$class::getTable()`        | Entity metadata registry keyed by class token        |
-| `$class::getX()` generally  | Registry lookup via container, keyed by class token  |
+| --------------------------- | --------------------------------------------------- |
+| `$class::fromValue($value)` | Container-registered factory                        |
+| `$class::getTable()`        | Entity metadata registry keyed by class token       |
+| `$class::getX()` generally  | Registry lookup via container, keyed by class token |
 
 The rule: **if PHP would call it statically on a variable class, every other
 language needs an explicit registration**. The developer declares how the

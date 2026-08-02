@@ -31,11 +31,11 @@ description becomes the permanent body. Write each for the job it actually does.
 A **root** says what the change is about. A **type** says what kind of change it
 is. Neither may restate the other.
 
-|                             | Ends with | Issue reference          |
-|-----------------------------|-----------|--------------------------|
-| **Working-branch commit**   | a period  | permitted, not required  |
-| **PR title**                | no period | required when one exists |
-| **Direct push to a protected branch** | no period | — |
+|                                       | Ends with | Issue reference          |
+| ------------------------------------- | --------- | ------------------------ |
+| **Working-branch commit**             | a period  | permitted, not required  |
+| **PR title**                          | no period | required when one exists |
+| **Direct push to a protected branch** | no period | —                        |
 
 A working-branch commit is a **ledger entry** — a complete sentence recording what
 that commit did, so it takes a period. Anything that becomes a **permanent subject
@@ -61,20 +61,20 @@ request. Position tells them apart.
 
 ## Types
 
-| Type        | Use for                                                      |
-|-------------|--------------------------------------------------------------|
-| `feat`      | A new capability or an addition to the public API            |
-| `fix`       | Corrects behavior that was broken                            |
-| `deprecate` | Marks API as deprecated without removing it yet              |
-| `docs`      | Documentation only                                           |
-| `test`      | Adds or changes tests only                                   |
-| `refactor`  | Internal restructuring with no behavior change               |
-| `perf`      | Performance improvement with no behavior change              |
-| `style`     | Formatting only — whitespace, import order, no behavior      |
-| `build`     | Build scripts, dependency manifests, packaging               |
-| `ci`        | CI workflows, tooling configuration, automated runs          |
-| `chore`     | Routine maintenance that fits nothing else                   |
-| `revert`    | Reverts an earlier change                                    |
+| Type        | Use for                                                 |
+| ----------- | ------------------------------------------------------- |
+| `feat`      | A new capability or an addition to the public API       |
+| `fix`       | Corrects behavior that was broken                       |
+| `deprecate` | Marks API as deprecated without removing it yet         |
+| `docs`      | Documentation only                                      |
+| `test`      | Adds or changes tests only                              |
+| `refactor`  | Internal restructuring with no behavior change          |
+| `perf`      | Performance improvement with no behavior change         |
+| `style`     | Formatting only — whitespace, import order, no behavior |
+| `build`     | Build scripts, dependency manifests, packaging          |
+| `ci`        | CI workflows, tooling configuration, automated runs     |
+| `chore`     | Routine maintenance that fits nothing else              |
+| `revert`    | Reverts an earlier change                               |
 
 These are the [Conventional Commits](https://www.conventionalcommits.org/) types
 plus `deprecate`, which that set has no word for in this scheme. `perf` and `style`
@@ -83,7 +83,7 @@ about where a change belongs.
 
 There is no type marking a change as automated. Git already records the author, and
 the generated release notes already attribute the bot by name — so a commit keeps
-the type its change actually deserves, and *who ran it* comes from
+the type its change actually deserves, and _who ran it_ comes from
 `git log --author`, which is exact rather than a convention someone must maintain.
 
 The type is chosen **relative to the repo you are in**. A new reusable workflow in
@@ -130,7 +130,7 @@ brackets, and everything else follows from them.
 
 `[Documentation]`, `[Tests]`, `[Refactor]`, and `[Merge]` all named a kind of
 change; the type slot carries those now. `[CI]` and `[Volundr]` name whatever
-*performed* the change — but git already records the author, so the root's one slot
+_performed_ the change — but git already records the author, so the root's one slot
 is better spent on what nothing else records.
 
 ### Rule 2 — a root is never the repo's own identity
@@ -150,7 +150,7 @@ in a framework repo      [PhpCsFixer] ci: Run linting across the source tree.
 ```
 
 The clearest case is one artifact taking different roots in different repos. A pull
-request template inside `valkyrja/.github` cannot be `[GitHub]` — that repo *is* the
+request template inside `valkyrja/.github` cannot be `[GitHub]` — that repo _is_ the
 org's GitHub configuration, so the name says nothing there and `[Template]` is the
 root. The identical file in a framework repo is `[GitHub]`, because there it is
 precisely the GitHub-specific thing that stands out:
@@ -162,7 +162,7 @@ in a framework repo      [GitHub] docs: Add a PR template superseding the org-wi
 
 This rule is **positional, not permanent**. `Http` and `Cli` are roots in the
 framework today because they live there. Were either split into its own repo, it
-would retire as a root *within that repo* while remaining a good root anywhere that
+would retire as a root _within that repo_ while remaining a good root anywhere that
 integrates with it.
 
 ### The vocabulary is open
@@ -171,18 +171,18 @@ There is no fixed list of roots. A root may be anything that sufficiently descri
 the thing being worked on, subject to the two rules above. What follows are
 examples of the kinds that come up, not an enumeration:
 
-| Kind                | Examples                                                  |
-|---------------------|-----------------------------------------------------------|
-| **Module**          | `[Http]`, `[Cli]`, `[Container]`, `[Orm]`, `[Api]`        |
-| **Concept**         | `[Provider]`, `[Throwable]`, `[Middleware]`, `[Routing]`   |
-| **Dependencies**    | `[Dependency]`                                            |
-| **External tool**   | `[Composer]`, `[npm]`, `[Gradle]`, `[PhpCsFixer]`, `[Sindri]` |
-| **Port**            | `[PHP]`, `[Java]`, `[Go]`, `[TypeScript]`, `[Python]`      |
+| Kind                | Examples                                                                    |
+| ------------------- | --------------------------------------------------------------------------- |
+| **Module**          | `[Http]`, `[Cli]`, `[Container]`, `[Orm]`, `[Api]`                          |
+| **Concept**         | `[Provider]`, `[Throwable]`, `[Middleware]`, `[Routing]`                    |
+| **Dependencies**    | `[Dependency]`                                                              |
+| **External tool**   | `[Composer]`, `[npm]`, `[Gradle]`, `[PhpCsFixer]`, `[Sindri]`               |
+| **Port**            | `[PHP]`, `[Java]`, `[Go]`, `[TypeScript]`, `[Python]`                       |
 | **Project surface** | `[Git]`, `[Workflow]`, `[Template]`, `[Ruleset]`, `[GitHub]`, `[Functions]` |
-| **Process**         | `[Process]`                                                |
-| **Version line**    | `[25.x]`, `[26.x]`                                         |
-| **Release version** | `[v26.6.1]`                                                |
-| **Exemption**       | `[Initial]`                                                |
+| **Process**         | `[Process]`                                                                 |
+| **Version line**    | `[25.x]`, `[26.x]`                                                          |
+| **Release version** | `[v26.6.1]`                                                                 |
+| **Exemption**       | `[Initial]`                                                                 |
 
 A **module** root is spelled exactly as its source directory — `[Orm]`, not
 `[ORM]`; `[Api]`, not `[API]`. Elsewhere use the name's own correct casing: `[CI]`
@@ -200,7 +200,7 @@ than reaching for a broader root.
 
 ### Breadth is not a root
 
-A change touching many modules is still *about* something, and that something is
+A change touching many modules is still _about_ something, and that something is
 the root. This holds at real scale — every one of these touched 20+ modules:
 
 ```
@@ -221,12 +221,12 @@ under both.
 Four roots sit close together. Each names **the thing the change touches**, not the
 subject it concerns:
 
-| Root         | Names                                                       |
-|--------------|-------------------------------------------------------------|
-| `[Git]`      | Git's own configuration — `.gitignore`, `.gitattributes`     |
-| `[Workflow]` | Workflow definitions — reusable and per-repo                  |
-| `[GitHub]`   | GitHub-specific files in a repo that is not `.github`         |
-| `[Process]`  | How the project works — conventions, the release process      |
+| Root         | Names                                                    |
+| ------------ | -------------------------------------------------------- |
+| `[Git]`      | Git's own configuration — `.gitignore`, `.gitattributes` |
+| `[Workflow]` | Workflow definitions — reusable and per-repo             |
+| `[GitHub]`   | GitHub-specific files in a repo that is not `.github`    |
+| `[Process]`  | How the project works — conventions, the release process |
 
 ```
 [Git] chore: Ignore the .worktrees directory.
@@ -237,7 +237,7 @@ subject it concerns:
 [Process] docs: Update release process documentation.
 ```
 
-So the release *workflow* is `[Workflow]` while the release *process documentation*
+So the release _workflow_ is `[Workflow]` while the release _process documentation_
 is `[Process]`, and the commit convention is `[Process]` even though what it governs
 is git.
 
@@ -265,9 +265,9 @@ A dependency update is `build` whether a person or a job made it. The type says 
 manifest changed; who changed it comes from `git log --author`, for the same reason
 there is no automation type.
 
-The last two lines are the boundary worth internalizing. Bumping a CI tool's *pinned
-version* is a dependency change, so `build` — but scoped to one tool, so the tool
-root says more than `[Dependency]` would. Changing that tool's *configuration* is
+The last two lines are the boundary worth internalizing. Bumping a CI tool's _pinned
+version_ is a dependency change, so `build` — but scoped to one tool, so the tool
+root says more than `[Dependency]` would. Changing that tool's _configuration_ is
 `ci`, because the checking machinery changed rather than the manifest. Keeping
 `build` for version pinning is what makes those two distinguishable at all.
 
@@ -290,7 +290,7 @@ their shared root:
 
 A release-version root is the signal that a commit is release bookkeeping rather
 than releasable work — see [`VERSIONING.md`](VERSIONING.md). Distinguish it from a
-**version line** root: `[26.x]` marks a change made *for* a maintenance line, e.g.
+**version line** root: `[26.x]` marks a change made _for_ a maintenance line, e.g.
 a backport.
 
 ### Stacking
@@ -310,16 +310,16 @@ find the shared root, or stack them.
 
 These named a kind of change rather than a thing, so the type now carries them:
 
-| Retired                          | Now                              |
-|----------------------------------|----------------------------------|
-| `[Documentation]`, `[Docs]`      | `docs`                           |
-| `[Tests]`, `[Test]`              | `test`                           |
-| `[Deprecation]`                  | `deprecate`                      |
-| `[Refactor]`, `[Revert]`         | `refactor`, `revert`             |
-| `[Remove]`, `[Merge]`            | a real root plus a type          |
-| `[CI]`                           | the specific tool, or `ci`       |
-| `[All]`                          | the concept the change is about  |
-| `[Release]`                      | `[v26.6.1]` or `[Process]`       |
+| Retired                     | Now                             |
+| --------------------------- | ------------------------------- |
+| `[Documentation]`, `[Docs]` | `docs`                          |
+| `[Tests]`, `[Test]`         | `test`                          |
+| `[Deprecation]`             | `deprecate`                     |
+| `[Refactor]`, `[Revert]`    | `refactor`, `revert`            |
+| `[Remove]`, `[Merge]`       | a real root plus a type         |
+| `[CI]`                      | the specific tool, or `ci`      |
+| `[All]`                     | the concept the change is about |
+| `[Release]`                 | `[v26.6.1]` or `[Process]`      |
 
 Freeing the root from the change kind is the point of the convention rather than a
 side effect of it. A documentation-only repo used to put `[Documentation]` on every
@@ -379,7 +379,7 @@ validates the root and type on the PR title and on every commit in the PR, that 
 titles carry no trailing period, that the branch's own commits do, and that no line
 exceeds 120 characters.
 
-Its scope matches the period rule exactly: it checks commits *in a pull request* —
+Its scope matches the period rule exactly: it checks commits _in a pull request_ —
 which are working-branch commits — and never sees a direct push to a protected
 branch, which is why those carry no period.
 
@@ -388,7 +388,7 @@ button generates `Revert "<original title>"`, which cannot match the pattern, an
 revert is usually being done under time pressure — the check must not stand in the
 way. Reverts should be rare enough that the exemption costs nothing.
 
-Only the *shape* is machine-checked. The root vocabulary is open by design, so no
+Only the _shape_ is machine-checked. The root vocabulary is open by design, so no
 pattern can validate it — the pattern accepts any bracketed word, and `[http]`
 passes. Root choice and casing are review's job, as they are today.
 
@@ -403,21 +403,21 @@ accounts for roughly 500 commits. These forms are **fixed**, and the workflow th
 emits each one is named so the two cannot drift apart. Anything generated must
 match exactly.
 
-| Form                                                       | Kind      | Emitted by                          |
-|------------------------------------------------------------|-----------|-------------------------------------|
-| `[Workflow] ci: Update <repo> workflow refs to <tag>`      | PR title  | `_update-workflow-refs.yml`         |
-| `[Dependency] build: Update composer dependencies`         | PR title  | `_php-update-dependencies.yml`      |
-| `[Dependency] build: Update npm dependencies`              | PR title  | `_ts-update-dependencies.yml`       |
-| `[Dependency] build: Update Gradle dependencies`           | PR title  | `_java-update-dependencies.yml`     |
-| `[Dependency] build: Update Go dependencies`               | PR title  | `_go-update-dependencies.yml`       |
-| `[Dependency] build: Update Python dependencies`           | PR title  | `_python-update-dependencies.yml`   |
-| `[Git] style: Add missing trailing newlines`                | PR title  | `_fix-trailing-newlines.yml`        |
-| `[v<X>] chore: Update version for the release`              | direct    | `_update-version-files.yml`         |
-| `[v<X>] chore: Update CHANGELOG for the release`            | direct    | `_release.yml`                      |
-| `[v<X>] chore: Update <Info> for the release`               | direct    | `_<lang>-update-info-files.yml`     |
-| `[v<X>] chore: Update package.json for the release`         | direct    | `_ts-update-package-json.yml`       |
-| `[v<X>] chore: Update pyproject.toml for the release`       | direct    | `_python-update-pyproject.yml`      |
-| `[<line>] chore: Update references for v<X>`                | direct    | `_<lang>-version-branch.yml`        |
+| Form                                                  | Kind     | Emitted by                        |
+| ----------------------------------------------------- | -------- | --------------------------------- |
+| `[Workflow] ci: Update <repo> workflow refs to <tag>` | PR title | `_update-workflow-refs.yml`       |
+| `[Dependency] build: Update composer dependencies`    | PR title | `_php-update-dependencies.yml`    |
+| `[Dependency] build: Update npm dependencies`         | PR title | `_ts-update-dependencies.yml`     |
+| `[Dependency] build: Update Gradle dependencies`      | PR title | `_java-update-dependencies.yml`   |
+| `[Dependency] build: Update Go dependencies`          | PR title | `_go-update-dependencies.yml`     |
+| `[Dependency] build: Update Python dependencies`      | PR title | `_python-update-dependencies.yml` |
+| `[Git] style: Add missing trailing newlines`          | PR title | `_fix-trailing-newlines.yml`      |
+| `[v<X>] chore: Update version for the release`        | direct   | `_update-version-files.yml`       |
+| `[v<X>] chore: Update CHANGELOG for the release`      | direct   | `_release.yml`                    |
+| `[v<X>] chore: Update <Info> for the release`         | direct   | `_<lang>-update-info-files.yml`   |
+| `[v<X>] chore: Update package.json for the release`   | direct   | `_ts-update-package-json.yml`     |
+| `[v<X>] chore: Update pyproject.toml for the release` | direct   | `_python-update-pyproject.yml`    |
+| `[<line>] chore: Update references for v<X>`          | direct   | `_<lang>-version-branch.yml`      |
 
 **Nothing automation emits takes a trailing period.** Every form above is either a
 PR title or a direct push to a protected branch, and both are permanent subject

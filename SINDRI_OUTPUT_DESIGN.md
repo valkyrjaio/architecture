@@ -65,7 +65,7 @@ form a visually distinct frame.
 
 ```php
 echo <<<TEXT
-    
+
     ╭── Sindri v26.0.0
     │
     │   ▗▄█████▄▖
@@ -77,7 +77,7 @@ echo <<<TEXT
     │   Running on PHP 8.4.7
     │   ~/app
     ╰── Forging application cache · cache:generate
-    
+
     TEXT;
 ```
 
@@ -116,7 +116,7 @@ it visually with the text content below.
 
 ### Resolved Configuration
 
-The configuration block shows what Sindri *resolved* from the user's
+The configuration block shows what Sindri _resolved_ from the user's
 invocation, independent of what they typed. This block answers "what inputs
 is Sindri actually working with?"
 
@@ -155,7 +155,7 @@ Generating Http Routes Data....................Fail
 **Rules:**
 
 - Each step line starts with a verb and a subject (e.g., `Generating
-  Container Data`).
+Container Data`).
 - Dot leaders (`.....`) fill the space between the step description and
   the status label. Status labels are aligned to the same column across
   all steps.
@@ -199,7 +199,7 @@ Status Semantics
 Each of the four status labels has precise meaning:
 
 | Status    | Meaning                                                              | Detail lines expected?                 |
-|-----------|----------------------------------------------------------------------|----------------------------------------|
+| --------- | -------------------------------------------------------------------- | -------------------------------------- |
 | `Success` | The step completed cleanly and produced its output                   | No                                     |
 | `Skipped` | The step was intentionally not performed; existing output is current | Yes — explain why                      |
 | `Warning` | The step produced output but encountered a non-blocking issue        | Yes — explain the issue                |
@@ -223,7 +223,7 @@ When Sindri detects a color-capable terminal, the following color
 assignments apply:
 
 | Element                    | Color                       |
-|----------------------------|-----------------------------|
+| -------------------------- | --------------------------- |
 | Banner frame characters    | Default                     |
 | Mjölnir icon               | Orange / warm (forge fire)  |
 | `Success` status label     | Green                       |
@@ -246,7 +246,7 @@ Exit Codes
 Sindri exit codes are determined by the worst status in the work output:
 
 | Worst status | Exit code |
-|--------------|-----------|
+| ------------ | --------- |
 | All Success  | `0`       |
 | Skipped      | `0`       |
 | Warning      | `0`       |

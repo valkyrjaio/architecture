@@ -30,13 +30,13 @@ The Ports
 
 Valkyrja is being ported to five languages in priority order:
 
-| # | Language       | Status                                | Build tool           |
-|---|----------------|---------------------------------------|----------------------|
-| 1 | **PHP**        | Production — reference implementation | `valkyrja/sindri`    |
-| 2 | **Java**       | In progress                           | `io.valkyrja:sindri` |
-| 3 | **Go**         | Proof of concept                      | `io/valkyrja/sindri` |
-| 4 | **Python**     | Planned                               | `valkyrja-sindri`    |
-| 5 | **TypeScript** | Planned                               | `@valkyrja/sindri`   |
+| #   | Language       | Status                                | Build tool           |
+| --- | -------------- | ------------------------------------- | -------------------- |
+| 1   | **PHP**        | Production — reference implementation | `valkyrja/sindri`    |
+| 2   | **Java**       | In progress                           | `io.valkyrja:sindri` |
+| 3   | **Go**         | Proof of concept                      | `io/valkyrja/sindri` |
+| 4   | **Python**     | Planned                               | `valkyrja-sindri`    |
+| 5   | **TypeScript** | Planned                               | `@valkyrja/sindri`   |
 
 Future languages under consideration: Kotlin (nearly free from Java), Scala,
 Rust, Ruby.
@@ -46,20 +46,20 @@ Architecture Documents
 
 Cross-cutting architectural decisions that apply to all ports.
 
-| Document                                         | Description                                               |
-|--------------------------------------------------|-----------------------------------------------------------|
-| [`SUMMARY.md`](SUMMARY.md)                       | Full session summary — all decisions and reasoning        |
-| [`PORTS.md`](PORTS.md)                           | Language port list, per-language notes, comparison tables |
-| [`THROWABLES.md`](THROWABLES.md)                 | Exception naming convention, hierarchy, language mapping  |
-| [`CONTAINER_BINDINGS.md`](CONTAINER_BINDINGS.md) | Closure bindings, string constants, per-component files   |
-| [`DISPATCH.md`](DISPATCH.md)                     | Handler contracts, typed signatures, dispatch deprecation |
-| [`DATA_CACHE.md`](DATA_CACHE.md)                 | Cache architecture, provider contracts, build flows       |
-| [`BUILD_TOOL.md`](BUILD_TOOL.md)                 | Build tool design, Bin extraction, AST implementations    |
-| [`STATIC_METHODS.md`](STATIC_METHODS.md)         | Static interface methods — cross-language design and registry pattern |
+| Document                                         | Description                                                                       |
+| ------------------------------------------------ | --------------------------------------------------------------------------------- |
+| [`SUMMARY.md`](SUMMARY.md)                       | Full session summary — all decisions and reasoning                                |
+| [`PORTS.md`](PORTS.md)                           | Language port list, per-language notes, comparison tables                         |
+| [`THROWABLES.md`](THROWABLES.md)                 | Exception naming convention, hierarchy, language mapping                          |
+| [`CONTAINER_BINDINGS.md`](CONTAINER_BINDINGS.md) | Closure bindings, string constants, per-component files                           |
+| [`DISPATCH.md`](DISPATCH.md)                     | Handler contracts, typed signatures, dispatch deprecation                         |
+| [`DATA_CACHE.md`](DATA_CACHE.md)                 | Cache architecture, provider contracts, build flows                               |
+| [`BUILD_TOOL.md`](BUILD_TOOL.md)                 | Build tool design, Bin extraction, AST implementations                            |
+| [`STATIC_METHODS.md`](STATIC_METHODS.md)         | Static interface methods — cross-language design and registry pattern             |
 | [`METHOD_NAMING.md`](METHOD_NAMING.md)           | Method name prefixes — what a method does, and whether the caller's value changes |
-| [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md)   | Commit and PR title format, conventional types, roots     |
-| [`VERSIONING.md`](VERSIONING.md)                 | Version scheme, bump mapping, release automation          |
-| [`VERSION_SUPPORT.md`](VERSION_SUPPORT.md)       | Support policy, release schedule, per-language runtimes   |
+| [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md)   | Commit and PR title format, conventional types, roots                             |
+| [`VERSIONING.md`](VERSIONING.md)                 | Version scheme, bump mapping, release automation                                  |
+| [`VERSION_SUPPORT.md`](VERSION_SUPPORT.md)       | Support policy, release schedule, per-language runtimes                           |
 
 Language Contracts
 ------------------
@@ -67,7 +67,7 @@ Language Contracts
 Per-language provider contract specifications.
 
 | Document                                                               | Description                                       |
-|------------------------------------------------------------------------|---------------------------------------------------|
+| ---------------------------------------------------------------------- | ------------------------------------------------- |
 | [`java/PROVIDER_CONTRACTS.md`](java/PROVIDER_CONTRACTS.md)             | Java provider contracts and implementations       |
 | [`go/PROVIDER_CONTRACTS.md`](go/PROVIDER_CONTRACTS.md)                 | Go provider contracts and implementations         |
 | [`python/PROVIDER_CONTRACTS.md`](python/PROVIDER_CONTRACTS.md)         | Python provider contracts and implementations     |
@@ -79,7 +79,7 @@ Implementation Notes
 Per-language implementation notes and priority order.
 
 | Document                                       | Description                                               |
-|------------------------------------------------|-----------------------------------------------------------|
+| ---------------------------------------------- | --------------------------------------------------------- |
 | [`php/README.md`](php/README.md)               | PHP — changes required to existing implementation         |
 | [`java/README.md`](java/README.md)             | Java — port implementation notes and priority order       |
 | [`go/README.md`](go/README.md)                 | Go — port implementation notes and priority order         |
@@ -90,7 +90,7 @@ TODO Checklists
 ---------------
 
 | Document                           | Description           |
-|------------------------------------|-----------------------|
+| ---------------------------------- | --------------------- |
 | [`php/TODO.md`](php/TODO.md)       | PHP change checklist  |
 | [`python/TODO.md`](python/TODO.md) | Python port checklist |
 
@@ -251,7 +251,7 @@ updates, clarifications to existing decisions — are welcome. See
 format, [`REPOSITORY_NAMING.md`][repository naming url] for how repos are named,
 and [`VOCABULARY.md`][vocabulary url] for terminology used across the project.
 
-Architecture decisions should be recorded here *before* they land in code, so
+Architecture decisions should be recorded here _before_ they land in code, so
 that per-language ports can reference the canonical decision rather than
 rediscovering it.
 
@@ -262,11 +262,7 @@ Licensed under the [MIT license][MIT license url]. See
 [`LICENSE.md`](./LICENSE.md).
 
 [valkyrja url]: https://valkyrja.io
-
 [contributing url]: https://github.com/valkyrjaio/.github/blob/26.x/CONTRIBUTING.md
-
 [repository naming url]: https://github.com/valkyrjaio/.github/blob/26.x/REPOSITORY_NAMING.md
-
 [vocabulary url]: https://github.com/valkyrjaio/.github/blob/26.x/VOCABULARY.md
-
 [MIT license url]: https://opensource.org/licenses/MIT

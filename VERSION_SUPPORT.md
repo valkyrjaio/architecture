@@ -32,7 +32,7 @@ Valkyrja 26 release is a Valkyrja 26 release in PHP, in Java, and in every other
 port.
 
 | Version | Release             | Bug Fixes Until | Security Fixes Until |
-|:--------|:--------------------|:----------------|:---------------------|
+| :------ | :------------------ | :-------------- | :------------------- |
 | 25 (*)  | December 11th, 2025 | March 31, 2026  | March 31, 2026       |
 | 26      | March 31, 2026      | Q2 2027         | Q1 2028              |
 | 27      | Q1 2027             | Q2 2028         | Q1 2029              |
@@ -47,7 +47,7 @@ Each port names the runtime versions that it supports. The runtime is the only
 column that differs between the ports.
 
 | Version | PHP       | Java    | Node (TypeScript) | Go    | Python |
-|:--------|:----------|:--------|:------------------|:------|:-------|
+| :------ | :-------- | :------ | :---------------- | :---- | :----- |
 | 25 (*)  | 8.4 – 8.6 | —       | —                 | —     | —      |
 | 26      | 8.4 – 8.6 | 21 – 25 | 22+               | 1.26+ | 3.14+  |
 | 27      | 8.5 – 8.6 | 23 – 25 | (**)              | (**)  | (**)   |

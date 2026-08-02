@@ -19,7 +19,7 @@ Sindri is a peer tool to the Valkyrja framework, not a component within it. Its 
 stands alone rather than nesting under `Valkyrja\*`:
 
 | Language   | Namespace / Package                     |
-|------------|-----------------------------------------|
+| ---------- | --------------------------------------- |
 | PHP        | `Sindri`                                |
 | Java       | `sindri` (top-level package)            |
 | Go         | `sindri` (module: `io/valkyrja/sindri`) |
@@ -138,7 +138,7 @@ list/array/map literals with no conditional logic — this is a hard contract en
 The build tool always generates exactly four classes regardless of how many providers or routes the application has:
 
 | Output class         | Contains                                                                            |
-|----------------------|-------------------------------------------------------------------------------------|
+| -------------------- | ----------------------------------------------------------------------------------- |
 | `AppContainerData`   | All bindings from every `ServiceProvider` across all components                     |
 | `AppEventData`       | All listeners from every `ListenerProvider` across all components                   |
 | `AppHttpRoutingData` | All HTTP routes from every `HttpRouteProvider` across all components, fully indexed |
@@ -260,7 +260,7 @@ public static function onUserCreated(ContainerContract $c, array $args): mixed
 ### Annotated Controllers — PHP, Java, Python
 
 For annotated controllers, `#[Handler]` / `@Handler` / `@handler` lives on the **implementation method** and carries a *
-*callable reference** pointing to the static handler method. The handler may live on the same controller class, the
+_callable reference_* pointing to the static handler method. The handler may live on the same controller class, the
 route provider, or any other class — Sindri follows the callable reference to wherever the handler lives.
 
 ```
@@ -1012,7 +1012,7 @@ For Go, Python, and TypeScript, Sindri derives the FQN string for each class fro
 path:
 
 | Language   | FQN format                                | Example                                 |
-|------------|-------------------------------------------|-----------------------------------------|
+| ---------- | ----------------------------------------- | --------------------------------------- |
 | Go         | `io/valkyrja/container.ContainerContract` | dot-separated package path + type name  |
 | Python     | `io.valkyrja.container.ContainerContract` | dot-separated module path + class name  |
 | TypeScript | `io.valkyrja.container.ContainerContract` | dot-separated package path + class name |
@@ -1215,7 +1215,7 @@ publishers      → map of binding key → publisher method body source text
 **Language-specific key resolution:**
 
 | Language   | Key in source                        | Resolution                                           |
-|------------|--------------------------------------|------------------------------------------------------|
+| ---------- | ------------------------------------ | ---------------------------------------------------- |
 | PHP        | `RouterContract::class`              | Resolve `RouterContract` via import map → FQN string |
 | Java       | `RouterContract.class`               | Resolve `RouterContract` via import map → FQN string |
 | Python     | `RouterContract` (class name)        | Resolve via import map → FQN string                  |
@@ -2314,12 +2314,12 @@ exemptions.
 ## Current Implementation Status
 
 | Language   | Without cache | Cache generation                                            | Notes                                                 |
-|------------|---------------|-------------------------------------------------------------|-------------------------------------------------------|
-| PHP        | ✅ works       | ⚠️ CLI command exists — will break when handler logic ships | Migrate to sindri before handler logic implementation |
-| Java       | ✅ works       | ❌ not yet built                                             | sindri Java AST implementation pending                |
-| Go         | ✅ works       | ❌ not yet built                                             | sindri Go AST implementation pending                  |
-| Python     | ✅ works       | ❌ not yet built                                             | sindri Python AST implementation pending              |
-| TypeScript | ✅ works       | ❌ not yet built                                             | sindri TypeScript compiler API implementation pending |
+| ---------- | ------------- | ----------------------------------------------------------- | ----------------------------------------------------- |
+| PHP        | ✅ works      | ⚠️ CLI command exists — will break when handler logic ships | Migrate to sindri before handler logic implementation |
+| Java       | ✅ works      | ❌ not yet built                                            | sindri Java AST implementation pending                |
+| Go         | ✅ works      | ❌ not yet built                                            | sindri Go AST implementation pending                  |
+| Python     | ✅ works      | ❌ not yet built                                            | sindri Python AST implementation pending              |
+| TypeScript | ✅ works      | ❌ not yet built                                            | sindri TypeScript compiler API implementation pending |
 
 The PHP CLI command is the most pressing TODO. It will stop working correctly once closure-based handler logic replaces
 the current dispatch-based routing — the existing serialization mechanism cannot handle closures. The migration to
@@ -2333,7 +2333,7 @@ The build tool requires access to provider source files to extract bindings and 
 accordingly:
 
 | Language   | Source shipping  | Requirement                                                                                            |
-|------------|------------------|--------------------------------------------------------------------------------------------------------|
+| ---------- | ---------------- | ------------------------------------------------------------------------------------------------------ |
 | PHP        | Composer package | Always present on disk — no special requirement                                                        |
 | Java       | Maven / Gradle   | Must publish `-sources.jar` as a **required** build dependency                                         |
 | Go         | Go modules       | Full source downloaded via `go mod download` — always present                                          |
@@ -2443,7 +2443,7 @@ composer create-project valkyrja/project my-app
 Each language port ships its own build tool as a separate package following the same pattern:
 
 | Language   | Build tool package                        | AST dependency                   |
-|------------|-------------------------------------------|----------------------------------|
+| ---------- | ----------------------------------------- | -------------------------------- |
 | PHP        | `sindri` (separate repo, formerly Bin)    | `nikic/php-parser`               |
 | Java       | `io.valkyrja:sindri` (separate artifact)  | Trees API (built into javac)     |
 | Go         | `io/valkyrja/sindri` (separate module)    | `go/analysis`, `go/ast` (stdlib) |

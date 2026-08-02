@@ -11,7 +11,7 @@ The build tool generates exactly **four data classes** for the entire applicatio
 everything across all providers of that type:
 
 | Class                | Contains                                                             |
-|----------------------|----------------------------------------------------------------------|
+| -------------------- | -------------------------------------------------------------------- |
 | `AppContainerData`   | All bindings from every `ServiceProvider` across all components      |
 | `AppEventData`       | All listeners from every `ListenerProvider` across all components    |
 | `AppHttpRoutingData` | All HTTP routes from every `HttpRouteProvider` across all components |
@@ -211,7 +211,7 @@ Third-party packages insert between framework and application:
 
 ```
 1. Framework pre-generated     ← base
-2. Third-party packages        ← extend / override framework  
+2. Third-party packages        ← extend / override framework
 3. Application generated       ← extend / override everything
 ```
 
@@ -1045,8 +1045,6 @@ Parameter definitions follow the same simple literal rule as all other build too
 
 ---
 
-
-
 The build tool enforces one rule across all languages for any method it reads:
 
 ```
@@ -1182,13 +1180,13 @@ This means the build tool and cache generation infrastructure can be built incre
 correctly in all languages while the build tool is developed. Cache is a performance optimization, not a correctness
 requirement.
 
-|            | Class/constructor ref          | Direct method calls | Works without cache | Cache status                                                   |
-|------------|--------------------------------|---------------------|---------------------|----------------------------------------------------------------|
-| PHP        | ✅ `::class`                    | ✅                   | ✅                   | CLI command exists — will break when handler logic implemented |
-| Java       | ✅ `.class`                     | ✅                   | ✅                   | Build tool not yet implemented                                 |
-| Go         | ❌ string const (bindings only) | ✅ interface methods | ✅                   | Build tool not yet implemented                                 |
-| Python     | ✅ class object                 | ✅                   | ✅                   | Build tool not yet implemented                                 |
-| TypeScript | ✅ constructor ref              | ✅                   | ✅                   | Build tool not yet implemented                                 |
+|            | Class/constructor ref           | Direct method calls  | Works without cache | Cache status                                                   |
+| ---------- | ------------------------------- | -------------------- | ------------------- | -------------------------------------------------------------- |
+| PHP        | ✅ `::class`                    | ✅                   | ✅                  | CLI command exists — will break when handler logic implemented |
+| Java       | ✅ `.class`                     | ✅                   | ✅                  | Build tool not yet implemented                                 |
+| Go         | ❌ string const (bindings only) | ✅ interface methods | ✅                  | Build tool not yet implemented                                 |
+| Python     | ✅ class object                 | ✅                   | ✅                  | Build tool not yet implemented                                 |
+| TypeScript | ✅ constructor ref              | ✅                   | ✅                  | Build tool not yet implemented                                 |
 
 ### Without Cache, Declare Routes With `getRoutes()`
 
@@ -1237,11 +1235,11 @@ provider at boot.
 
 The cost is not the same in each language. It is a function of what the uncached path must do:
 
-| Language       | Uncached route discovery                                     | Measured cache benefit           |
-|----------------|--------------------------------------------------------------|----------------------------------|
-| **PHP**        | reflection over each controller from `getControllerClasses()` | **+41% throughput** per request  |
-| **Java**       | reflection over each controller (same shape as PHP)           | not yet measured                 |
-| **TypeScript** | `getRoutes()` only — no decorator support yet                  | ≈0 in derivation                 |
+| Language       | Uncached route discovery                                      | Measured cache benefit          |
+| -------------- | ------------------------------------------------------------- | ------------------------------- |
+| **PHP**        | reflection over each controller from `getControllerClasses()` | **+41% throughput** per request |
+| **Java**       | reflection over each controller (same shape as PHP)           | not yet measured                |
+| **TypeScript** | `getRoutes()` only — no decorator support yet                 | ≈0 in derivation                |
 
 The PHP number comes from the starter application on nginx with PHP-FPM, where each request pays a boot: 2,909 requests
 per second without the cache, and 4,110 requests per second with it.
@@ -1278,20 +1276,20 @@ logic ships. Until then PHP runs without cache in the same way as all other lang
 
 ## Cache Generation Build Status
 
-| Language   | Without cache | Cache generation                     | Notes                                                |
-|------------|---------------|--------------------------------------|------------------------------------------------------|
-| PHP        | ✅ works       | ⚠️ CLI command exists but will break | Migrate to sindri before handler logic ships |
-| Java       | ✅ works       | ❌ not yet built                      | sindri Java implementation pending           |
-| Go         | ✅ works       | ❌ not yet built                      | sindri Go implementation pending             |
-| Python     | ✅ works       | ❌ not yet built                      | sindri Python implementation pending         |
-| TypeScript | ✅ works       | ❌ not yet built                      | sindri TypeScript implementation pending     |
+| Language   | Without cache | Cache generation                     | Notes                                        |
+| ---------- | ------------- | ------------------------------------ | -------------------------------------------- |
+| PHP        | ✅ works      | ⚠️ CLI command exists but will break | Migrate to sindri before handler logic ships |
+| Java       | ✅ works      | ❌ not yet built                     | sindri Java implementation pending           |
+| Go         | ✅ works      | ❌ not yet built                     | sindri Go implementation pending             |
+| Python     | ✅ works      | ❌ not yet built                     | sindri Python implementation pending         |
+| TypeScript | ✅ works      | ❌ not yet built                     | sindri TypeScript implementation pending     |
 
 ---
 
 ## Summary Table
 
-|            | AST Tool                | File Resolution                | Annotations                                     | Framework Source               |
-|------------|-------------------------|--------------------------------|-------------------------------------------------|--------------------------------|
+|            | AST Tool                | File Resolution                | Annotations                                      | Framework Source               |
+| ---------- | ----------------------- | ------------------------------ | ------------------------------------------------ | ------------------------------ |
 | PHP        | nikic/php-parser        | ReflectionClass::getFileName() | ✅ Attributes                                    | Composer (always present)      |
 | Java       | Trees API + JavaPoet    | Annotation processor           | ✅ Annotations                                   | -sources.jar (required)        |
 | Go         | go/analysis + go/ast    | Package path resolution        | ❌ Explicit only — no `getControllerClasses()`   | Module source (always present) |

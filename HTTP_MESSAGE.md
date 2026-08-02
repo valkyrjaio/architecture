@@ -43,7 +43,7 @@ Implementations delegate to the language's native stream — file descriptors, s
 interchangeable from the contract's perspective.
 
 | Language | Native backing                                         | In-memory equivalent                             |
-|----------|--------------------------------------------------------|--------------------------------------------------|
+| -------- | ------------------------------------------------------ | ------------------------------------------------ |
 | PHP      | `resource` (stream wrappers)                           | `php://memory`, `php://temp`                     |
 | Java     | `SeekableByteChannel` / `InputStream` + `OutputStream` | `ByteArrayInputStream` / `ByteArrayOutputStream` |
 | Go       | `io.ReadWriteSeeker` + `io.Closer`                     | custom `[]byte` wrapper with position pointer    |
@@ -62,7 +62,7 @@ sockets directly. Large file delivery uses `FileResponse` which bypasses the str
 ## Method Mapping Across Languages
 
 | Method              | PHP                      | Java                                     | Go                             | Python                  | TypeScript                                  |
-|---------------------|--------------------------|------------------------------------------|--------------------------------|-------------------------|---------------------------------------------|
+| ------------------- | ------------------------ | ---------------------------------------- | ------------------------------ | ----------------------- | ------------------------------------------- |
 | `toString()`        | `stream_get_contents()`  | read all bytes to String                 | `io.ReadAll()`                 | `.getvalue().decode()`  | `buffer.toString('utf8')`                   |
 | `close()`           | `fclose()`               | `.close()`                               | `.Close()`                     | `.close()`              | no-op (GC managed)                          |
 | `detach()`          | returns raw `resource`   | returns underlying channel/stream        | returns `io.ReadWriteSeeker`   | returns `io.BytesIO`    | returns `Uint8Array`, stream unusable after |
@@ -617,12 +617,12 @@ return ""
 ### Which to Use
 
 |                      | `ValkyrjaStream`         | `ValkyrjaBufferedStream`  | `ValkyrjaFileStream`              |
-|----------------------|--------------------------|---------------------------|-----------------------------------|
+| -------------------- | ------------------------ | ------------------------- | --------------------------------- |
 | **Backing**          | `[]byte`                 | `bytes.Buffer` + `[]byte` | `os.File`                         |
-| **Default**          | ✅ yes                    | —                         | —                                 |
-| **Seekable**         | ✅ always                 | ✅ after flush             | ✅ always (native)                 |
-| **In-memory**        | ✅                        | ✅                         | ❌                                 |
-| **File-backed**      | ❌                        | ❌                         | ✅                                 |
+| **Default**          | ✅ yes                   | —                         | —                                 |
+| **Seekable**         | ✅ always                | ✅ after flush            | ✅ always (native)                |
+| **In-memory**        | ✅                       | ✅                        | ❌                                |
+| **File-backed**      | ❌                       | ❌                        | ✅                                |
 | **Write efficiency** | standard `append()`      | `bytes.Buffer` growth     | OS-level buffering                |
 | **`close()` cost**   | nil the slice            | nil + reset               | `file.Close()` syscall            |
 | **Best for**         | HTTP bodies, typical use | Incremental write-heavy   | File serving, uploads, temp files |
