@@ -526,11 +526,10 @@ Released under the MIT License. See LICENSE.md for details.
 
 The first line names the package, and each repository has its own identifier for
 it. `COPYRIGHT_HEADER.md` in the `.github` repo holds the identifier for every
-repository, and it is the source of truth for the header. The other three lines
-are the same in every repository and in every language.
+repository, and it is the source of truth for the header. The two lines that
+follow it are the same in every repository and in every language.
 
-The year is 2016, because the first commit in `valkyrja-php` is from October
-2016. Every repository uses that year, including a port that a later year
+The year is 2016, because the first commit in `valkyrja-php` is from October 2016. Every repository uses that year, including a port that a later year
 created, because each port is a translation of the same work. `LICENSE.md`
 states the same year.
 
