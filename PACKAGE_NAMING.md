@@ -11,29 +11,29 @@ Read that document first. This one starts where it stops.
 
 ## The core rule
 
-**A repository name organizes the GitHub organization. A package name states
-what the package is.**
+**Drop the `-{lang}` suffix. Keep everything else.**
 
-A repository name carries a category prefix and a language suffix, because the
-organization holds every category and every language in one list.
-`REPOSITORY_NAMING.md` explains why.
+A repository name carries a language suffix, because the organization holds
+every language in one list. `REPOSITORY_NAMING.md` explains why.
 
 A registry does not. Maven Central holds one Java, Packagist holds one PHP, and
-npm holds one TypeScript. The language is already the registry, and the category
-is already the namespace. Both therefore come off:
+npm holds one TypeScript, so the language is already the registry. The suffix
+therefore comes off, and nothing else does:
 
 ```
-ci-phpcsfixer-php    →  valkyrja/phpcsfixer
-      ^^^^^^^^^          drop `ci-`, drop `-php`
+ci-spotless-java    →  io.valkyrja:ci-spotless
+sindri-java         →  io.valkyrja:sindri
+valkyrja-java       →  io.valkyrja:valkyrja
+ci-phpcsfixer-php   →  valkyrja/ci-phpcsfixer
 ```
 
-```
-sindri-java          →  io.valkyrja:sindri
-                         drop `-java`
-```
+The `ci-` prefix stays. It names what the package is — a CI tool
+configuration — rather than how the organization files the repository. A
+developer reading a dependency list learns something from it.
 
-Take the repository name, remove the category prefix, and remove the language
-suffix. What remains is the package name.
+Warning: the PHP packages read `valkyrja/phpcsfixer`, `valkyrja/phpstan`, and so
+on today, with no prefix. Those names predate this convention and are due to be
+renamed. Do not take them as the pattern.
 
 ---
 
@@ -42,70 +42,80 @@ suffix. What remains is the package name.
 Each language publishes to one registry, and each registry has one namespace
 for the organization.
 
-| Language   | Registry                                  | Namespace      | Example package        |
-| ---------- | ----------------------------------------- | -------------- | ---------------------- |
-| PHP        | Packagist                                 | `valkyrja/`    | `valkyrja/valkyrja`    |
-| Java       | Maven Central                             | `io.valkyrja:` | `io.valkyrja:valkyrja` |
-| TypeScript | npm                                       | `@valkyrjaio/` | `@valkyrjaio/valkyrja` |
-| Go         | the module path — see the exception below |
-| Python     | PyPI                                      | planned        | planned                |
+| Language   | Registry      | Namespace       | Example package                     |
+| ---------- | ------------- | --------------- | ----------------------------------- |
+| PHP        | Packagist     | `valkyrja/`     | `valkyrja/valkyrja`                 |
+| Java       | Maven Central | `io.valkyrja:`  | `io.valkyrja:valkyrja`              |
+| TypeScript | npm           | `@valkyrjaio/`  | `@valkyrjaio/valkyrja`              |
+| Python     | PyPI          | none — flat     | `valkyrja`                          |
+| Go         | none          | the module path | `github.com/valkyrjaio/valkyrja-go` |
 
 Warning: the PHP namespace is `valkyrja` and the npm scope is `@valkyrjaio`.
 The two differ because npm scopes take the organization handle. Do not
 "correct" either one.
 
+### PyPI has no namespace
+
+PyPI holds one flat list of names, so a package cannot sit under the
+organization. The organization name goes into the package name instead:
+
+| Repository        | PyPI package       |
+| ----------------- | ------------------ |
+| `valkyrja-python` | `valkyrja`         |
+| `sindri-python`   | `valkyrja-sindri`  |
+| `ci-ruff-python`  | `valkyrja-ci-ruff` |
+
+Warning: `sindri` on PyPI is taken. "Sindri Python SDK" by Sindri Labs owns it,
+and PyPI does not release a held name. Sindri therefore publishes as
+`valkyrja-sindri` on PyPI alone.
+
+This cuts against `COPYRIGHT_HEADER.md`, which classes Sindri as a standalone
+project and gives it no Valkyrja prefix. That intent holds for the copyright
+identifier and for every other registry. PyPI's flat namespace does not respect
+it, and the name was already gone.
+
 ### The names in use
 
-| Repository                 | Package                   |
-| -------------------------- | ------------------------- |
-| `valkyrja-php`             | `valkyrja/valkyrja`       |
-| `valkyrja-java`            | `io.valkyrja:valkyrja`    |
-| `valkyrja-ts`              | `@valkyrjaio/valkyrja`    |
-| `sindri-php`               | `valkyrja/sindri`         |
-| `sindri-java`              | `io.valkyrja:sindri`      |
-| `sindri-ts`                | `@valkyrjaio/sindri`      |
-| `valkyrja-starter-app-php` | `valkyrja/application`    |
-| `valkyrja-starter-app-ts`  | `@valkyrjaio/application` |
-| `ci-phparkitect-php`       | `valkyrja/phparkitect`    |
-| `ci-phpcodesniffer-php`    | `valkyrja/phpcodesniffer` |
-| `ci-phpcsfixer-php`        | `valkyrja/phpcsfixer`     |
-| `ci-phpstan-php`           | `valkyrja/phpstan`        |
-| `ci-phpunit-php`           | `valkyrja/phpunit`        |
-| `ci-psalm-php`             | `valkyrja/psalm`          |
-| `ci-rector-php`            | `valkyrja/rector`         |
-| `ci-spotless-java`         | `io.valkyrja:spotless`    |
+| Repository                 | Package                      |
+| -------------------------- | ---------------------------- |
+| `valkyrja-php`             | `valkyrja/valkyrja`          |
+| `valkyrja-java`            | `io.valkyrja:valkyrja`       |
+| `valkyrja-ts`              | `@valkyrjaio/valkyrja`       |
+| `sindri-php`               | `valkyrja/sindri`            |
+| `sindri-java`              | `io.valkyrja:sindri`         |
+| `sindri-ts`                | `@valkyrjaio/sindri`         |
+| `sindri-python`            | `valkyrja-sindri`            |
+| `valkyrja-starter-app-php` | `valkyrja/application`       |
+| `valkyrja-starter-app-ts`  | `@valkyrjaio/application`    |
+| `ci-phparkitect-php`       | `valkyrja/ci-phparkitect`    |
+| `ci-phpcodesniffer-php`    | `valkyrja/ci-phpcodesniffer` |
+| `ci-phpcsfixer-php`        | `valkyrja/ci-phpcsfixer`     |
+| `ci-phpstan-php`           | `valkyrja/ci-phpstan`        |
+| `ci-phpunit-php`           | `valkyrja/ci-phpunit`        |
+| `ci-psalm-php`             | `valkyrja/ci-psalm`          |
+| `ci-rector-php`            | `valkyrja/ci-rector`         |
+| `ci-spotless-java`         | `io.valkyrja:ci-spotless`    |
+| `ci-ruff-python`           | `valkyrja-ci-ruff`           |
 
-A starter application publishes as `application`, because that is what the
-package is. The repository name records that it is a starting point, and the
-package name does not repeat it.
+A starter application publishes as `application`, not `valkyrja-starter-app`.
+The repository name records that the application is a starting point, and the
+package is simply the application. This is a name, not a suffix the rule
+removes.
 
 ---
 
-## Two exceptions
+## Go is the outlier
 
-### Go takes the whole repository URL
-
-A Go module path is a URL that the toolchain fetches. It therefore states the
-repository name in full, including the language suffix:
+Go has no package registry. `go get` fetches the module from its source, so the
+module path **is** the GitHub repository URL, and it therefore states the
+repository name in full — language suffix included:
 
 ```go
 module github.com/valkyrjaio/valkyrja-go
 ```
 
-This is not a deviation to correct. `go get` resolves the path, so the path must
-name the repository. Go has no registry namespace of its own.
-
-### A project template puts the language first
-
-```
-project-template-php  →  valkyrja/php-template
-project-template-ts   →  @valkyrjaio/ts-template
-```
-
-These keep the language and move it to the front. A project template is not a
-language-specific build of one project; it is a distinct template per language,
-and the name reads that way. This is the one place a package name states a
-language.
+This is not a deviation to correct. The path has to resolve, and the rule above
+does not apply to a name the toolchain uses as an address.
 
 ---
 
@@ -130,8 +140,10 @@ root that names what it is:
 package io.valkyrja.spotless;
 ```
 
-The package name then matches that last segment, so `io.valkyrja.spotless`
-publishes as `io.valkyrja:spotless`. Keep the two in step.
+The source namespace drops the `ci-` prefix, because a Java package segment
+names the tool rather than the repository category. `io.valkyrja.spotless`
+therefore publishes as `io.valkyrja:ci-spotless`: the namespace and the package
+name are related but not identical.
 
 Warning: `sindri-java` publishes as `io.valkyrja:sindri` and its source root is
 `io.sindri`. The group id names the organization that publishes the package, and
@@ -142,18 +154,17 @@ do not have to match.
 
 ## What not to do
 
-- **Do not put the language in the package name.** `io.valkyrja:spotless-java`
+- **Do not put the language in the package name.** `io.valkyrja:ci-spotless-java`
   states the language twice, because Maven Central holds only Java. Go is the
-  exception, and only because the path is a URL.
+  outlier, and only because its module path is an address.
 
-- **Do not put the `ci-` prefix in the package name.** `ci-` marks a category of
-  repository. A consumer that adds `valkyrja/phpstan` already knows it is
-  adding a PHPStan configuration.
+- **Do not remove the `ci-` prefix.** Only the language suffix comes off. The
+  prefix states what the package is, and a dependency list is where that reading
+  matters most.
 
-- **Do not name the package after the repository out of habit.** Every name in
-  the table above was chosen. `ci-spotless-java` was published once as
-  `io.valkyrja:ci-spotless-java`, which took both the prefix and the suffix, and
-  it had to be republished as `io.valkyrja:spotless`.
+- **Do not name the package after the repository out of habit.** `ci-spotless-java`
+  was published once as `io.valkyrja:ci-spotless-java`, which kept the language
+  suffix, and it had to be republished as `io.valkyrja:ci-spotless`.
 
 - **Do not assume a rename is available.** Read the next section first.
 
@@ -167,7 +178,7 @@ remedy is to publish under the right name and leave the wrong one where it sits.
 
 `io.valkyrja:ci-spotless-java:26.0.0` is such a package. It stays on Maven
 Central, it receives no further release, and every consumer moved to
-`io.valkyrja:spotless`.
+`io.valkyrja:ci-spotless`.
 
 **Check the name before the first release**, and check it against the table
 above rather than against the repository name.
@@ -181,21 +192,22 @@ above rather than against the repository name.
 | PHP        | `composer.json`    | `name`                                                                            |
 | Java       | `build.gradle.kts` | `mavenPublishing { coordinates }` and `rootProject.name` in `settings.gradle.kts` |
 | TypeScript | `package.json`     | `name`                                                                            |
-| Go         | `go.mod`           | `module`                                                                          |
+| Go         | `go.mod`           | `module` — the full repository URL                                                |
+| Python     | `pyproject.toml`   | `project.name`                                                                    |
 
 Warning: Java states the name twice. `coordinates(...)` sets what Maven Central
 receives, and `rootProject.name` sets what the built jar is called. A change to
-one without the other publishes `spotless` as a jar named `ci-spotless-java`.
+one without the other publishes `ci-spotless` as a jar named `spotless`.
 
 ```kotlin
 // settings.gradle.kts
-rootProject.name = "spotless"
+rootProject.name = "ci-spotless"
 ```
 
 ```kotlin
 // build.gradle.kts
 mavenPublishing {
-    coordinates(group.toString(), "spotless", version.toString())
+    coordinates(group.toString(), "ci-spotless", version.toString())
 }
 ```
 
