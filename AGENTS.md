@@ -778,6 +778,46 @@ The label stays until it is removed. Each later push reviews the change again, s
 tell the user that a labeled pull request keeps costing usage while the label is
 on.
 
+### Answering a review
+
+**A pull request that carries the `claude-review` label is not done when it
+opens. It is done when the review has reported and every finding has an
+answer.** The label is a request you made, so the findings are work you asked
+for.
+
+Wait for the review. It runs after the other checks, and a busy organization can
+hold it for many minutes. A pull request left the moment it opens is a pull
+request whose findings nobody reads.
+
+Warning: a finding can be wrong. **Verify each one against the code and the
+documentation before you act on it.** A reviewer that states a fact you can check
+has given you something to check, not something to obey. A wrong finding that you
+"fix" makes the change worse, and it teaches the next reader that the wrong
+statement was right.
+
+Each finding gets one of three answers:
+
+- **The finding is right.** Push the fix, then resolve the thread in the same
+  turn. Do not wait for the reviewer to confirm.
+- **The finding is wrong, or you disagree.** Leave the thread open and reply with
+  the evidence. The user decides, not you.
+- **The finding is right and out of scope.** Leave the thread open, open an
+  issue, and reply with the number.
+
+Warning: never resolve a thread to clear the list. An open thread means open
+work, and resolving one that the code does not answer hides it. Resolve a thread
+only when the change answers it.
+
+The REST API cannot resolve a thread. Read the thread ids, then resolve each one
+the change answers:
+
+```bash
+gh api graphql -f query='mutation { resolveReviewThread(input: {threadId: "PRRT_kwDOH…"}) { thread { isResolved } } }'
+```
+
+Resolving is an action on the pull request, so it uses the same account a push
+uses.
+
 ### Current working branch
 
 The current working branch is always the current-year `??.x` branch (for 2026,
