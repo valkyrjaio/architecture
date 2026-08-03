@@ -1,6 +1,17 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.2...26.x)
+## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.3...26.x)
+
+## [v26.0.3](https://github.com/valkyrjaio/architecture/compare/v26.0.2...v26.0.3) - 2026-08-03
+
+* [Workflow] ci: Update .github workflow refs to v26.22.0 by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/architecture/pull/158
+* [Copyright] ci: Add the copyright header check by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/159
+* [Process] docs: Record that the first npm publish of a new package is manual by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/161
+* [Package] docs: Add the package and namespace naming convention by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/162
+* [Shell] docs: Record the shell script conventions by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/163
+* [Workflow] ci: Update .github workflow refs to v26.23.0 by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/architecture/pull/164
+* [PHP] docs: Record the renamed CI packages by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/165
+* [Review] docs: Record how to answer a review by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/167
 
 ## [v26.0.2](https://github.com/valkyrjaio/architecture/compare/v26.0.1...v26.0.2) - 2026-08-02
 
