@@ -57,6 +57,7 @@ Cross-cutting architectural decisions that apply to all ports.
 | [`BUILD_TOOL.md`](BUILD_TOOL.md)                 | Build tool design, Bin extraction, AST implementations                            |
 | [`STATIC_METHODS.md`](STATIC_METHODS.md)         | Static interface methods — cross-language design and registry pattern             |
 | [`METHOD_NAMING.md`](METHOD_NAMING.md)           | Method name prefixes — what a method does, and whether the caller's value changes |
+| [`PACKAGE_NAMING.md`](PACKAGE_NAMING.md)         | Package name, registry namespace, and source namespace per language               |
 | [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md)   | Commit and PR title format, conventional types, roots                             |
 | [`VERSIONING.md`](VERSIONING.md)                 | Version scheme, bump mapping, release automation                                  |
 | [`VERSION_SUPPORT.md`](VERSION_SUPPORT.md)       | Support policy, release schedule, per-language runtimes                           |
