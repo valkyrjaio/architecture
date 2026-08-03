@@ -54,7 +54,7 @@ list, a test data provider, and an `@var` or `@param` annotation.
 A configuration format is the one exception, because NEON, YAML and JSON have no
 `::class`. Warning: a class name in a config file drifts from the code without a
 failure. Keep the authoritative list in PHP with `::class`, and assert that the
-config matches it. `valkyrja/phpstan` does this — `Rules::getRules()` holds each
+config matches it. `valkyrja/ci-phpstan` does this — `Rules::getRules()` holds each
 rule as `::class`, `rules.neon` registers the same rules for PHPStan, and a test
 fails when the two disagree.
 
@@ -70,7 +70,7 @@ fails when the two disagree.
 
 The cross-language taxonomy ([`../AGENTS.md`](../AGENTS.md) §4) is **defined
 here** and enforced by **PHPArkitect** (`composer phparkitect`; the rules live in
-the `valkyrja/phparkitect` package's `Rules` class). Segments are PascalCase
+the `valkyrja/ci-phparkitect` package's `Rules` class). Segments are PascalCase
 namespace parts exactly as in §4 — `Contract\`, `Provider\`, `Factory\`,
 `Constant\`, `Attribute\`, `Exception\`, `Throwable\`, `Abstract\`, `Enum\`,
 `Trait\`, `Type\`, `Model\`, `Entity\`, `Security\`, `Cli\Command\`. The other

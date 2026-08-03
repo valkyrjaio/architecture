@@ -62,7 +62,7 @@ Notes:
 
 ### Test base classes
 
-- `Valkyrja\PhpUnit\Abstract\ValkyrjaTestCase` (from the `valkyrja/phpunit` package) — base for most repos.
+- `Valkyrja\PhpUnit\Abstract\ValkyrjaTestCase` (from the `valkyrja/ci-phpunit` package) — base for most repos.
 - `Valkyrja\PhpUnit\Abstract\ServiceProviderTestCase` — boots a `Container` with a base `Env`, `ApplicationContract`
   stub, and `Config`; set `protected static string $provider`. Use for testing service providers' `publishers()` and
   `publishX()` methods.

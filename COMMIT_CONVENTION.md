@@ -144,7 +144,7 @@ The same name is perfectly good **elsewhere**, because outside its own repo it
 carries real information:
 
 ```
-in valkyrja/phpcsfixer   [Ruleset] feat: Add the SeparateMultiUseImports rule.
+in ci-phpcsfixer-php     [Ruleset] feat: Add the SeparateMultiUseImports rule.
 in a framework repo      [PhpCsFixer] build: Update to v26.1.1.
 in a framework repo      [PhpCsFixer] ci: Run linting across the source tree.
 ```
