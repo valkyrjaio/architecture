@@ -875,8 +875,9 @@ Read these in order when starting or extending a port:
 6. [`BUILD_TOOL.md`](BUILD_TOOL.md) — `sindri` implementation
 7. [`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md) — testing & 100% coverage
 8. [`METHOD_NAMING.md`](METHOD_NAMING.md) — method name prefixes
-9. [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md) — commit & PR title format
-10. [`VERSIONING.md`](VERSIONING.md) — version scheme & release automation
-11. `{language}/PROVIDER_CONTRACTS.md` — full contracts + examples
-12. `{language}/README.md` — port notes & priority order
-13. `{language}/AGENTS.md` — the Layer-2 agent guide for that language
+9. [`PACKAGE_NAMING.md`](PACKAGE_NAMING.md) — package, registry, and source namespace names
+10. [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md) — commit & PR title format
+11. [`VERSIONING.md`](VERSIONING.md) — version scheme & release automation
+12. `{language}/PROVIDER_CONTRACTS.md` — full contracts + examples
+13. `{language}/README.md` — port notes & priority order
+14. `{language}/AGENTS.md` — the Layer-2 agent guide for that language
