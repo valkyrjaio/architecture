@@ -530,11 +530,15 @@ and a variable holding a space are then safe without a quote.
 ```bash
 # Wrong — `[ ]` is a command, and its arguments expand before it runs.
 if [ -n "$BRANCH_EXISTS" ]; then
+    echo "The branch is there already."
+fi
 ```
 
 ```bash
 # Right — `[[ ]]` parses the test.
 if [[ -n "$BRANCH_EXISTS" ]]; then
+    echo "The branch is there already."
+fi
 ```
 
 Warning: quote the right side of a `=` inside `[[ ]]`. An unquoted right side is
