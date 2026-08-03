@@ -9,8 +9,8 @@ identify. Gaps are noted where a language lacks a strong equivalent for a role t
 
 Every CI tool is **isolated from application code and from every other CI tool**. Concretely, each tool:
 
-- lives in its **own repository** and is published as its **own package** (the PHP tools are the `valkyrja/phpstan`,
-  `valkyrja/phpunit`, `valkyrja/rector`, … Composer packages; the other ports follow the same one-package-per-tool
+- lives in its **own repository** and is published as its **own package** (the PHP tools are the `valkyrja/ci-phpstan`,
+  `valkyrja/ci-phpunit`, `valkyrja/ci-rector`, … Composer packages; the other ports follow the same one-package-per-tool
   shape), and
 - is installed into its **own per-tool directory** inside each consuming repo — `.github/ci/<tool>/`, each with its own
   `composer.json` and `vendor/` (PHP) — so a tool resolves and pins its dependency graph in complete isolation.

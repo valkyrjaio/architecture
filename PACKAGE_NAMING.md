@@ -31,9 +31,10 @@ The `ci-` prefix stays. It names what the package is — a CI tool
 configuration — rather than how the organization files the repository. A
 developer reading a dependency list learns something from it.
 
-Warning: the PHP packages read `valkyrja/phpcsfixer`, `valkyrja/phpstan`, and so
-on today, with no prefix. Those names predate this convention and are due to be
-renamed. Do not take them as the pattern.
+The seven PHP CI packages read `valkyrja/phpcsfixer`, `valkyrja/phpstan`, and so
+on until August of 2026. Those names predate this convention. Each one now
+publishes with the prefix, and Packagist marks the old name as abandoned and
+names the new one as its replacement.
 
 ---
 
