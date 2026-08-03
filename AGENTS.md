@@ -129,14 +129,29 @@ The 100% rule is **per file, not an aggregate**, and it binds both directions:
 - **Every file you touch stays at 100%.** Adding a branch to an existing file
   means adding the test for it in the same change.
 
-**A green gate is not proof of coverage.** Every repo _runs_ coverage and
-publishes a report, but no language's gate currently **fails** on it — a build at
-55% passes exactly like one at 100%. That is the deliberate state for now, and
-gating may be added later; either way the 100% requirement above does not depend
-on a tool enforcing it. So **read the coverage report yourself** before calling a
-change done, and check the per-file numbers for the files you added or changed,
-not just the summary line. If gating does arrive, treat it as a backstop for what
-you missed — never as the thing that defines the rule.
+**A green gate is not proof of coverage.** Four ports now fail a build that drops
+below the floor. No gate proves the rule above, because each gate measures the
+repository as a whole and the rule is per file. One fully untested new file moves
+an aggregate percentage very little. The gate stays green, and the file the
+change added sits at 0%.
+
+| Port           | Gate                      | Measures                          |
+| -------------- | ------------------------- | --------------------------------- |
+| **PHP**        | CI                        | line                              |
+| **TypeScript** | CI                        | line, branch, function, statement |
+| **Go**         | CI                        | statement                         |
+| **Python**     | CI                        | line, branch                      |
+| **Java**       | local `./gradlew ci` only | line, branch                      |
+
+Each floor is 100%. Two ports need a note. **Java does not gate in CI**: the
+JUnit job runs `gradle test`, and `test` never runs
+`jacocoCoverageVerification` — only the root `ci` task does. **Go measures
+statements only**, because Go has no native branch coverage, so an untested
+branch inside a covered statement stays invisible to it.
+
+So **read the coverage report yourself** before you call a change done. Check the
+per-file numbers for each file the change adds or touches, not the summary line.
+A gate is a backstop for what you missed. A gate never defines the rule.
 
 The only exception is an **explicitly documented** one: code that genuinely
 cannot be covered (a process-exiting call, a blocking server loop) is excluded in

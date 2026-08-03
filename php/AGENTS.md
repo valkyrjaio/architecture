@@ -101,10 +101,12 @@ PHP nuances:
   named `*Fixture` — never `*Test`. A fixture that is itself an enum, trait, or
   contract keeps that type's naming (`*Enum` / `*Trait` / `*Contract`).
 - **Coverage: 100% (line and branch), never dropping** — every code branch has a
-  test — via `composer phpunit-coverage`. On **`valkyrja`** that script measures
-  lines only, because `--path-coverage` is too slow to bundle there; branches
-  need `composer phpunit-path-coverage-parallel` and are nobody's gate, so check
-  them before calling work done (see the CI tools section). Recipes & gotchas:
+  test — via `composer phpunit-coverage`. CI fails a PHPUnit job whose **line**
+  coverage drops below 100%. **Branch coverage is nobody's gate**, so check it
+  yourself before calling work done (see the CI tools section). On **`valkyrja`**
+  the `coverage` script measures lines only, because `--path-coverage` is too
+  slow to bundle there; branches need
+  `composer phpunit-path-coverage-parallel`. Recipes & gotchas:
   [`../TESTING_METHODOLOGY.md`](../TESTING_METHODOLOGY.md).
 
 ---
@@ -139,11 +141,15 @@ If a `composer.json` changed: `composer validate --strict` (root) or
 
 ### Check branch coverage before done
 
-Every repo except `valkyrja` keeps `--path-coverage` inside its `coverage`
-script, so `phpunit-coverage` already reports branches there and the gate covers
-them. **On `valkyrja` it does not** — that script measures lines only, and
-nothing in CI gates branch coverage, so a new uncovered branch will not fail
-anything. **Check it yourself once the work is complete**, so nothing creeps in:
+**No gate reads a branch number, in any repo.** The CI check asserts line
+coverage only, because clover carries no conditional data unless the run used
+`--path-coverage`, and a branch assertion over a report without it would assert
+nothing. So a new uncovered branch fails nothing.
+
+Every repo except `valkyrja` does keep `--path-coverage` inside its `coverage`
+script, so `phpunit-coverage` at least _reports_ branches there. On `valkyrja`
+that script measures lines only. Either way the number is yours to read.
+**Check it once the work is complete**, so nothing creeps in:
 
 ```bash
 GAPS=1 composer phpunit-path-coverage-parallel
