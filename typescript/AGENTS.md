@@ -103,6 +103,59 @@ full gate, not a subset:
 `npm run typescript` → `npm run eslint` (then `eslint-check`) → `npm run prettier`
 (then `prettier-check`) → `npm run vitest-coverage`.
 
+### The first release of a new package publishes by hand
+
+Warning: the `publish` job **always fails on the first release of a new package**.
+Expect the failure. It is not a defect in the repository or in the workflow.
+
+`_ts-release-npm-publish.yml` publishes with npm trusted publishing, which
+authenticates through OIDC. npm attaches a trusted publisher **to a package**, so
+a package name that does not exist yet has nothing to attach one to. npm then
+answers the create request with `404`, not `403`, because a `403` would tell a
+stranger that the name exists:
+
+```
+npm error code E404
+npm error 404 Not Found - PUT https://registry.npmjs.org/@valkyrjaio%2f<package>
+npm error 404  … could not be found or you do not have permission to access it
+```
+
+**Run the release workflow anyway.** The `release` job does the work that the
+repository keeps: it computes the version, rewrites `package.json`, rewrites the
+`*Info.ts` constants, writes `CHANGELOG.md`, and cuts the tag and the GitHub
+release. Only the `publish` job fails, and it runs after all of that.
+
+Then publish the tag by hand, once:
+
+1. Check the tag out on its own, so the publish carries the released commit and
+   not a branch that has moved.
+2. Install the TypeScript CI dependencies **first**. `prepublishOnly` runs
+   `npm run build`, and `tsconfig.json` resolves `@types/node` through
+   `typeRoots`, which points into `.github/ci/typescript/node_modules`. Without
+   that install, `tsc` stops with error `TS2688`, and it reports that it cannot
+   find the type definition file for `node`.
+3. Publish. npm asks for a one-time password and opens a browser.
+
+```bash
+git worktree add .worktrees/publish --detach v26.0.0
+cd .worktrees/publish
+(cd .github/ci/typescript && npm ci)
+npm publish --access public
+```
+
+Note that this first version carries **no provenance**. `--provenance` needs the
+OIDC token that only CI holds.
+
+After the package exists, configure its trusted publisher on npmjs and name this
+repository. Every later release then publishes from CI, with provenance, and no
+person authenticates.
+
+This was measured on `ci-eslint-ts` v26.0.0. Re-running the same failed job after
+the manual publish returned
+`You cannot publish over the previously published versions: 26.0.0` rather than
+`E404`, which shows that the OIDC identity was authorized as soon as the package
+existed. The first release is the only one that needs a person.
+
 ---
 
 ## TypeScript-specific notes
