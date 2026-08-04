@@ -201,28 +201,33 @@ $container->bind(UserRepositoryContract::class, fn($c) => ...);
 container.bind(UserRepositoryContract.class, c -> ...);
 ```
 
-**Python** — class objects as keys. `type` objects are hashable in Python and work natively as dict keys. This is
-idiomatic, IDE-supported, and eliminates the need for string constants entirely:
+**Python** — string constants, not class objects. A `type` object is hashable and works as a dict key, so the class
+object looks like the better key. It is not. Warning: a class object as the key imports the module that holds the
+class, and the container holds every binding that the application can resolve. The cache then imports every such
+module at load time, which defeats the lazy import that Python 3.14 gives.
 
 ```python
-# class object as key — hashable, IDE autocomplete works, cannot mistype
-container.bind(UserRepositoryContract, lambda c: UserRepository(c.get_singleton(Database)))
-container.get(UserRepositoryContract)  # same key, type-checked by mypy/pyright
+# Wrong — the class object as the key imports the module before anything resolves it.
+container.bind(UserRepositoryContract, lambda c: UserRepository(c.get_singleton(DatabaseContract)))
 ```
-
-The key must be the exact class object — subclasses are different keys, which is correct for a DI container (bind
-against the contract, resolve against the contract):
 
 ```python
-container.bind(UserRepositoryContract, lambda c: UserRepository(...))  # contract as key
-container.get(UserRepositoryContract)  # ✅ resolves correctly
-container.get(UserRepository)  # ❌ KeyError — different object, intentional
+# Right — the string constant names the class and imports nothing.
+container.bind(
+    ContainerConstants.USER_REPOSITORY,
+    lambda c: UserRepository(c.get_singleton(ContainerConstants.DATABASE)),
+)
 ```
 
-**Go and TypeScript** — string constants required. Neither language has a usable class reference at runtime for this
-purpose:
+A bare class name still names the type for direct code usage. It is not a container key, and the container resolves on
+the full key string only.
+
+**Go, Python, and TypeScript** — string constants required. No language of the three has a usable class reference at
+runtime for this purpose:
 
 - Go has no class system at all
+- Python has a usable class object, but a class object as the key imports the module that holds the class, which
+  defeats the lazy import that Python 3.14 gives
 - TypeScript interfaces are erased at runtime — `Map<Interface, Factory>` is not possible since interfaces don't exist
   at runtime. Constructor references work for concrete classes but most Valkyrja bindings are against
   contracts/interfaces
