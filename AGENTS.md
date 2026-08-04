@@ -22,7 +22,7 @@ This is **Layer 1** of a three-layer guide:
 > guide.
 
 > **Before contributing, also read
-> [`CONTRIBUTING.md`](https://github.com/valkyrjaio/.github/blob/master/CONTRIBUTING.md)**
+> [`CONTRIBUTING.md`](https://github.com/valkyrjaio/.github/blob/26.x/CONTRIBUTING.md)**
 > — the submission process, running CI locally, the commit/PR conventions, and
 > branch targeting. This guide is the technical companion to it.
 
@@ -53,7 +53,7 @@ repo's directories, files, and classes are laid out. Every new repo in that
 language is scaffolded from it (see §3, rule 9).
 
 Use the shared vocabulary (app, module, component, tool) consistently — see
-[VOCABULARY.md](https://github.com/valkyrjaio/.github/blob/master/VOCABULARY.md).
+[VOCABULARY.md](https://github.com/valkyrjaio/.github/blob/26.x/VOCABULARY.md).
 
 ---
 
@@ -746,7 +746,7 @@ root kinds, and worked examples:
   from the PR description, which is why that description is where durable
   explanation belongs (see §3, rule 10).
 - PR description follows the
-  [PR template](https://github.com/valkyrjaio/.github/blob/master/.github/PULL_REQUEST_TEMPLATE.md)
+  [PR template](https://github.com/valkyrjaio/.github/blob/26.x/.github/PULL_REQUEST_TEMPLATE.md)
   — fill **Description**, **Types of changes**, and **Changes** (bold
   file/component — em dash — what changed). When an issue tracks the work, put
   `Closes #123` in the description: it becomes the squash commit body, so that is
@@ -863,7 +863,7 @@ at the same time, code and tests together. Open one PR per language repo and
 the other languages.
 
 Full detail:
-[CONTRIBUTING.md](https://github.com/valkyrjaio/.github/blob/master/CONTRIBUTING.md).
+[CONTRIBUTING.md](https://github.com/valkyrjaio/.github/blob/26.x/CONTRIBUTING.md).
 
 ---
 

@@ -119,7 +119,7 @@ That module is upgraded with **`go get tool`** — the `tool` meta-pattern with 
   _is_ the code under test, so upgrading its graph is the point.
 
 The reusable workflows enforce this
-([`_go-update-dependencies.yml`](https://github.com/valkyrjaio/.github/blob/master/.github/workflows/_go-update-dependencies.yml)).
+([`_go-update-dependencies.yml`](https://github.com/valkyrjaio/.github/blob/26.x/.github/workflows/_go-update-dependencies.yml)).
 `_go-check-outdated-dependencies.yml` deliberately performs the very same upgrade
 so the two can never disagree — change them in lockstep, or the check reports
 every tool module as perpetually outdated for an upgrade the updater will not
