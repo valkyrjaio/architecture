@@ -51,7 +51,7 @@ Established that:
 - PHP and Java use `::class` / `.class` for type-safety but not dynamic dispatch
 - Go, Python, and TypeScript use string constants (no `::class` equivalent)
 - Per-component constants files — never a single central constants file
-- String format: `io.valkyrja.{component}.{ClassName}`
+- String format: `Valkyrja.{Segment}.{ClassName}` — StudlyCase, `Contract` segment removed
 
 **Produced:** `CONTAINER_BINDINGS.md`
 

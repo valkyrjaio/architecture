@@ -961,9 +961,9 @@ public final class ContainerConstants {
 ```go
 // io/valkyrja/container/container_constants.go — shipped with framework
 const (
-ContainerClass = "io.valkyrja.container.ContainerContract"
-DispatcherClass = "io.valkyrja.container.DispatcherContract"
-RouterClass = "io.valkyrja.http.routing.RouterContract"
+ContainerClass = "Valkyrja.Container.Manager.ContainerContract"
+DispatcherClass = "Valkyrja.Dispatch.Dispatcher.DispatcherContract"
+RouterClass = "Valkyrja.Http.Routing.Dispatcher.RouterContract"
 )
 ```
 
@@ -972,9 +972,9 @@ RouterClass = "io.valkyrja.http.routing.RouterContract"
 ```python
 # valkyrja/container/container_constants.py — shipped with framework
 class ContainerConstants:
-    CONTAINER = "io.valkyrja.container.ContainerContract"
-    DISPATCHER = "io.valkyrja.container.DispatcherContract"
-    ROUTER = "io.valkyrja.http.routing.RouterContract"
+    CONTAINER = "Valkyrja.Container.Manager.ContainerContract"
+    DISPATCHER = "Valkyrja.Dispatch.Dispatcher.DispatcherContract"
+    ROUTER = "Valkyrja.Http.Routing.Dispatcher.RouterContract"
 ```
 
 **TypeScript** — constants hold FQN string literals:
@@ -982,9 +982,9 @@ class ContainerConstants:
 ```typescript
 // valkyrja/container/container-constants.ts — shipped with framework
 export const ContainerConstants = {
-    CONTAINER: 'io.valkyrja.container.ContainerContract',
-    DISPATCHER: 'io.valkyrja.container.DispatcherContract',
-    ROUTER: 'io.valkyrja.http.routing.RouterContract',
+    CONTAINER: 'Valkyrja.Container.Manager.ContainerContract',
+    DISPATCHER: 'Valkyrja.Dispatch.Dispatcher.DispatcherContract',
+    ROUTER: 'Valkyrja.Http.Routing.Dispatcher.RouterContract',
 } as const
 ```
 
@@ -1008,14 +1008,18 @@ constants files. This is a quality-of-life feature to implement after the core s
 
 ### How the FQN String Is Derived
 
-For Go, Python, and TypeScript, Sindri derives the FQN string for each class from the language-native module/package
-path:
+Warning: Sindri does not derive the string from the language-native module or package path. The key names the framework
+class, so the same class gets the same key in Go, in Python, and in TypeScript. A key derived from the host language
+gives one class three different names.
 
-| Language   | FQN format                                | Example                                 |
-| ---------- | ----------------------------------------- | --------------------------------------- |
-| Go         | `io/valkyrja/container.ContainerContract` | dot-separated package path + type name  |
-| Python     | `io.valkyrja.container.ContainerContract` | dot-separated module path + class name  |
-| TypeScript | `io.valkyrja.container.ContainerContract` | dot-separated package path + class name |
+Sindri derives the string from the class path in the framework namespace. It writes each segment in StudlyCase, and it
+removes the `Contract` segment, because the class name ends in `Contract` already:
+
+| Source class                                               | Key                                               |
+| ---------------------------------------------------------- | ------------------------------------------------- |
+| `Valkyrja\Container\Manager\Contract\ContainerContract`    | `Valkyrja.Container.Manager.ContainerContract`    |
+| `Valkyrja\Http\Routing\Dispatcher\Contract\RouterContract` | `Valkyrja.Http.Routing.Dispatcher.RouterContract` |
+| `Valkyrja\Container\Data\ContainerData`                    | `Valkyrja.Container.Data.ContainerData`           |
 
 The constant name is derived from the class name using the language-idiomatic convention — `SCREAMING_SNAKE_CASE` for
 Python/TypeScript, `PascalCaseClass` suffix for Go.
@@ -1214,13 +1218,13 @@ publishers      → map of binding key → publisher method body source text
 
 **Language-specific key resolution:**
 
-| Language   | Key in source                        | Resolution                                           |
-| ---------- | ------------------------------------ | ---------------------------------------------------- |
-| PHP        | `RouterContract::class`              | Resolve `RouterContract` via import map → FQN string |
-| Java       | `RouterContract.class`               | Resolve `RouterContract` via import map → FQN string |
-| Python     | `RouterContract` (class name)        | Resolve via import map → FQN string                  |
-| Go         | `"io.valkyrja.http.RouterContract"`  | String literal — use as-is                           |
-| TypeScript | `RouterClass` (string constant name) | Resolve constant value via import map → string       |
+| Language   | Key in source                                       | Resolution                                           |
+| ---------- | --------------------------------------------------- | ---------------------------------------------------- |
+| PHP        | `RouterContract::class`                             | Resolve `RouterContract` via import map → FQN string |
+| Java       | `RouterContract.class`                              | Resolve `RouterContract` via import map → FQN string |
+| Python     | `RouterContract` (class name)                       | Resolve via import map → FQN string                  |
+| Go         | `"Valkyrja.Http.Routing.Dispatcher.RouterContract"` | String literal — use as-is                           |
+| TypeScript | `RouterClass` (string constant name)                | Resolve constant value via import map → string       |
 
 ---
 

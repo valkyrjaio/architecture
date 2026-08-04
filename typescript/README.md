@@ -97,9 +97,9 @@ function tryMake<T>(abstract: string): Result<T, ContainerException> {
 ```typescript
 // container-constants.ts
 export const ContainerConstants = {
-    CONTAINER: 'io.valkyrja.container.ContainerContract',
-    ROUTER: 'io.valkyrja.http.routing.RouterContract',
-    USER_REPOSITORY: 'io.valkyrja.app.repositories.UserRepositoryContract',
+    CONTAINER: 'Valkyrja.Container.Manager.ContainerContract',
+    ROUTER: 'Valkyrja.Http.Routing.Dispatcher.RouterContract',
+    USER_REPOSITORY: 'App.Repository.UserRepositoryContract',
 } as const
 ```
 
