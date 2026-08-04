@@ -275,8 +275,8 @@ $handler = $child->getSingleton(RequestHandlerContract::class);
 
 In practice you will not construct child containers directly. The worker entry
 classes (`WorkerHttp` and its subclasses) handle this for every request. See the
-[Application README](../Application/README.md#persistent-worker-lifecycle) for
-the full lifecycle.
+[Application README](https://github.com/valkyrjaio/valkyrja-php/blob/26.x/src/Valkyrja/Application/README.md#persistent-worker-lifecycle)
+for the full lifecycle.
 
 ### Singleton State Methods
 
