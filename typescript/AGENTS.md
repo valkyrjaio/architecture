@@ -105,8 +105,8 @@ full gate, not a subset:
 
 ### A package publishes by hand until its trusted publisher is configured
 
-Warning: the `publish` job fails on **every** release of a package whose trusted
-publisher npmjs does not hold. It is not a defect in the repository or in the
+Warning: the `publish` job fails on **every** release of a package for which
+npmjs holds no trusted publisher. It is not a defect in the repository or in the
 workflow, and it is not limited to the first release.
 
 `_ts-release-npm-publish.yml` publishes with npm trusted publishing, which
