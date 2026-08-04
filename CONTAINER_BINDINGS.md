@@ -45,7 +45,12 @@ both. A key that follows the host language gives one class a different name in e
 five spellings for one binding.
 
 An application uses the same rules with its own root. `App\Repository\Contract\UserRepositoryContract` becomes
-`App.Repository.UserRepositoryContract`.
+`App.Repository.UserRepositoryContract`, and `App\Service\Contract\DatabaseContract` becomes
+`App.Service.DatabaseContract`.
+
+Each segment is singular, because the key copies the source directory and a Valkyrja segment is singular. The framework
+writes `Repository\`, `Manager\`, `Provider\`, and `Middleware\`. An application that writes `Repositories\` gets
+`App.Repositories.UserRepositoryContract`, because the key copies the directory that the application has.
 
 ---
 
