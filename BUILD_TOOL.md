@@ -1008,17 +1008,17 @@ constants files. This is a quality-of-life feature to implement after the core s
 
 ### How the FQN String Is Derived
 
-Sindri derives the string from the source file's path, written the way the target language writes a namespace. The
-class name keeps its PascalCase spelling, and the `Contract` segment goes, because the class name ends in `Contract`
-already.
+Sindri derives the string from the source file's path in the port it generates for. The class name keeps its
+PascalCase spelling, and the `Contract` segment goes, because the class name ends in `Contract` already.
 
-The key is therefore language-specific. `Valkyrja\Container\Manager\Contract\ContainerContract` gives:
+The key is therefore language-specific, because each port's directory layout already differs. PHP and TypeScript write
+a StudlyCase directory, and Go and Python write a lowercase directory:
 
-| Language   | Key                                            |
-| ---------- | ---------------------------------------------- |
-| Go         | `valkyrja.container.manager.ContainerContract` |
-| Python     | `valkyrja.container.manager.ContainerContract` |
-| TypeScript | `Valkyrja.Container.Manager.ContainerContract` |
+| Language   | Namespaced class                                        | Key                                            |
+| ---------- | ------------------------------------------------------- | ---------------------------------------------- |
+| TypeScript | `Valkyrja/Container/Manager/Contract/ContainerContract` | `Valkyrja.Container.Manager.ContainerContract` |
+| Python     | `valkyrja.container.manager.contract.ContainerContract` | `valkyrja.container.manager.ContainerContract` |
+| Go         | `valkyrja/container/manager/contract.ContainerContract` | `valkyrja.container.manager.ContainerContract` |
 
 Warning: do not copy a key from one port into another. A developer reads a key and looks for that file, so each key
 must match the import path that its own port has.

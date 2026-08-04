@@ -17,23 +17,27 @@ Languages differ in what they use as that key:
 constants for the same reason as Go and TypeScript — using class objects as keys forces module imports, defeating Python
 3.14's lazy import mechanism which is the primary solution to Python's cold start problem.
 
-**The key is modeled on how the port imports the class.** It is the directory path of the source file, written the way
-the port's own language writes a namespace. The class name keeps its PascalCase spelling in every port.
+**The key is modeled on how the port imports the class.** It is the directory path of the source file, plus the class
+name. The class name keeps its PascalCase spelling in every port.
 
-The key is therefore language-specific. `Valkyrja\Container\Manager\Contract\ContainerContract` gives:
+The key is therefore language-specific, because each port's directory layout already differs. PHP and TypeScript write
+a StudlyCase directory. Go and Python write a lowercase directory. Each port copies the layout that the port itself
+has, so no port converts the case of another port's path:
 
-| Language   | Namespace spelling        | Key                                            |
-| ---------- | ------------------------- | ---------------------------------------------- |
-| Go         | lowercase, `.` separator  | `valkyrja.container.manager.ContainerContract` |
-| Python     | lowercase, `.` separator  | `valkyrja.container.manager.ContainerContract` |
-| TypeScript | StudlyCase, `.` separator | `Valkyrja.Container.Manager.ContainerContract` |
+| Language   | Namespaced class                                        | Key                                                     |
+| ---------- | ------------------------------------------------------- | ------------------------------------------------------- |
+| PHP        | `Valkyrja\Container\Manager\Contract\ContainerContract` | `Valkyrja\Container\Manager\Contract\ContainerContract` |
+| TypeScript | `Valkyrja/Container/Manager/Contract/ContainerContract` | `Valkyrja.Container.Manager.ContainerContract`          |
+| Python     | `valkyrja.container.manager.contract.ContainerContract` | `valkyrja.container.manager.ContainerContract`          |
+| Go         | `valkyrja/container/manager/contract.ContainerContract` | `valkyrja.container.manager.ContainerContract`          |
 
 Two rules shape every key:
 
 - **Copy the directory path of the source file.** The Cli component and the Http component each hold a
   `RouterContract`, so a shorter path is not unique.
 - **Remove the `Contract` segment**, because the class name ends in `Contract` already. A contract whose name does not
-  end in `Contract` keeps the segment: `Valkyrja\Throwable\Contract\ValkyrjaThrowable` gives the Python key
+  end in `Contract` keeps the segment. Python holds `ValkyrjaThrowable` in
+  `src/valkyrja/throwable/contract/valkyrja_throwable.py`, so its key is
   `valkyrja.throwable.contract.ValkyrjaThrowable`.
 
 ```typescript
