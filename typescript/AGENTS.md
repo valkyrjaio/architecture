@@ -103,16 +103,17 @@ full gate, not a subset:
 `npm run typescript` → `npm run eslint` (then `eslint-check`) → `npm run prettier`
 (then `prettier-check`) → `npm run vitest-coverage`.
 
-### The first release of a new package publishes by hand
+### A package publishes by hand until its trusted publisher is configured
 
-Warning: the `publish` job **always fails on the first release of a new package**.
-Expect the failure. It is not a defect in the repository or in the workflow.
+Warning: the `publish` job fails on **every** release of a package whose trusted
+publisher npmjs does not hold. It is not a defect in the repository or in the
+workflow, and it is not limited to the first release.
 
 `_ts-release-npm-publish.yml` publishes with npm trusted publishing, which
-authenticates through OIDC. npm attaches a trusted publisher **to a package**, so
-a package name that does not exist yet has nothing to attach one to. npm then
-answers the create request with `404`, not `403`, because a `403` would tell a
-stranger that the name exists:
+authenticates through OIDC. npm attaches a trusted publisher **to a package**, and
+it rejects a publish from an identity it does not hold one for. npm answers with
+`404` rather than `403`, because a `403` would tell a stranger that the name
+exists:
 
 ```
 npm error code E404
@@ -125,7 +126,7 @@ repository keeps: it computes the version, rewrites `package.json`, rewrites the
 `*Info.ts` constants, writes `CHANGELOG.md`, and cuts the tag and the GitHub
 release. Only the `publish` job fails, and it runs after all of that.
 
-Then publish the tag by hand, once:
+Then publish the tag by hand:
 
 1. Check the tag out on its own, so the publish carries the released commit and
    not a branch that has moved.
@@ -137,24 +138,36 @@ Then publish the tag by hand, once:
 3. Publish. npm asks for a one-time password and opens a browser.
 
 ```bash
-git worktree add .worktrees/publish --detach v26.0.0
+git worktree add .worktrees/publish --detach v26.1.0
 cd .worktrees/publish
 (cd .github/ci/typescript && npm ci)
 npm publish --access public
 ```
 
-Note that this first version carries **no provenance**. `--provenance` needs the
-OIDC token that only CI holds.
+Note that a version published this way carries **no provenance**. `--provenance`
+needs the OIDC token that only CI holds.
 
-After the package exists, configure its trusted publisher on npmjs and name this
-repository. Every later release then publishes from CI, with provenance, and no
+Configure the trusted publisher on npmjs, and name this repository, to stop the
+failure recurring. Until a person does that, every release repeats the manual
+step above. After it, each release publishes from CI, with provenance, and no
 person authenticates.
 
-This was measured on `ci-eslint-ts` v26.0.0. Re-running the same failed job after
-the manual publish returned
-`You cannot publish over the previously published versions: 26.0.0` rather than
-`E404`, which shows that the OIDC identity was authorized as soon as the package
-existed. The first release is the only one that needs a person.
+Warning: a re-run of the failed job does **not** tell you whether the identity is
+authorized. npm rejects a duplicate version before it checks authorization, so a
+re-run against a version that already published returns
+`You cannot publish over the previously published versions: <version>` whatever
+the authorization state is. Read that error as "this version exists", and never
+as "the identity is now authorized".
+
+This was measured on `ci-eslint-ts`. The v26.0.0 publish failed with `E404`, a
+person published the tag by hand, and the re-run then returned the duplicate
+version error. That reads as authorization, and it is not: v26.1.0 failed with
+`E404` again, from the same workflow and the same identity, against a package
+that by then existed.
+
+Note that provenance is not the signal either. npm signs the provenance statement
+and writes it to the transparency log **before** the registry rejects the publish,
+so a failed run still reports a signed statement.
 
 ---
 
