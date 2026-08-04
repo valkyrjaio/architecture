@@ -2,7 +2,7 @@
 
 > Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `DISPATCH.md`,
 > `DATA_CACHE.md`, `BUILD_TOOL.md`, `CONTRACTS_TYPESCRIPT.md`
-> Port order: Container → Dispatch → Event → Application → CLI → HTTP → Bin
+> Port order: Container → Event → Application → CLI → HTTP → Bin
 
 ---
 
@@ -356,7 +356,6 @@ tsc compiles with generated files
 7. Named handler types — HttpHandlerFunc, CliHandlerFunc, ListenerHandlerFunc
 8. Handler contracts per concern
 9. Route and listener data classes
-10. Dispatch component
-11. @valkyrja/build npm package — TypeScript compiler API implementation
-12. AppContainerData, AppHttpRoutingData, AppCliRoutingData, AppEventData
+10. @valkyrja/build npm package — TypeScript compiler API implementation
+11. AppContainerData, AppHttpRoutingData, AppCliRoutingData, AppEventData
     generation
