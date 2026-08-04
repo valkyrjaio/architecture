@@ -57,7 +57,7 @@ Established that:
 
 ---
 
-### 4. Dispatch Deprecation
+### 4. Dispatch Removal
 
 Established that the Dispatch component cannot be central across all ports — it relies on `::class` / `.class` dynamic
 dispatch which doesn't exist in Go, TypeScript, or Python reliably.
@@ -77,7 +77,8 @@ Each concern gets its own typed handler contract:
 - `CliHandlerContract` using `CliHandlerFunc`
 - `ListenerHandlerContract` using `ListenerHandlerFunc`
 
-Dispatch retained as opt-in power feature for PHP and Java only.
+The Dispatch component is dropped framework-wide — no port includes it, and the PHP and Java implementations are
+removed once their dispatch-based routes migrate to closure handlers.
 
 **Produced:** `DISPATCH.md`
 

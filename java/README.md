@@ -2,7 +2,7 @@
 
 > Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `DISPATCH.md`,
 > `DATA_CACHE.md`, `BUILD_TOOL.md`, `CONTRACTS_JAVA.md`
-> Port order: Container → Dispatch → Event → Application → CLI → HTTP → Bin
+> Port order: Container → Event → Application → CLI → HTTP → Bin
 
 ---
 
@@ -365,5 +365,4 @@ provider tree, then walks each provider's source file via Trees API.
 8. Records for data classes
 9. Annotation processor setup + Trees API lambda extraction
 10. JavaPoet cache data class generation
-11. Dispatch component (after HTTP)
-12. valkyrja-build Java artifact
+11. valkyrja-build Java artifact

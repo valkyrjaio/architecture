@@ -14,9 +14,9 @@ Go idiom. Authoritative port detail: [`README.md`](README.md),
   (`project-template-go`, in progress) — the source of truth for repo/file/class
   structure (canonical rule: §3.9).
 - **Module path:** `github.com/valkyrjaio/valkyrja-go`. Components map to
-  lowercase packages (`container`, `http`, `cli`, `event`, `application`,
-  `dispatcher`), with a `contract` sub-package for interfaces and a `data`
-  sub-package for data structs.
+  lowercase packages (`container`, `http`, `cli`, `event`, `application`),
+  with a `contract` sub-package for interfaces and a `data` sub-package for
+  data structs.
 - **Contracts:** Go `interface` types, structural (no `implements`). The
   **name keeps the `*Contract` suffix** (`ContainerContract`, `RouterContract`,
   `ServiceProviderContract`) but the type lives in a `contract` package rather

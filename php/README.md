@@ -201,7 +201,7 @@ name and pattern.
 
 ---
 
-## 5. Dispatch — Deprecation
+## 5. Dispatch — Removal
 
 **Reference:** `DISPATCH.md`
 
@@ -209,13 +209,14 @@ name and pattern.
 
 - Add `@deprecated` to dispatch-based route handler methods
 - New routes must use `#[Handler]` attribute or explicit closure on the route object
-- Dispatch component retained as opt-in for backwards compatibility but removed from core pipeline
+- Dispatch component removed entirely once existing routes and listeners migrate to closure handlers
 - Add deprecation notices to guide developers toward closure-based handlers
 
 ### Remove dispatch from core routing pipeline
 
-The router and event dispatcher must invoke the handler closure directly if present. Dispatch is only invoked as a
-fallback if no closure handler is set (backwards compatibility).
+The router and event dispatcher must invoke the handler closure directly if present. During the migration, dispatch is
+invoked as a fallback only when no closure handler is set. The fallback goes when the last dispatch-based route
+migrates.
 
 ---
 
@@ -378,6 +379,6 @@ they return `::class` references directly — never constant references.
 5. **#[Parameter] attribute** — needed before cache generation
 6. **Bin extraction to sindri** — needed before handler logic ships (CLI command will break)
 7. **sindri implementation** — PHP cache generation via AST
-8. **Dispatch deprecation** — additive, can happen alongside or after handler contracts
+8. **Dispatch removal** — additive, can happen alongside or after handler contracts
 9. **Container constants files** — additive, can happen incrementally per component
 10. **Closure-based container bindings** — additive, can happen incrementally per component

@@ -2,12 +2,13 @@
 
 ## Overview
 
-The Dispatch component is currently central to how routes (CLI and HTTP) and listeners are dispatched from their
-respective routers and the event dispatcher. It relies heavily on `::class` (PHP) and `.class` (Java) to dynamically
-resolve and call methods on controllers, actions, and listeners via reflection.
+The Dispatch component was central to how routes (CLI and HTTP) and listeners were dispatched from their respective
+routers and the event dispatcher. It relied heavily on `::class` (PHP) and `.class` (Java) to dynamically resolve and
+call methods on controllers, actions, and listeners via reflection.
 
-This approach is being deprecated as the central dispatch mechanism and replaced with explicit closure-based handlers on
-routes and listeners directly. The Dispatch component is retained as an optional power feature for PHP and Java only.
+The component is dropped framework-wide: explicit closure-based handlers on routes and listeners replace it, no port
+includes it, and the PHP and Java implementations are removed once their dispatch-based routes migrate. This document
+records the replacement design.
 
 ---
 
@@ -658,32 +659,24 @@ the developer wants explicit control over the cached form.
 
 ---
 
-## Dispatch Component Retention
+## Dispatch Component Removal
 
-The Dispatch component is retained for PHP and Java as an opt-in power feature. It is not removed — it simply loses its
-status as a required central dependency of the routing and event pipeline.
-
-**What Dispatch retains:**
-
-- Dynamic method resolution via `::class` / `.class`
-- Reflection-based handler calling
-- All existing PHP/Java dispatch behavior
+The Dispatch component is removed framework-wide. No port includes it, and the PHP and Java implementations are
+removed once their dispatch-based routes and listeners migrate to closure handlers.
 
 **What changes:**
 
 - Routes and listeners no longer require Dispatch to function
-- The router and event dispatcher invoke the handler closure directly if present
-- Dispatch is only invoked as a fallback if no closure handler is set (backwards compatibility during migration)
-- New routes and listeners should use closure handlers
+- The router and event dispatcher invoke the handler closure directly
+- New routes and listeners must use closure handlers
 
 **Migration path:**
 
 1. Introduce `Handler` and `CacheableHandler` contracts on routes and listeners
 2. New routes use closure handlers — Dispatch not involved
-3. Existing routes continue to work via Dispatch (backwards compatible)
+3. Existing routes continue to work via Dispatch (backwards compatibility during migration)
 4. Deprecation warnings added to Dispatch-based route definitions
-5. Dispatch removed from core pipeline in a future major version
-6. Dispatch component remains available as an optional package for PHP and Java
+5. Dispatch removed from the core pipeline and then from the framework entirely
 
 ---
 
@@ -826,8 +819,8 @@ listener collection — same pattern, `ListenerContract` instead of `RouteContra
 
 ### PHP
 
-Dispatch retained as opt-in. Closure handlers are the new canonical approach. The `#[Handler]` attribute drives both
-runtime dispatch and cache generation (via build tool AST extraction).
+Dispatch removed once existing routes migrate. Closure handlers are the canonical approach. The `#[Handler]` attribute
+drives both runtime dispatch and cache generation (via build tool AST extraction).
 
 ```php
 // old — dispatch-based (deprecated)
@@ -843,8 +836,8 @@ $route->setHandler(
 
 ### Java
 
-Dispatch retained as opt-in. Annotation processor extracts `@Handler` lambda via Trees API at compile time, generates
-cache data classes via JavaPoet. No developer-written `CacheableHandler` string needed.
+Dispatch removed once existing routes migrate. Annotation processor extracts `@Handler` lambda via Trees API at compile
+time, generates cache data classes via JavaPoet. No developer-written `CacheableHandler` string needed.
 
 ```java
 // old — dispatch-based (deprecated)
@@ -1152,10 +1145,9 @@ The annotation/attribute approach for PHP, Java, and Python allows the framework
 experience — the developer annotates the action method and the framework handles the rest. Go and TypeScript use
 explicit registration which is honest to their philosophy of explicit-over-implicit.
 
-The decision to retain Dispatch as an optional component rather than removing it entirely was driven by backwards
-compatibility and the genuine usefulness of dynamic dispatch for PHP and Java developers who want it. Removing it from
-the core pipeline while keeping it available as an opt-in respects existing users while establishing the correct
-architecture for all ports going forward.
+The initial decision retained Dispatch as an optional component for backwards compatibility. A later decision
+superseded it: the component is removed framework-wide. Closure handlers replace it in every port, and the PHP and
+Java implementations go once their dispatch-based routes migrate.
 
 A further benefit of the closure-based handler approach — identified after the initial design — is typed closure
 signatures. The dispatch approach had no type enforcement on what method was called or what it returned. Errors were

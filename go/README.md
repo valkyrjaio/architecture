@@ -2,7 +2,7 @@
 
 > Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `DISPATCH.md`,
 > `DATA_CACHE.md`, `BUILD_TOOL.md`, `CONTRACTS_GO.md`
-> Port order: Container → Dispatch → Event → Application → CLI → HTTP → Bin
+> Port order: Container → Event → Application → CLI → HTTP → Bin
 
 ---
 
@@ -120,14 +120,14 @@ const (
 container.Bind(
 RouterClass,
 func (c ContainerContract) any {
-return NewRouter(c.GetSingleton(DispatcherClass).(DispatcherContract))
+return NewRouter(c.GetSingleton(EventDispatcherClass).(EventDispatcherContract))
 },
 )
 
 container.BindSingleton(
 RouterClass,
 func(c ContainerContract) any {
-return NewRouter(c.GetSingleton(DispatcherClass).(DispatcherContract))
+return NewRouter(c.GetSingleton(EventDispatcherClass).(EventDispatcherContract))
 },
 )
 ```
@@ -332,7 +332,6 @@ go build compiles with generated files
    ListenerHandlerFunc
 7. Handler contracts per concern
 8. Route and listener data classes
-9. Dispatch component
-10. go generate + go/analysis build tool
-11. AppContainerData, AppHttpRoutingData, AppCliRoutingData, AppEventData
+9. go generate + go/analysis build tool
+10. AppContainerData, AppHttpRoutingData, AppCliRoutingData, AppEventData
     generation
