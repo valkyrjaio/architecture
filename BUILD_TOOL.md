@@ -961,9 +961,9 @@ public final class ContainerConstants {
 ```go
 // io/valkyrja/container/container_constants.go — shipped with framework
 const (
-ContainerClass = "Valkyrja.Container.Manager.ContainerContract"
-DispatcherClass = "Valkyrja.Dispatch.Dispatcher.DispatcherContract"
-RouterClass = "Valkyrja.Http.Routing.Dispatcher.RouterContract"
+ContainerClass = "valkyrja.container.manager.ContainerContract"
+DispatcherClass = "valkyrja.dispatch.dispatcher.DispatcherContract"
+RouterClass = "valkyrja.http.routing.dispatcher.RouterContract"
 )
 ```
 
@@ -972,9 +972,9 @@ RouterClass = "Valkyrja.Http.Routing.Dispatcher.RouterContract"
 ```python
 # valkyrja/container/container_constants.py — shipped with framework
 class ContainerConstants:
-    CONTAINER = "Valkyrja.Container.Manager.ContainerContract"
-    DISPATCHER = "Valkyrja.Dispatch.Dispatcher.DispatcherContract"
-    ROUTER = "Valkyrja.Http.Routing.Dispatcher.RouterContract"
+    CONTAINER = "valkyrja.container.manager.ContainerContract"
+    DISPATCHER = "valkyrja.dispatch.dispatcher.DispatcherContract"
+    ROUTER = "valkyrja.http.routing.dispatcher.RouterContract"
 ```
 
 **TypeScript** — constants hold FQN string literals:
@@ -1008,18 +1008,20 @@ constants files. This is a quality-of-life feature to implement after the core s
 
 ### How the FQN String Is Derived
 
-Warning: Sindri does not derive the string from the language-native module or package path. The key names the framework
-class, so the same class gets the same key in Go, in Python, and in TypeScript. A key derived from the host language
-gives one class three different names.
+Sindri derives the string from the source file's path, written the way the target language writes a namespace. The
+class name keeps its PascalCase spelling, and the `Contract` segment goes, because the class name ends in `Contract`
+already.
 
-Sindri derives the string from the class path in the framework namespace. It writes each segment in StudlyCase, and it
-removes the `Contract` segment, because the class name ends in `Contract` already:
+The key is therefore language-specific. `Valkyrja\Container\Manager\Contract\ContainerContract` gives:
 
-| Source class                                               | Key                                               |
-| ---------------------------------------------------------- | ------------------------------------------------- |
-| `Valkyrja\Container\Manager\Contract\ContainerContract`    | `Valkyrja.Container.Manager.ContainerContract`    |
-| `Valkyrja\Http\Routing\Dispatcher\Contract\RouterContract` | `Valkyrja.Http.Routing.Dispatcher.RouterContract` |
-| `Valkyrja\Container\Data\ContainerData`                    | `Valkyrja.Container.Data.ContainerData`           |
+| Language   | Key                                            |
+| ---------- | ---------------------------------------------- |
+| Go         | `valkyrja.container.manager.ContainerContract` |
+| Python     | `valkyrja.container.manager.ContainerContract` |
+| TypeScript | `Valkyrja.Container.Manager.ContainerContract` |
+
+Warning: do not copy a key from one port into another. A developer reads a key and looks for that file, so each key
+must match the import path that its own port has.
 
 The constant name is derived from the class name using the language-idiomatic convention — `SCREAMING_SNAKE_CASE` for
 Python/TypeScript, `PascalCaseClass` suffix for Go.
@@ -1223,7 +1225,7 @@ publishers      → map of binding key → publisher method body source text
 | PHP        | `RouterContract::class`                             | Resolve `RouterContract` via import map → FQN string |
 | Java       | `RouterContract.class`                              | Resolve `RouterContract` via import map → FQN string |
 | Python     | `RouterContract` (class name)                       | Resolve via import map → FQN string                  |
-| Go         | `"Valkyrja.Http.Routing.Dispatcher.RouterContract"` | String literal — use as-is                           |
+| Go         | `"valkyrja.http.routing.dispatcher.RouterContract"` | String literal — use as-is                           |
 | TypeScript | `RouterClass` (string constant name)                | Resolve constant value via import map → string       |
 
 ---

@@ -82,10 +82,10 @@ eager import entirely, independent of any lazy-import language feature (see §5)
 ```python
 # container_constants.py — required per component
 class ContainerConstants:
-    CONTAINER = "Valkyrja.Container.Manager.ContainerContract"
-    ROUTER = "Valkyrja.Http.Routing.Dispatcher.RouterContract"
-    USER_REPOSITORY = "App.Repository.UserRepositoryContract"
-    DATABASE = "App.Service.DatabaseContract"
+    CONTAINER = "valkyrja.container.manager.ContainerContract"
+    ROUTER = "valkyrja.http.routing.dispatcher.RouterContract"
+    USER_REPOSITORY = "app.repository.UserRepositoryContract"
+    DATABASE = "app.service.DatabaseContract"
 ```
 
 ```python

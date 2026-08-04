@@ -506,11 +506,12 @@ The full table and the per-language spelling: [`METHOD_NAMING.md`](METHOD_NAMING
 ### Binding-key constants
 
 Per-component constants files (never one central file). String format
-`Valkyrja.{Segments}.{ClassName}` — the class path in the framework namespace,
-in StudlyCase, with the `Contract` segment removed
-(`Valkyrja.Container.Manager.ContainerContract`). The key names the framework
-class, not the host language's package. Every port holds the same string, even
-a language that spells its own packages in lowercase. PHP holds `::class`
+The key is how the port imports the
+class: the source file's directory path, written the way that language writes a
+namespace, with the `Contract` segment removed because the class name ends in
+`Contract` already. The key is therefore language-specific — TypeScript writes
+`Valkyrja.Container.Manager.ContainerContract`, and Go and Python write
+`valkyrja.container.manager.ContainerContract`. PHP holds `::class`
 strings, Java holds `.class` objects, Go/Python/TypeScript hold string
 literals. Detail: [`CONTAINER_BINDINGS.md`](CONTAINER_BINDINGS.md).
 

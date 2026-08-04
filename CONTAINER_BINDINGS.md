@@ -17,18 +17,24 @@ Languages differ in what they use as that key:
 constants for the same reason as Go and TypeScript — using class objects as keys forces module imports, defeating Python
 3.14's lazy import mechanism which is the primary solution to Python's cold start problem.
 
-The string constant format for Go, Python, and TypeScript:
+**The key is how the port imports the class.** It is the directory path of the source file, written the way the port's
+own language writes a namespace. The class name keeps its PascalCase spelling in every port.
 
-```
-Valkyrja.{Segments}.{ClassName}
-```
+The key is therefore language-specific. `Valkyrja\Container\Manager\Contract\ContainerContract` gives:
 
-The key is the class path in the framework namespace, and a dot separates each segment. Three rules make the key:
+| Language   | Namespace spelling        | Key                                            |
+| ---------- | ------------------------- | ---------------------------------------------- |
+| Go         | lowercase, `.` separator  | `valkyrja.container.manager.ContainerContract` |
+| Python     | lowercase, `.` separator  | `valkyrja.container.manager.ContainerContract` |
+| TypeScript | StudlyCase, `.` separator | `Valkyrja.Container.Manager.ContainerContract` |
 
-- **Write each segment in StudlyCase.** The key copies the spelling of the source directory.
-- **Remove the `Contract` segment.** The class name ends in `Contract` already.
-- **Keep every other segment.** The Cli component and the Http component each hold a `RouterContract`, so a shorter path
-  is not unique.
+Two rules shape every key:
+
+- **Copy the directory path of the source file.** The Cli component and the Http component each hold a
+  `RouterContract`, so a shorter path is not unique.
+- **Remove the `Contract` segment**, because the class name ends in `Contract` already. A contract whose name does not
+  end in `Contract` keeps the segment: `Valkyrja\Throwable\Contract\ValkyrjaThrowable` gives the Python key
+  `valkyrja.throwable.contract.ValkyrjaThrowable`.
 
 ```typescript
 export class ContainerServiceId {
@@ -39,14 +45,18 @@ export class ContainerServiceId {
 }
 ```
 
-**The key is a logical framework name, not a language path.** Each port uses the same string, whatever the port's own
-language spells. A Go package name is lowercase and a Python module name is lowercase, but the key stays StudlyCase in
-both. A key that follows the host language gives one class a different name in each port, and a reader must then learn
-five spellings for one binding.
+Warning: do not copy a key from one port into another. A Go package name and a Python module name are lowercase, so
+their keys are lowercase. A TypeScript directory is StudlyCase, so its key is StudlyCase. A developer reads a key and
+looks for that file, so a key that does not match the port's own import path sends the reader to a path that the port
+does not have.
 
-An application uses the same rules with its own root. `App\Repository\Contract\UserRepositoryContract` becomes
-`App.Repository.UserRepositoryContract`, and `App\Service\Contract\DatabaseContract` becomes
-`App.Service.DatabaseContract`.
+PHP and Java do not hand-write a key. `::class` and `.class` return the fully qualified name, so the `Contract` segment
+stays in those two ports.
+
+An application uses the same rules with its own root. In TypeScript, `App\Repository\Contract\UserRepositoryContract`
+becomes `App.Repository.UserRepositoryContract`, and `App\Service\Contract\DatabaseContract` becomes
+`App.Service.DatabaseContract`. In Python the same two classes give `app.repository.UserRepositoryContract` and
+`app.service.DatabaseContract`.
 
 Each segment is singular, because the key copies the source directory and a Valkyrja segment is singular. The framework
 writes `Repository\`, `Manager\`, `Provider\`, and `Middleware\`. An application that writes `Repositories\` gets
@@ -210,7 +220,7 @@ purpose:
 
 ```go
 // Go — string constant required
-const UserRepositoryClass = "App.Repository.UserRepositoryContract"
+const UserRepositoryClass = "app.repository.UserRepositoryContract"
 container.Bind(UserRepositoryClass, func (c ContainerContract) any { ... })
 ```
 
@@ -347,9 +357,9 @@ No `::class` equivalent. String constants are the only mechanism. The constants 
 package container
 
 const (
-	ContainerClass     = "Valkyrja.Container.Manager.ContainerContract"
-	ContainerDataClass = "Valkyrja.Container.Data.ContainerData"
-	RouterClass        = "Valkyrja.Http.Routing.Dispatcher.RouterContract"
+	ContainerClass     = "valkyrja.container.manager.ContainerContract"
+	ContainerDataClass = "valkyrja.container.data.ContainerData"
+	RouterClass        = "valkyrja.http.routing.dispatcher.RouterContract"
 )
 ```
 
@@ -367,10 +377,10 @@ object keys forces module imports which defeats Python 3.14's lazy import mechan
 ```python
 # container_constants.py — required, same as Go and TypeScript
 class ContainerConstants:
-    CONTAINER = "Valkyrja.Container.Manager.ContainerContract"
-    ROUTER = "Valkyrja.Http.Routing.Dispatcher.RouterContract"
-    USER_REPOSITORY = "App.Repository.UserRepositoryContract"
-    DATABASE = "App.Service.DatabaseContract"
+    CONTAINER = "valkyrja.container.manager.ContainerContract"
+    ROUTER = "valkyrja.http.routing.dispatcher.RouterContract"
+    USER_REPOSITORY = "app.repository.UserRepositoryContract"
+    DATABASE = "app.service.DatabaseContract"
 ```
 
 ### The Uniform Lambda Pattern
@@ -385,14 +395,14 @@ class UserServiceProvider(ServiceProviderContract):
     @staticmethod
     def publishers() -> dict:
         return {
-            'App.Repository.UserRepositoryContract': UserServiceProvider.publish_user_repository,
+            'app.repository.UserRepositoryContract': UserServiceProvider.publish_user_repository,
         }
 
     @staticmethod
     def publish_user_repository(c: ContainerContract) -> None:
         c.set_singleton(
-            'App.Repository.UserRepositoryContract',
-            UserRepository(c.get_singleton('App.Service.DatabaseContract'))
+            'app.repository.UserRepositoryContract',
+            UserRepository(c.get_singleton('app.service.DatabaseContract'))
         )
 ```
 
@@ -428,9 +438,9 @@ file, matching the container's internal format:
 ```python
 # generated AppContainerData — lambda format, same as container internal map
 APP_CONTAINER_DATA = {
-    'App.Repository.UserRepositoryContract': lambda: UserServiceProvider.publish_user_repository,
-    'App.Service.DatabaseContract': lambda: DatabaseServiceProvider.publish_database,
-    'Valkyrja.Http.Routing.Dispatcher.RouterContract': lambda: HttpServiceProvider.publish_router,
+    'app.repository.UserRepositoryContract': lambda: UserServiceProvider.publish_user_repository,
+    'app.service.DatabaseContract': lambda: DatabaseServiceProvider.publish_database,
+    'valkyrja.http.routing.dispatcher.RouterContract': lambda: HttpServiceProvider.publish_router,
 }
 ```
 
@@ -537,8 +547,8 @@ The key type per language:
 
 - PHP: `UserRepositoryContract::class` (FQN string)
 - Java: `UserRepositoryContract.class` (Class<T> token)
-- Python: `'App.Repository.UserRepositoryContract'` (string constant)
-- Go: `"App.Repository.UserRepositoryContract"` (string constant)
+- Python: `'app.repository.UserRepositoryContract'` (string constant)
+- Go: `"app.repository.UserRepositoryContract"` (string constant)
 - TypeScript: `'App.Repository.UserRepositoryContract'` (string constant)
 
 The container stores the closure. When `make(key)` is called:

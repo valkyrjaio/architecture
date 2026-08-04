@@ -25,11 +25,12 @@ Go idiom. Authoritative port detail: [`README.md`](README.md),
   contracts; the cache-optional design calls those interface methods directly on
   the provider structs at bootstrap.
 - **Binding keys:** string constants (no `::class` equivalent), format
-  `Valkyrja.{Segments}.{Name}`, in `const` blocks. The key is StudlyCase and
-  drops the `Contract` segment
-  (`Valkyrja.Http.Routing.Dispatcher.RouterContract`). A Go package name is
-  lowercase and the key is not, because the key names the framework class
-  rather than the Go package. Every port holds the same string.
+  in `const` blocks. The key is how Go imports the class — the package path,
+  lowercase and dot-separated — and it drops the `Contract` segment because the
+  type name ends in `Contract` already
+  (`valkyrja.http.routing.dispatcher.RouterContract`). The type name keeps its
+  PascalCase spelling. The key is language-specific: TypeScript spells the same
+  binding `Valkyrja.Http.Routing.Dispatcher.RouterContract`.
 - Every file starts with the license header.
 
 ### Errors (not exceptions)
