@@ -1198,9 +1198,8 @@ imports         → map of simple name → FQN
 
 publishers      → map of binding key → publisher method body source text
                   key format is language-specific:
-                    PHP/Java      → ::class / .class  (class name resolved to FQN via imports)
-                    Python        → class name        (resolved to FQN via imports)
-                    Go/TypeScript → string constant   (string literal value — used as-is)
+                    PHP/Java             → ::class / .class (class name resolved to FQN via imports)
+                    Go/Python/TypeScript → string constant  (constant resolved to its key string)
 ```
 
 **Pattern:**
@@ -1220,13 +1219,18 @@ publishers      → map of binding key → publisher method body source text
 
 **Language-specific key resolution:**
 
-| Language   | Key in source                                       | Resolution                                           |
-| ---------- | --------------------------------------------------- | ---------------------------------------------------- |
-| PHP        | `RouterContract::class`                             | Resolve `RouterContract` via import map → FQN string |
-| Java       | `RouterContract.class`                              | Resolve `RouterContract` via import map → FQN string |
-| Python     | `RouterContract` (class name)                       | Resolve via import map → FQN string                  |
-| Go         | `"valkyrja.http.routing.dispatcher.RouterContract"` | String literal — use as-is                           |
-| TypeScript | `RouterClass` (string constant name)                | Resolve constant value via import map → string       |
+| Language   | Key in source                                    | Resolution                                           |
+| ---------- | ------------------------------------------------ | ---------------------------------------------------- |
+| PHP        | `RouterContract::class`                          | Resolve `RouterContract` via import map → FQN string |
+| Java       | `RouterContract.class`                           | Resolve `RouterContract` via import map → FQN string |
+| Go         | `RouterClass` (constant name)                    | Resolve the constant via import map → key string     |
+| Python     | `ContainerConstants.ROUTER` (constant reference) | Resolve the constant via import map → key string     |
+| TypeScript | `RouterClass` (constant name)                    | Resolve the constant via import map → key string     |
+
+Warning: a bare type name is not a container key in Go, in Python, or in TypeScript. `RouterContract` names the type
+for direct code usage, and the container resolves on the full key string only. A class object as the key would load
+every module that the container can hold as soon as the cache loads, and avoiding that cost is why these three ports
+use a string constant. A raw string literal in place of the constant is used as-is.
 
 ---
 
