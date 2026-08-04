@@ -20,7 +20,7 @@ constants for the same reason as Go and TypeScript — using class objects as ke
 The string constant format for Go, Python, and TypeScript:
 
 ```
-Valkyrja.{Segment}.{ClassName}
+Valkyrja.{Segments}.{ClassName}
 ```
 
 The key is the class path in the framework namespace, and a dot separates each segment. Three rules make the key:
@@ -349,7 +349,7 @@ const (
 ```
 
 Type safety is convention-enforced. The linter and code review are the enforcement mechanisms. The string format
-`Valkyrja.{Segment}.{ClassName}` is the cross-port standard.
+`Valkyrja.{Segments}.{ClassName}` is the cross-port standard.
 
 Warning: a Go package name is lowercase, and the key is not. The key names the framework class, not the Go package, so
 the Go constant holds the same StudlyCase string that every other port holds.

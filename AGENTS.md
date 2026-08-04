@@ -506,7 +506,7 @@ The full table and the per-language spelling: [`METHOD_NAMING.md`](METHOD_NAMING
 ### Binding-key constants
 
 Per-component constants files (never one central file). String format
-`Valkyrja.{Segment}.{ClassName}` — the class path in the framework namespace,
+`Valkyrja.{Segments}.{ClassName}` — the class path in the framework namespace,
 in StudlyCase, with the `Contract` segment removed
 (`Valkyrja.Container.Manager.ContainerContract`). The key names the framework
 class, not the host language's package. Every port holds the same string, even
