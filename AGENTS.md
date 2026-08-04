@@ -192,6 +192,8 @@ Then:
     report is meaningless" is a decision — keep it. "Pinned ahead of the others
     until the next release bumps it" is a condition — the release automation will
     strand it, so it belongs in the PR.
+    State the decision in the description in a sentence or two. The description
+    takes the decision, not the essay around it — its budget is in §7.
 11. **Update the documentation in the same pull request.** A change to behavior,
     to configuration, or to a public API also updates every document that
     describes it. The component's `README.md` is the usual one, because each
@@ -211,6 +213,16 @@ Then:
     callers in `.github/workflows/ci.yml`. Read the rule before you add or edit
     a caller:
     [`AGENTS.md` in `valkyrjaio/.github`](https://github.com/valkyrjaio/.github/blob/26.x/AGENTS.md).
+13. **A comment states what the code cannot show.** Keep a comment to one or two
+    lines: the constraint, the invariant, or the reason the obvious approach
+    fails. Do not write a comment that narrates what the next line does — the
+    code shows it. When an explanation needs a paragraph, put the paragraph in
+    the PR description or in a document, and shrink the comment to one sentence
+    that states the conclusion.
+    Density is itself a defect. A file where every block carries a comment
+    paragraph is a wall of text. A reader skips walls, so the one warning that
+    matters goes unread. Comment the one line in ten that needs a comment, and
+    let that warning stand alone.
 
 ---
 
@@ -751,6 +763,13 @@ root kinds, and worked examples:
   file/component — em dash — what changed). When an issue tracks the work, put
   `Closes #123` in the description: it becomes the squash commit body, so that is
   both what closes the issue on merge and where the link durably lives.
+- **Budget the description.** State what changed, why, and any trap — most pull
+  requests fit in three to six sentences. Add a table or a verification note
+  only when it carries something a reviewer would otherwise miss. Do not
+  restate the diff, and do not narrate the process that produced it. Rule 10 in
+  §3 moves decisions into the description, and a decision is a sentence, not an
+  essay. A reviewer skips a wall of text, so every extra sentence hides the one
+  the reviewer needs.
 
 ### Asking for a review
 
@@ -946,6 +965,28 @@ opens a decision log to answer one question: what did we consider, and why did w
 reject it? A run-on sentence hides exactly that answer. **No section of a
 document is exempt** — a design record that a reader consults years later has the
 most to gain.
+
+### Select before you write
+
+STE governs how you write a sentence. This rule governs which sentences you
+write. Include a sentence only when it changes what the reader does or decides.
+A document is not more complete because it is longer — every sentence the reader
+must skip hides the sentence the reader needs.
+
+Cut these before they reach the page:
+
+- **Process narration.** "This was found after the code was written", "every
+  example was checked before commit" — state the conclusion, not the journey.
+- **Restatement of the artifact.** A PR description does not re-teach the
+  section it adds. A comment does not repeat the code below it. A summary does
+  not restate the diff.
+- **Background the reader can derive.** The diff, the file, and the linked
+  document already carry it.
+
+"A shorter document is not the goal" (above) and this rule do not conflict. That
+rule forbids compressing a needed sentence into a dense one. This rule forbids
+writing a sentence nobody needs. Write every needed sentence plainly, and no
+others.
 
 ### Code examples
 
