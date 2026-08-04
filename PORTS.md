@@ -114,7 +114,7 @@ Every port shares the same architectural identity:
 
 **Worker mode:** Go binary stays running, goroutines handle concurrency natively — single bootstrap always
 
-**Port order:** Container → Dispatch → Event → Application → CLI → HTTP → Bin
+**Port order:** Container → Event → Application → CLI → HTTP → Bin
 
 ---
 

@@ -604,7 +604,7 @@ the table are in
 
 ### Port order for a new component
 
-**Container → Dispatch → Event → Application → CLI → HTTP → Bin.**
+**Container → Event → Application → CLI → HTTP → Bin.**
 
 ---
 

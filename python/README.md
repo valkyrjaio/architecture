@@ -2,7 +2,7 @@
 
 > Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `DISPATCH.md`, `DATA_CACHE.md`, `BUILD_TOOL.md`,
 > `PROVIDER_CONTRACTS.md`
-> Port order: Container → Dispatch → Event → Application → CLI → HTTP → Bin
+> Port order: Container → Event → Application → CLI → HTTP → Bin
 
 ---
 
@@ -535,5 +535,4 @@ deploy with generated files
 8. `@handler` and `@parameter` decorators
 9. Route and listener data classes
 10. CGI and ASGI entry points
-11. Dispatch component
-12. sindri Python implementation
+11. sindri Python implementation

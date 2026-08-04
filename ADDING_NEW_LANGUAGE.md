@@ -304,8 +304,8 @@ then release upstream and bump the pin.
 
 ### Framework repo (`valkyrja-<lang>`)
 
-- **Component port order:** Container → Dispatch → Event → Application → CLI →
-  HTTP → Bin.
+- **Component port order:** Container → Event → Application → CLI → HTTP →
+  Bin.
 - **Port code and tests together**, mirroring the source repo's test layout and
   mapping the framework (PHPUnit → the target's runner). Target **100% coverage**
   (branch where the language/tooling supports it — see Findings).

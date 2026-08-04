@@ -201,7 +201,7 @@ name and pattern.
 
 ---
 
-## 5. Dispatch — Deprecation
+## 5. Dispatch — Removal
 
 **Reference:** `DISPATCH.md`
 
@@ -209,7 +209,7 @@ name and pattern.
 
 - Add `@deprecated` to dispatch-based route handler methods
 - New routes must use `#[Handler]` attribute or explicit closure on the route object
-- Dispatch component retained as opt-in for backwards compatibility but removed from core pipeline
+- Dispatch component removed entirely once existing routes and listeners migrate to closure handlers
 - Add deprecation notices to guide developers toward closure-based handlers
 
 ### Remove dispatch from core routing pipeline

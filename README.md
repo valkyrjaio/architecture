@@ -203,7 +203,7 @@ Starting a New Port
 
 Port components in this order:
 
-**Container → Dispatch → Event → Application → CLI → HTTP → Bin**
+**Container → Event → Application → CLI → HTTP → Bin**
 
 Read these files in order:
 
