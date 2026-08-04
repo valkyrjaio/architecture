@@ -12,7 +12,7 @@ This is a NET-NEW capability: it was consciously left out when the TS port was
 first laid out because decorators were assumed unavailable. They are available
 now (see "Decorator strategy" below).
 
-Work spans three repos, each with its own PR, cross-linked, released in order.
+Work spans three repos, each with its own standalone PR, released in order.
 Work on the current-year `??.x`/`master` branch as the branch-targeting table
 dictates, in **separate worktrees**, and **ask before committing / pushing /
 opening any PR**. Follow each repo's `AGENTS.md` and the architecture guides
@@ -161,8 +161,9 @@ Key constraints, established during investigation:
   as the current imperative output (7 HTTP routes incl. the dynamic
   `/{value}` route; CLI `test` command).
 - Run each repo's full suite + tsc + eslint + prettier before proposing a PR;
-  keep coverage at 100%. Cross-link the three PRs (framework + sindri + app) and
-  the PHP/Java siblings.
+  keep coverage at 100%. Keep the three PRs (framework + sindri + app) and the
+  PHP/Java siblings standalone — see the cross-link warning in
+  [`../AGENTS.md`](../AGENTS.md) §7.
 
 ## Out of scope (separate, tracked follow-up)
 
