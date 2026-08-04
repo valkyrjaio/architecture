@@ -56,8 +56,10 @@ an alias resolves the underlying service transparently.
 ## Binding Services
 
 Both `bind()` and `bindSingleton()` accept any `callable` with the signature
-`(ContainerContract $container, array $arguments): object`. The recommended
-convention is a static `make()` factory method passed as an array callable:
+`(ContainerContract $container, array $arguments): object`. The framework's
+pattern is a service provider publisher that constructs the service inline —
+the service class carries no registration code. A service class may instead
+define a static `make()` factory passed as an array callable:
 
 ```php
 use Valkyrja\Container\Manager\Contract\ContainerContract;
@@ -75,17 +77,17 @@ class UserRepository implements UserRepositoryContract
 $container->bind(UserRepositoryContract::class, [UserRepository::class, 'make']);
 ```
 
-This design gives each class explicit ownership of its own instantiation, rather
-than relying on reflection-based autowiring. There is no magic — every
-dependency is declared in code.
+This design gives each binding an explicit factory, rather than relying on
+reflection-based autowiring. There is no magic — every dependency is declared
+in code.
 
 ### Binding Methods
 
 **`bind(string $id, callable $callable)`** — Binds a service ID to a callable
 factory. The callable receives the container and an optional arguments array and
 must return an object. Every call to `getService($id)` invokes the callable and
-returns a fresh instance. The recommended convention is to pass an array callable
-pointing to a static `make()` factory: `[MyClass::class, 'make']`.
+returns a fresh instance. A service class with a static `make()` factory can be
+passed as an array callable: `[MyClass::class, 'make']`.
 
 **`bindSingleton(string $id, callable $callable)`** — Same as `bind()`, but
 singleton-scoped. The callable is invoked once on first resolution and the result
@@ -344,7 +346,7 @@ class NotifierServiceProvider implements ServiceProviderContract
     {
         $container->setSingleton(
             NotifierContract::class,
-            TeamsNotifier::make($container)
+            new TeamsNotifier()
         );
     }
 }
