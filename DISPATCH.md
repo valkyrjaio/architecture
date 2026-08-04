@@ -836,8 +836,8 @@ $route->setHandler(
 
 ### Java
 
-Dispatch removed once existing routes migrate. Annotation processor extracts `@Handler` lambda via Trees API at compile time, generates
-cache data classes via JavaPoet. No developer-written `CacheableHandler` string needed.
+Dispatch removed once existing routes migrate. Annotation processor extracts `@Handler` lambda via Trees API at compile
+time, generates cache data classes via JavaPoet. No developer-written `CacheableHandler` string needed.
 
 ```java
 // old — dispatch-based (deprecated)
@@ -1145,10 +1145,9 @@ The annotation/attribute approach for PHP, Java, and Python allows the framework
 experience — the developer annotates the action method and the framework handles the rest. Go and TypeScript use
 explicit registration which is honest to their philosophy of explicit-over-implicit.
 
-The decision to retain Dispatch as an optional component rather than removing it entirely was driven by backwards
-compatibility and the genuine usefulness of dynamic dispatch for PHP and Java developers who want it. Removing it from
-the core pipeline while keeping it available as an opt-in respects existing users while establishing the correct
-architecture for all ports going forward.
+The initial decision retained Dispatch as an optional component for backwards compatibility. A later decision
+superseded it: the component is removed framework-wide. Closure handlers replace it in every port, and the PHP and
+Java implementations go once their dispatch-based routes migrate.
 
 A further benefit of the closure-based handler approach — identified after the initial design — is typed closure
 signatures. The dispatch approach had no type enforcement on what method was called or what it returned. Errors were
