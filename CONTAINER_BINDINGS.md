@@ -17,8 +17,8 @@ Languages differ in what they use as that key:
 constants for the same reason as Go and TypeScript — using class objects as keys forces module imports, defeating Python
 3.14's lazy import mechanism which is the primary solution to Python's cold start problem.
 
-**The key is how the port imports the class.** It is the directory path of the source file, written the way the port's
-own language writes a namespace. The class name keeps its PascalCase spelling in every port.
+**The key is modeled on how the port imports the class.** It is the directory path of the source file, written the way
+the port's own language writes a namespace. The class name keeps its PascalCase spelling in every port.
 
 The key is therefore language-specific. `Valkyrja\Container\Manager\Contract\ContainerContract` gives:
 
@@ -49,6 +49,11 @@ Warning: do not copy a key from one port into another. A Go package name and a P
 their keys are lowercase. A TypeScript directory is StudlyCase, so its key is StudlyCase. A developer reads a key and
 looks for that file, so a key that does not match the port's own import path sends the reader to a path that the port
 does not have.
+
+Go is the one port where the key is not literal syntax. A Go import path is slash-separated and carries the module
+prefix, as in `github.com/valkyrjaio/valkyrja-go/container/manager`, and only the final `package.Symbol` selector uses
+a dot. A Go key drops the module prefix and writes a dot between each segment, so it reads like the key in every other
+port. Python is literal: `from valkyrja.container.manager import ContainerContract` is the import that its key names.
 
 PHP and Java do not hand-write a key. `::class` and `.class` return the fully qualified name, so the `Contract` segment
 stays in those two ports.
@@ -363,11 +368,11 @@ const (
 )
 ```
 
-Type safety is convention-enforced. The linter and code review are the enforcement mechanisms. The string format
-`Valkyrja.{Segments}.{ClassName}` is the cross-port standard.
+Type safety is convention-enforced. The linter and code review are the enforcement mechanisms.
 
-Warning: a Go package name is lowercase, and the key is not. The key names the framework class, not the Go package, so
-the Go constant holds the same StudlyCase string that every other port holds.
+A Go package name is lowercase, so a Go key is lowercase. The type name keeps its PascalCase spelling, because Go
+writes an exported type in PascalCase. TypeScript spells the same binding `Valkyrja.Container.Manager.ContainerContract`,
+so do not copy a key between the two ports.
 
 ### Python
 

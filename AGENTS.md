@@ -505,11 +505,11 @@ The full table and the per-language spelling: [`METHOD_NAMING.md`](METHOD_NAMING
 
 ### Binding-key constants
 
-Per-component constants files (never one central file). String format
-The key is how the port imports the
-class: the source file's directory path, written the way that language writes a
-namespace, with the `Contract` segment removed because the class name ends in
-`Contract` already. The key is therefore language-specific — TypeScript writes
+Per-component constants files (never one central file). The key is modeled on
+how the port imports the class: the source file's directory path, written the
+way that language writes a namespace, with the `Contract` segment removed
+because the class name ends in `Contract` already. The key is therefore
+language-specific — TypeScript writes
 `Valkyrja.Container.Manager.ContainerContract`, and Go and Python write
 `valkyrja.container.manager.ContainerContract`. PHP holds `::class`
 strings, Java holds `.class` objects, Go/Python/TypeScript hold string
