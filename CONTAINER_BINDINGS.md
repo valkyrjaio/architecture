@@ -31,7 +31,10 @@ has, so no port converts the case of another port's path:
 | Python     | `valkyrja.container.manager.contract.ContainerContract` | `valkyrja.container.manager.ContainerContract`          |
 | Go         | `valkyrja/container/manager/contract.ContainerContract` | `valkyrja.container.manager.ContainerContract`          |
 
-Two rules shape every key:
+The PHP row repeats the namespaced class, because PHP does not hand-write a key. `::class` and `.class` return the
+fully qualified name, so PHP and Java keep every segment that the class has, including `Contract`.
+
+Two rules shape every hand-written key — the Go key, the Python key, and the TypeScript key:
 
 - **Copy the directory path of the source file.** The Cli component and the Http component each hold a
   `RouterContract`, so a shorter path is not unique.
@@ -58,9 +61,6 @@ Go is the one port where the key is not literal syntax. A Go import path is slas
 prefix, as in `github.com/valkyrjaio/valkyrja-go/container/manager`, and only the final `package.Symbol` selector uses
 a dot. A Go key drops the module prefix and writes a dot between each segment, so it reads like the key in every other
 port. Python is literal: `from valkyrja.container.manager import ContainerContract` is the import that its key names.
-
-PHP and Java do not hand-write a key. `::class` and `.class` return the fully qualified name, so the `Contract` segment
-stays in those two ports.
 
 An application uses the same rules with its own root. In TypeScript, `App\Repository\Contract\UserRepositoryContract`
 becomes `App.Repository.UserRepositoryContract`, and `App\Service\Contract\DatabaseContract` becomes
