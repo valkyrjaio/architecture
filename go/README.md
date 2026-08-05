@@ -108,9 +108,9 @@ Every class, interface, and contract needs a string constant:
 package container
 
 const (
-	ContainerClass      = "io.valkyrja.container.ContainerContract"
-	RouterClass         = "io.valkyrja.http.routing.RouterContract"
-	UserRepositoryClass = "io.valkyrja.app.repositories.UserRepositoryContract"
+	ContainerClass      = "valkyrja.container.manager.ContainerContract"
+	RouterClass         = "valkyrja.http.routing.dispatcher.RouterContract"
+	UserRepositoryClass = "app.repository.UserRepositoryContract"
 )
 ```
 
