@@ -167,7 +167,8 @@ Then:
    Keep each branch/PR small and atomic. See §7.
 8. **Cross-language changes propagate.** If a change affects more than one port,
    make it in every affected language in the _same_ batch (code and tests
-   together) and cross-link the sibling PRs. See §7.
+   together). Open each PR standalone, and never cross-link the siblings. See
+   §7.
 9. **New repos are scaffolded from the language's `template` repo** — the source
    of truth for repo layout and file/class structure. Start from it; never
    hand-assemble a repo's structure. Your Layer-2 guide names the template repo.
@@ -877,9 +878,15 @@ The `prefix` and the PR's base branch are both set by the change type:
 If a change affects more than one language port, make it in **every affected
 language in the same batch** — never a deferred follow-up. A bug fixed in the PHP
 reference implementation that also exists in Java/TypeScript/etc. is fixed there
-at the same time, code and tests together. Open one PR per language repo and
-**cross-link the sibling PRs**: each PR's Description lists the matching PRs for
-the other languages.
+at the same time, code and tests together. Open one PR per language repo.
+
+**Warning: never cross-link the sibling PRs.** The cost of a cross-link is a
+wrong merge. GitHub expands a PR reference inline, next to the commits and the
+threads of the PR that holds it. A reader then reads a sibling's commit as a
+commit on this PR. The same reader reads a linked issue as closed while it is
+open. This project merged a PR early for that reason. Keep each PR standalone.
+Report the sibling list to the person who asked for the batch, and keep the list
+out of the Description.
 
 Full detail:
 [CONTRIBUTING.md](https://github.com/valkyrjaio/.github/blob/26.x/CONTRIBUTING.md).
