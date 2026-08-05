@@ -1,6 +1,19 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.3...26.x)
+## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.4...26.x)
+
+## [v26.0.4](https://github.com/valkyrjaio/architecture/compare/v26.0.3...v26.0.4) - 2026-08-05
+
+* [Workflow] ci: Update .github workflow refs to v26.23.1 by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/architecture/pull/169
+* [TypeScript] docs: Drop Dispatch from the port order and priority list by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/170
+* [Agents] fix: Pin the .github document links to the version branch by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/176
+* [Process] docs: Budget the prose in comments and descriptions by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/174
+* [Container] docs: Correct the registration pattern and the Application link by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/173
+* [Process] docs: Correct what makes an npm publish fail by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/175
+* [Dispatch] docs: Record the framework-wide removal of the component by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/172
+* [Readme] fix: Pin the art asset links to the version branch by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/177
+* [Process] docs: Remove the sibling pull request cross-link requirement by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/178
+* [Container] docs: Correct the binding-key string format to what the ports ship by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/171
 
 ## [v26.0.3](https://github.com/valkyrjaio/architecture/compare/v26.0.2...v26.0.3) - 2026-08-03
 
