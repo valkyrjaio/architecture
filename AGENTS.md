@@ -225,117 +225,19 @@ Then:
     matters goes unread. Comment the one line in ten that needs a comment, and
     let that warning stand alone.
 14. **A doc comment stays true for every override.** A doc comment describes the
-    method, not one implementation of the method. Every override inherits the
-    comment, so a sentence about one implementation becomes false in the next
-    override. The next reader trusts the false sentence.
-    **Keep the inherited block as it is when you override a method.** Change
-    only what the new signature requires — the parameter and return annotations.
-    Never add a paragraph that says what this implementation does. Inside the
-    body, clear code takes no comment. A comment explains what is unclear, or
-    why the code does something this particular way. When an alternative
-    failed, say so, so the next editor does not retry it. Rule 13 governs the
-    shape.
-    The rule holds in every language, because every language inherits a doc
-    comment: PHP `@inheritDoc`, Java `{@inheritDoc}`, TypeScript `@inheritdoc`,
-    Python's inherited docstring, and Go's doc comment on the interface method.
-    Rule 10 describes the same failure for a comment that states a current
-    condition, and an implementation-specific sentence is a current condition.
-    Rule 13 limits how much a comment says; this rule limits what an inherited
-    comment can say.
-    **Put the explanation in the PR description when an override needs one.** The
-    squash merge writes the description as the commit body, so the explanation
-    stays attached to the commit that introduced the override.
-
-    ```php
-    // Wrong — the paragraph describes this one override of getAlias(). The next
-    // override of getAlias() inherits the paragraph, and it is then false.
-    /**
-     * @inheritDoc
-     *
-     * A parent-only alias resolves its target through the child's own get(), so
-     * a deferred target publishes into the child scope.
-     *
-     * @param class-string $id The service id
-     *
-     * @return class-string|null
-     */
-    #[Override]
-    protected function getAlias(string $id): string|null
-    {
-        return $this->aliases[$id]
-            ?? $this->parent->aliases[$id]
-            ?? null;
-    }
-    ```
-
-    ```php
-    // Right — NativeChildContainer::getAlias() keeps the inherited block. Only
-    // the annotations change, because the signature narrows the types.
-    /**
-     * @inheritDoc
-     *
-     * @param class-string $id The service id
-     *
-     * @return class-string|null
-     */
-    #[Override]
-    protected function getAlias(string $id): string|null
-    {
-        return $this->aliases[$id]
-            ?? $this->parent->aliases[$id]
-            ?? null;
-    }
-    ```
-
-15. **A type declaration carries no doc comment.** Do not put a comment block
-    on a class, a contract, a trait, an enum, or a struct. The declaration
-    explains itself: §4 encodes the kind in the name and the segment, and each
-    method's doc comment states what the type does. When a type needs more than
-    that, the component's documentation takes it (rule 11 keeps that
-    documentation current).
-    **A method's doc comment enhances the signature.** Write one sentence that
-    states what the method does, then the annotations the signature needs. Do
-    not restate the signature in prose, and do not describe the implementation
-    (rule 14).
-    One exception: a **test fixture** carries a one-line comment block on the
-    declaration, because the comment says what the fixture is for, and the
-    fixture's methods cannot say it.
-
-    ```php
-    // Wrong — the block re-teaches what the name and the methods already say.
-    /**
-     * The native child container.
-     *
-     * Checks its own maps first, and falls back to the maps of the parent.
-     */
-    class NativeChildContainer extends Container
-    ```
-
-    ```php
-    // Right — the declaration is bare. The methods explain the class.
-    class NativeChildContainer extends Container
-    ```
-
-    ```php
-    // Right — one sentence states what the method does, and the annotations
-    // complete the signature.
-    /**
-     * Bind an alias to the container.
-     *
-     * @param class-string $alias The alias
-     * @param class-string $id    The service id to alias
-     */
-    public function bindAlias(string $alias, string $id): static;
-    ```
-
-    ```php
-    // Right — a fixture is the exception, because the comment says what the
-    // fixture is for.
-    /**
-     * Attribute child class used for unit testing.
-     */
-    final class AttributeClassChildFixture extends AttributeFixture
-    ```
+    method, not one implementation of the method, because every override
+    inherits the comment. Keep the inherited block as it is when you override a
+    method; change only the parameter and return annotations. Inside a body,
+    clear code takes no comment — a comment explains what is unclear, or why
+    the code does something this particular way. Rule 10 describes the same
+    failure for a comment that states a current condition; rule 13 limits how
+    much a comment says. Full rules and examples: [`COMMENTS.md`](COMMENTS.md).
+15. **A type declaration carries no doc comment.** A class, a contract, a
+    trait, an enum, and a struct explain themselves: §4 encodes the kind in the
+    name and the segment, and each method's doc comment — one sentence that
+    enhances the signature, plus the annotations — states what the type does.
+    The one exception is a test fixture's one-line block, which says what the
+    fixture is for. Full rules and examples: [`COMMENTS.md`](COMMENTS.md).
 
 ---
 
@@ -1172,9 +1074,10 @@ Read these in order when starting or extending a port:
 6. [`BUILD_TOOL.md`](BUILD_TOOL.md) — `sindri` implementation
 7. [`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md) — testing & 100% coverage
 8. [`METHOD_NAMING.md`](METHOD_NAMING.md) — method name prefixes
-9. [`PACKAGE_NAMING.md`](PACKAGE_NAMING.md) — package, registry, and source namespace names
-10. [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md) — commit & PR title format
-11. [`VERSIONING.md`](VERSIONING.md) — version scheme & release automation
-12. `{language}/PROVIDER_CONTRACTS.md` — full contracts + examples
-13. `{language}/README.md` — port notes & priority order
-14. `{language}/AGENTS.md` — the Layer-2 agent guide for that language
+9. [`COMMENTS.md`](COMMENTS.md) — what a comment may state
+10. [`PACKAGE_NAMING.md`](PACKAGE_NAMING.md) — package, registry, and source namespace names
+11. [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md) — commit & PR title format
+12. [`VERSIONING.md`](VERSIONING.md) — version scheme & release automation
+13. `{language}/PROVIDER_CONTRACTS.md` — full contracts + examples
+14. `{language}/README.md` — port notes & priority order
+15. `{language}/AGENTS.md` — the Layer-2 agent guide for that language
