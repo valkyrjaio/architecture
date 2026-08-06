@@ -258,7 +258,9 @@ Then:
     #[Override]
     protected function getAlias(string $id): string|null
     {
-        return $this->aliases[$id] ?? $this->parent->aliases[$id] ?? null;
+        return $this->aliases[$id]
+            ?? $this->parent->aliases[$id]
+            ?? null;
     }
     ```
 
@@ -275,7 +277,9 @@ Then:
     #[Override]
     protected function getAlias(string $id): string|null
     {
-        return $this->aliases[$id] ?? $this->parent->aliases[$id] ?? null;
+        return $this->aliases[$id]
+            ?? $this->parent->aliases[$id]
+            ?? null;
     }
     ```
 
