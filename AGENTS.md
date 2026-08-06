@@ -224,6 +224,60 @@ Then:
     paragraph is a wall of text. A reader skips walls, so the one warning that
     matters goes unread. Comment the one line in ten that needs a comment, and
     let that warning stand alone.
+14. **A doc comment stays true for every override.** A doc comment describes the
+    method, not one implementation of the method. Every override inherits the
+    comment, so a sentence about one implementation becomes false in the next
+    override. The next reader trusts the false sentence.
+    **Keep the inherited block as it is when you override a method.** Change
+    only what the new signature requires — the parameter and return annotations.
+    Never add a paragraph that says what this implementation does.
+    The rule holds in every language, because every language inherits a doc
+    comment: PHP `@inheritDoc`, Java `{@inheritDoc}`, TypeScript `@inheritdoc`,
+    Python's inherited docstring, and Go's doc comment on the interface method.
+    Rule 10 describes the same failure for a comment that states a current
+    condition, and an implementation-specific sentence is a current condition.
+    Rule 13 limits how much a comment says; this rule limits what an inherited
+    comment can say.
+    **Put the explanation in the PR description when an override needs one.** The
+    squash merge writes the description as the commit body, so the explanation
+    stays attached to the commit that introduced the override.
+
+    ```php
+    // Wrong — the paragraph describes this one override of getAlias(). The next
+    // override of getAlias() inherits the paragraph, and it is then false.
+    /**
+     * @inheritDoc
+     *
+     * A parent-only alias resolves its target through the child's own get(), so
+     * a deferred target publishes into the child scope.
+     *
+     * @param class-string $id The service id
+     *
+     * @return class-string|null
+     */
+    #[Override]
+    protected function getAlias(string $id): string|null
+    {
+        return $this->aliases[$id] ?? $this->parent->aliases[$id] ?? null;
+    }
+    ```
+
+    ```php
+    // Right — NativeChildContainer::getAlias() keeps the inherited block. Only
+    // the annotations change, because the signature narrows the types.
+    /**
+     * @inheritDoc
+     *
+     * @param class-string $id The service id
+     *
+     * @return class-string|null
+     */
+    #[Override]
+    protected function getAlias(string $id): string|null
+    {
+        return $this->aliases[$id] ?? $this->parent->aliases[$id] ?? null;
+    }
+    ```
 
 ---
 
