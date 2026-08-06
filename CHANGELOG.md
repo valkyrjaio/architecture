@@ -1,6 +1,16 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.4...26.x)
+## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.5...26.x)
+
+## [v26.0.5](https://github.com/valkyrjaio/architecture/compare/v26.0.4...v26.0.5) - 2026-08-06
+
+* [Workflow] ci: Update .github workflow refs to v26.24.0 by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/architecture/pull/179
+* [Process] docs: Add the contracts-first pull request convention by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/180
+* [Process] docs: Add the rule on context to the documentation style by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/183
+* [Go] docs: Drop the io/valkyrja source root the Go port never had by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/182
+* [Example] docs: Require generic code examples in convention documents by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/184
+* [Comment] docs: Add the doc comment rules for overrides and type declarations by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/181
+* [Process] docs: Describe the what and the why in a PR description, not the how by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/185
 
 ## [v26.0.4](https://github.com/valkyrjaio/architecture/compare/v26.0.3...v26.0.4) - 2026-08-05
 
