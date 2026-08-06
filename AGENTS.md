@@ -230,7 +230,9 @@ Then:
     override. The next reader trusts the false sentence.
     **Keep the inherited block as it is when you override a method.** Change
     only what the new signature requires — the parameter and return annotations.
-    Never add a paragraph that says what this implementation does.
+    Never add a paragraph that says what this implementation does. A line that
+    the implementation does a specific way for a specific reason takes a comment
+    inside the body, on that line, under rule 13.
     The rule holds in every language, because every language inherits a doc
     comment: PHP `@inheritDoc`, Java `{@inheritDoc}`, TypeScript `@inheritdoc`,
     Python's inherited docstring, and Go's doc comment on the interface method.
@@ -281,6 +283,56 @@ Then:
             ?? $this->parent->aliases[$id]
             ?? null;
     }
+    ```
+
+15. **A type declaration carries no doc comment.** Do not put a comment block
+    on a class, a contract, a trait, an enum, or a struct. The declaration
+    explains itself: §4 encodes the kind in the name and the segment, and each
+    method's doc comment states what the type does. When a type needs more than
+    that, the component's documentation takes it (rule 11 keeps that
+    documentation current).
+    **A method's doc comment enhances the signature.** Write one sentence that
+    states what the method does, then the annotations the signature needs. Do
+    not restate the signature in prose, and do not describe the implementation
+    (rule 14).
+    One exception: a **test fixture** carries a one-line comment block on the
+    declaration, because the comment says what the fixture is for, and the
+    fixture's methods cannot say it.
+
+    ```php
+    // Wrong — the block re-teaches what the name and the methods already say.
+    /**
+     * The native child container.
+     *
+     * Checks its own maps first, and falls back to the maps of the parent.
+     */
+    class NativeChildContainer extends Container
+    ```
+
+    ```php
+    // Right — the declaration is bare. The methods explain the class.
+    class NativeChildContainer extends Container
+    ```
+
+    ```php
+    // Right — one sentence states what the method does, and the annotations
+    // complete the signature.
+    /**
+     * Bind an alias to the container.
+     *
+     * @param class-string $alias The alias
+     * @param class-string $id    The service id to alias
+     */
+    public function bindAlias(string $alias, string $id): static;
+    ```
+
+    ```php
+    // Right — a fixture is the exception, because the comment says what the
+    // fixture is for.
+    /**
+     * Attribute child class used for unit testing.
+     */
+    final class AttributeClassChildFixture extends AttributeFixture
     ```
 
 ---
