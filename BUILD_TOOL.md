@@ -1018,7 +1018,7 @@ a StudlyCase directory, and Go and Python write a lowercase directory:
 | ---------- | ------------------------------------------------------- | ---------------------------------------------- |
 | TypeScript | `Valkyrja/Container/Manager/Contract/ContainerContract` | `Valkyrja.Container.Manager.ContainerContract` |
 | Python     | `valkyrja.container.manager.contract.ContainerContract` | `valkyrja.container.manager.ContainerContract` |
-| Go         | `valkyrja/container/manager/contract.ContainerContract` | `valkyrja.container.manager.ContainerContract` |
+| Go         | `container/manager/contract.ContainerContract`          | `valkyrja.container.manager.ContainerContract` |
 
 Warning: do not copy a key from one port into another. A developer reads a key and looks for that file, so each key
 must match the import path that its own port has.
