@@ -779,13 +779,13 @@ root kinds, and worked examples:
   the reviewer needs.
 - **The description holds the what and the why.** A pull request answers five
   questions. GitHub records the when and the where, and the diff records the
-  how. The description holds the two the reader cannot derive: a summary of what
-  changed, and why the change is right. Warning: a description that restates a
-  specific edit binds the description to the code, so a later push makes the
-  description false until someone corrects both together. Write "Update the
-  Python binding keys, because the old keys were wrong", not "Change the key
-  from `Valkyrja.Container.Manager.ContainerContract` to
-  `valkyrja.container.manager.ContainerContract`". The summary stays true
+  how. The description holds the two the reader cannot derive: what changed,
+  and why the change is right. Warning: a description that restates a specific
+  edit binds the description to the code, so a later push makes the description
+  false until someone corrects both together. Write "Update the Python binding
+  keys, because the old keys were wrong", not "Change the key from
+  `valkyrja.container.ContainerContract` to
+  `valkyrja.container.manager.ContainerContract`". The first form stays true
   through every revision of the pull request.
 
 ### Asking for a review
