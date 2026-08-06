@@ -1072,9 +1072,14 @@ Cut these before they reach the page:
 
 Warning: evidence goes stale before the rule does. A rule that carries its own
 evidence sends a reader to check the evidence, and the document then states
-something that is no longer true. **Add context only when a reader needs it,
-when it is relevant, and when someone asks for it.** State the rule, and keep
-the case that produced it in the pull request description.
+something that is no longer true. State the rule, and keep the case that
+produced it in the pull request description.
+
+**Add context only when all three of these are true:**
+
+- A reader needs the context.
+- The context is relevant to the rule.
+- Someone asks for the context.
 
 > Wrong — the rule carries its evidence, and the evidence names a port status
 > that changes:
