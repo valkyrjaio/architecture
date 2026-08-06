@@ -889,13 +889,11 @@ A component lands as two pull requests or more, and the contracts land first:
    it adds the classes that satisfy the contracts.
 
 A port that carries a whole component in one pull request is too large to
-review. The Go port shows the cost. One Go pull request added every component at
-once, and it closed without a merge. A reviewer cannot read the full diff with
-care, so the review reports style and misses the design. A
-contracts pull request is small, and it decides the shape. A reviewer reads the
-contracts with no implementation in the diff, and reviews the design on its own.
-The same reviewer then reads each implementation against a contract that the
-project agreed already.
+review. A reviewer cannot read the full diff with care, so the review reports
+style and misses the design. A contracts pull request is small, and it decides
+the shape. A reviewer reads the contracts with no implementation in the diff,
+and reviews the design on its own. The same reviewer then reads each
+implementation against a contract that the project agreed already.
 
 **Split further, per sub-component, when a component is large.** Each
 sub-component then gets a contracts pull request and an implementation pull
@@ -1069,6 +1067,32 @@ Cut these before they reach the page:
   not restate the diff.
 - **Background the reader can derive.** The diff, the file, and the linked
   document already carry it.
+- **The evidence for a rule.** A guide states the rule. The case that produced
+  the rule is context, and a reader does not act on it.
+
+Warning: evidence goes stale before the rule does. A rule that carries its own
+evidence sends a reader to check the evidence, and the document then states
+something that is no longer true. State the rule, and keep the case that
+produced it in the pull request description.
+
+**Add context only when all three of these are true:**
+
+- A reader needs the context.
+- The context is relevant to the rule.
+- Someone asks for the context.
+
+> Wrong — the rule carries its evidence, and the evidence names a port status
+> that changes:
+>
+> A port that carries a whole component in one pull request is too large to
+> review. The Go port shows the cost. One Go pull request added every component
+> at once, and it closed without a merge.
+
+> Right — the rule states what breaks, and nothing else:
+>
+> A port that carries a whole component in one pull request is too large to
+> review. A reviewer cannot read the full diff with care, so the review reports
+> style and misses the design.
 
 "A shorter document is not the goal" (above) and this rule do not conflict. That
 rule forbids compressing a needed sentence into a dense one. This rule forbids
