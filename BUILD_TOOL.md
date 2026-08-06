@@ -961,9 +961,9 @@ public final class ContainerConstants {
 ```go
 // io/valkyrja/container/container_constants.go — shipped with framework
 const (
-ContainerClass = "io.valkyrja.container.manager.ContainerContract"
-DispatcherClass = "io.valkyrja.dispatch.dispatcher.DispatcherContract"
-RouterClass = "io.valkyrja.http.routing.dispatcher.RouterContract"
+ContainerClass = "valkyrja.container.manager.ContainerContract"
+DispatcherClass = "valkyrja.dispatch.dispatcher.DispatcherContract"
+RouterClass = "valkyrja.http.routing.dispatcher.RouterContract"
 )
 ```
 
@@ -1014,11 +1014,11 @@ PascalCase spelling, and the `Contract` segment goes, because the class name end
 The key is therefore language-specific, because each port's directory layout already differs. PHP and TypeScript write
 a StudlyCase directory, and Go and Python write a lowercase directory:
 
-| Language   | Namespaced class                                           | Key                                               |
-| ---------- | ---------------------------------------------------------- | ------------------------------------------------- |
-| TypeScript | `Valkyrja/Container/Manager/Contract/ContainerContract`    | `Valkyrja.Container.Manager.ContainerContract`    |
-| Python     | `valkyrja.container.manager.contract.ContainerContract`    | `valkyrja.container.manager.ContainerContract`    |
-| Go         | `io/valkyrja/container/manager/contract.ContainerContract` | `io.valkyrja.container.manager.ContainerContract` |
+| Language   | Namespaced class                                        | Key                                            |
+| ---------- | ------------------------------------------------------- | ---------------------------------------------- |
+| TypeScript | `Valkyrja/Container/Manager/Contract/ContainerContract` | `Valkyrja.Container.Manager.ContainerContract` |
+| Python     | `valkyrja.container.manager.contract.ContainerContract` | `valkyrja.container.manager.ContainerContract` |
+| Go         | `valkyrja/container/manager/contract.ContainerContract` | `valkyrja.container.manager.ContainerContract` |
 
 Warning: do not copy a key from one port into another. A developer reads a key and looks for that file, so each key
 must match the import path that its own port has.

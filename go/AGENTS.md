@@ -13,13 +13,10 @@ Go idiom. Authoritative port detail: [`README.md`](README.md),
 - **New repos** are scaffolded from the language's `template` repo
   (`project-template-go`, in progress) — the source of truth for repo/file/class
   structure (canonical rule: §3.9).
-- **Module path:** `github.com/valkyrjaio/valkyrja-go`. **Source root:**
-  `io/valkyrja`, under the module path (see
-  [`../PACKAGE_NAMING.md`](../PACKAGE_NAMING.md)). Components map to lowercase
-  packages under that root (`io/valkyrja/container`, `io/valkyrja/http`,
-  `io/valkyrja/cli`, `io/valkyrja/event`, `io/valkyrja/application`), with a
-  `contract` sub-package for interfaces and a `data` sub-package for data
-  structs.
+- **Module path:** `github.com/valkyrjaio/valkyrja-go`. Components map to
+  lowercase packages (`container`, `http`, `cli`, `event`, `application`),
+  with a `contract` sub-package for interfaces and a `data` sub-package for
+  data structs.
 - **Contracts:** Go `interface` types, structural (no `implements`). The
   **name keeps the `*Contract` suffix** (`ContainerContract`, `RouterContract`,
   `ServiceProviderContract`) but the type lives in a `contract` package rather
@@ -31,7 +28,7 @@ Go idiom. Authoritative port detail: [`README.md`](README.md),
   blocks. The key is modeled on how Go imports the class — the package path,
   lowercase, with a dot between each segment — and it drops the `Contract`
   segment because the type name ends in `Contract` already
-  (`io.valkyrja.http.routing.dispatcher.RouterContract`). The type name keeps its
+  (`valkyrja.http.routing.dispatcher.RouterContract`). The type name keeps its
   PascalCase spelling. A Go import path is slash-separated and carries the
   module prefix, so the key is a convention and not literal Go syntax. The key
   is language-specific: TypeScript spells the same binding
