@@ -164,7 +164,8 @@ Then:
    target branch, then commit with the `[Root] type:` message, push, and open a PR
    (base = that target branch) with the template filled out. **Ask for
    confirmation before committing, before pushing, and before opening the PR.**
-   Keep each branch/PR small and atomic. See §7.
+   Keep each branch/PR small and atomic. A new component is more than one
+   change, and the contracts land in their own pull request first. See §7.
 8. **Cross-language changes propagate.** If a change affects more than one port,
    make it in every affected language in the _same_ batch (code and tests
    together). Open each PR standalone, and never cross-link the siblings. See
@@ -877,6 +878,80 @@ The `prefix` and the PR's base branch are both set by the change type:
 | Deprecation     | `master`                                       | `deprecation/` |
 | Breaking change | `master` (unless a bug fix — open issue first) | `breaking/`    |
 | Documentation   | Lowest major affected branch the docs apply to | `docs/`        |
+
+### Contracts land first
+
+A component lands as two pull requests or more, and the contracts land first:
+
+1. A **contracts pull request** adds the contracts for a component, or for one
+   sub-component, and nothing else.
+2. An **implementation pull request** stacks on that contracts pull request, and
+   it adds the classes that satisfy the contracts.
+
+A port that carries a whole component in one pull request is too large to
+review. The Go port shows the cost. One Go pull request added every component at
+once, and it closed without a merge. A reviewer cannot read the full diff with
+care, so the review reports style and misses the design. A
+contracts pull request is small, and it decides the shape. A reviewer reads the
+contracts with no implementation in the diff, and reviews the design on its own.
+The same reviewer then reads each implementation against a contract that the
+project agreed already.
+
+**Split further, per sub-component, when a component is large.** Each
+sub-component then gets a contracts pull request and an implementation pull
+request. A contracts pull request bases on the target branch, unless it needs a
+contract that another contracts pull request adds. The stack for the Queue
+component reads:
+
+| Pull request                     | Branch                                       | Base                                         |
+| -------------------------------- | -------------------------------------------- | -------------------------------------------- |
+| Message contracts                | `feature/queue-message-contracts`            | `master`                                     |
+| Message implementation           | `feature/queue-message`                      | `feature/queue-message-contracts`            |
+| Middleware and routing contracts | `feature/queue-middleware-routing-contracts` | `feature/queue-message-contracts`            |
+| Middleware implementation        | `feature/queue-middleware`                   | `feature/queue-middleware-routing-contracts` |
+| Routing implementation           | `feature/queue-routing`                      | `feature/queue-middleware-routing-contracts` |
+
+Warning: an implementation pull request bases on the contracts branch, not on
+the target branch. GitHub moves the base to the target branch when the contracts
+pull request merges.
+
+```bash
+# Right — the implementation pull request bases on the contracts branch.
+gh pr create --base feature/queue-message-contracts \
+  --title "[Queue] feat: Add the queue message implementation"
+```
+
+**What belongs in a contracts pull request.** The test is whether the file
+declares the shape that a caller programs against, or whether the file does the
+work:
+
+- **A contract** — the contracts pull request. The contract is what the pull
+  request is for.
+- **An enum** — the contracts pull request. The cases are shared vocabulary, and
+  an implementation depends on them.
+- **A constant holder** — the contracts pull request. A binding key names a
+  contract, so the key lands with the contract. See §4, _Binding-key constants_.
+- **A throwable contract** — the contracts pull request. A caller catches the
+  throwable contract, so the throwable contract is part of the shape.
+- **A concrete exception** — the implementation pull request that throws it. The
+  exception names a failure of one implementation.
+
+**One contracts pull request carries two sets of mutually dependent contracts.**
+Two sub-components can reference each other's contracts. The Queue middleware
+contracts take a routing `RouteContract`, and HTTP has the same shape. Neither
+set of contracts stands on its own, so one contracts pull request adds both. The
+two implementations still land as two pull requests.
+
+**A contracts pull request does not move coverage.** A contract declares no
+executable line, so a contracts pull request adds no test. The 100% rule in §3
+does not block a contracts pull request, and coverage does not drop.
+
+Warning: an enum case that holds a method is executable code. The same pull
+request adds the test for that method.
+
+**The rule governs a pull request that adds a contract.** A pull request that
+adds no contract is one pull request, as before. A new adapter behind an
+existing contract is one pull request, and a bug fix is one pull request.
 
 ### Cross-language changes
 
