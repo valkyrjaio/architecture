@@ -889,8 +889,9 @@ A component lands as two pull requests or more, and the contracts land first:
    it adds the classes that satisfy the contracts.
 
 A port that carries a whole component in one pull request is too large to
-review. The Go port and the Python port show the cost. A reviewer cannot read
-the full diff with care, so the review reports style and misses the design. A
+review. The Go port shows the cost. One Go pull request added every component at
+once, and it closed without a merge. A reviewer cannot read the full diff with
+care, so the review reports style and misses the design. A
 contracts pull request is small, and it decides the shape. A reviewer reads the
 contracts with no implementation in the diff, and reviews the design on its own.
 The same reviewer then reads each implementation against a contract that the
