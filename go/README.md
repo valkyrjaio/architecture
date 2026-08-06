@@ -8,7 +8,7 @@
 
 ## Key Language Decisions
 
-- **Package namespace:** `io/valkyrja`
+- **Module path:** `github.com/valkyrjaio/valkyrja-go/vN`; a component package sits directly under it
 - **No annotations** — explicit registration only throughout
 - **No `::class` equivalent** — string constants for all binding keys
 - **Interfaces** for contracts, **structs** for implementations
@@ -274,7 +274,7 @@ from the AST.
 
 **Reference:** `BUILD_TOOL.md`
 
-- Separate Go module: `io/valkyrja/build`
+- Separate Go module: `github.com/valkyrjaio/sindri-go/vN`
 - Triggered via `go generate`
 - Uses `go/packages`, `go/ast`, `go/analysis` — all standard library
 - Go module system downloads full source — no special source shipping policy

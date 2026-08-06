@@ -43,13 +43,13 @@ names the new one as its replacement.
 Each language publishes to one registry, and each registry has one namespace
 for the organization.
 
-| Language   | Registry      | Namespace       | Example package                     |
-| ---------- | ------------- | --------------- | ----------------------------------- |
-| PHP        | Packagist     | `valkyrja/`     | `valkyrja/valkyrja`                 |
-| Java       | Maven Central | `io.valkyrja:`  | `io.valkyrja:valkyrja`              |
-| TypeScript | npm           | `@valkyrjaio/`  | `@valkyrjaio/valkyrja`              |
-| Python     | PyPI          | none — flat     | `valkyrja`                          |
-| Go         | none          | the module path | `github.com/valkyrjaio/valkyrja-go` |
+| Language   | Registry      | Namespace       | Example package                        |
+| ---------- | ------------- | --------------- | -------------------------------------- |
+| PHP        | Packagist     | `valkyrja/`     | `valkyrja/valkyrja`                    |
+| Java       | Maven Central | `io.valkyrja:`  | `io.valkyrja:valkyrja`                 |
+| TypeScript | npm           | `@valkyrjaio/`  | `@valkyrjaio/valkyrja`                 |
+| Python     | PyPI          | none — flat     | `valkyrja`                             |
+| Go         | none          | the module path | `github.com/valkyrjaio/valkyrja-go/vN` |
 
 Warning: the PHP namespace is `valkyrja` and the npm scope is `@valkyrjaio`.
 The two differ because npm scopes take the organization handle. Do not
@@ -112,11 +112,19 @@ module path **is** the GitHub repository URL, and it therefore states the
 repository name in full — language suffix included:
 
 ```go
-module github.com/valkyrjaio/valkyrja-go
+module github.com/valkyrjaio/valkyrja-go/vN
 ```
 
 This is not a deviation to correct. The path has to resolve, and the rule above
 does not apply to a name the toolchain uses as an address.
+
+`vN` is the major version of the release. Go puts a major of 2 or more in the
+module path, and Valkyrja releases a new major each year, so `N` is the current
+year major. The path ends `/v26` through 2026, and `/v27` through 2027. Every
+document writes `vN`, because a document that writes the digits states a
+condition that each January makes false.
+[`VERSIONING.md`](VERSIONING.md) holds the scheme, and the version branch
+workflow rewrites the digits in `go.mod` and in every Go import.
 
 ---
 
@@ -130,9 +138,15 @@ name.
 | PHP        | `Valkyrja\`            | `Sindri\`            |
 | Java       | `io.valkyrja`          | `io.sindri`          |
 | Kotlin     | `io.valkyrja`          | `io.sindri`          |
-| Go         | `io/valkyrja`          | `io/sindri`          |
+| Go         | `valkyrja`             | `sindri`             |
 | Python     | `valkyrja`             | `sindri`             |
 | TypeScript | `@valkyrjaio/valkyrja` | `@valkyrjaio/sindri` |
+
+Warning: the Go root is a convention, and every other root is a directory. A Go
+component package sits directly under the module path
+(`github.com/valkyrjaio/valkyrja-go/vN/container/manager`), so no Go directory
+carries the name `valkyrja`. The root names the framework in a binding key, and
+[`CONTAINER_BINDINGS.md`](CONTAINER_BINDINGS.md) states how a Go key uses it.
 
 A Java package that is not the framework takes a segment under the framework
 root that names what it is:

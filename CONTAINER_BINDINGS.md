@@ -29,7 +29,7 @@ has, so no port converts the case of another port's path:
 | PHP        | `Valkyrja\Container\Manager\Contract\ContainerContract` | `Valkyrja\Container\Manager\Contract\ContainerContract` |
 | TypeScript | `Valkyrja/Container/Manager/Contract/ContainerContract` | `Valkyrja.Container.Manager.ContainerContract`          |
 | Python     | `valkyrja.container.manager.contract.ContainerContract` | `valkyrja.container.manager.ContainerContract`          |
-| Go         | `valkyrja/container/manager/contract.ContainerContract` | `valkyrja.container.manager.ContainerContract`          |
+| Go         | `container/manager/contract.ContainerContract`          | `valkyrja.container.manager.ContainerContract`          |
 
 The PHP row repeats the namespaced class, because PHP does not hand-write a key. `::class` and `.class` return the
 fully qualified name, so PHP and Java keep every segment that the class has, including `Contract`.
@@ -57,10 +57,17 @@ their keys are lowercase. A TypeScript directory is StudlyCase, so its key is St
 looks for that file, so a key that does not match the port's own import path sends the reader to a path that the port
 does not have.
 
+The Go key and the Python key are the same string, and that is correct. Both ports root the framework at `valkyrja`,
+both write a lowercase segment, and both hold the component at the same depth, so the two rules give one result. Derive
+the key from the port you work in. Two ports that agree do not make a third port agree, and the TypeScript key for the
+same class differs in every segment.
+
 Go is the one port where the key is not literal syntax. A Go import path is slash-separated and carries the module
-prefix, as in `github.com/valkyrjaio/valkyrja-go/container/manager`, and only the final `package.Symbol` selector uses
-a dot. A Go key drops the module prefix and writes a dot between each segment, so it reads like the key in every other
-port. Python is literal: `from valkyrja.container.manager import ContainerContract` is the import that its key names.
+prefix, as in `github.com/valkyrjaio/valkyrja-go/vN/container/manager`, and only the final `package.Symbol` selector uses
+a dot. A component package sits directly under the module path, so no Go directory carries the framework name. The Go
+key therefore replaces the module prefix with `valkyrja` and writes a dot between each segment, which gives the key the
+same root that every other port has. Python is literal: `from valkyrja.container.manager import ContainerContract` is
+the import that its key names.
 
 An application uses the same rules with its own root. In TypeScript, `App\Repository\Contract\UserRepositoryContract`
 becomes `App.Repository.UserRepositoryContract`, and `App\Service\Contract\DatabaseContract` becomes

@@ -514,10 +514,10 @@ apply. Append a section when you finish a port.
 ### Go
 
 - **Semantic Import Versioning (SIV) is the dominant Go-only concern.** Any major
-  ≥ 2 must live in the module path (`.../valkyrja-go/v26`), so the annual `NN.0.0`
-  scheme forces a `/vNN` suffix in `go.mod` and every internal import; a major bump
-  rewrites the path, not a manifest field. (The PoC `go.mod` lacked `/v26` — a `v26`
-  tag on it is invalid; catch this early.)
+  ≥ 2 must live in the module path (`.../valkyrja-go/vN`), so the annual `NN.0.0`
+  scheme forces a `/vN` suffix in `go.mod` and every internal import; a major bump
+  rewrites the path, not a manifest field. (The PoC `go.mod` lacked the suffix — a
+  `v26` tag on it is invalid; catch this early.)
 - **No publish workflow.** The module proxy serves from the git tag — releasing is
   tag-only, so there is no publish reusable, no registry credential/OIDC, and no
   `publish` job in the framework repo's `release-new-version.yml`.

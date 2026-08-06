@@ -13,8 +13,10 @@ Go idiom. Authoritative port detail: [`README.md`](README.md),
 - **New repos** are scaffolded from the language's `template` repo
   (`project-template-go`, in progress) — the source of truth for repo/file/class
   structure (canonical rule: §3.9).
-- **Module path:** `github.com/valkyrjaio/valkyrja-go`. Components map to
-  lowercase packages (`container`, `http`, `cli`, `event`, `application`),
+- **Module path:** `github.com/valkyrjaio/valkyrja-go/vN`, where `vN` is the
+  current year major (see [`../PACKAGE_NAMING.md`](../PACKAGE_NAMING.md)).
+  Components map to lowercase packages (`container`, `http`, `cli`, `event`,
+  `application`),
   with a `contract` sub-package for interfaces and a `data` sub-package for
   data structs.
 - **Contracts:** Go `interface` types, structural (no `implements`). The
@@ -25,13 +27,14 @@ Go idiom. Authoritative port detail: [`README.md`](README.md),
   contracts; the cache-optional design calls those interface methods directly on
   the provider structs at bootstrap.
 - **Binding keys:** string constants (no `::class` equivalent), in `const`
-  blocks. The key is modeled on how Go imports the class — the package path,
-  lowercase, with a dot between each segment — and it drops the `Contract`
+  blocks. A component package sits directly under the module path, so no Go
+  directory carries the framework name. The key replaces the module prefix with
+  `valkyrja`, writes a dot between each segment, and drops the `Contract`
   segment because the type name ends in `Contract` already
   (`valkyrja.http.routing.dispatcher.RouterContract`). The type name keeps its
-  PascalCase spelling. A Go import path is slash-separated and carries the
-  module prefix, so the key is a convention and not literal Go syntax. The key
-  is language-specific: TypeScript spells the same binding
+  PascalCase spelling. A Go import path is slash-separated, so the key is a
+  convention and not literal Go syntax. The key is language-specific:
+  TypeScript spells the same binding
   `Valkyrja.Http.Routing.Dispatcher.RouterContract`.
 - Every file starts with the license header.
 

@@ -38,7 +38,7 @@ naming, and tests.
 | --- | -------------- | ------------------------------------- | ------------------------ |
 | 1   | **PHP**        | Production — reference implementation | `Valkyrja\`              |
 | 2   | **Java**       | In progress                           | `io.valkyrja`            |
-| 3   | **Go**         | Proof of concept                      | `io/valkyrja`            |
+| 3   | **Go**         | Proof of concept                      | `valkyrja`               |
 | 4   | **Python**     | Planned                               | `valkyrja`               |
 | 5   | **TypeScript** | Planned                               | `@valkyrjaio/valkyrja`   |
 | 6   | **Kotlin**     | Planned (JVM — nearly free from Java) | `io.valkyrja`            |

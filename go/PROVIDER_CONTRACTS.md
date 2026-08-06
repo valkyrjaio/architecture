@@ -44,10 +44,10 @@ Top-level aggregator. Returns slices of sub-provider interface values. Build too
 AST — must be simple slice literals with no conditional logic.
 
 ```go
-// package: io/valkyrja/application/provider/contract
+// package: github.com/valkyrjaio/valkyrja-go/vN/application/provider/contract
 package contract
 
-import appContract "io/valkyrja/application/kernel/contract"
+import appContract "github.com/valkyrjaio/valkyrja-go/vN/application/kernel/contract"
 
 // ComponentProviderContract defines what a component provider must implement.
 // All methods must return simple slice literals — no conditional logic permitted.
@@ -77,11 +77,11 @@ type ComponentProviderContract interface {
 package provider
 
 import (
-	appContract "io/valkyrja/application/kernel/contract"
-	cliContract "io/valkyrja/cli/routing/provider/contract"
-	ctnContract "io/valkyrja/container/provider/contract"
-	evtContract "io/valkyrja/event/provider/contract"
-	httpContract "io/valkyrja/http/routing/provider/contract"
+	appContract "github.com/valkyrjaio/valkyrja-go/vN/application/kernel/contract"
+	cliContract "github.com/valkyrjaio/valkyrja-go/vN/cli/routing/provider/contract"
+	ctnContract "github.com/valkyrjaio/valkyrja-go/vN/container/provider/contract"
+	evtContract "github.com/valkyrjaio/valkyrja-go/vN/event/provider/contract"
+	httpContract "github.com/valkyrjaio/valkyrja-go/vN/http/routing/provider/contract"
 )
 
 type HttpComponentProvider struct{}
@@ -136,10 +136,10 @@ build tool reads the map from AST, resolves each function reference, and reads t
 functions can be struct methods OR package-level functions — both are valid.
 
 ```go
-// package: io/valkyrja/container/provider/contract
+// package: github.com/valkyrjaio/valkyrja-go/vN/container/provider/contract
 package contract
 
-import ctnContract "io/valkyrja/container/manager/contract"
+import ctnContract "github.com/valkyrjaio/valkyrja-go/vN/container/manager/contract"
 
 // ServiceProviderContract defines what a container service provider must implement.
 //
@@ -176,7 +176,7 @@ type ServiceProviderContract interface {
 package provider
 
 import (
-	ctnContract "io/valkyrja/container/manager/contract"
+	ctnContract "github.com/valkyrjaio/valkyrja-go/vN/container/manager/contract"
 	"app/repositories"
 	repoContract "app/repositories/contract"
 	svcContract "app/services/contract"
@@ -226,10 +226,10 @@ constants (no `::class` equivalent). Routes are complete data structures carryin
 and handler together.
 
 ```go
-// package: io/valkyrja/http/routing/provider/contract
+// package: github.com/valkyrjaio/valkyrja-go/vN/http/routing/provider/contract
 package contract
 
-import dataContract "io/valkyrja/http/routing/data/contract"
+import dataContract "github.com/valkyrjaio/valkyrja-go/vN/http/routing/data/contract"
 
 // HttpRouteProviderContract defines what an HTTP route provider must implement.
 type HttpRouteProviderContract interface {
@@ -255,9 +255,9 @@ type HttpRouteProviderContract interface {
 package provider
 
 import (
-	ctnContract "io/valkyrja/container/manager/contract"
-	"io/valkyrja/http/routing/data"
-	dataContract "io/valkyrja/http/routing/data/contract"
+	ctnContract "github.com/valkyrjaio/valkyrja-go/vN/container/manager/contract"
+	"github.com/valkyrjaio/valkyrja-go/vN/http/routing/data"
+	dataContract "github.com/valkyrjaio/valkyrja-go/vN/http/routing/data/contract"
 	"app/controllers"
 )
 
@@ -289,10 +289,10 @@ func (p *UserHttpRouteProvider) GetRoutes() []dataContract.RouteContract {
 ## CliRouteProviderContract
 
 ```go
-// package: io/valkyrja/cli/routing/provider/contract
+// package: github.com/valkyrjaio/valkyrja-go/vN/cli/routing/provider/contract
 package contract
 
-import dataContract "io/valkyrja/cli/routing/data/contract"
+import dataContract "github.com/valkyrjaio/valkyrja-go/vN/cli/routing/data/contract"
 
 // CliRouteProviderContract defines what a CLI route provider must implement.
 type CliRouteProviderContract interface {
@@ -311,10 +311,10 @@ type CliRouteProviderContract interface {
 ## ListenerProviderContract
 
 ```go
-// package: io/valkyrja/event/provider/contract
+// package: github.com/valkyrjaio/valkyrja-go/vN/event/provider/contract
 package contract
 
-import dataContract "io/valkyrja/event/data/contract"
+import dataContract "github.com/valkyrjaio/valkyrja-go/vN/event/data/contract"
 
 // ListenerProviderContract defines what an event listener provider must implement.
 type ListenerProviderContract interface {
