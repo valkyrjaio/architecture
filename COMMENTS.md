@@ -12,7 +12,9 @@ rules 10 and 13, together with the rule that a comment never states a transient
 condition.)
 
 PHP examples are shown, because PHP is the reference implementation. The rules
-hold in every port.
+hold in every port. The examples are generic by design: they show the shape in
+the framework's naming style, and they copy no real method, so this document
+does not drift when the source changes.
 
 ## A comment inside a method body
 
@@ -22,10 +24,12 @@ the next editor does not retry it.
 
 ```php
 // Right — the comment states an ordering reason the code cannot show.
-protected static function fromBackedEnum(string|int $value): static|null
+protected function matchRoute(string $path): Route|null
 {
-    // Need to check BackedEnum first because all Enums are UnitEnum
-    if (is_a(static::class, BackedEnum::class, true)) {
+    // Match the static routes first, because a dynamic pattern can also match a static path.
+    return $this->matchStatic($path)
+        ?? $this->matchDynamic($path);
+}
 ```
 
 ## The doc comment on a method
@@ -38,12 +42,14 @@ signature, and it does not describe the implementation.
 // Right — one sentence states what the method does, and the annotations
 // complete the signature.
 /**
- * Bind an alias to the container.
+ * Bind a service to the container.
  *
- * @param class-string $alias The alias
- * @param class-string $id    The service id to alias
+ * @template T of object
+ *
+ * @param class-string<T>                           $id       The service id
+ * @param callable(self, array<array-key, mixed>):T $callable The callable
  */
-public function bindAlias(string $alias, string $id): static;
+public function bind(string $id, callable $callable): static;
 ```
 
 A doc comment describes the method, not one implementation of the method. Every
@@ -59,43 +65,37 @@ Java `{@inheritDoc}`, TypeScript `@inheritdoc`, Python's inherited docstring,
 and Go's doc comment on the interface method.
 
 ```php
-// Wrong — the paragraph describes this one override of getAlias(). The next
-// override of getAlias() inherits the paragraph, and it is then false.
+// Wrong — the paragraph describes this one override of get(). The next
+// override of get() inherits the paragraph, and it is then false.
 /**
  * @inheritDoc
  *
- * A parent-only alias resolves its target through the child's own get(), so
- * a deferred target publishes into the child scope.
+ * A miss reads through to the parent store, and the parent's value publishes
+ * into this store.
  *
- * @param class-string $id The service id
- *
- * @return class-string|null
+ * @param non-empty-string $key The cache key
  */
 #[Override]
-protected function getAlias(string $id): string|null
+public function get(string $key): string|null
 {
-    return $this->aliases[$id]
-        ?? $this->parent->aliases[$id]
-        ?? null;
+    return $this->store[$key]
+        ?? $this->parent->get($key);
 }
 ```
 
 ```php
-// Right — NativeChildContainer::getAlias() keeps the inherited block. Only
-// the annotations change, because the signature narrows the types.
+// Right — the inherited block stays as it is. Only the annotations change,
+// because the signature narrows the types.
 /**
  * @inheritDoc
  *
- * @param class-string $id The service id
- *
- * @return class-string|null
+ * @param non-empty-string $key The cache key
  */
 #[Override]
-protected function getAlias(string $id): string|null
+public function get(string $key): string|null
 {
-    return $this->aliases[$id]
-        ?? $this->parent->aliases[$id]
-        ?? null;
+    return $this->store[$key]
+        ?? $this->parent->get($key);
 }
 ```
 
@@ -115,16 +115,17 @@ component's documentation takes it.
 ```php
 // Wrong — the block re-teaches what the name and the methods already say.
 /**
- * The native child container.
+ * The redis cache.
  *
- * Checks its own maps first, and falls back to the maps of the parent.
+ * Stores each value in redis, and reads through to the parent store on a
+ * miss.
  */
-class NativeChildContainer extends Container
+final class RedisCache implements CacheContract
 ```
 
 ```php
 // Right — the declaration is bare. The methods explain the class.
-class NativeChildContainer extends Container
+final class RedisCache implements CacheContract
 ```
 
 One exception: a **test fixture** carries a one-line comment block on the
@@ -135,7 +136,7 @@ fixture's methods cannot say it.
 // Right — a fixture is the exception, because the comment says what the
 // fixture is for.
 /**
- * Attribute child class used for unit testing.
+ * Pass-through middleware used for unit testing.
  */
-final class AttributeClassChildFixture extends AttributeFixture
+final class PassThroughMiddlewareFixture implements RouteMatchedMiddlewareContract
 ```
