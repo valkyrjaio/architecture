@@ -30,13 +30,13 @@ The Ports
 
 Valkyrja is being ported to five languages in priority order:
 
-| #   | Language       | Status                                | Build tool                        |
-| --- | -------------- | ------------------------------------- | --------------------------------- |
-| 1   | **PHP**        | Production — reference implementation | `valkyrja/sindri`                 |
-| 2   | **Java**       | In progress                           | `io.valkyrja:sindri`              |
-| 3   | **Go**         | Proof of concept                      | `github.com/valkyrjaio/sindri-go` |
-| 4   | **Python**     | Planned                               | `valkyrja-sindri`                 |
-| 5   | **TypeScript** | Planned                               | `@valkyrja/sindri`                |
+| #   | Language       | Status                                | Build tool                           |
+| --- | -------------- | ------------------------------------- | ------------------------------------ |
+| 1   | **PHP**        | Production — reference implementation | `valkyrja/sindri`                    |
+| 2   | **Java**       | In progress                           | `io.valkyrja:sindri`                 |
+| 3   | **Go**         | Proof of concept                      | `github.com/valkyrjaio/sindri-go/vN` |
+| 4   | **Python**     | Planned                               | `valkyrja-sindri`                    |
+| 5   | **TypeScript** | Planned                               | `@valkyrja/sindri`                   |
 
 Future languages under consideration: Kotlin (nearly free from Java), Scala,
 Rust, Ruby.

@@ -13,8 +13,10 @@ Go idiom. Authoritative port detail: [`README.md`](README.md),
 - **New repos** are scaffolded from the language's `template` repo
   (`project-template-go`, in progress) — the source of truth for repo/file/class
   structure (canonical rule: §3.9).
-- **Module path:** `github.com/valkyrjaio/valkyrja-go`. Components map to
-  lowercase packages (`container`, `http`, `cli`, `event`, `application`),
+- **Module path:** `github.com/valkyrjaio/valkyrja-go/vN`, where `vN` is the
+  current year major (see [`../PACKAGE_NAMING.md`](../PACKAGE_NAMING.md)).
+  Components map to lowercase packages (`container`, `http`, `cli`, `event`,
+  `application`),
   with a `contract` sub-package for interfaces and a `data` sub-package for
   data structs.
 - **Contracts:** Go `interface` types, structural (no `implements`). The

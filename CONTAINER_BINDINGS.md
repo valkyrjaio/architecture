@@ -63,7 +63,7 @@ the key from the port you work in. Two ports that agree do not make a third port
 same class differs in every segment.
 
 Go is the one port where the key is not literal syntax. A Go import path is slash-separated and carries the module
-prefix, as in `github.com/valkyrjaio/valkyrja-go/container/manager`, and only the final `package.Symbol` selector uses
+prefix, as in `github.com/valkyrjaio/valkyrja-go/vN/container/manager`, and only the final `package.Symbol` selector uses
 a dot. A component package sits directly under the module path, so no Go directory carries the framework name. The Go
 key therefore replaces the module prefix with `valkyrja` and writes a dot between each segment, which gives the key the
 same root that every other port has. Python is literal: `from valkyrja.container.manager import ContainerContract` is
