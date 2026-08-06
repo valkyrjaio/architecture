@@ -134,6 +134,12 @@ name.
 | Python     | `valkyrja`             | `sindri`             |
 | TypeScript | `@valkyrjaio/valkyrja` | `@valkyrjaio/sindri` |
 
+Warning: the Go root is a convention, and every other root is a directory. A Go
+component package sits directly under the module path
+(`github.com/valkyrjaio/valkyrja-go/container/manager`), so no Go directory
+carries the name `valkyrja`. The root names the framework in a binding key, and
+[`CONTAINER_BINDINGS.md`](CONTAINER_BINDINGS.md) states how a Go key uses it.
+
 A Java package that is not the framework takes a segment under the framework
 root that names what it is:
 
