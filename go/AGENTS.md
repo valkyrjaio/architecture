@@ -28,7 +28,7 @@ Go idiom. Authoritative port detail: [`README.md`](README.md),
   blocks. The key is modeled on how Go imports the class — the package path,
   lowercase, with a dot between each segment — and it drops the `Contract`
   segment because the type name ends in `Contract` already
-  (`valkyrja.http.routing.dispatcher.RouterContract`). The type name keeps its
+  (`io.valkyrja.http.routing.dispatcher.RouterContract`). The type name keeps its
   PascalCase spelling. A Go import path is slash-separated and carries the
   module prefix, so the key is a convention and not literal Go syntax. The key
   is language-specific: TypeScript spells the same binding

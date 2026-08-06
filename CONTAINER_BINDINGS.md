@@ -21,15 +21,16 @@ constants for the same reason as Go and TypeScript — using class objects as ke
 name. The class name keeps its PascalCase spelling in every port.
 
 The key is therefore language-specific, because each port's directory layout already differs. PHP and TypeScript write
-a StudlyCase directory. Go and Python write a lowercase directory. Each port copies the layout that the port itself
-has, so no port converts the case of another port's path:
+a StudlyCase directory, and Go and Python write a lowercase directory. The source root differs as well: Go roots the
+framework at `io/valkyrja`, and Python roots it at `valkyrja`. Each port copies the layout that the port itself has, so
+no port rewrites another port's path:
 
-| Language   | Namespaced class                                        | Key                                                     |
-| ---------- | ------------------------------------------------------- | ------------------------------------------------------- |
-| PHP        | `Valkyrja\Container\Manager\Contract\ContainerContract` | `Valkyrja\Container\Manager\Contract\ContainerContract` |
-| TypeScript | `Valkyrja/Container/Manager/Contract/ContainerContract` | `Valkyrja.Container.Manager.ContainerContract`          |
-| Python     | `valkyrja.container.manager.contract.ContainerContract` | `valkyrja.container.manager.ContainerContract`          |
-| Go         | `valkyrja/container/manager/contract.ContainerContract` | `valkyrja.container.manager.ContainerContract`          |
+| Language   | Namespaced class                                           | Key                                                     |
+| ---------- | ---------------------------------------------------------- | ------------------------------------------------------- |
+| PHP        | `Valkyrja\Container\Manager\Contract\ContainerContract`    | `Valkyrja\Container\Manager\Contract\ContainerContract` |
+| TypeScript | `Valkyrja/Container/Manager/Contract/ContainerContract`    | `Valkyrja.Container.Manager.ContainerContract`          |
+| Python     | `valkyrja.container.manager.contract.ContainerContract`    | `valkyrja.container.manager.ContainerContract`          |
+| Go         | `io/valkyrja/container/manager/contract.ContainerContract` | `io.valkyrja.container.manager.ContainerContract`       |
 
 The PHP row repeats the namespaced class, because PHP does not hand-write a key. `::class` and `.class` return the
 fully qualified name, so PHP and Java keep every segment that the class has, including `Contract`.
@@ -53,14 +54,15 @@ export class ContainerServiceId {
 ```
 
 Warning: do not copy a key from one port into another. A Go package name and a Python module name are lowercase, so
-their keys are lowercase. A TypeScript directory is StudlyCase, so its key is StudlyCase. A developer reads a key and
-looks for that file, so a key that does not match the port's own import path sends the reader to a path that the port
-does not have.
+their keys are lowercase, and a TypeScript directory is StudlyCase, so its key is StudlyCase. The root differs too: the
+Go key starts `io.valkyrja`, and the Python key starts `valkyrja`. A developer reads a key and looks for that file, so
+a key that does not match the port's own import path sends the reader to a path that the port does not have.
 
 Go is the one port where the key is not literal syntax. A Go import path is slash-separated and carries the module
-prefix, as in `github.com/valkyrjaio/valkyrja-go/container/manager`, and only the final `package.Symbol` selector uses
-a dot. A Go key drops the module prefix and writes a dot between each segment, so it reads like the key in every other
-port. Python is literal: `from valkyrja.container.manager import ContainerContract` is the import that its key names.
+prefix, as in `github.com/valkyrjaio/valkyrja-go/io/valkyrja/container/manager`, and only the final `package.Symbol`
+selector uses a dot. A Go key drops the module prefix, keeps the `io/valkyrja` source root, and writes a dot between
+each segment. [`PACKAGE_NAMING.md`](PACKAGE_NAMING.md) holds the source root of every port. Python is literal:
+`from valkyrja.container.manager import ContainerContract` is the import that its key names.
 
 An application uses the same rules with its own root. In TypeScript, `App\Repository\Contract\UserRepositoryContract`
 becomes `App.Repository.UserRepositoryContract`, and `App\Service\Contract\DatabaseContract` becomes
@@ -371,9 +373,9 @@ No `::class` equivalent. String constants are the only mechanism. The constants 
 package container
 
 const (
-	ContainerClass     = "valkyrja.container.manager.ContainerContract"
-	ContainerDataClass = "valkyrja.container.data.ContainerData"
-	RouterClass        = "valkyrja.http.routing.dispatcher.RouterContract"
+	ContainerClass     = "io.valkyrja.container.manager.ContainerContract"
+	ContainerDataClass = "io.valkyrja.container.data.ContainerData"
+	RouterClass        = "io.valkyrja.http.routing.dispatcher.RouterContract"
 )
 ```
 
