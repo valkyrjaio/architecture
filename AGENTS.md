@@ -225,6 +225,20 @@ Then:
     paragraph is a wall of text. A reader skips walls, so the one warning that
     matters goes unread. Comment the one line in ten that needs a comment, and
     let that warning stand alone.
+14. **A doc comment stays true for every override.** A doc comment describes the
+    method, not one implementation of the method, because every override
+    inherits the comment. Keep the inherited block as it is when you override a
+    method; change only the parameter and return annotations. Inside a body,
+    clear code takes no comment — a comment explains what is unclear, or why
+    the code does something this particular way. Rule 10 describes the same
+    failure for a comment that states a current condition; rule 13 limits how
+    much a comment says. Full rules and examples: [`COMMENTS.md`](COMMENTS.md).
+15. **A type declaration carries no doc comment.** A class, a contract, a
+    trait, an enum, and a struct explain themselves: §4 encodes the kind in the
+    name and the segment, and each method's doc comment — one sentence that
+    enhances the signature, plus the annotations — states what the type does.
+    The one exception is a test fixture's one-line block, which says what the
+    fixture is for. Full rules and examples: [`COMMENTS.md`](COMMENTS.md).
 
 ---
 
@@ -1167,9 +1181,10 @@ Read these in order when starting or extending a port:
 6. [`BUILD_TOOL.md`](BUILD_TOOL.md) — `sindri` implementation
 7. [`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md) — testing & 100% coverage
 8. [`METHOD_NAMING.md`](METHOD_NAMING.md) — method name prefixes
-9. [`PACKAGE_NAMING.md`](PACKAGE_NAMING.md) — package, registry, and source namespace names
-10. [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md) — commit & PR title format
-11. [`VERSIONING.md`](VERSIONING.md) — version scheme & release automation
-12. `{language}/PROVIDER_CONTRACTS.md` — full contracts + examples
-13. `{language}/README.md` — port notes & priority order
-14. `{language}/AGENTS.md` — the Layer-2 agent guide for that language
+9. [`COMMENTS.md`](COMMENTS.md) — what a comment may state
+10. [`PACKAGE_NAMING.md`](PACKAGE_NAMING.md) — package, registry, and source namespace names
+11. [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md) — commit & PR title format
+12. [`VERSIONING.md`](VERSIONING.md) — version scheme & release automation
+13. `{language}/PROVIDER_CONTRACTS.md` — full contracts + examples
+14. `{language}/README.md` — port notes & priority order
+15. `{language}/AGENTS.md` — the Layer-2 agent guide for that language
