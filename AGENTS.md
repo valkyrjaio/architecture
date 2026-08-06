@@ -1118,8 +1118,16 @@ the example and be correct.
   example only for a language whose spelling differs. A Layer-2 guide shows only
   its own language.
 - **Keep every example valid.** An example that does not compile teaches the
-  wrong thing. Copy from real source where you can, and link to the file instead
-  of pasting code longer than 20 lines.
+  wrong thing.
+- **Write a generic example in a convention or design document.** Warning: a
+  verbatim copy of real source drifts when the source changes. The document then
+  asserts something that is false — the failure that rule 10 in §3 describes for
+  a comment. Show the shape in the framework's naming style, and copy no real
+  method. A generic example still uses real framework names — the rule above
+  forbids `Foo` and `Bar`.
+- **Documentation about the code is the exception — it shows the real code.** In
+  a component's `README.md`, and in a repo's own documents, the code is the
+  subject. There the example must match the source.
 
 The taxonomy rule in §4 — "for `Abstract`, `Enum`, and `Trait` the segment
 carries the meaning, so the name must not repeat it" — takes this example:
