@@ -791,9 +791,9 @@ root kinds, and worked examples:
   fail the same way — the reader cannot tell what the pull request is about.
   "Update a method for naming consistency" names no method, and a restated
   signature buries the answer in detail. A class name and a contract method
-  name survive every revision, so the description names them: write "Rename
-  `checkRoute` to `isValidRoute` to follow the method-naming families", and
-  leave the signature to the diff.
+  name survive every revision, so the description names them. Write "Rename
+  `checkRoute` to `isValidRoute` to follow the method-naming families". The
+  signature stays in the diff.
 
 ### Asking for a review
 
