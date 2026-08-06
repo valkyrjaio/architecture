@@ -782,8 +782,8 @@ root kinds, and worked examples:
   how. The description holds the two the reader cannot derive: what changed,
   and why the change is right. Warning: a description that restates a specific
   edit binds the description to the code. A later push then makes the
-  description false until someone corrects both together. Write "Update the Python binding
-  keys, because the old keys were wrong", not "Change the key from
+  description false until someone corrects both together. Write "Update the
+  Python binding keys, because the old keys were wrong", not "Change the key from
   `valkyrja.container.ContainerContract` to
   `valkyrja.container.manager.ContainerContract`". The first form stays true
   through every revision of the pull request.
