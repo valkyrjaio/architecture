@@ -791,6 +791,23 @@ root kinds, and worked examples:
   §3 moves decisions into the description, and a decision is a sentence, not an
   essay. A reviewer skips a wall of text, so every extra sentence hides the one
   the reviewer needs.
+- **The description holds the what and the why.** A pull request answers five
+  questions. GitHub records the when and the where, and the diff records the
+  how. The description holds the two the reader cannot derive: what changed,
+  and why the change is right. Warning: a description that restates a specific
+  edit binds the description to the code. A later push then makes the
+  description false until someone corrects both together. Write "Update the
+  Python binding keys, because the old keys were wrong", not "Change the key from
+  `valkyrja.container.ContainerContract` to
+  `valkyrja.container.manager.ContainerContract`". The first form stays true
+  through every revision of the pull request.
+- **A stable name sets the level of detail.** Warning: too little and too much
+  fail the same way — the reader cannot tell what the pull request is about.
+  "Update a method for naming consistency" names no method, and a restated
+  signature buries the answer in detail. A class name and a contract method
+  name survive every revision, so the description names them. Write "Rename
+  `checkRoute` to `isValidRoute` to follow the method-naming families". The
+  signature stays in the diff.
 
 ### Asking for a review
 
