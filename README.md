@@ -34,7 +34,7 @@ Valkyrja is being ported to five languages in priority order:
 | --- | -------------- | ------------------------------------- | -------------------- |
 | 1   | **PHP**        | Production — reference implementation | `valkyrja/sindri`    |
 | 2   | **Java**       | In progress                           | `io.valkyrja:sindri` |
-| 3   | **Go**         | Proof of concept                      | `io/valkyrja/sindri` |
+| 3   | **Go**         | Proof of concept                      | `sindri`             |
 | 4   | **Python**     | Planned                               | `valkyrja-sindri`    |
 | 5   | **TypeScript** | Planned                               | `@valkyrja/sindri`   |
 

@@ -130,7 +130,7 @@ name.
 | PHP        | `Valkyrja\`            | `Sindri\`            |
 | Java       | `io.valkyrja`          | `io.sindri`          |
 | Kotlin     | `io.valkyrja`          | `io.sindri`          |
-| Go         | `io/valkyrja`          | `io/sindri`          |
+| Go         | `valkyrja`             | `sindri`             |
 | Python     | `valkyrja`             | `sindri`             |
 | TypeScript | `@valkyrjaio/valkyrja` | `@valkyrjaio/sindri` |
 

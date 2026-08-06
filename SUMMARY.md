@@ -214,7 +214,7 @@ Established that:
 
 - PHP: `valkyrja/sindri` (namespace: `Sindri`) — nikic/php-parser
 - Java: `io.valkyrja:sindri` (package: `sindri`) — Trees API + JavaPoet (annotation processor)
-- Go: `io/valkyrja/sindri` (module: `sindri`) — go/analysis, go/ast (stdlib)
+- Go: `sindri` (module: `github.com/valkyrjaio/sindri-go`) — go/analysis, go/ast (stdlib)
 - Python: `valkyrja-sindri` (module: `sindri`) — ast, inspect (stdlib)
 - TypeScript: `@valkyrja/sindri` (module: `sindri`) — TypeScript compiler API
 
