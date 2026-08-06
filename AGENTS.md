@@ -231,10 +231,10 @@ Then:
     **Keep the inherited block as it is when you override a method.** Change
     only what the new signature requires — the parameter and return annotations.
     Never add a paragraph that says what this implementation does. Inside the
-    body, clear code takes no comment. Comment the line a reader cannot
-    understand from the code alone, and the workaround that a failed alternative
-    forced — say that the alternative failed, so the next editor does not retry
-    it. Rule 13 governs the shape.
+    body, clear code takes no comment. A comment explains what is unclear, or
+    why the code does something this particular way. When an alternative
+    failed, say so, so the next editor does not retry it. Rule 13 governs the
+    shape.
     The rule holds in every language, because every language inherits a doc
     comment: PHP `@inheritDoc`, Java `{@inheritDoc}`, TypeScript `@inheritdoc`,
     Python's inherited docstring, and Go's doc comment on the interface method.
