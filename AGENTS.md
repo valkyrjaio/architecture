@@ -904,14 +904,15 @@ component reads:
 
 | Pull request                     | Branch                                       | Base                                         |
 | -------------------------------- | -------------------------------------------- | -------------------------------------------- |
-| Message contracts                | `feature/queue-message-contracts`            | `26.x`                                       |
+| Message contracts                | `feature/queue-message-contracts`            | `master`                                     |
 | Message implementation           | `feature/queue-message`                      | `feature/queue-message-contracts`            |
 | Middleware and routing contracts | `feature/queue-middleware-routing-contracts` | `feature/queue-message-contracts`            |
 | Middleware implementation        | `feature/queue-middleware`                   | `feature/queue-middleware-routing-contracts` |
 | Routing implementation           | `feature/queue-routing`                      | `feature/queue-middleware-routing-contracts` |
 
 Warning: an implementation pull request bases on the contracts branch, not on
-`26.x`. GitHub moves the base to `26.x` when the contracts pull request merges.
+the target branch. GitHub moves the base to the target branch when the contracts
+pull request merges.
 
 ```bash
 # Right — the implementation pull request bases on the contracts branch.
