@@ -123,9 +123,9 @@ gh api --method PATCH "repos/valkyrjaio/valkyrja/git/refs/heads/master" \
 
 The commit that lands is byte-identical to the commit CI tested: same author,
 same subject, same body, same trailer. GitHub marks the promotion pull request
-as merged when its head commit reaches the base branch, so the pull request
-closes as merged and the commit page shows both pull requests — the origin
-through the subject, and the promotion through the merge association.
+as merged when its head commit reaches the base branch. The commit page then
+shows both pull requests: the origin through the subject, and the promotion
+through the merge association.
 
 The fast-forward requires the promotion branch to sit on the destination's
 current tip. When the tip has moved, the sweep re-picks onto the new tip and
