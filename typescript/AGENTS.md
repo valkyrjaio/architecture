@@ -38,7 +38,7 @@ Three abstract branches, all extending native `Error`:
 
 ## Structure taxonomy
 
-The cross-language taxonomy ([`../AGENTS.md`](../AGENTS.md) §4) applies, with
+The cross-language taxonomy ([`../STRUCTURE.md`](../STRUCTURE.md)) applies, with
 **PascalCase directory** segments mirroring PHP: `Contract/`, `Provider/`,
 `Factory/`, `Constant/`, `Exception/`, `Throwable/`, `Abstract/`, `Enum/`,
 `Type/`, `Model/`, `Entity/`, `Security/`.

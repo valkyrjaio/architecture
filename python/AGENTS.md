@@ -60,7 +60,7 @@ ABC)`, `ValkyrjaInvalidArgumentException(ValueError, ABC)` → abstract
 
 ## Structure taxonomy
 
-The cross-language taxonomy ([`../AGENTS.md`](../AGENTS.md) §4) applies with
+The cross-language taxonomy ([`../STRUCTURE.md`](../STRUCTURE.md)) applies with
 **snake_case** module/package segments (`contract`, `provider`, `factory`,
 `constant`, `exception`, `throwable`, `abstract`, `enum`, `type`, `model`,
 `entity`, `security`). Name suffixes match §4 (`*Contract`, `*ServiceProvider`,

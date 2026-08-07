@@ -47,7 +47,7 @@ native root), then abstract `Component*` → concrete
 
 ## Structure taxonomy
 
-The cross-language taxonomy ([`../AGENTS.md`](../AGENTS.md) §4) is enforced by
+The cross-language taxonomy ([`../STRUCTURE.md`](../STRUCTURE.md)) is enforced by
 **Konsist** (Kotlin's ArchUnit analog). Segments are **lowercase** packages, same
 as Java: `contract`, `provider`, `factory`, `constant`, `exception`, `throwable`,
 `type`, `model`, `entity`, `security`, `command`.

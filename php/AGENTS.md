@@ -68,7 +68,7 @@ fails when the two disagree.
 
 ## Structure taxonomy
 
-The cross-language taxonomy ([`../AGENTS.md`](../AGENTS.md) §4) is **defined
+The cross-language taxonomy ([`../STRUCTURE.md`](../STRUCTURE.md)) is **defined
 here** and enforced by **PHPArkitect** (`composer phparkitect`; the rules live in
 the `valkyrja/ci-phparkitect` package's `Rules` class). Segments are PascalCase
 namespace parts exactly as in §4 — `Contract\`, `Provider\`, `Factory\`,

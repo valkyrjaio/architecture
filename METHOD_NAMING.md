@@ -271,7 +271,7 @@ func IsValidPath(path string) bool
 Three naming rules live elsewhere. They govern a different axis and do not repeat here.
 
 - **The class name, the segment, and the modifier** — the structure taxonomy in
-  [`AGENTS.md`](AGENTS.md) §4.
+  [`STRUCTURE.md`](STRUCTURE.md).
 - **A static method on a data object** — a named constructor stays on its own type;
   anything else moves to a factory or a support class. See
   [`STATIC_METHODS.md`](STATIC_METHODS.md).

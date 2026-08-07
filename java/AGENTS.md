@@ -38,7 +38,7 @@ Detail: [`../THROWABLES.md`](../THROWABLES.md).
 
 ## Structure taxonomy
 
-The cross-language taxonomy ([`../AGENTS.md`](../AGENTS.md) §4) is enforced by
+The cross-language taxonomy ([`../STRUCTURE.md`](../STRUCTURE.md)) is enforced by
 **ArchUnit** (the PHPArkitect analog, run in the `archunit` CI build). Segments
 are **lowercase** packages: `contract`, `provider`, `factory`, `constant`,
 `exception`, `throwable`, `type`, `model`, `entity`, `security`, `command`.
