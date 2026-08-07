@@ -101,10 +101,12 @@ labeled commit never promotes, whatever the other sources say. The label
 records a deliberate decision (§6), so the sweep obeys it first.
 
 **The pull request template's `Ships to` section** is the explicit signal. The
-author checks the branches the change applies to, or checks "this branch only".
+author states the highest branch the change ships to, or states "this branch
+only". The ladder carries the commit to every branch up to the stated one, so
+a selection cannot skip a rung. A change that a middle branch must not receive
+is outside the automation; a person carries it with the attended dispatch (§9).
 The squash merge writes the section into the commit body, so the sweep reads
-the signal from the commit itself. This is the override channel: a fix that
-only applies to one version states so here, and the sweep obeys.
+the signal from the commit itself.
 
 **The author** supplies the default when the section is absent. The default
 covers every commit type, so no commit lacks a rule:
@@ -180,6 +182,10 @@ When the agent cannot resolve the conflict, the sweep opens the promotion pull
 request as a draft. The branch holds the cherry-pick with the conflict
 unresolved, and the description states what blocked the agent. The sweep never
 fast-forwards a draft pull request.
+
+A draft leaves the draft state when the conflict is resolved. The sweep marks
+the pull request as ready when the branch holds one commit with no conflict
+markers, and §5 then governs the landing.
 
 An open pull request normally takes a new commit instead of an amend, because
 an amend destroys a reviewer's in-progress context. The promotion pull request
