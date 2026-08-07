@@ -782,8 +782,8 @@ root kinds, and worked examples:
 - **The PR description is permanent** — the squash merge writes it into git
   history as the commit body. The description follows the
   [PR template](https://github.com/valkyrjaio/.github/blob/26.x/.github/PULL_REQUEST_TEMPLATE.md),
-  it holds the what and the why in three to six sentences, and a stable name
-  sets its level of detail. Full rules:
+  it holds the what and the why, and it keeps no sentence the diff already
+  shows. Full rules:
   [`PR_DESCRIPTION.md`](PR_DESCRIPTION.md).
 
 ### Asking for a review
