@@ -10,7 +10,37 @@ equivalent tooling (see [CI_TOOLS.md](CI_TOOLS.md)).
 
 ---
 
-## 1. Repository anatomy
+## 1. The definition of done — coverage is per file
+
+The 100% rule is **per file, not an aggregate**, and it binds both directions:
+
+- **Every file you add is at 100%** — line and branch — on its own, before the
+  change is done. A repo-wide percentage is not evidence: one fully untested new
+  class hides inside a large, well-covered codebase and barely moves the total.
+- **Every file you touch stays at 100%.** Adding a branch to an existing file
+  means adding the test for it in the same change.
+
+**A green gate is not proof of coverage.** Every repo _runs_ coverage and
+publishes a report, but no language's gate currently **fails** on it — a build
+at 55% passes exactly like one at 100%. That is the deliberate state for now,
+and gating may be added later; either way the 100% requirement does not depend
+on a tool enforcing it. So **read the coverage report yourself** before calling
+a change done, and check the per-file numbers for the files you added or
+changed, not just the summary line. If gating does arrive, treat it as a
+backstop for what you missed — never as the thing that defines the rule.
+
+The only exception is an **explicitly documented** one: code that genuinely
+cannot be covered (a process-exiting call, a blocking server loop) is excluded
+in the coverage tool's own config, narrowly, with a comment saying why. Two
+rules about exclusions: an accepted gap must be _written down_ where the tool
+reads it, never merely tolerated in silence; and never lower a threshold to
+accommodate a gap — a floor set to "whatever we happen to be at" legitimizes
+the gap and defeats the point. Cover the code, or exclude it narrowly and say
+why.
+
+---
+
+## 2. Repository anatomy
 
 Every PHP repo under `php/` shares this shape:
 
@@ -57,7 +87,7 @@ Notes:
   `sindri` has `Abstract`, `Fixtures`, `Unit`; `valkyrja` has all of them plus the root `EnvClass`.
 - Things in `Fixtures/` are production-shaped classes (named `*Class`, `*Provider`, etc. — never `*Test`) so the
   architecture rules (PHPArkitect) can assert "testable classes are named appropriately and are not tests."
-- Rector fixture data is the one exception that lives **outside** `tests/Tests/` (see §2) — it is `require`d data, not
+- Rector fixture data is the one exception that lives **outside** `tests/Tests/` (see §3) — it is `require`d data, not
   autoloaded test code.
 
 ### Test base classes
@@ -70,7 +100,7 @@ Notes:
 
 ---
 
-## 2. The 100% coverage goal — recipes by code shape
+## 3. The 100% coverage goal — recipes by code shape
 
 ### Plain classes / services
 
@@ -137,7 +167,7 @@ real request.
 
 ---
 
-## 3. Coverage gotchas & their fixes
+## 4. Coverage gotchas & their fixes
 
 | Situation                                                                                                                                                 | Effect on coverage                                                                     | Fix                                                                                                                                                                    |
 | --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -149,7 +179,7 @@ real request.
 
 ---
 
-## 4. CI gate to run on every change
+## 5. CI gate to run on every change
 
 Run from the repo root via composer scripts (see [CI_TOOLS.md](CI_TOOLS.md) for roles):
 
@@ -166,7 +196,7 @@ the lowest affected `??.x` branch, new features/deprecations target `master`.
 
 ---
 
-## 5. Repo-by-repo status & notes
+## 6. Repo-by-repo status & notes
 
 | Repo                                                       | Shape                                                                                                | Coverage approach                                                                                                                                                                                    |
 | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -181,7 +211,7 @@ the lowest affected `??.x` branch, new features/deprecations target `master`.
 
 ---
 
-## 6. Mental model for ports
+## 7. Mental model for ports
 
 When porting a module to another language, reproduce **three things together**: the source class, its test class
 (mirrored path + name), and the coverage outcome (100%). Translate the recipe, not just the code:
