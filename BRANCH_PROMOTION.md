@@ -62,7 +62,8 @@ not land through the merge button.
 ## 3. The design
 
 One scheduled sweep runs in the `.github` repository and fans out per
-repository. For each repository, for each rung of the branch ladder, the sweep:
+repository. For each repository and each rung of the branch ladder the sweep
+does the following:
 
 1. Enumerates the merged commits on the lower branch that the ledger (§6) does
    not show on the higher branch.
