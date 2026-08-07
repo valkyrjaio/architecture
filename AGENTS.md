@@ -19,7 +19,10 @@ This is **Layer 1** of a three-layer guide:
 > A fix to a rule that applies to all languages belongs **here**. A fix specific
 > to one language belongs in that language's Layer-2 file. When those and a
 > deeper architecture document disagree, the architecture document wins — fix the
-> guide.
+> guide. Write a rule that governs a human as well as an agent in its topic
+> document — a release rule in [`VERSIONING.md`](VERSIONING.md), a commit rule in
+> [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md) — and point at it from this
+> guide. This guide holds in full only the rules for how an agent works.
 
 > **Before contributing, also read
 > [`CONTRIBUTING.md`](https://github.com/valkyrjaio/.github/blob/26.x/CONTRIBUTING.md)**
