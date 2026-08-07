@@ -44,7 +44,8 @@ The consequence to understand: a consumer on `^26.1` will pick up a breaking
 
 Valkyrja has no users yet, so the current-year branch takes a breaking change
 whenever the framework needs one. A planned break does not wait for the year
-boundary, and every change lands on that branch rather than on `master`.
+boundary, and a new feature, a deprecation and a breaking change land on that
+branch rather than on `master`.
 
 The rules above return when adoption grows and the framework settles.
 
