@@ -68,8 +68,8 @@ fails when the two disagree.
 
 ## Structure taxonomy
 
-The cross-language taxonomy ([`../STRUCTURE.md`](../STRUCTURE.md)) is **defined
-here** and enforced by **PHPArkitect** (`composer phparkitect`; the rules live in
+The cross-language taxonomy ([`../STRUCTURE.md`](../STRUCTURE.md)) is **enforced
+here** by **PHPArkitect** (`composer phparkitect`; the rules live in
 the `valkyrja/ci-phparkitect` package's `Rules` class). Segments are PascalCase
 namespace parts exactly as in `STRUCTURE.md` — `Contract\`, `Provider\`, `Factory\`,
 `Constant\`, `Attribute\`, `Exception\`, `Throwable\`, `Abstract\`, `Enum\`,
