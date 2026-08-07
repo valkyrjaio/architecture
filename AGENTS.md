@@ -195,7 +195,7 @@ Then:
     until the next release bumps it" is a condition — the release automation will
     strand it, so it belongs in the PR.
     State the decision in the description in a sentence or two. The description
-    takes the decision, not the essay around it — its budget is in
+    takes the decision, not the essay around it — full rules are in
     [`PR_DESCRIPTION.md`](PR_DESCRIPTION.md).
 11. **Update the documentation in the same pull request.** A change to behavior,
     to configuration, or to a public API also updates every document that
