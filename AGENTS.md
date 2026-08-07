@@ -368,94 +368,14 @@ type. The full rules, the examples, and the replacement for static metadata:
 
 ### Component config
 
-A component gets one `ComponentNameConfigContract` for the settings that apply to
-the whole component. The default adapter is the most common such setting. Each
-adapter then gets its own `ComponentName<Adapter>ConfigContract`. Every contract
-has a default implementation that drops the `Contract` suffix (`CacheConfig`,
-`CacheRedisConfig`), and all of these live in the component's `Data\` segment.
-The component's service provider publishes each contract as its own container
-binding.
-
-Two rules make the shape work:
-
-1. **The component config does not hold the adapter configs.** The container
-   resolves an adapter config only when something asks for that adapter. An
-   application that uses one cache adapter never constructs the configuration for
-   the other cache adapters.
-2. **An adapter contract prefixes every property with the adapter name.** One
-   application config class can implement several adapter contracts at once.
-   Without the prefix, two adapters that both declare a `prefix` property
-   collide.
-
-```php
-// Wrong — the component config holds every adapter config. An application that
-// uses only the null cache still constructs the redis and the log configuration.
-interface CacheConfigContract
-{
-    public string $defaultCache { get; }
-    public CacheRedisConfig $redisCache { get; }
-    public CacheLogConfig $logCache { get; }
-    public CacheNullConfig $nullCache { get; }
-}
-```
-
-```php
-// Right — the component config holds the component-wide setting only.
-interface CacheConfigContract
-{
-    /** @var class-string<CacheContract> */
-    public string $defaultCache { get; }
-}
-
-// Right — each adapter has its own contract, and each property carries the
-// adapter prefix, so one class can implement several contracts at once.
-interface CacheRedisConfigContract
-{
-    public string $redisHost { get; }
-    public int $redisPort { get; }
-    public string $redisPrefix { get; }
-}
-
-interface CacheNullConfigContract
-{
-    public string $nullPrefix { get; }
-}
-```
-
-The application implements only the contracts for the adapters that it uses:
-
-```php
-final class AppConfig extends Config implements CacheConfigContract, CacheRedisConfigContract
-{
-    public function __construct(
-        public string $defaultCache = RedisCache::class,
-        public string $redisHost = 'cache.internal',
-        public int $redisPort = 6379,
-        public string $redisPrefix = 'app:',
-    ) {
-        parent::__construct();
-    }
-}
-```
-
-The service provider binds the application config when the application config
-implements the contract. If it does not, the service provider binds the
-framework default:
-
-```php
-public static function publishRedisConfig(ContainerContract $container): void
-{
-    $config = $container->getSingleton(ConfigContract::class);
-
-    if ($config instanceof CacheRedisConfigContract) {
-        $container->setSingleton(CacheRedisConfigContract::class, $config);
-
-        return;
-    }
-
-    $container->setSingleton(CacheRedisConfigContract::class, new CacheRedisConfig());
-}
-```
+A component gets one `ComponentNameConfigContract` for the settings that apply
+to the whole component, and each adapter gets its own
+`ComponentName<Adapter>ConfigContract`. The component config does not hold the
+adapter configs, and an adapter contract prefixes every property with the
+adapter name. Every contract has a default implementation that drops the
+`Contract` suffix, all of these live in the component's `Data\` segment, and
+the service provider publishes each contract as its own container binding. The
+full rules and examples: [`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md).
 
 ### Method naming
 
@@ -950,15 +870,16 @@ Read these in order when starting or extending a port:
 3. [`CONTAINER_BINDINGS.md`](CONTAINER_BINDINGS.md) — binding keys & closures
 4. [`DISPATCH.md`](DISPATCH.md) — handler contracts
 5. [`DATA_CACHE.md`](DATA_CACHE.md) — provider contracts & cache generation
-6. [`BUILD_TOOL.md`](BUILD_TOOL.md) — `sindri` implementation
-7. [`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md) — testing & 100% coverage
-8. [`METHOD_NAMING.md`](METHOD_NAMING.md) — method name prefixes
-9. [`COMMENTS.md`](COMMENTS.md) — what a comment may state
-10. [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md) — the writing rules for documentation prose
-11. [`PACKAGE_NAMING.md`](PACKAGE_NAMING.md) — package, registry, and source namespace names
-12. [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md) — commit & PR title format
-13. [`PR_DESCRIPTION.md`](PR_DESCRIPTION.md) — what a pull request description holds
-14. [`VERSIONING.md`](VERSIONING.md) — version scheme & release automation
-15. `{language}/PROVIDER_CONTRACTS.md` — full contracts + examples
-16. `{language}/README.md` — port notes & priority order
-17. `{language}/AGENTS.md` — the Layer-2 agent guide for that language
+6. [`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md) — the component config shape
+7. [`BUILD_TOOL.md`](BUILD_TOOL.md) — `sindri` implementation
+8. [`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md) — testing & 100% coverage
+9. [`METHOD_NAMING.md`](METHOD_NAMING.md) — method name prefixes
+10. [`COMMENTS.md`](COMMENTS.md) — what a comment may state
+11. [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md) — the writing rules for documentation prose
+12. [`PACKAGE_NAMING.md`](PACKAGE_NAMING.md) — package, registry, and source namespace names
+13. [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md) — commit & PR title format
+14. [`PR_DESCRIPTION.md`](PR_DESCRIPTION.md) — what a pull request description holds
+15. [`VERSIONING.md`](VERSIONING.md) — version scheme & release automation
+16. `{language}/PROVIDER_CONTRACTS.md` — full contracts + examples
+17. `{language}/README.md` — port notes & priority order
+18. `{language}/AGENTS.md` — the Layer-2 agent guide for that language
