@@ -157,7 +157,9 @@ Then:
    for every rule that has a code shape (see §8).
 4. **Every source file carries the license header** (see §5).
 5. **Target the right branch** (see §7) — improvements/bug fixes go to the lowest
-   affected `??.x`, new features/deprecations go to `master`.
+   affected `??.x`, new features/deprecations go to `master`. Warning: an
+   exception suspends part of this rule today. See
+   [`VERSIONING.md`](VERSIONING.md).
 6. **Run the full CI gate** for the language you touched before considering the
    work done — exact commands are in your language's Layer-2 guide.
 7. **One branch and one PR per change.** Create a new branch off the correct
@@ -909,6 +911,10 @@ The `prefix` and the PR's base branch are both set by the change type:
 | Deprecation     | `master`                                       | `deprecation/` |
 | Breaking change | `master` (unless a bug fix — open issue first) | `breaking/`    |
 | Documentation   | Lowest major affected branch the docs apply to | `docs/`        |
+
+Warning: the current-year branch overrides this table until the framework has
+users. Every change targets that branch, including a new feature, a deprecation
+and a breaking change. See [`VERSIONING.md`](VERSIONING.md).
 
 ### Contracts land first
 
