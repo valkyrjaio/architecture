@@ -10,6 +10,36 @@ equivalent tooling (see [CI_TOOLS.md](CI_TOOLS.md)).
 
 ---
 
+## The definition of done — coverage is per file
+
+The 100% rule is **per file, not an aggregate**, and it binds both directions:
+
+- **Every file you add is at 100%** — line and branch — on its own, before the
+  change is done. A repo-wide percentage is not evidence: one fully untested new
+  class hides inside a large, well-covered codebase and barely moves the total.
+- **Every file you touch stays at 100%.** Adding a branch to an existing file
+  means adding the test for it in the same change.
+
+**A green gate is not proof of coverage.** Every repo _runs_ coverage and
+publishes a report, but no language's gate currently **fails** on it — a build
+at 55% passes exactly like one at 100%. That is the deliberate state for now,
+and gating may be added later; either way the 100% requirement does not depend
+on a tool enforcing it. So **read the coverage report yourself** before calling
+a change done, and check the per-file numbers for the files you added or
+changed, not just the summary line. If gating does arrive, treat it as a
+backstop for what you missed — never as the thing that defines the rule.
+
+The only exception is an **explicitly documented** one: code that genuinely
+cannot be covered (a process-exiting call, a blocking server loop) is excluded
+in the coverage tool's own config, narrowly, with a comment saying why. Two
+rules about exclusions: an accepted gap must be _written down_ where the tool
+reads it, never merely tolerated in silence; and never lower a threshold to
+accommodate a gap — a floor set to "whatever we happen to be at" legitimizes
+the gap and defeats the point. Cover the code, or exclude it narrowly and say
+why.
+
+---
+
 ## 1. Repository anatomy
 
 Every PHP repo under `php/` shares this shape:
