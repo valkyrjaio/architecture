@@ -14,7 +14,7 @@ each language.
 
 ---
 
-## 1. The four families
+## 1. The four conventions
 
 ### Validation
 
@@ -60,7 +60,7 @@ same verb behind `get` returns a copy and leaves the argument alone. `parse` and
 `getParsed` are the same operation with opposite effects on the caller's value.
 
 Read [§2](#2-in-place-transformation-does-not-exist-in-every-language) before you use
-this family. It does not translate to every port.
+this convention. It does not translate to every port.
 
 ### State on the host
 
@@ -80,7 +80,7 @@ sees no change.
 
 ## 2. In-place transformation does not exist in every language
 
-**Warning: the in-place family in [§1](#transformation-in-place) assumes the language can
+**Warning: the in-place convention in [§1](#transformation-in-place) assumes the language can
 modify the caller's variable. Most Valkyrja languages cannot do this for every type.**
 
 PHP takes a parameter by reference with `&`. No other Valkyrja language has that.
@@ -96,7 +96,7 @@ PHP takes a parameter by reference with `&`. No other Valkyrja language has that
 A string, a number, and a boolean are immutable in Java, TypeScript, and Python. A method
 there cannot change the caller's string.
 
-**The rule that follows: use the in-place family only when the language can honor it.
+**The rule that follows: use the in-place convention only when the language can honor it.
 Otherwise use the `get` form, which every language can express.** A `parseValue(String
 value)` in Java that claims to parse in place is a lie the type system permits, and the
 caller finds out at runtime.
@@ -279,12 +279,12 @@ Three naming rules live elsewhere. They govern a different axis and do not repea
 
 ### An open question, recorded rather than decided
 
-`php/TODO.md` carries a worked-through position on a second naming family, for a method
+`php/TODO.md` carries a worked-through position on a second naming convention, for a method
 that retrieves one item: `Create…` and `Get…` and `Retrieve…` throw when the item is
 absent, `GetOrCreate…` creates it, and `Find…` returns null. A collection query always
 returns a collection, empty when nothing matches.
 
-That family is a natural fit for this document, and the reasoning behind it is explicitly
+That convention is a natural fit for this document, and the reasoning behind it is explicitly
 cross-language — it exists to give parity with Java and Go. **It is not adopted here,
 because it has not been decided.** Read the record in `php/TODO.md`, under "Is returning
 null cheating?", before you rely on it.
