@@ -80,8 +80,8 @@ sees no change.
 
 ## 2. In-place transformation does not exist in every language
 
-**Warning: the in-place convention in [§1](#transformation-in-place) assumes the language can
-modify the caller's variable. Most Valkyrja languages cannot do this for every type.**
+**Warning: the in-place convention in [§1](#transformation-in-place) assumes the language
+can modify the caller's variable. Most Valkyrja languages cannot do this for every type.**
 
 PHP takes a parameter by reference with `&`. No other Valkyrja language has that.
 
@@ -279,12 +279,12 @@ Three naming rules live elsewhere. They govern a different axis and do not repea
 
 ### An open question, recorded rather than decided
 
-`php/TODO.md` carries a worked-through position on a second naming convention, for a method
-that retrieves one item: `Create…` and `Get…` and `Retrieve…` throw when the item is
-absent, `GetOrCreate…` creates it, and `Find…` returns null. A collection query always
+`php/TODO.md` carries a worked-through position on a second naming convention, for a
+method that retrieves one item: `Create…` and `Get…` and `Retrieve…` throw when the item
+is absent, `GetOrCreate…` creates it, and `Find…` returns null. A collection query always
 returns a collection, empty when nothing matches.
 
-That convention is a natural fit for this document, and the reasoning behind it is explicitly
-cross-language — it exists to give parity with Java and Go. **It is not adopted here,
-because it has not been decided.** Read the record in `php/TODO.md`, under "Is returning
-null cheating?", before you rely on it.
+That convention is a natural fit for this document, and the reasoning behind it is
+explicitly cross-language — it exists to give parity with Java and Go. **It is not
+adopted here, because it has not been decided.** Read the record in `php/TODO.md`, under
+"Is returning null cheating?", before you rely on it.
