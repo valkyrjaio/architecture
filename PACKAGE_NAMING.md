@@ -225,6 +225,8 @@ default plugin repository, so a consuming build resolves the plugin with no
 Maven Central holds the jar alone. A `buildscript { classpath(...) }` consumer
 and a dependency scanner resolve the jar, and neither one reads the marker.
 
+---
+
 ## What not to do
 
 - **Do not put the language in the package name.** `io.valkyrja:ci-spotless-java`
