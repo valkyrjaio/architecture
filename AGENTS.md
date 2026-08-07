@@ -157,7 +157,9 @@ Then:
    for every rule that has a code shape (see §8).
 4. **Every source file carries the license header** (see §5).
 5. **Target the right branch** (see §7) — improvements/bug fixes go to the lowest
-   affected `??.x`, new features/deprecations go to `master`.
+   affected `??.x`, new features/deprecations go to `master`. Warning: an
+   exception suspends part of this rule today. See
+   [`VERSIONING.md`](VERSIONING.md).
 6. **Run the full CI gate** for the language you touched before considering the
    work done — exact commands are in your language's Layer-2 guide.
 7. **One branch and one PR per change.** Create a new branch off the correct
