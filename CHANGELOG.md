@@ -1,6 +1,15 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.5...26.x)
+## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.6...26.x)
+
+## [v26.0.6](https://github.com/valkyrjaio/architecture/compare/v26.0.5...v26.0.6) - 2026-08-07
+
+* [Workflow] ci: Update .github workflow refs to v26.24.1 by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/architecture/pull/186
+* [Versioning] docs: Record that the year branch takes every break until adoption by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/168
+* [Process] docs: Move the pull request description rules into PR_DESCRIPTION.md by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/187
+* [Naming] docs: Rename the method-name families to conventions by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/196
+* [Promotion] docs: Add the branch promotion design by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/190
+* [Process] docs: State where a rule that governs a human belongs by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/197
 
 ## [v26.0.5](https://github.com/valkyrjaio/architecture/compare/v26.0.4...v26.0.5) - 2026-08-06
 
