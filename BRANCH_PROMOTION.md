@@ -45,10 +45,14 @@ origin pull request is one click through the subject, and the origin commit is
 one click through the trailer.
 
 Warning: a squash merge of a promotion pull request destroys all three. The
-squash writes a new commit whose subject is the promotion pull request's title,
-whose body is the promotion pull request's description, and whose author is the
-bot. Every repository enforces squash-only merges, so a promotion pull request
-must not land through the merge button.
+squash writes a new commit:
+
+- The subject is the promotion pull request's title.
+- The body is the promotion pull request's description.
+- The author is the bot.
+
+Every repository enforces squash-only merges, so a promotion pull request must
+not land through the merge button.
 
 ---
 
@@ -61,11 +65,13 @@ repository. For each repository, for each rung of the branch ladder, the sweep:
    not show on the higher branch.
 2. Filters them through the promotion signal (§4).
 3. Cherry-picks each eligible commit with `git cherry-pick -x` onto the higher
-   branch's tip, in commit order.
+   branch's tip, in commit order. A conflict here escalates to an agent (§7),
+   which resolves the conflict before the next step.
 4. Opens a **promotion pull request** whose branch holds exactly that one
    commit. CI runs on the pull request.
-5. Lands the pull request by fast-forward (§5) when the checks pass.
-6. Escalates to an agent when the cherry-pick conflicts (§7).
+5. Lands the pull request by fast-forward (§5) when the checks pass. A pull
+   request that carries an agent resolution also waits for a human approval
+   (§7).
 
 The sweep promotes one rung at a time: `26.x` → `27.x`, then `27.x` → `master`.
 Each rung picks from the commit the previous rung landed, so a conflict
@@ -89,19 +95,19 @@ The squash merge writes the section into the commit body, so the sweep reads
 the signal from the commit itself. This is the override channel: a fix that
 only applies to one version states so here, and the sweep obeys.
 
-**The commit type** supplies the default when the section is absent:
+**The author** supplies the default when the section is absent. The default
+covers every commit type, so no commit lacks a rule:
 
-| Type on a version branch                       | Default             |
-| ---------------------------------------------- | ------------------- |
-| `fix`, `perf`, `refactor`, `style`, `docs`     | Promote upward      |
-| `feat`, `deprecate`, any `!`                   | Promote upward      |
-| `build`, `ci`, `chore` from a bot              | Never promote       |
-| `revert`                                       | Promote upward      |
+| Commit on a version branch | Default        |
+| -------------------------- | -------------- |
+| A human-authored commit    | Promote upward |
+| A bot-authored commit      | Never promote  |
 
 Warning: a bot's dependency and workflow commits never promote, whatever their
 type. Each branch's own automation maintains its own lockfiles and workflow
 pins. A promoted lockfile commit fights that automation and corrupts the
-destination's `content-hash`.
+destination's `content-hash`. A human who needs a bot's change on a higher
+branch states so in the `Ships to` section.
 
 ---
 
@@ -158,10 +164,13 @@ every run. The sweep skips a commit when the origin pull request carries the
 A cherry-pick that conflicts escalates to an agent. The agent resolves the
 conflict, amends the resolution into the cherry-pick commit, and pushes the
 promotion branch. The promotion branch holds exactly one commit at every point.
-That contract is the deliberate exception to the no-amend rule: the amend
-preserves the single pristine commit that the fast-forward lands, and the pull
-request description — which never becomes a commit — carries the resolution
-notes.
+
+An open pull request normally takes a new commit instead of an amend, because
+an amend destroys a reviewer's in-progress context. The promotion pull request
+is the deliberate exception: the fast-forward lands the branch's commits as
+they are, so a second commit would land beside the first. The amend preserves
+the single pristine commit, and the pull request description — which never
+becomes a commit — carries the resolution notes.
 
 The label on the promotion pull request states who must act next:
 
