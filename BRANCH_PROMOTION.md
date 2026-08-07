@@ -68,10 +68,10 @@ repository. For each repository, for each rung of the branch ladder, the sweep:
    not show on the higher branch.
 2. Filters them through the promotion signal (§4).
 3. Cherry-picks the next eligible commit with `git cherry-pick -x` onto the
-   higher branch's tip. A conflict here escalates to an agent (§7), which
-   resolves the conflict before the next step.
+   higher branch's tip. A conflict here escalates to an agent (§7).
 4. Opens a **promotion pull request** whose branch holds exactly that one
-   commit. CI runs on the pull request.
+   commit. CI runs on the pull request. The pull request opens as a draft when
+   the agent could not resolve a conflict (§7).
 5. Lands the pull request by fast-forward (§5) when the checks pass. A pull
    request that carries an agent resolution also waits for a human approval
    (§7).
