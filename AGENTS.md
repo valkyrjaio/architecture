@@ -529,7 +529,7 @@ changes the argument, `getParsed` returns a copy, `set` modifies the host, and `
 returns a clone.
 
 Two per-language caveats matter most. A language without pass-by-reference cannot honor
-the in-place family for an immutable type. **Go reports a failure with a returned
+the in-place convention for an immutable type. **Go reports a failure with a returned
 `error`, not a throw**, so a Go signature carries an extra return value.
 
 The full table and the per-language spelling: [`METHOD_NAMING.md`](METHOD_NAMING.md).
