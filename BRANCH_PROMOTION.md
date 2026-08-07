@@ -95,10 +95,12 @@ push, and no backup branch.
 ## 4. The promotion signal
 
 Warning: a bot's commit never promotes, whatever its type, and no source below
-overrides the exclusion. Each branch's own automation maintains its own
-lockfiles and workflow pins. A promoted lockfile commit fights that automation
-and corrupts the destination's `content-hash`. A human who needs a dependency
-change on a higher branch lets that branch's own automation carry it.
+overrides the exclusion. A bot's commit is branch-local maintenance, and the
+same automation runs on every branch, so a promoted copy duplicates or fights
+the destination's own run. The sharpest case is the lockfile: a promoted
+lockfile commit corrupts the destination's `content-hash`. A human who needs a
+dependency change on a higher branch lets that branch's own automation carry
+it.
 
 For a human's commit, the sweep decides where the commit goes from three
 sources, in priority order.
