@@ -117,10 +117,11 @@ covers every commit type, so no commit lacks a rule:
 | A bot-authored commit      | Never promote  |
 
 Warning: a bot's dependency and workflow commits never promote, whatever their
-type. Each branch's own automation maintains its own lockfiles and workflow
-pins. A promoted lockfile commit fights that automation and corrupts the
-destination's `content-hash`. A human who needs a bot's change on a higher
-branch states so in the `Ships to` section.
+type. The `Ships to` section does not override the exclusion. Each branch's
+own automation maintains its own lockfiles and workflow pins. A promoted
+lockfile commit fights that automation and corrupts the destination's
+`content-hash`. A human who needs a dependency change on a higher branch lets
+that branch's own automation carry it.
 
 ---
 
