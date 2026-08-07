@@ -910,22 +910,9 @@ The `prefix` and the PR's base branch are both set by the change type:
 | Breaking change | `master` (unless a bug fix — open issue first) | `breaking/`    |
 | Documentation   | Lowest major affected branch the docs apply to | `docs/`        |
 
-Warning: the table above states the rule for a framework that has users. Valkyrja
-has none yet, so a different rule applies for now.
-
-`master` lags far behind the current-year `??.x` branch today. A change that this
-table routes to `master` targets the current-year branch instead. This covers a
-new feature, a deprecation and a breaking change.
-
-The reason is adoption. The framework has none yet. A breaking change inside the
-year therefore costs no user a migration, because no user depends on the year.
-One year branch consequently carries every kind of change: an improvement, a bug
-fix, a new feature, a deprecation and a breaking change.
-
-The exception ends when the framework has users. The table then governs again,
-and a new feature, a deprecation and a breaking change each return to `master`.
-Confirm the base branch with the maintainer when a change would otherwise target
-`master`.
+Warning: the current-year branch overrides this table until the framework has
+users. Every change targets that branch, including a new feature, a deprecation
+and a breaking change. See [`VERSIONING.md`](VERSIONING.md).
 
 ### Contracts land first
 
