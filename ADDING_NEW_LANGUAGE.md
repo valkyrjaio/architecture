@@ -74,7 +74,7 @@ Then **decide and write down** (these become the Layer-2 docs in Phase 1):
   the suffix word itself can differ per language (see Findings)._
 - **Structure-taxonomy segment spelling.** The taxonomy (`Contract`, `Provider`,
   `Factory`, `Constant`, `Exception`/error, `Throwable`, `Abstract`, `Enum`,
-  `Type`, …) is defined in [`AGENTS.md`](AGENTS.md) §4. Spell each segment in the
+  `Type`, …) is defined in [`STRUCTURE.md`](STRUCTURE.md). Spell each segment in the
   language's idiom, and **escape any segment that collides with a reserved word or
   a standard-library name** (a trailing underscore is the established convention).
   Drop segments for constructs the language lacks.

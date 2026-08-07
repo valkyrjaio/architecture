@@ -47,7 +47,7 @@ native root), then abstract `Component*` → concrete
 
 ## Structure taxonomy
 
-The cross-language taxonomy ([`../AGENTS.md`](../AGENTS.md) §4) is enforced by
+The cross-language taxonomy ([`../STRUCTURE.md`](../STRUCTURE.md)) is enforced by
 **Konsist** (Kotlin's ArchUnit analog). Segments are **lowercase** packages, same
 as Java: `contract`, `provider`, `factory`, `constant`, `exception`, `throwable`,
 `type`, `model`, `entity`, `security`, `command`.
@@ -57,11 +57,11 @@ Kotlin nuances:
 - **Reserved words → trailing underscore, for JVM/Java parity.** Use
   **`abstract_`** and **`enum_`** as package segments (matching Java, since the two
   share packages). `abstract`/`enum` are Kotlin soft-keywords and could be
-  backtick-escaped, but `_` keeps parity with the Java port. The §4 _name_ rules
+  backtick-escaped, but `_` keeps parity with the Java port. The `STRUCTURE.md` _name_ rules
   still hold (no `Abstract`/`Enum` in the class name).
 - **No traits** — no `trait` segment.
 - **Attributes → annotations** in an `annotation` package.
-- Name suffixes match §4 (`*Contract`, `*ServiceProvider`, `*Exception`, …).
+- Name suffixes match `STRUCTURE.md` (`*Contract`, `*ServiceProvider`, `*Exception`, …).
 
 ---
 

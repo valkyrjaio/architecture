@@ -38,7 +38,7 @@ Detail: [`../THROWABLES.md`](../THROWABLES.md).
 
 ## Structure taxonomy
 
-The cross-language taxonomy ([`../AGENTS.md`](../AGENTS.md) §4) is enforced by
+The cross-language taxonomy ([`../STRUCTURE.md`](../STRUCTURE.md)) is enforced by
 **ArchUnit** (the PHPArkitect analog, run in the `archunit` CI build). Segments
 are **lowercase** packages: `contract`, `provider`, `factory`, `constant`,
 `exception`, `throwable`, `type`, `model`, `entity`, `security`, `command`.
@@ -47,13 +47,13 @@ Java nuances:
 
 - **Reserved words → trailing underscore.** `abstract` and `enum` are Java
   keywords and cannot be package names — use **`abstract_`** and **`enum_`** for
-  those segments. The §4 _name_ rules still hold (an abstract class's name must
+  those segments. The `STRUCTURE.md` _name_ rules still hold (an abstract class's name must
   not contain `Abstract`; an enum's must not contain `Enum`).
 - **No traits.** Java has no trait construct, so there is no `trait` segment —
   share behavior via abstract classes or interface `default` methods.
 - **Attributes → annotations.** The attribute marker is a Java annotation
   (`@interface`); annotation types live in an `annotation` package.
-- Name suffixes are identical to §4 (`*Contract`, `*ServiceProvider`,
+- Name suffixes are identical to `STRUCTURE.md` (`*Contract`, `*ServiceProvider`,
   `*Exception`, `*Factory`, …).
 
 ---

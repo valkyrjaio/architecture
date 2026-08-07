@@ -38,7 +38,7 @@ Three abstract branches, all extending native `Error`:
 
 ## Structure taxonomy
 
-The cross-language taxonomy ([`../AGENTS.md`](../AGENTS.md) §4) applies, with
+The cross-language taxonomy ([`../STRUCTURE.md`](../STRUCTURE.md)) applies, with
 **PascalCase directory** segments mirroring PHP: `Contract/`, `Provider/`,
 `Factory/`, `Constant/`, `Exception/`, `Throwable/`, `Abstract/`, `Enum/`,
 `Type/`, `Model/`, `Entity/`, `Security/`.
@@ -49,7 +49,7 @@ TypeScript nuances:
   is enforced in **review**; keep it exact anyway.
 - **No traits** — no `Trait/` segment; share behavior via an `Abstract/` base.
 - **Interfaces erase at runtime** — contracts cannot be binding keys, so use the
-  string-constant keys (see Layout & naming). Name suffixes match §4
+  string-constant keys (see Layout & naming). Name suffixes match `STRUCTURE.md`
   (`*Contract`, etc.).
 
 ---
