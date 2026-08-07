@@ -195,7 +195,8 @@ Then:
     until the next release bumps it" is a condition — the release automation will
     strand it, so it belongs in the PR.
     State the decision in the description in a sentence or two. The description
-    takes the decision, not the essay around it — its budget is in §7.
+    takes the decision, not the essay around it — its budget is in
+    [`PR_DESCRIPTION.md`](PR_DESCRIPTION.md).
 11. **Update the documentation in the same pull request.** A change to behavior,
     to configuration, or to a public API also updates every document that
     describes it. The component's `README.md` is the usual one, because each
@@ -778,36 +779,12 @@ root kinds, and worked examples:
   _you_ write; the squash merge takes its subject from the PR title and its body
   from the PR description, which is why that description is where durable
   explanation belongs (see §3, rule 10).
-- PR description follows the
-  [PR template](https://github.com/valkyrjaio/.github/blob/26.x/.github/PULL_REQUEST_TEMPLATE.md)
-  — fill **Description**, **Types of changes**, and **Changes** (bold
-  file/component — em dash — what changed). When an issue tracks the work, put
-  `Closes #123` in the description: it becomes the squash commit body, so that is
-  both what closes the issue on merge and where the link durably lives.
-- **Budget the description.** State what changed, why, and any trap — most pull
-  requests fit in three to six sentences. Add a table or a verification note
-  only when it carries something a reviewer would otherwise miss. Do not
-  restate the diff, and do not narrate the process that produced it. Rule 10 in
-  §3 moves decisions into the description, and a decision is a sentence, not an
-  essay. A reviewer skips a wall of text, so every extra sentence hides the one
-  the reviewer needs.
-- **The description holds the what and the why.** A pull request answers five
-  questions. GitHub records the when and the where, and the diff records the
-  how. The description holds the two the reader cannot derive: what changed,
-  and why the change is right. Warning: a description that restates a specific
-  edit binds the description to the code. A later push then makes the
-  description false until someone corrects both together. Write "Update the
-  Python binding keys, because the old keys were wrong", not "Change the key from
-  `valkyrja.container.ContainerContract` to
-  `valkyrja.container.manager.ContainerContract`". The first form stays true
-  through every revision of the pull request.
-- **A stable name sets the level of detail.** Warning: too little and too much
-  fail the same way — the reader cannot tell what the pull request is about.
-  "Update a method for naming consistency" names no method, and a restated
-  signature buries the answer in detail. A class name and a contract method
-  name survive every revision, so the description names them. Write "Rename
-  `checkRoute` to `isValidRoute` to follow the method-naming families". The
-  signature stays in the diff.
+- **The PR description is permanent** — the squash merge writes it into git
+  history as the commit body. The description follows the
+  [PR template](https://github.com/valkyrjaio/.github/blob/26.x/.github/PULL_REQUEST_TEMPLATE.md),
+  it holds the what and the why in three to six sentences, and a stable name
+  sets its level of detail. Full rules:
+  [`PR_DESCRIPTION.md`](PR_DESCRIPTION.md).
 
 ### Asking for a review
 
@@ -1201,7 +1178,8 @@ Read these in order when starting or extending a port:
 9. [`COMMENTS.md`](COMMENTS.md) — what a comment may state
 10. [`PACKAGE_NAMING.md`](PACKAGE_NAMING.md) — package, registry, and source namespace names
 11. [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md) — commit & PR title format
-12. [`VERSIONING.md`](VERSIONING.md) — version scheme & release automation
-13. `{language}/PROVIDER_CONTRACTS.md` — full contracts + examples
-14. `{language}/README.md` — port notes & priority order
-15. `{language}/AGENTS.md` — the Layer-2 agent guide for that language
+12. [`PR_DESCRIPTION.md`](PR_DESCRIPTION.md) — what a pull request description holds
+13. [`VERSIONING.md`](VERSIONING.md) — version scheme & release automation
+14. `{language}/PROVIDER_CONTRACTS.md` — full contracts + examples
+15. `{language}/README.md` — port notes & priority order
+16. `{language}/AGENTS.md` — the Layer-2 agent guide for that language
