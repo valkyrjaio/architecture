@@ -49,7 +49,7 @@ TypeScript nuances:
   is enforced in **review**; keep it exact anyway.
 - **No traits** — no `Trait/` segment; share behavior via an `Abstract/` base.
 - **Interfaces erase at runtime** — contracts cannot be binding keys, so use the
-  string-constant keys (see Layout & naming). Name suffixes match §4
+  string-constant keys (see Layout & naming). Name suffixes match `STRUCTURE.md`
   (`*Contract`, etc.).
 
 ---
