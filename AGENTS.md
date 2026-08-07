@@ -917,10 +917,10 @@ has none yet, so a different rule applies for now.
 table routes to `master` targets the current-year branch instead. This covers a
 new feature, a deprecation and a breaking change.
 
-The reason is adoption. The framework has none yet. This first year therefore
-takes a fix, a feature and a breaking change on the same year branch. A breaking
-change inside the year costs no user a migration, because no user depends on the
-year.
+The reason is adoption. The framework has none yet. A breaking change inside the
+year therefore costs no user a migration, because no user depends on the year.
+One year branch consequently carries every kind of change: an improvement, a bug
+fix, a new feature, a deprecation and a breaking change.
 
 The exception ends when the framework has users. The table then governs again,
 and a new feature, a deprecation and a breaking change each return to `master`.
