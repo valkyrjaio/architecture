@@ -20,8 +20,11 @@ mechanisms carry fixes upward today, and each one has a limit:
   the destination, and runs it. Nothing records which commits moved, and nothing
   notices the commits that did not.
 
-The automation below promotes every eligible commit on a schedule, records what
-moved, and asks a person only when a commit cannot move on its own.
+The automation below does three things:
+
+- It promotes every eligible commit on a schedule.
+- It records what moved.
+- It asks a person only when a commit cannot move on its own.
 
 ---
 
@@ -41,8 +44,8 @@ The squash merge on the source branch produces a commit that identifies itself:
 A promotion preserves all three, and adds one line: the
 `(cherry picked from commit …)` trailer that `git cherry-pick -x` writes.
 GitHub links that hash to the origin commit. From `git blame` on any branch, the
-origin pull request is one click through the subject, and the origin commit is
-one click through the trailer.
+origin pull request is one click through the subject. The origin commit is one
+click through the trailer.
 
 Warning: a squash merge of a promotion pull request destroys all three. The
 squash writes a new commit:
@@ -167,7 +170,7 @@ promotion branch. The promotion branch holds exactly one commit at every point.
 
 An open pull request normally takes a new commit instead of an amend, because
 an amend destroys a reviewer's in-progress context. The promotion pull request
-is the deliberate exception: the fast-forward lands the branch's commits as
+is the deliberate exception. The fast-forward lands the branch's commits as
 they are, so a second commit would land beside the first. The amend preserves
 the single pristine commit, and the pull request description — which never
 becomes a commit — carries the resolution notes.
