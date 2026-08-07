@@ -46,21 +46,22 @@ Architecture Documents
 
 Cross-cutting architectural decisions that apply to all ports.
 
-| Document                                         | Description                                                                       |
-| ------------------------------------------------ | --------------------------------------------------------------------------------- |
-| [`SUMMARY.md`](SUMMARY.md)                       | Full session summary — all decisions and reasoning                                |
-| [`PORTS.md`](PORTS.md)                           | Language port list, per-language notes, comparison tables                         |
-| [`THROWABLES.md`](THROWABLES.md)                 | Exception naming convention, hierarchy, language mapping                          |
-| [`CONTAINER_BINDINGS.md`](CONTAINER_BINDINGS.md) | Closure bindings, string constants, per-component files                           |
-| [`DISPATCH.md`](DISPATCH.md)                     | Handler contracts, typed signatures, dispatch deprecation                         |
-| [`DATA_CACHE.md`](DATA_CACHE.md)                 | Cache architecture, provider contracts, build flows                               |
-| [`BUILD_TOOL.md`](BUILD_TOOL.md)                 | Build tool design, Bin extraction, AST implementations                            |
-| [`STATIC_METHODS.md`](STATIC_METHODS.md)         | Static interface methods — cross-language design and registry pattern             |
-| [`METHOD_NAMING.md`](METHOD_NAMING.md)           | Method name prefixes — what a method does, and whether the caller's value changes |
-| [`PACKAGE_NAMING.md`](PACKAGE_NAMING.md)         | Package name, registry namespace, and source namespace per language               |
-| [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md)   | Commit and PR title format, conventional types, roots                             |
-| [`VERSIONING.md`](VERSIONING.md)                 | Version scheme, bump mapping, release automation                                  |
-| [`VERSION_SUPPORT.md`](VERSION_SUPPORT.md)       | Support policy, release schedule, per-language runtimes                           |
+| Document                                           | Description                                                                       |
+| -------------------------------------------------- | --------------------------------------------------------------------------------- |
+| [`SUMMARY.md`](SUMMARY.md)                         | Full session summary — all decisions and reasoning                                |
+| [`PORTS.md`](PORTS.md)                             | Language port list, per-language notes, comparison tables                         |
+| [`THROWABLES.md`](THROWABLES.md)                   | Exception naming convention, hierarchy, language mapping                          |
+| [`CONTAINER_BINDINGS.md`](CONTAINER_BINDINGS.md)   | Closure bindings, string constants, per-component files                           |
+| [`DISPATCH.md`](DISPATCH.md)                       | Handler contracts, typed signatures, dispatch deprecation                         |
+| [`DATA_CACHE.md`](DATA_CACHE.md)                   | Cache architecture, provider contracts, build flows                               |
+| [`BUILD_TOOL.md`](BUILD_TOOL.md)                   | Build tool design, Bin extraction, AST implementations                            |
+| [`STATIC_METHODS.md`](STATIC_METHODS.md)           | Static interface methods — cross-language design and registry pattern             |
+| [`METHOD_NAMING.md`](METHOD_NAMING.md)             | Method name prefixes — what a method does, and whether the caller's value changes |
+| [`PACKAGE_NAMING.md`](PACKAGE_NAMING.md)           | Package name, registry namespace, and source namespace per language               |
+| [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md) | The writing rules for documentation prose                                         |
+| [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md)     | Commit and PR title format, conventional types, roots                             |
+| [`VERSIONING.md`](VERSIONING.md)                   | Version scheme, bump mapping, release automation                                  |
+| [`VERSION_SUPPORT.md`](VERSION_SUPPORT.md)         | Support policy, release schedule, per-language runtimes                           |
 
 Language Contracts
 ------------------
