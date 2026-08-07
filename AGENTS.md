@@ -223,7 +223,7 @@ Then:
     failure for a comment that states a current condition; rule 13 limits how
     much a comment says. Full rules and examples: [`COMMENTS.md`](COMMENTS.md).
 15. **A type declaration carries no doc comment.** A class, a contract, a
-    trait, an enum, and a struct explain themselves: §4 encodes the kind in the
+    trait, an enum, and a struct explain themselves: [`STRUCTURE.md`](STRUCTURE.md) encodes the kind in the
     name and the segment, and each method's doc comment — one sentence that
     enhances the signature, plus the annotations — states what the type does.
     The one exception is a test fixture's one-line block, which says what the
