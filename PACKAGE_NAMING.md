@@ -167,6 +167,66 @@ do not have to match.
 
 ---
 
+## Gradle plugin id
+
+A Gradle plugin has a fourth name: its plugin id. A build script states the
+plugin id, not the package name, so the two names are separate.
+
+**The plugin id is the group id, then the package name.**
+
+```
+io.valkyrja:ci-spotless    →  io.valkyrja.ci-spotless
+io.valkyrja:ci-archunit    →  io.valkyrja.ci-archunit
+```
+
+The rule keeps the `ci-` prefix, for the same reason that the package name keeps
+it. A build script lists the plugins that it applies, and a reader of that list
+learns that the plugin holds a CI tool configuration.
+
+```kotlin
+// Right — the plugin id states the group id and the package name.
+plugins {
+    id("io.valkyrja.ci-spotless") version "26.2.0"
+}
+```
+
+The source namespace does not appear in the plugin id. `ci-spotless` publishes
+the plugin id `io.valkyrja.ci-spotless`, and its source namespace stays
+`io.valkyrja.spotless`. The source namespace drops the `ci-` prefix, because a
+Java package segment names the tool. A plugin id is a coordinate, so it does
+not.
+
+```kotlin
+// Wrong — this is the source namespace, not the plugin id.
+plugins {
+    id("io.valkyrja.spotless") version "26.2.0"
+}
+```
+
+### A plugin id is also a group id
+
+Gradle publishes a **plugin marker** beside the jar. The marker is a small POM
+that a `plugins { id(...) }` block resolves, and its coordinate comes from the
+plugin id:
+
+```
+io.valkyrja.ci-spotless:io.valkyrja.ci-spotless.gradle.plugin
+```
+
+Warning: a plugin id is therefore permanent in the same way that a package name
+is permanent. Read the section below before the first release.
+
+### Where each registry holds what
+
+The Gradle Plugin Portal holds the marker and the jar. The Portal is Gradle's
+default plugin repository, so a consuming build resolves the plugin with no
+`pluginManagement` block of its own.
+
+Maven Central holds the jar alone. A `buildscript { classpath(...) }` consumer
+and a dependency scanner resolve the jar, and neither one reads the marker.
+
+---
+
 ## What not to do
 
 - **Do not put the language in the package name.** `io.valkyrja:ci-spotless-java`
@@ -181,15 +241,20 @@ do not have to match.
   was published once as `io.valkyrja:ci-spotless-java`, which kept the language
   suffix, and it had to be republished as `io.valkyrja:ci-spotless`.
 
+- **Do not name a plugin after its source namespace.** `io.valkyrja.spotless` is
+  the Java package, not the plugin id. The plugin id keeps the `ci-` prefix.
+
 - **Do not assume a rename is available.** Read the next section first.
 
 ---
 
 ## A published package name cannot be corrected
 
-Maven Central, Packagist, and npm do not let a package change its name, and they
-do not let a published version be removed. A wrong name is permanent. The only
-remedy is to publish under the right name and leave the wrong one where it sits.
+Maven Central, Packagist, npm, and the Gradle Plugin Portal do not let a package
+change its name, and they do not let a published version be removed. A wrong
+name is permanent. The only remedy is to publish under the right name and leave
+the wrong one where it sits. A plugin id follows the same rule, because the
+marker it publishes is itself a coordinate.
 
 `io.valkyrja:ci-spotless-java:26.0.0` is such a package. It stays on Maven
 Central, it receives no further release, and every consumer moved to
@@ -223,6 +288,20 @@ rootProject.name = "ci-spotless"
 // build.gradle.kts
 mavenPublishing {
     coordinates(group.toString(), "ci-spotless", version.toString())
+}
+```
+
+A Gradle plugin states its plugin id a third time, in the `gradlePlugin` block:
+
+```kotlin
+// build.gradle.kts
+gradlePlugin {
+    plugins {
+        create("ciSpotless") {
+            id = "io.valkyrja.ci-spotless"
+            implementationClass = "io.valkyrja.spotless.ValkyrjaSpotlessPlugin"
+        }
+    }
 }
 ```
 
