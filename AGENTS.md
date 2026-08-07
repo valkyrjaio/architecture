@@ -173,29 +173,12 @@ Then:
 9. **New repos are scaffolded from the language's `template` repo** — the source
    of truth for repo layout and file/class structure. Start from it; never
    hand-assemble a repo's structure. Your Layer-2 guide names the template repo.
-10. **Never comment transient state.** A comment in code or config must stay true
-    indefinitely. Do not write one to explain something temporary, or something
-    an automated process will later rewrite — a pinned version awaiting a
-    release, a workaround pending a fix, a value some job regenerates. Automation
-    rewrites values, not the prose around them, so the comment outlives what it
-    described and becomes an assertion that is now false. That is worse than no
-    comment, because the next reader trusts it.
-    **Put it in the PR description instead — nothing is lost.** The squash merge
-    writes the PR title as the commit subject and the _entire PR description_ as
-    the commit body, so the explanation lives in git history permanently,
-    attached to the commit that introduced it and reachable by `git log` /
-    `git blame`. (This is also why the "no commit body" rule in §7 governs only
-    the commits you write; the merge commit's body comes from the PR.) The
-    explanation is better placed there anyway: pinned to when it was true,
-    instead of floating in a file where a later automated edit silently
-    falsifies it.
-    The test is whether the comment states a _decision or invariant_ or a
-    _current condition_. "This job asserts only generated code, so its coverage
-    report is meaningless" is a decision — keep it. "Pinned ahead of the others
-    until the next release bumps it" is a condition — the release automation will
-    strand it, so it belongs in the PR.
-    State the decision in the description in a sentence or two. The description
-    takes the decision, not the essay around it — its budget is in §7.
+10. **Never comment transient state.** A comment in code or config must stay
+    true indefinitely, so a temporary condition never goes in a comment. Put
+    the explanation in the PR description instead — the squash merge writes the
+    description into git history as the commit body, so nothing is lost. Full
+    rules, the decision-or-condition test, and examples:
+    [`COMMENTS.md`](COMMENTS.md).
 11. **Update the documentation in the same pull request.** A change to behavior,
     to configuration, or to a public API also updates every document that
     describes it. The component's `README.md` is the usual one, because each
@@ -215,16 +198,11 @@ Then:
     callers in `.github/workflows/ci.yml`. Read the rule before you add or edit
     a caller:
     [`AGENTS.md` in `valkyrjaio/.github`](https://github.com/valkyrjaio/.github/blob/26.x/AGENTS.md).
-13. **A comment states what the code cannot show.** Keep a comment to one or two
-    lines: the constraint, the invariant, or the reason the obvious approach
-    fails. Do not write a comment that narrates what the next line does — the
-    code shows it. When an explanation needs a paragraph, put the paragraph in
-    the PR description or in a document, and shrink the comment to one sentence
-    that states the conclusion.
-    Density is itself a defect. A file where every block carries a comment
-    paragraph is a wall of text. A reader skips walls, so the one warning that
-    matters goes unread. Comment the one line in ten that needs a comment, and
-    let that warning stand alone.
+13. **A comment states what the code cannot show.** Keep a comment to one or
+    two lines: the constraint, the invariant, or the reason the obvious
+    approach fails. Density is itself a defect — comment the one line in ten
+    that needs a comment, and let that warning stand alone. Full rules and
+    examples: [`COMMENTS.md`](COMMENTS.md).
 14. **A doc comment stays true for every override.** A doc comment describes the
     method, not one implementation of the method, because every override
     inherits the comment. Keep the inherited block as it is when you override a

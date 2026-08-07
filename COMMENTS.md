@@ -7,14 +7,78 @@ every contributor, human or agent.
 Code speaks for itself. A comment adds what the code cannot show, so most code
 carries no comment. A file where every block carries a comment is a wall of
 text, and a reader skips walls. Comment the one line in ten that needs one, and
-that warning stands alone. ([`AGENTS.md`](AGENTS.md) §3 states this as golden
-rules 10 and 13, together with the rule that a comment never states a transient
-condition.)
+that warning stands alone. ([`AGENTS.md`](AGENTS.md) §3 summarizes these rules
+as golden rules 10, 13, 14, and 15.)
 
 PHP examples are shown, because PHP is the reference implementation. The rules
 hold in every port. The examples are generic by design: they show the shape in
 the framework's naming style, and they copy no real method, so this document
 does not drift when the source changes.
+
+## What a comment states
+
+A comment states what the code cannot show. Keep a comment to one or two
+lines: the constraint, the invariant, or the reason the obvious approach
+fails. Do not write a comment that narrates what the next line does — the code
+shows it.
+
+When an explanation needs a paragraph, put the paragraph in the PR description
+or in a document, and shrink the comment to one sentence that states the
+conclusion.
+
+```php
+// Wrong — the explanation grew into a paragraph, so the paragraph moved into
+// the comment.
+// The cache key includes the locale. Two locales can render one route
+// differently, and a shared key would publish one locale's render to the
+// other. Do not remove the locale from the key.
+$key = $this->getCacheKey($route, $locale);
+```
+
+```php
+// Right — one sentence states the conclusion. The paragraph lives in the pull
+// request description.
+// The key includes the locale, because two locales render one route differently.
+$key = $this->getCacheKey($route, $locale);
+```
+
+Density is itself a defect. A file where every block carries a comment
+paragraph is a wall of text. A reader skips walls, so the one warning that
+matters goes unread. Comment the one line in ten that needs a comment, and let
+that warning stand alone.
+
+## A comment never states a transient condition
+
+A comment in code or config must stay true indefinitely. Do not write one to
+explain something temporary, or something an automated process will later
+rewrite — a pinned version awaiting a release, a workaround pending a fix, a
+value some job regenerates. Automation rewrites values, not the prose around
+them, so the comment outlives what it described and becomes an assertion that
+is now false. That is worse than no comment, because the next reader trusts it.
+
+Put the explanation in the pull request description instead
+([`PR_DESCRIPTION.md`](PR_DESCRIPTION.md)). Nothing is lost: the squash merge
+writes the description as the commit body, so the explanation lives in git
+history permanently, attached to the commit that introduced it and reachable by
+`git log` and `git blame`. The explanation is better placed there anyway:
+pinned to when it was true, instead of floating in a file where a later
+automated edit silently falsifies it.
+
+The test is whether the comment states a _decision or invariant_ or a _current
+condition_. A decision stays in the comment. A condition goes to the pull
+request description.
+
+```yaml
+# Wrong — the comment states a condition. The release automation bumps the
+# version and leaves the sentence, so the comment is then false.
+sindri-version: "26.5.0" # Pinned ahead of the others until the next release.
+```
+
+```yaml
+# Right — the comment states a decision, and the decision stays true.
+# This job asserts only generated code, so its coverage report is meaningless.
+coverage-report: false
+```
 
 ## A comment inside a method body
 
