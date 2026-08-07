@@ -94,7 +94,14 @@ push, and no backup branch.
 
 ## 4. The promotion signal
 
-The sweep decides where a commit goes from three sources, in priority order.
+Warning: a bot's commit never promotes, whatever its type, and no source below
+overrides the exclusion. Each branch's own automation maintains its own
+lockfiles and workflow pins. A promoted lockfile commit fights that automation
+and corrupts the destination's `content-hash`. A human who needs a dependency
+change on a higher branch lets that branch's own automation carry it.
+
+For a human's commit, the sweep decides where the commit goes from three
+sources, in priority order.
 
 **The `promotion:skip` label on the origin pull request** is the hard stop. A
 labeled commit never promotes, whatever the other sources say. The label
@@ -108,20 +115,8 @@ is outside the automation; a person carries it with the attended dispatch (§9).
 The squash merge writes the section into the commit body, so the sweep reads
 the signal from the commit itself.
 
-**The author** supplies the default when the section is absent. The default
-covers every commit type, so no commit lacks a rule:
-
-| Commit on a version branch | Default        |
-| -------------------------- | -------------- |
-| A human-authored commit    | Promote upward |
-| A bot-authored commit      | Never promote  |
-
-Warning: a bot's dependency and workflow commits never promote, whatever their
-type. The `Ships to` section does not override the exclusion. Each branch's
-own automation maintains its own lockfiles and workflow pins. A promoted
-lockfile commit fights that automation and corrupts the destination's
-`content-hash`. A human who needs a dependency change on a higher branch lets
-that branch's own automation carry it.
+**The default** covers every remaining commit, so no commit lacks a rule: a
+human's commit promotes upward when neither source above says otherwise.
 
 ---
 
