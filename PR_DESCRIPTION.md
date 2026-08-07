@@ -1,7 +1,7 @@
 # PR_DESCRIPTION.md — what a pull request description holds
 
 The **cross-language** convention for the pull request description. It applies
-in every Valkyrja repository, and to every contributor, human or agent.
+in every Valkyrja repository, and to every contributor.
 
 The description is permanent. Merges are squash-only, and the squash merge
 writes the pull request title as the commit subject and the entire description
