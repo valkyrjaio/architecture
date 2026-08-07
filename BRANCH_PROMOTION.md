@@ -67,14 +67,18 @@ repository. For each repository, for each rung of the branch ladder, the sweep:
 1. Enumerates the merged commits on the lower branch that the ledger (§6) does
    not show on the higher branch.
 2. Filters them through the promotion signal (§4).
-3. Cherry-picks each eligible commit with `git cherry-pick -x` onto the higher
-   branch's tip, in commit order. A conflict here escalates to an agent (§7),
-   which resolves the conflict before the next step.
+3. Cherry-picks the next eligible commit with `git cherry-pick -x` onto the
+   higher branch's tip. A conflict here escalates to an agent (§7), which
+   resolves the conflict before the next step.
 4. Opens a **promotion pull request** whose branch holds exactly that one
    commit. CI runs on the pull request.
 5. Lands the pull request by fast-forward (§5) when the checks pass. A pull
    request that carries an agent resolution also waits for a human approval
    (§7).
+
+Steps 3 through 5 run once per eligible commit, in commit order. The next
+commit starts after the previous pull request lands, so each pick sits on a
+current tip.
 
 The sweep promotes one rung at a time: `26.x` → `27.x`, then `27.x` → `master`.
 Each rung picks from the commit the previous rung landed, so a conflict
@@ -90,7 +94,11 @@ push, and no backup branch.
 
 ## 4. The promotion signal
 
-The sweep decides where a commit goes from two sources, in priority order.
+The sweep decides where a commit goes from three sources, in priority order.
+
+**The `promotion:skip` label on the origin pull request** is the hard stop. A
+labeled commit never promotes, whatever the other sources say. The label
+records a deliberate decision (§6), so the sweep obeys it first.
 
 **The pull request template's `Ships to` section** is the explicit signal. The
 author checks the branches the change applies to, or checks "this branch only".
@@ -157,8 +165,8 @@ A commit is promoted when the grep finds it, and unpromoted when the grep does
 not. No side state exists, so the ledger cannot drift from the branches.
 
 A deliberate skip needs a record too, or the sweep reconsiders the commit on
-every run. The sweep skips a commit when the origin pull request carries the
-`promotion:skip` label, and the label is the durable record of the decision.
+every run. The `promotion:skip` label on the origin pull request is the durable
+record of the decision, and §4 gives the label the highest priority.
 
 ---
 
@@ -167,6 +175,11 @@ every run. The sweep skips a commit when the origin pull request carries the
 A cherry-pick that conflicts escalates to an agent. The agent resolves the
 conflict, amends the resolution into the cherry-pick commit, and pushes the
 promotion branch. The promotion branch holds exactly one commit at every point.
+
+When the agent cannot resolve the conflict, the sweep opens the promotion pull
+request as a draft. The branch holds the cherry-pick with the conflict
+unresolved, and the description states what blocked the agent. The sweep never
+fast-forwards a draft pull request.
 
 An open pull request normally takes a new commit instead of an amend, because
 an amend destroys a reviewer's in-progress context. The promotion pull request
