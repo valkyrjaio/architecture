@@ -191,8 +191,8 @@ Then:
 13. **A comment states what the code cannot show.** Keep a comment to one or
     two lines: the constraint, the invariant, or the reason the obvious
     approach fails. Density is itself a defect. Comment the one line in ten
-    that needs a comment. That warning then stands alone. Full rules and
-    examples: [`COMMENTS.md`](COMMENTS.md).
+    that needs a comment. Full rules and examples:
+    [`COMMENTS.md`](COMMENTS.md).
 14. **A doc comment stays true for every override.** A doc comment describes the
     method, not one implementation of the method, because every override
     inherits the comment. Keep the inherited block as it is when you override a
