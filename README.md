@@ -59,6 +59,7 @@ Cross-cutting architectural decisions that apply to all ports.
 | [`BUILD_TOOL.md`](BUILD_TOOL.md)                   | Build tool design, Bin extraction, AST implementations                            |
 | [`STATIC_METHODS.md`](STATIC_METHODS.md)           | Static interface methods — cross-language design and registry pattern             |
 | [`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md) | Testing taxonomy and the 100% per-file coverage rules                             |
+| [`COMMENTS.md`](COMMENTS.md)                       | What a comment may state                                                          |
 | [`METHOD_NAMING.md`](METHOD_NAMING.md)             | Method name prefixes — what a method does, and whether the caller's value changes |
 | [`PACKAGE_NAMING.md`](PACKAGE_NAMING.md)           | Package name, registry namespace, and source namespace per language               |
 | [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md) | The writing rules for documentation prose                                         |
