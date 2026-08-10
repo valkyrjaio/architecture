@@ -71,9 +71,10 @@ fails when the two disagree.
 The cross-language taxonomy ([`../STRUCTURE.md`](../STRUCTURE.md)) is **enforced
 here** by **PHPArkitect** (`composer phparkitect`; the rules live in
 the `valkyrja/ci-phparkitect` package's `Rules` class). Segments are PascalCase
-namespace parts exactly as in `STRUCTURE.md` — `Contract\`, `Provider\`, `Factory\`,
-`Constant\`, `Attribute\`, `Exception\`, `Throwable\`, `Abstract\`, `Enum\`,
-`Trait\`, `Type\`, `Model\`, `Entity\`, `Security\`, `Cli\Command\`. The other
+namespace parts exactly as in `STRUCTURE.md` — `Contract\`, `Provider\`,
+`Factory\`, `Constant\`, `Attribute\`, `Exception\`, `Throwable\`,
+`Abstract\`, `Enum\`, `Trait\`, `Type\`, `Model\`, `Entity\`, `Security\`,
+`Cli\Command\`. The other
 languages adapt to PHP, not the reverse.
 
 PHP nuances:
