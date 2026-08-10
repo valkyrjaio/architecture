@@ -63,5 +63,9 @@ Concrete test classes are `final`, live in `Unit\`/`Functional\`, and are named
 `*Test`; reusable doubles live in `Fixtures\`, named `*Fixture`, never `*Test`.
 A fixture that is itself an enum, trait, or contract keeps that type's naming
 (`*Enum` / `*Trait` / `*Contract`) — the type rule supersedes the fixture
-marker, just as the segment does for `Abstract`/`Enum`/`Trait` above. No class
-carries an `@author` docblock.
+marker, just as the segment does for `Abstract`/`Enum`/`Trait` above.
+
+## No author docblock
+
+No class carries an `@author` docblock. The rule governs every class in every
+segment, in `src` and in the tests alike.
