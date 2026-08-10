@@ -9,7 +9,7 @@ This is **Layer 1** of a three-layer guide:
 1. **This file** — cross-language rules that apply everywhere.
 2. **`<language>/AGENTS.md`** (in this repo, next to this file) — the per-language
    deltas: exact CI commands, package roots, tool lists, test mapping, and the
-   per-language spelling of the structure taxonomy (§4).
+   per-language spelling of the structure taxonomy ([`STRUCTURE.md`](STRUCTURE.md)).
    → [`php`](php/AGENTS.md) · [`java`](java/AGENTS.md) · [`go`](go/AGENTS.md) ·
    [`python`](python/AGENTS.md) · [`typescript`](typescript/AGENTS.md) ·
    [`kotlin`](kotlin/AGENTS.md)

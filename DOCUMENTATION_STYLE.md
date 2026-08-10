@@ -161,7 +161,7 @@ the example and be correct.
   a component's `README.md`, and in a repo's own documents, the code is the
   subject. There the example must match the source.
 
-The taxonomy rule in [`AGENTS.md`](AGENTS.md) §4 — "for `Abstract`, `Enum`, and
+The taxonomy rule in [`STRUCTURE.md`](STRUCTURE.md) — "for `Abstract`, `Enum`, and
 `Trait` the segment carries the meaning, so the name must not repeat it" — takes
 this example:
 
