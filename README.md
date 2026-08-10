@@ -58,11 +58,13 @@ Cross-cutting architectural decisions that apply to all ports.
 | [`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md)       | The component config shape                                                        |
 | [`BUILD_TOOL.md`](BUILD_TOOL.md)                   | Build tool design, Bin extraction, AST implementations                            |
 | [`STATIC_METHODS.md`](STATIC_METHODS.md)           | Static interface methods — cross-language design and registry pattern             |
+| [`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md) | Testing taxonomy and the 100% per-file coverage rules                             |
 | [`METHOD_NAMING.md`](METHOD_NAMING.md)             | Method name prefixes — what a method does, and whether the caller's value changes |
 | [`PACKAGE_NAMING.md`](PACKAGE_NAMING.md)           | Package name, registry namespace, and source namespace per language               |
 | [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md) | The writing rules for documentation prose                                         |
 | [`SHELL_SCRIPTS.md`](SHELL_SCRIPTS.md)             | The rules for shell                                                               |
 | [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md)     | Commit and PR title format, conventional types, roots                             |
+| [`PR_DESCRIPTION.md`](PR_DESCRIPTION.md)           | What a pull request description holds                                             |
 | [`VERSIONING.md`](VERSIONING.md)                   | Version scheme, bump mapping, release automation                                  |
 | [`VERSION_SUPPORT.md`](VERSION_SUPPORT.md)         | Support policy, release schedule, per-language runtimes                           |
 
