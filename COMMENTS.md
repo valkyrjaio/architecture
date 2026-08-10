@@ -97,9 +97,9 @@ coverage-report: false
 
 ## A comment inside a method body
 
-A comment inside a body states why the code does something this particular
-way. When an alternative failed, say so, so the next editor does not retry
-it.
+A comment inside a body explains what is unclear: why the code does something
+this particular way. When an alternative failed, say so, so the next editor
+does not retry it.
 
 ```php
 // Right — the comment states an ordering reason the code cannot show.
@@ -179,9 +179,7 @@ public function get(string $key): string|null
 ```
 
 When an override genuinely needs an explanation, put the explanation in the
-pull request description. The squash merge writes the description as the commit
-body, so the explanation stays attached to the commit that introduced the
-override, reachable by `git log` and `git blame`.
+pull request description. The transient rule above says why nothing is lost.
 
 ## The doc comment on a type declaration
 
