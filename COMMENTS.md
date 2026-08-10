@@ -56,8 +56,7 @@ $key = $this->getCacheKey($route, $locale);
 $key = $this->getCacheKey($route, $locale);
 ```
 
-A wall of text hides the one warning that matters. Comment the one line in
-ten that needs a comment:
+The one-line-in-ten rule takes this example:
 
 ```php
 // Wrong — every line carries a true comment, so the one warning drowns.
