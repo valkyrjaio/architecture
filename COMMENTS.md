@@ -66,6 +66,20 @@ The test is whether the comment states a _decision or invariant_ or a _current
 condition_. A decision stays in the comment. A condition goes to the pull
 request description.
 
+```php
+// Wrong — the comment states a condition, and the fix makes it false.
+// Retry twice as a workaround until the redis client reconnects on its own.
+$response = $this->retry($request, 2);
+```
+
+```php
+// Right — the comment states a decision, and the decision stays true.
+// Retry twice, because the redis client drops one connection on failover.
+$response = $this->retry($request, 2);
+```
+
+The same rule governs config:
+
 ```yaml
 # Wrong — the comment states a condition. The release automation bumps the
 # version and leaves the sentence, so the comment is then false.
