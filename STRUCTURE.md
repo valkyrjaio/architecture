@@ -1,7 +1,7 @@
 # STRUCTURE.md — the structure taxonomy
 
 The **cross-language** convention for the structure taxonomy. It applies in
-every Valkyrja repository, and to every contributor, human or agent.
+every Valkyrja port, and to every contributor, human or agent.
 
 A class's _kind_ is encoded three ways at once — its **name suffix**, the
 **segment** (namespace/package/directory) it lives in, and its **modifier** —
