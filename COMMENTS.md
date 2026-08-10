@@ -46,12 +46,17 @@ $key = $this->getCacheKey($route, $locale);
 
 ## A comment never states a transient condition
 
-A comment in code or config must stay true indefinitely. Do not write one to
-explain something temporary, or something an automated process will later
-rewrite — a pinned version awaiting a release, a workaround pending a fix, a
-value some job regenerates. Automation rewrites values, not the prose around
-them, so the comment outlives what it described and becomes an assertion that
-is now false. That is worse than no comment, because the next reader trusts it.
+A comment in code or config must stay true indefinitely. Do not write a
+comment to explain something temporary, or something an automated process will
+later rewrite:
+
+- a version pinned pending a release
+- a workaround awaiting a fix
+- a value some job regenerates
+
+Automation rewrites values, not the prose around them, so the comment outlives
+what it described and becomes an assertion that is now false. That is worse
+than no comment, because the next reader trusts it.
 
 Put the explanation in the pull request description instead
 ([`PR_DESCRIPTION.md`](PR_DESCRIPTION.md)). Nothing is lost: the squash merge
