@@ -5,8 +5,8 @@ repository, and to every contributor, human or agent.
 
 A repository in every language holds shell. A CI helper, a pre-commit hook, and
 a script under `.github/ci/scripts/` are all shell. Every script runs under
-`bash`, and its first line is `#!/usr/bin/env bash` — the rules below use bash
-constructs (`[[ ]]`, arrays, `local`) that plain `sh` does not have. SonarCloud
+`bash`, and its first line is `#!/usr/bin/env bash`. The rules below use bash
+constructs that plain `sh` does not have. SonarCloud
 reads a `.sh` file in each repository, and `shellcheck` reads one on a
 developer's machine. Most rules below are a rule of one of those two tools, so
 a script that breaks one reports a finding.
