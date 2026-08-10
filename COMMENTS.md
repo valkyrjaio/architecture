@@ -7,8 +7,8 @@ every contributor, human or agent.
 Code speaks for itself. A comment adds what the code cannot show, so most code
 carries no comment. A file where every block carries a comment is a wall of
 text, and a reader skips walls. Comment the one line in ten that needs one, and
-that warning stands alone. ([`AGENTS.md`](AGENTS.md) §3 summarizes these rules
-as golden rules 10, 13, 14, and 15.)
+that warning stands alone. ([`AGENTS.md`](AGENTS.md) §3 summarizes this
+document's rules as golden rules 10, 13, 14, and 15.)
 
 PHP examples are shown, because PHP is the reference implementation; a rule
 about config shows YAML. The rules hold in every port. The examples are generic
@@ -74,15 +74,16 @@ sindri-version: "26.5.0" # Pinned ahead of the others until the next release.
 
 ```yaml
 # Right — the comment states a decision, and the decision stays true.
+
 # This job asserts only generated code, so its coverage report is meaningless.
 coverage-report: false
 ```
 
 ## A comment inside a method body
 
-Clear code takes no comment. A comment explains what is unclear, or why the
-code does something this particular way. When an alternative failed, say so, so
-the next editor does not retry it.
+A comment inside a body follows the same rule: it states why the code does
+something this particular way. When an alternative failed, say so, so the next
+editor does not retry it.
 
 ```php
 // Right — the comment states an ordering reason the code cannot show.
