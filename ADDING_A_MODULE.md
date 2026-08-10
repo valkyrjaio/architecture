@@ -112,9 +112,10 @@ Each language uses its idiomatic discovery mechanism to populate `Map<key, Route
 ### Config
 
 Add a `Config` value + contract carrying the module's port/options and its per-stage middleware lists,
-with sensible defaults. The module's service provider publishes the contract as a container singleton:
-it binds the application config when the application config implements the contract, and the module's
-default class when it does not ([`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md)).
+with sensible defaults. The module's service provider publishes the contract as a container singleton
+([`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md)). The provider binds the application config when that
+config implements the contract. When the application config does not implement the contract, the
+provider binds the module's default class.
 
 ### Providers
 
@@ -188,7 +189,7 @@ framework with a build-tool composite build, then release the framework, then bu
 - [ ] Kernel handler (+ contract) with try/catch → status mapping; adapter contract.
 - [ ] Throwable contract + base + specific exceptions.
 - [ ] Registration: attributes + collector + route-provider contract.
-- [ ] Config + contract; bound in the application bootstrap.
+- [ ] Config + contract; published by the module's service provider.
 - [ ] Service + component provider pairs; stage handlers published as shared singletons.
 - [ ] `get<Module>Providers` across the shared contracts, kernel, child app, and every implementor.
 - [ ] Single-shot + worker-base application entry.
