@@ -39,7 +39,7 @@ fi
 ```
 
 Warning: quote the right side of a `=` inside `[[ ]]`. An unquoted right side is
-a pattern, so `[[ "$a" = $b ]]` matches a glob where `[ "$a" = "$b" ]` compared
+a pattern, so `[[ "$a" = $b ]]` matches a glob where `[ "$a" = "$b" ]` compares
 two strings.
 
 ## Give every `case` a default branch
