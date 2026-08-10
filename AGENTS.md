@@ -377,10 +377,16 @@ literals. Detail: [`CONTAINER_BINDINGS.md`](CONTAINER_BINDINGS.md).
 
 A repository in every language holds shell. A CI helper, a pre-commit hook, and
 a script under `.github/ci/scripts/` are all shell, and every script runs under
-`bash`. Use `[[ ]]` for a test, give every `case` a default branch, put a list
-of arguments in an array, write a local variable in `lower_case`, and give
-every suppression a reason. SonarCloud and `shellcheck` enforce most of these
-rules.
+`bash`. The rules:
+
+- Use `[[ ]]` for a test, never `[ ]`.
+- Give every `case` a default branch.
+- Write a local variable in `lower_case`.
+- Put a list of arguments in an array, never in a string.
+- Give every suppression a reason.
+- Match the `set` line to how the workflow runs the script.
+
+SonarCloud and `shellcheck` enforce most of these rules.
 
 Warning: shell inside a GitHub Actions `run:` block is invisible to both tools,
 so a rule goes unenforced until the shell moves into a `.sh` file. That is a

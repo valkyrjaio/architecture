@@ -98,6 +98,14 @@ SUMMARY=$(echo "$REPORT" | sed 's/^/- /')
 
 ## The `set` line follows the workflow
 
+Match the `set` line of a script to the shell options of the `run:` block that
+the script replaces.
+
+```bash
+# Right — the workflow step names `shell: bash`, so the script keeps `pipefail`.
+set -eo pipefail
+```
+
 Warning: the `set` line of a script that a GitHub Actions workflow runs depends
 on how the workflow runs it. A `run:` step that names no shell gives `bash -e`
 alone, and an explicit `shell: bash` gives `-eo pipefail`. A script that adds
