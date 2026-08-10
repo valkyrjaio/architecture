@@ -106,10 +106,11 @@ alone, and an explicit `shell: bash` gives `-eo pipefail`. A script that adds
 `pipefail` where the block had none does not do what the block did.
 
 Match the `set` line of a script to the shell options of the `run:` step that
-runs the script.
+runs the script. One addition is licensed: a script that a `shell: bash` step
+runs also sets `-u`, which the workflows README prescribes for that family.
 
 ```bash
-# Wrong — a bare `run:` step gave `-e` alone, and the script adds `pipefail`.
+# Wrong — a bare `run:` step gives `-e` alone, and the script adds two options.
 set -euo pipefail
 ```
 
@@ -119,7 +120,7 @@ set -e
 ```
 
 ```bash
-# Right — the step names `shell: bash`; the script keeps `pipefail` and adds `-u`.
+# Right — the step names `shell: bash`, and the script also sets `-u`.
 set -euo pipefail
 ```
 
