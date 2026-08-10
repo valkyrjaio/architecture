@@ -47,8 +47,8 @@ Java nuances:
 
 - **Reserved words → trailing underscore.** `abstract` and `enum` are Java
   keywords and cannot be package names — use **`abstract_`** and **`enum_`** for
-  those segments. The `STRUCTURE.md` _name_ rules still hold (an abstract class's name must
-  not contain `Abstract`; an enum's must not contain `Enum`).
+  those segments. The `STRUCTURE.md` _name_ rules still hold (an abstract
+  class's name must not contain `Abstract`; an enum's must not contain `Enum`).
 - **No traits.** Java has no trait construct, so there is no `trait` segment —
   share behavior via abstract classes or interface `default` methods.
 - **Attributes → annotations.** The attribute marker is a Java annotation
