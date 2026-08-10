@@ -44,7 +44,8 @@ $key = $this->getCacheKey($route, $locale);
 $key = $this->getCacheKey($route, $locale);
 ```
 
-A wall of comments hides the one warning that matters:
+Write the one comment that a passage needs, and no more. A wall of comments
+hides the one warning that matters:
 
 ```php
 // Wrong — every line carries a true comment, so the one warning drowns.
