@@ -68,12 +68,14 @@ request description.
 
 ```php
 // Wrong — the comment states a condition, and the fix makes it false.
+
 // Retry twice as a workaround until the redis client reconnects on its own.
 $response = $this->retry($request, 2);
 ```
 
 ```php
 // Right — the comment states a decision, and the decision stays true.
+
 // Retry twice, because the redis client drops one connection on failover.
 $response = $this->retry($request, 2);
 ```
@@ -95,9 +97,9 @@ coverage-report: false
 
 ## A comment inside a method body
 
-A comment inside a body follows the same rule: it states why the code does
-something this particular way. When an alternative failed, say so, so the next
-editor does not retry it.
+A comment inside a body states why the code does something this particular
+way. When an alternative failed, say so, so the next editor does not retry
+it.
 
 ```php
 // Right — the comment states an ordering reason the code cannot show.
