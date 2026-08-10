@@ -53,7 +53,7 @@ A wall of comments hides the one warning that matters:
 $config = $container->getSingleton(ConfigContract::class);
 // Read the cache path from the config.
 $path = $config->cachePath;
-// Load the cache from the path.
+// The cache file is generated. A missing file means the build has not run.
 $cache = CacheFactory::fromPath($path);
 ```
 
