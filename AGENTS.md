@@ -85,8 +85,8 @@ These hold in **every** language. Do not violate them in a port.
 - **`AppConfig` is the build tool entry point.** No `valkyrja.yaml`. The app
   config class already lists the component providers; `sindri` reads it via AST.
 - **A component config holds only component-wide settings.** Each adapter gets
-  its own config contract and its own default class. The component's service
-  provider publishes each contract as a separate container binding. A component
+  its own config contract and its own default implementation. The component's
+  service provider publishes each contract as a separate container binding. A component
   config that holds every adapter config forces an application to construct
   configuration for adapters that the application never uses. An adapter
   contract prefixes every property with the adapter name, so one application

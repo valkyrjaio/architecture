@@ -85,7 +85,7 @@ final class AppConfig extends Config implements CacheConfigContract, CacheRedisC
 
 The service provider binds the application config when the application config
 implements the contract. If it does not, the service provider binds the
-framework default:
+default implementation:
 
 ```php
 public static function publishRedisConfig(ContainerContract $container): void

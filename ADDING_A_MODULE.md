@@ -115,7 +115,7 @@ Add a `Config` value + contract carrying the module's port/options and its per-s
 with sensible defaults. The module's service provider publishes the contract as a container singleton
 ([`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md)). The provider binds the application config when that
 config implements the contract. When the application config does not implement the contract, the
-provider binds the module's default class.
+provider binds the module's default implementation.
 
 ### Providers
 
