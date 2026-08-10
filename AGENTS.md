@@ -86,9 +86,9 @@ These hold in **every** language. Do not violate them in a port.
   config class already lists the component providers; `sindri` reads it via AST.
 - **A component config holds only component-wide settings.** Each adapter gets
   its own config contract and its own default implementation. The component's
-  service provider publishes each contract as a separate container binding. A component
-  config that holds every adapter config forces an application to construct
-  configuration for adapters that the application never uses. An adapter
+  service provider publishes each contract as a separate container binding. A
+  component config that holds every adapter config forces an application to
+  construct configuration for adapters that the application never uses. An adapter
   contract prefixes every property with the adapter name, so one application
   config class can implement several adapter contracts. See §4.
 - **No provider-reference constants class.** Provider references use
