@@ -9,10 +9,9 @@ to the whole component. The default adapter is the most common such setting.
 Each adapter then gets its own `ComponentName<Adapter>ConfigContract`. Every
 contract has a default implementation that drops the `Contract` suffix
 (`CacheConfig`, `CacheRedisConfig`). The default implementations live in the
-component's `Data\` segment, and the contracts in its `Data\Contract\`
-segment. The
-component's service provider publishes each contract as its own container
-binding.
+component's `Data\` segment. The contracts live in the component's
+`Data\Contract\` segment. The component's service provider publishes each
+contract as its own container binding.
 
 ## The two rules
 
