@@ -86,8 +86,8 @@ Put the explanation in the pull request description instead
 writes the description as the commit body, so the explanation lives in git
 history permanently. The explanation stays attached to the commit that
 introduced it, and `git log` and `git blame` reach it. This is also why the
-commits you write carry no body — the merge commit's body comes from the pull
-request.
+commits you write carry no body — the squash commit's body comes from the
+pull request.
 
 The description also pins the explanation to when it was true. A comment
 floats in a file, where a later automated edit silently falsifies it.
