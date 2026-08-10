@@ -22,6 +22,17 @@ lines: the constraint, the invariant, or the reason the obvious approach
 fails. Do not write a comment that narrates what the next line does — the code
 shows it.
 
+```php
+// Wrong — the comment narrates what the next line does.
+// Get the config from the container.
+$config = $container->getSingleton(ConfigContract::class);
+```
+
+```php
+// Right — the code shows what it does, so the line takes no comment.
+$config = $container->getSingleton(ConfigContract::class);
+```
+
 When an explanation needs a paragraph, put the paragraph in the pull request
 description or in a document. Shrink the comment to one sentence that states
 the conclusion.
