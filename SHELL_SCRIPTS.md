@@ -24,15 +24,15 @@ then safe without a quote.
 
 ```bash
 # Wrong — `[ ]` is a command, and its arguments expand before it runs.
-if [ -n "$BRANCH_EXISTS" ]; then
-    echo "The branch is there already."
+if [ -n "$COVERAGE_REPORT" ]; then
+    echo "The coverage report is there."
 fi
 ```
 
 ```bash
 # Right — `[[ ]]` parses the test.
-if [[ -n "$BRANCH_EXISTS" ]]; then
-    echo "The branch is there already."
+if [[ -n "$COVERAGE_REPORT" ]]; then
+    echo "The coverage report is there."
 fi
 ```
 
@@ -47,9 +47,9 @@ reader cannot tell a deliberate skip from a missing branch.
 
 ```bash
 # Right — the default states that every other value is ignored.
-case "$OUTCOME" in
-    success) released=$((released + 1)) ;;
-    timeout) timed_out=$((timed_out + 1)) ;;
+case "$CHECK_OUTCOME" in
+    success) passed=$((passed + 1)) ;;
+    failure) failed=$((failed + 1)) ;;
     *) ;;
 esac
 ```
@@ -60,12 +60,12 @@ A script mixes a local with a global that a function reports through, and case
 is what separates them.
 
 ```bash
-# Right — `base_sha` belongs to the function, and `BRANCH_EXISTS` to the caller.
-create_branch_if_needed() {
-    local base_sha
-    base_sha=$(gh api "repos/$ORG/$REPO/git/refs/heads/$BASE_BRANCH" --jq '.object.sha')
+# Right — `branch` belongs to the function, and `DEFAULT_BRANCH` to the caller.
+read_default_branch() {
+    local branch
+    branch=$(git remote show origin | sed -n 's/.*HEAD branch: //p')
 
-    BRANCH_EXISTS="$base_sha"
+    DEFAULT_BRANCH="$branch"
 }
 ```
 
@@ -75,15 +75,15 @@ A string of arguments needs word splitting to work, and word splitting breaks
 on a value that holds a space.
 
 ```bash
-# Wrong — the string splits on every space, including one inside a name.
-REVIEWER_FLAGS="--assignee $REVIEWER --reviewer $REVIEWER"
-gh pr create $REVIEWER_FLAGS
+# Wrong — the string splits on every space, including one inside a value.
+PHPUNIT_FLAGS="--colors=always --filter $TEST_FILTER"
+composer phpunit -- $PHPUNIT_FLAGS
 ```
 
 ```bash
 # Right — the array carries each argument, whatever it holds.
-REVIEWER_FLAGS=(--assignee "$REVIEWER" --reviewer "$REVIEWER")
-gh pr create "${REVIEWER_FLAGS[@]}"
+PHPUNIT_FLAGS=(--colors=always --filter "$TEST_FILTER")
+composer phpunit -- "${PHPUNIT_FLAGS[@]}"
 ```
 
 ## A suppression states its reason
@@ -93,7 +93,7 @@ considered suppression from a silenced one.
 
 ```bash
 # shellcheck disable=SC2001 # `^` anchors each line, and `${var//}` anchors nothing.
-NEW_CONTENT=$(echo "$CONTENT" | sed 's/^name: Reusable/name: Z Reusable/')
+SUMMARY=$(echo "$REPORT" | sed 's/^/- /')
 ```
 
 ## The `set` line follows the workflow
