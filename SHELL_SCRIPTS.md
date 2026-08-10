@@ -62,7 +62,7 @@ A script mixes a local with a global that a function reports through, and case
 is what separates them.
 
 ```bash
-# Right — `branch` belongs to the function, and `DEFAULT_BRANCH` to the caller.
+# Right — `branch` belongs to the function, `DEFAULT_BRANCH` to the caller.
 read_default_branch() {
     local branch
     branch=$(git remote show origin | sed -n 's/.*HEAD branch: //p')
@@ -110,7 +110,7 @@ runs the script. One addition is licensed: a script that a `shell: bash` step
 runs also sets `-u`, which the workflows README prescribes for that family.
 
 ```bash
-# Wrong — a bare `run:` step gives `-e` alone, and the script adds two options.
+# Wrong — a bare `run:` step gives `-e` alone; the script adds two options.
 set -euo pipefail
 ```
 
