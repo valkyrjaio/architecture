@@ -99,12 +99,11 @@ why it matters:
 
 ## A decision lands in the description, not in a comment
 
-A comment in code must stay true indefinitely, so a temporary explanation never
-goes in a comment — a version pinned pending a release, a workaround awaiting a
-fix. Put the explanation in the
-description instead. Nothing is lost: the description becomes the commit body,
-so the explanation is pinned to when it was true, and `git log` and `git blame`
-reach it.
+A comment in code or config must stay true indefinitely, so a temporary
+explanation never goes in a comment ([`COMMENTS.md`](COMMENTS.md)). Put the
+explanation in the description instead. Nothing is lost: the description
+becomes the commit body, so the explanation is pinned to when it was true, and
+`git log` and `git blame` reach it.
 
 State the decision in a sentence or two. The description takes the decision,
 not the essay around it.
