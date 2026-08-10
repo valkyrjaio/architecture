@@ -71,12 +71,12 @@ $cache = CacheFactory::fromPath($path);
 ## A comment never states a transient condition
 
 A comment in code or config must stay true indefinitely. Do not write a
-comment to explain something temporary, or something an automated process will
-later rewrite:
+comment to explain something temporary, or something automation will later
+rewrite:
 
 - a version pinned pending a release
 - a workaround awaiting a fix
-- a value some job regenerates
+- a value automation regenerates
 
 Automation rewrites values, not the prose around them, so the comment outlives
 what it described and becomes an assertion that is now false. That is worse
@@ -111,8 +111,8 @@ $response = $this->retry($request, 2);
 The same rule governs config:
 
 ```yaml
-# Wrong — the comment states a condition. The release automation bumps the
-# version and leaves the sentence, so the comment is then false.
+# Wrong — the comment states a condition. Automation bumps the version and
+# leaves the sentence, so the comment is then false.
 sindri-version: "26.5.0" # Pinned ahead of the others until the next release.
 ```
 
