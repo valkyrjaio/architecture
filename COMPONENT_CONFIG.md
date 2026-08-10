@@ -65,7 +65,7 @@ interface CacheNullConfigContract
 ## The application implements only what it uses
 
 One application config class implements the component contract, and it adds an
-adapter contract only when the application resolves that adapter:
+adapter contract only when the application uses that adapter:
 
 ```php
 final class AppConfig extends Config implements CacheConfigContract, CacheRedisConfigContract
