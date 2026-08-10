@@ -165,10 +165,10 @@ Then:
     true indefinitely, so a temporary condition never goes in a comment.
     Automation rewrites values, not the prose around them, so the comment
     becomes an assertion that is now false. Put the explanation in the PR
-    description instead ([`PR_DESCRIPTION.md`](PR_DESCRIPTION.md)) — the
-    squash merge writes the description into git history as the commit body,
-    so nothing is lost. Full rules, the decision-or-condition test, and
-    examples: [`COMMENTS.md`](COMMENTS.md).
+    description instead ([`PR_DESCRIPTION.md`](PR_DESCRIPTION.md)). The squash
+    merge writes the description into git history as the commit body, so
+    nothing is lost. Full rules, the decision-or-condition test, and examples:
+    [`COMMENTS.md`](COMMENTS.md).
 11. **Update the documentation in the same pull request.** A change to behavior,
     to configuration, or to a public API also updates every document that
     describes it. The component's `README.md` is the usual one, because each
