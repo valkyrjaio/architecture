@@ -209,7 +209,7 @@ categories and their remedies.
 - **CI-tool config repos** (`ci/*`) are tested by asserting the full rule set is
   configured exactly as expected (`assertSame` lock on `getRules()`), plus branch
   tests for any custom expressions/rules. See
-  [`../TESTING_METHODOLOGY.md`](../TESTING_METHODOLOGY.md) §2.
+  [`../TESTING_METHODOLOGY.md`](../TESTING_METHODOLOGY.md) §3.
 - **Entry workers** (the per-runtime `Application\Entry\<Runtime>` HTTP workers —
   FrankenPHP, OpenSwoole, RoadRunner) reach **100% line + branch** coverage: each
   `run()` wraps its irreducible runtime call (`frankenphp_handle_request`,
