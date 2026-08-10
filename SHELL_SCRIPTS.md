@@ -103,11 +103,11 @@ SUMMARY=$(echo "$REPORT" | sed 's/^/- /')
 Warning: the `set` line of a script that a GitHub Actions workflow runs depends
 on how the workflow runs it. A `run:` step that names no shell gives `bash -e`
 alone, and an explicit `shell: bash` gives `-eo pipefail`. A script that adds
-`pipefail` where the block had none does not do what the block did.
+an option the block did not have does not do what the block did.
 
 Match the `set` line of a script to the shell options of the `run:` step that
-runs the script. One addition is licensed: a script that a `shell: bash` step
-runs also sets `-u`, which the workflows README prescribes for that family.
+runs the script. The workflows README permits one addition: a script that a
+`shell: bash` step runs also sets `-u`.
 
 ```bash
 # Wrong — a bare `run:` step gives `-e` alone; the script adds two options.
