@@ -373,8 +373,9 @@ to the whole component, and each adapter gets its own
 `ComponentName<Adapter>ConfigContract`. The component config does not hold the
 adapter configs, and an adapter contract prefixes every property with the
 adapter name. Every contract has a default implementation that drops the
-`Contract` suffix. The defaults live in the component's `Data\` segment, and
-the contracts in its `Data\Contract\` segment. The service provider publishes
+`Contract` suffix. The default implementations live in the component's `Data\`
+segment, and the contracts in its `Data\Contract\` segment. The service
+provider publishes
 each contract as its own container binding. The full rules and examples:
 [`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md).
 

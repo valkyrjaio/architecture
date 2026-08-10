@@ -1,14 +1,16 @@
 # COMPONENT_CONFIG.md — the component config shape
 
 The **cross-language** convention for a component's configuration. It applies
-in every Valkyrja port, and to every contributor, human or agent.
+in every Valkyrja port, and to every contributor, human or agent. PHP spellings
+are shown; each Layer-2 guide gives the per-language spelling.
 
 A component gets one `ComponentNameConfigContract` for the settings that apply
 to the whole component. The default adapter is the most common such setting.
 Each adapter then gets its own `ComponentName<Adapter>ConfigContract`. Every
 contract has a default implementation that drops the `Contract` suffix
-(`CacheConfig`, `CacheRedisConfig`). The defaults live in the component's
-`Data\` segment, and the contracts in its `Data\Contract\` segment. The
+(`CacheConfig`, `CacheRedisConfig`). The default implementations live in the
+component's `Data\` segment, and the contracts in its `Data\Contract\`
+segment. The
 component's service provider publishes each contract as its own container
 binding.
 
@@ -42,7 +44,9 @@ interface CacheConfigContract
     /** @var class-string<CacheContract> */
     public string $defaultCache { get; }
 }
+```
 
+```php
 // Right — each adapter has its own contract, and each property carries the
 // adapter prefix, so one class can implement several contracts at once.
 interface CacheRedisConfigContract
