@@ -60,7 +60,8 @@ Put the explanation in the pull request description instead
 ([`PR_DESCRIPTION.md`](PR_DESCRIPTION.md)). Nothing is lost: the squash merge
 writes the description as the commit body, so the explanation lives in git
 history permanently, attached to the commit that introduced it and reachable by
-`git log` and `git blame`. The explanation is better placed there anyway:
+`git log` and `git blame`. This is also why the commits you write carry no
+body — the merge commit's body comes from the pull request. The explanation is better placed there anyway:
 pinned to when it was true, instead of floating in a file where a later
 automated edit silently falsifies it.
 
