@@ -23,8 +23,8 @@ fails. Do not write a comment that narrates what the next line does — the code
 shows it.
 
 When an explanation needs a paragraph, put the paragraph in the pull request
-description or in a document, and shrink the comment to one sentence that
-states the conclusion.
+description or in a document. Shrink the comment to one sentence that states
+the conclusion.
 
 ```php
 // Wrong — the explanation grew into a paragraph, so the paragraph moved into
@@ -44,6 +44,29 @@ $key = $this->getCacheKey($route, $locale);
 $key = $this->getCacheKey($route, $locale);
 ```
 
+A wall of comments hides the one warning that matters:
+
+```php
+// Wrong — every line carries a comment, so the one warning drowns.
+
+// Get the config from the container.
+$config = $container->getSingleton(ConfigContract::class);
+// Read the cache path from the config.
+$path = $config->cachePath;
+// Load the cache from the path.
+$cache = CacheFactory::fromPath($path);
+```
+
+```php
+// Right — the one comment that matters stands alone.
+
+$config = $container->getSingleton(ConfigContract::class);
+$path = $config->cachePath;
+
+// The cache file is generated. A missing file means the build has not run.
+$cache = CacheFactory::fromPath($path);
+```
+
 ## A comment never states a transient condition
 
 A comment in code or config must stay true indefinitely. Do not write a
@@ -59,13 +82,13 @@ what it described and becomes an assertion that is now false. That is worse
 than no comment, because the next reader trusts it.
 
 Put the explanation in the pull request description instead
-([`PR_DESCRIPTION.md`](PR_DESCRIPTION.md)). Nothing is lost: the squash merge
+([`PR_DESCRIPTION.md`](PR_DESCRIPTION.md)). Nothing is lost. The squash merge
 writes the description as the commit body, so the explanation lives in git
-history permanently, attached to the commit that introduced it and reachable by
-`git log` and `git blame`. This is also why the commits you write carry no
-body — the merge commit's body comes from the pull request. The explanation is
-better placed there anyway: pinned to when it was true, instead of floating in
-a file where a later automated edit silently falsifies it.
+history permanently. The explanation stays attached to the commit that
+introduced it, and `git log` and `git blame` reach it. This is also why the
+commits you write carry no body — the merge commit's body comes from the pull
+request. The description also pins the explanation to when it was true. A
+comment floats in a file, where a later automated edit silently falsifies it.
 
 The test is whether the comment states a _decision or invariant_ or a _current
 condition_. A decision stays in the comment. A condition goes to the pull
