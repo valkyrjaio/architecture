@@ -50,7 +50,7 @@ in ten that needs a comment:
 ```php
 // Wrong — every line carries a true comment, so the one warning drowns.
 
-// The container caches singletons, so the call is cheap.
+// Boot registers the config before any handler runs.
 $config = $container->getSingleton(ConfigContract::class);
 // The path is absolute.
 $path = $config->cachePath;
