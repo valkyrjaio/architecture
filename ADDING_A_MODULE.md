@@ -112,9 +112,9 @@ Each language uses its idiomatic discovery mechanism to populate `Map<key, Route
 ### Config
 
 Add a `Config` value + contract carrying the module's port/options and its per-stage middleware lists,
-with sensible defaults. Bind it in the application bootstrap (`App.bootstrapServices`) so the config is
-a container singleton keyed by its contract — add the `instanceof <YourConfig>` binding next to the
-existing ones.
+with sensible defaults. The module's service provider publishes the contract as a container singleton:
+it binds the application config when the application config implements the contract, and the module's
+default class when it does not ([`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md)).
 
 ### Providers
 
