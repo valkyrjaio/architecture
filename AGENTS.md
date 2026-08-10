@@ -321,7 +321,8 @@ the language has an architecture linter, and review enforces it elsewhere. For
 `Abstract`, `Enum`, and `Trait` the segment carries the meaning, so the name
 must not repeat it — an abstract `Stream` is `Abstract\Stream`, never
 `AbstractStream`. Each Layer-2 guide gives the per-language spelling. The full
-table, the test-class rules, and the examples: [`STRUCTURE.md`](STRUCTURE.md).
+table, the test-class rules, the author-docblock rule, and the examples:
+[`STRUCTURE.md`](STRUCTURE.md).
 
 ### What a data object holds
 
