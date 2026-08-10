@@ -61,8 +61,8 @@ Cross-cutting architectural decisions that apply to all ports.
 | [`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md) | Testing taxonomy and the 100% per-file coverage rules                             |
 | [`METHOD_NAMING.md`](METHOD_NAMING.md)             | Method name prefixes — what a method does, and whether the caller's value changes |
 | [`COMMENTS.md`](COMMENTS.md)                       | What a comment may state                                                          |
-| [`PACKAGE_NAMING.md`](PACKAGE_NAMING.md)           | Package name, registry namespace, and source namespace per language               |
 | [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md) | The writing rules for documentation prose                                         |
+| [`PACKAGE_NAMING.md`](PACKAGE_NAMING.md)           | Package name, registry namespace, and source namespace per language               |
 | [`SHELL_SCRIPTS.md`](SHELL_SCRIPTS.md)             | The rules for shell                                                               |
 | [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md)     | Commit and PR title format, conventional types, roots                             |
 | [`PR_DESCRIPTION.md`](PR_DESCRIPTION.md)           | What a pull request description holds                                             |
