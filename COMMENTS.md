@@ -24,6 +24,7 @@ shows it.
 
 ```php
 // Wrong — the comment narrates what the next line does.
+
 // Get the config from the container.
 $config = $container->getSingleton(ConfigContract::class);
 ```
