@@ -87,8 +87,10 @@ writes the description as the commit body, so the explanation lives in git
 history permanently. The explanation stays attached to the commit that
 introduced it, and `git log` and `git blame` reach it. This is also why the
 commits you write carry no body — the merge commit's body comes from the pull
-request. The description also pins the explanation to when it was true. A
-comment floats in a file, where a later automated edit silently falsifies it.
+request.
+
+The description also pins the explanation to when it was true. A comment
+floats in a file, where a later automated edit silently falsifies it.
 
 The test is whether the comment states a _decision or invariant_ or a _current
 condition_. A decision stays in the comment. A condition goes to the pull
@@ -125,9 +127,9 @@ coverage-report: false
 
 ## A comment inside a method body
 
-A comment inside a body explains what is unclear: why the code does something
-this particular way. When an alternative failed, say so, so the next editor
-does not retry it.
+A comment inside a body explains what is unclear, or why the code does
+something this particular way. When an alternative failed, say so, so the next
+editor does not retry it.
 
 ```php
 // Right — the comment states an ordering reason the code cannot show.
