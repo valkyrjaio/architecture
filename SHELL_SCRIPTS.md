@@ -7,10 +7,11 @@ A repository in every language holds shell. A CI helper, a pre-commit hook, and
 a script under `.github/ci/scripts/` are all shell. Every script runs under
 `bash`, and its first line is `#!/usr/bin/env bash`. The license header
 ([`AGENTS.md`](AGENTS.md) §5) follows the shebang. The rules below use bash
-constructs that plain `sh` does not have. SonarCloud reads a `.sh` file in
-each repository, and `shellcheck` reads one on a developer's machine. Most
-rules below are a rule of one of those two tools, so a script that breaks one
-reports a finding.
+constructs that plain `sh` does not have.
+
+SonarCloud reads a `.sh` file in each repository, and `shellcheck` reads one
+on a developer's machine. Most rules below are a rule of one of those two
+tools, so a script that breaks one reports a finding.
 
 Warning: shell inside a GitHub Actions `run:` block is invisible to both tools.
 Neither one reads a workflow file, so a rule below goes unenforced until the
@@ -108,13 +109,18 @@ Match the `set` line of a script to the shell options of the `run:` step that
 runs the script.
 
 ```bash
+# Wrong — a bare `run:` step gave `-e` alone, and the script adds `pipefail`.
+set -euo pipefail
+```
+
+```bash
 # Right — a bare `run:` step runs the script, so the script sets `-e` alone.
 set -e
 ```
 
 ```bash
-# Right — the step names `shell: bash`, so the script keeps `pipefail`.
-set -eo pipefail
+# Right — the step names `shell: bash`, so the script keeps `set -euo pipefail`.
+set -euo pipefail
 ```
 
 The rule and the table are in
