@@ -119,7 +119,7 @@ set -e
 ```
 
 ```bash
-# Right — the step names `shell: bash`, so the script keeps `set -euo pipefail`.
+# Right — the step names `shell: bash`; the script keeps `pipefail` and adds `-u`.
 set -euo pipefail
 ```
 
