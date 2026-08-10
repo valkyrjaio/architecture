@@ -47,11 +47,11 @@ $key = $this->getCacheKey($route, $locale);
 A wall of comments hides the one warning that matters:
 
 ```php
-// Wrong — every line carries a comment, so the one warning drowns.
+// Wrong — every line carries a true comment, so the one warning drowns.
 
-// Get the config from the container.
+// The container caches singletons, so the call is cheap.
 $config = $container->getSingleton(ConfigContract::class);
-// Read the cache path from the config.
+// The path is absolute.
 $path = $config->cachePath;
 // The cache file is generated. A missing file means the build has not run.
 $cache = CacheFactory::fromPath($path);
@@ -88,9 +88,6 @@ history permanently. The explanation stays attached to the commit that
 introduced it, and `git log` and `git blame` reach it. This is also why the
 commits you write carry no body — the squash commit's body comes from the
 pull request.
-
-The description also pins the explanation to when it was true. A comment
-floats in a file, where a later automated edit silently falsifies it.
 
 The test is whether the comment states a _decision or invariant_ or a _current
 condition_. A decision stays in the comment. A condition goes to the pull
