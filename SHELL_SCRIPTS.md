@@ -106,8 +106,8 @@ alone, and an explicit `shell: bash` gives `-eo pipefail`. A script that adds
 an option the block did not have does not do what the block did.
 
 Match the `set` line of a script to the shell options of the `run:` step that
-runs the script. The workflows README permits one addition: a script that a
-`shell: bash` step runs also sets `-u`.
+runs the script. One exception: a script that a `shell: bash` step runs also
+sets `-u`, which `.github/workflows/README.md` states.
 
 ```bash
 # Wrong — a bare `run:` step gives `-e` alone; the script adds two options.
