@@ -74,8 +74,7 @@ the `valkyrja/ci-phparkitect` package's `Rules` class). Segments are PascalCase
 namespace parts exactly as in `STRUCTURE.md` — `Contract\`, `Provider\`,
 `Factory\`, `Constant\`, `Attribute\`, `Exception\`, `Throwable\`,
 `Abstract\`, `Enum\`, `Trait\`, `Type\`, `Model\`, `Entity\`, `Security\`,
-`Cli\Command\`. The other
-languages adapt to PHP, not the reverse.
+`Cli\Command\`. The other languages adapt to PHP, not the reverse.
 
 PHP nuances:
 
