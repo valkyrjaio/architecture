@@ -56,7 +56,7 @@ $key = $this->getCacheKey($route, $locale);
 $key = $this->getCacheKey($route, $locale);
 ```
 
-The one-line-in-ten rule takes this example:
+Comment the one line in ten that needs a comment:
 
 ```php
 // Wrong — every line carries a true comment, so the one warning drowns.
