@@ -136,7 +136,7 @@ coverage-report: false
 
 ## A comment inside a method body
 
-A comment inside a body explains what is unclear, or why the code does
+A comment inside a method body explains what is unclear, or why the code does
 something this particular way. When an alternative failed, say so, so the next
 editor does not retry it.
 
