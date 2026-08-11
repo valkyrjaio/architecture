@@ -81,17 +81,17 @@ $cache = CacheFactory::fromPath($path);
 
 ## A comment never states a transient condition
 
-A comment in code or config must stay true indefinitely. Do not write a
-comment to explain something temporary, or something automation will later
-rewrite:
+A comment in code or config must stay true indefinitely. Automation rewrites
+values, not the prose around them, so a comment about a temporary condition
+outlives what it described and becomes an assertion that is now false. That is
+worse than no comment, because the next reader trusts it.
+
+Do not write a comment to explain something temporary, or something automation
+will later rewrite:
 
 - a version pinned pending a release
 - a workaround awaiting a fix
 - a value automation regenerates
-
-Automation rewrites values, not the prose around them, so the comment outlives
-what it described and becomes an assertion that is now false. That is worse
-than no comment, because the next reader trusts it.
 
 Put the explanation in the pull request description instead
 ([`PR_DESCRIPTION.md`](PR_DESCRIPTION.md)). Nothing is lost. The squash merge
