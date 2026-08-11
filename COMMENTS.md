@@ -6,9 +6,8 @@ every contributor, human or agent.
 
 Code speaks for itself. A comment adds what the code cannot show, so most code
 carries no comment. A file where every block carries a comment is a wall of
-text, and a reader skips walls. Comment the one line in ten that needs a
-comment. That comment then stands alone. ([`AGENTS.md`](AGENTS.md) §3
-summarizes this document's rules as golden rules 10, 13, 14, and 15.)
+text, and a reader skips walls. ([`AGENTS.md`](AGENTS.md) §3 summarizes this
+document's rules as golden rules 10, 13, 14, and 15.)
 
 PHP examples are shown, because PHP is the reference implementation; a rule
 about config shows YAML. The rules hold in every port. The examples are generic
@@ -56,8 +55,8 @@ $key = $this->getCacheKey($route, $locale);
 $key = $this->getCacheKey($route, $locale);
 ```
 
-Each comment below is true, and the wall still hides the warning that
-matters:
+Comment the one line in ten that needs a comment. That comment then stands
+alone:
 
 ```php
 // Wrong — every line carries a true comment, so the one warning drowns.
