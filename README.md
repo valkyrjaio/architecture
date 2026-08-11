@@ -50,6 +50,7 @@ Cross-cutting architectural decisions that apply to all ports.
 | -------------------------------------------------- | --------------------------------------------------------------------------------- |
 | [`SUMMARY.md`](SUMMARY.md)                         | Full session summary — all decisions and reasoning                                |
 | [`PORTS.md`](PORTS.md)                             | Language port list, per-language notes, comparison tables                         |
+| [`STRUCTURE.md`](STRUCTURE.md)                     | The structure taxonomy                                                            |
 | [`THROWABLES.md`](THROWABLES.md)                   | Exception naming convention, hierarchy, language mapping                          |
 | [`CONTAINER_BINDINGS.md`](CONTAINER_BINDINGS.md)   | Closure bindings, string constants, per-component files                           |
 | [`DISPATCH.md`](DISPATCH.md)                       | Handler contracts, typed signatures, dispatch deprecation                         |

@@ -52,9 +52,10 @@ unexported categoricals like `containerRuntimeError`. Return errors; do not
 
 ## Structure taxonomy
 
-The cross-language taxonomy ([`../AGENTS.md`](../AGENTS.md) §4) applies loosely —
-Go's model diverges most of the five. Segments are **lowercase** packages:
-`contract`, `provider`, `data`, `factory`, `constant`, `security`, `command`.
+The cross-language taxonomy ([`../STRUCTURE.md`](../STRUCTURE.md)) applies
+loosely — Go's model diverges most of the five. Segments are **lowercase**
+packages: `contract`, `provider`, `data`, `factory`, `constant`, `security`,
+`command`.
 
 Go nuances:
 

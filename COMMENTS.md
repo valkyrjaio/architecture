@@ -108,7 +108,7 @@ override, reachable by `git log` and `git blame`.
 
 A class, a contract, a trait, an enum, and a struct carry no doc comment. The
 declaration explains itself: the name and the segment say what the type is
-([`AGENTS.md`](AGENTS.md) §4 encodes the kind in both), and each method's doc
+([`STRUCTURE.md`](STRUCTURE.md) encodes the kind in both), and each method's doc
 comment says what the type does. When a type needs more than that, the
 component's documentation takes it.
 

@@ -9,7 +9,7 @@ This is **Layer 1** of a three-layer guide:
 1. **This file** — cross-language rules that apply everywhere.
 2. **`<language>/AGENTS.md`** (in this repo, next to this file) — the per-language
    deltas: exact CI commands, package roots, tool lists, test mapping, and the
-   per-language spelling of the structure taxonomy (§4).
+   per-language spelling of the structure taxonomy ([`STRUCTURE.md`](STRUCTURE.md)).
    → [`php`](php/AGENTS.md) · [`java`](java/AGENTS.md) · [`go`](go/AGENTS.md) ·
    [`python`](python/AGENTS.md) · [`typescript`](typescript/AGENTS.md) ·
    [`kotlin`](kotlin/AGENTS.md)
@@ -223,8 +223,9 @@ Then:
     failure for a comment that states a current condition; rule 13 limits how
     much a comment says. Full rules and examples: [`COMMENTS.md`](COMMENTS.md).
 15. **A type declaration carries no doc comment.** A class, a contract, a
-    trait, an enum, and a struct explain themselves: §4 encodes the kind in the
-    name and the segment, and each method's doc comment — one sentence that
+    trait, an enum, and a struct explain themselves:
+    [`STRUCTURE.md`](STRUCTURE.md) encodes the kind in the name and the
+    segment, and each method's doc comment — one sentence that
     enhances the signature, plus the annotations — states what the type does.
     The one exception is a test fixture's one-line block, which says what the
     fixture is for. Full rules and examples: [`COMMENTS.md`](COMMENTS.md).
@@ -314,47 +315,14 @@ become `App\Queue\App` and `App\Queue\PushApp` alongside a per-runtime
 ### Structure taxonomy (enforced)
 
 A class's _kind_ is encoded three ways at once — its **name suffix**, the
-**segment** (namespace/package/directory) it lives in, and its **modifier** — and
-all three must agree. This is the machine-verified spec (PHP's PHPArkitect
-`Rules` is the reference; Java ArchUnit and Kotlin Konsist mirror it; where a
-language has no architecture linter — Go, Python, TypeScript — it is enforced in
-review). PHP segment spellings are shown; **each Layer-2 guide gives the
-per-language spelling** (case + reserved-word handling + constructs a language
-lacks).
-
-| Kind                                                   | Identified by                                | Name                               | Segment                        | Modifier  |
-| ------------------------------------------------------ | -------------------------------------------- | ---------------------------------- | ------------------------------ | --------- |
-| Contract                                               | is an interface                              | `*Contract`                        | `Contract\`                    | interface |
-| Service provider                                       | implements `ServiceProviderContract`         | `*ServiceProvider`                 | `Provider\`                    | —         |
-| Component provider                                     | implements `ComponentProviderContract`       | `*ComponentProvider`               | `Provider\`                    | —         |
-| Route provider                                         | implements `Http`/`CliRouteProviderContract` | `*RouteProvider`                   | `Provider\`                    | —         |
-| Listener provider                                      | implements `ListenerProviderContract`        | `*ListenerProvider`                | `Provider\`                    | —         |
-| Factory                                                | —                                            | `*Factory`                         | `Factory\`                     | —         |
-| Constant                                               | —                                            | `*Constant`                        | `Constant\`                    | final     |
-| Attribute / annotation                                 | has the attribute marker                     | —                                  | `Attribute\`                   | —         |
-| CLI command                                            | —                                            | `*Command`                         | `Cli\Command\`                 | —         |
-| Security                                               | —                                            | `*Security`                        | `Security\`                    | final     |
-| Concrete exception                                     | implements Throwable                         | `*Exception` (Go: `*Error`)        | `Exception\`                   | —         |
-| Any throwable                                          | extends/implements Throwable                 | —                                  | `Throwable\`                   | —         |
-| Base `*RuntimeException` / `*InvalidArgumentException` | —                                            | as-is                              | `Abstract\`                    | abstract  |
-| Type / Model / Entity                                  | extends the base                             | —                                  | `Type\` / `Model\` / `Entity\` | —         |
-| Abstract class                                         | is abstract                                  | must **not** contain `Abstract`    | `Abstract\`                    | abstract  |
-| Enum                                                   | is an enum                                   | must **not** contain `Enum`        | `Enum\`                        | enum      |
-| Trait                                                  | is a trait                                   | must **not** contain `Trait` (src) | `Trait\`                       | trait     |
-| Test fixture                                           | reusable double in `Fixtures\`               | `*Fixture`                         | `Fixtures\`                    | final     |
-
-The relationships are **bidirectional**: everything in `Contract\` must be an
-interface _and_ named `*Contract`; everything in `Enum\` must be an enum; every
-final constant lives in `Constant\`; and so on. For `Abstract`, `Enum`, and
-`Trait` the _segment_ carries the meaning, so the **name must not repeat it** — an
-abstract `Stream` is `Abstract\Stream`, never `AbstractStream`.
-
-Tests: concrete test classes are `final`, live in `Unit\`/`Functional\`, and are
-named `*Test`; reusable doubles live in `Fixtures\`, named `*Fixture`, never
-`*Test`. A fixture that is itself an enum, trait, or contract keeps that type's
-naming (`*Enum` / `*Trait` / `*Contract`) — the type rule supersedes the fixture
-marker, just as the segment does for `Abstract`/`Enum`/`Trait` above. No class
-carries an `@author` docblock.
+**segment** (namespace/package/directory) it lives in, and its **modifier** —
+and all three must agree, bidirectionally. The spec is machine-verified where
+the language has an architecture linter, and review enforces it elsewhere. For
+`Abstract`, `Enum`, and `Trait` the segment carries the meaning, so the name
+must not repeat it — an abstract `Stream` is `Abstract\Stream`, never
+`AbstractStream`. Each Layer-2 guide gives the per-language spelling. The full
+table, the test-class rules, the author-docblock rule, and the examples:
+[`STRUCTURE.md`](STRUCTURE.md).
 
 ### What a data object holds
 
@@ -869,20 +837,21 @@ examples: [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md).
 Read these in order when starting or extending a port:
 
 1. [`PORTS.md`](PORTS.md) — per-language characteristics
-2. [`THROWABLES.md`](THROWABLES.md) — exception hierarchy
-3. [`CONTAINER_BINDINGS.md`](CONTAINER_BINDINGS.md) — binding keys & closures
-4. [`DISPATCH.md`](DISPATCH.md) — handler contracts
-5. [`DATA_CACHE.md`](DATA_CACHE.md) — provider contracts & cache generation
-6. [`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md) — the component config shape
-7. [`BUILD_TOOL.md`](BUILD_TOOL.md) — `sindri` implementation
-8. [`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md) — testing & 100% coverage
-9. [`METHOD_NAMING.md`](METHOD_NAMING.md) — method name prefixes
-10. [`COMMENTS.md`](COMMENTS.md) — what a comment may state
-11. [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md) — the writing rules for documentation prose
-12. [`PACKAGE_NAMING.md`](PACKAGE_NAMING.md) — package, registry, and source namespace names
-13. [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md) — commit & PR title format
-14. [`PR_DESCRIPTION.md`](PR_DESCRIPTION.md) — what a pull request description holds
-15. [`VERSIONING.md`](VERSIONING.md) — version scheme & release automation
-16. `{language}/PROVIDER_CONTRACTS.md` — full contracts + examples
-17. `{language}/README.md` — port notes & priority order
-18. `{language}/AGENTS.md` — the Layer-2 agent guide for that language
+2. [`STRUCTURE.md`](STRUCTURE.md) — the structure taxonomy
+3. [`THROWABLES.md`](THROWABLES.md) — exception hierarchy
+4. [`CONTAINER_BINDINGS.md`](CONTAINER_BINDINGS.md) — binding keys & closures
+5. [`DISPATCH.md`](DISPATCH.md) — handler contracts
+6. [`DATA_CACHE.md`](DATA_CACHE.md) — provider contracts & cache generation
+7. [`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md) — the component config shape
+8. [`BUILD_TOOL.md`](BUILD_TOOL.md) — `sindri` implementation
+9. [`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md) — testing & 100% coverage
+10. [`METHOD_NAMING.md`](METHOD_NAMING.md) — method name prefixes
+11. [`COMMENTS.md`](COMMENTS.md) — what a comment may state
+12. [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md) — the writing rules for documentation prose
+13. [`PACKAGE_NAMING.md`](PACKAGE_NAMING.md) — package, registry, and source namespace names
+14. [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md) — commit & PR title format
+15. [`PR_DESCRIPTION.md`](PR_DESCRIPTION.md) — what a pull request description holds
+16. [`VERSIONING.md`](VERSIONING.md) — version scheme & release automation
+17. `{language}/PROVIDER_CONTRACTS.md` — full contracts + examples
+18. `{language}/README.md` — port notes & priority order
+19. `{language}/AGENTS.md` — the Layer-2 agent guide for that language
