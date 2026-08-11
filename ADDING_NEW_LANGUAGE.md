@@ -50,6 +50,7 @@ Read these in the architecture repo, in order: `README.md`,
 [`AGENTS.md`](AGENTS.md) (cross-language canon), [`PORTS.md`](PORTS.md),
 [`THROWABLES.md`](THROWABLES.md), [`CONTAINER_BINDINGS.md`](CONTAINER_BINDINGS.md),
 [`DISPATCH.md`](DISPATCH.md), [`DATA_CACHE.md`](DATA_CACHE.md),
+[`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md),
 [`BUILD_TOOL.md`](BUILD_TOOL.md), [`STATIC_METHODS.md`](STATIC_METHODS.md),
 [`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md), then the closest language's
 `<lang>/` folder.

@@ -54,6 +54,7 @@ Cross-cutting architectural decisions that apply to all ports.
 | [`CONTAINER_BINDINGS.md`](CONTAINER_BINDINGS.md)   | Closure bindings, string constants, per-component files                           |
 | [`DISPATCH.md`](DISPATCH.md)                       | Handler contracts, typed signatures, dispatch deprecation                         |
 | [`DATA_CACHE.md`](DATA_CACHE.md)                   | Cache architecture, provider contracts, build flows                               |
+| [`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md)       | The component config shape                                                        |
 | [`BUILD_TOOL.md`](BUILD_TOOL.md)                   | Build tool design, Bin extraction, AST implementations                            |
 | [`STATIC_METHODS.md`](STATIC_METHODS.md)           | Static interface methods — cross-language design and registry pattern             |
 | [`METHOD_NAMING.md`](METHOD_NAMING.md)             | Method name prefixes — what a method does, and whether the caller's value changes |
