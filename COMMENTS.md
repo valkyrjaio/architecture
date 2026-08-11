@@ -82,9 +82,9 @@ $cache = CacheFactory::fromPath($path);
 ## A comment never states a transient condition
 
 A comment in code or config must stay true indefinitely. Automation rewrites
-values, not the prose around them, so a comment about a temporary condition
-outlives what it described and becomes an assertion that is now false. That is
-worse than no comment, because the next reader trusts it.
+values, not the prose around them. A comment about a temporary condition then
+outlives what it described, and becomes an assertion that is now false. That
+is worse than no comment, because the next reader trusts it.
 
 Do not write a comment to explain something temporary, or something automation
 will later rewrite:
