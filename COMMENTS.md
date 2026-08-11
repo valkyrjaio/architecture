@@ -128,6 +128,12 @@ sindri-version: "26.5.0" # Pinned ahead of the others until the next release.
 ```
 
 ```yaml
+# Right — the line carries no comment. The pull request description holds the
+# reason for the pin.
+sindri-version: "26.5.0"
+```
+
+```yaml
 # Right — the comment states a decision, and the decision stays true.
 
 # This job asserts only generated code, so its coverage report is meaningless.
