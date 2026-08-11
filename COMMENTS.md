@@ -133,7 +133,7 @@ sindri-version: "26.5.0" # Pinned ahead of the others until the next release.
 sindri-version: "26.5.0"
 ```
 
-A decision stays in the comment:
+The `coverage-report` comment carries a decision:
 
 ```yaml
 # Right — the comment states a decision, and the decision stays true.
