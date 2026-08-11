@@ -1,6 +1,16 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.8...26.x)
+## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.9...26.x)
+
+## [v26.0.9](https://github.com/valkyrjaio/architecture/compare/v26.0.8...v26.0.9) - 2026-08-11
+
+* [Process] docs: Move the documentation style rules into DOCUMENTATION_STYLE.md by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/188
+* [DataObject] docs: Move the data object rules into STATIC_METHODS.md by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/194
+* [Coverage] docs: Move the per-file coverage rules into TESTING_METHODOLOGY.md by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/195
+* [Config] docs: Move the component config shape into COMPONENT_CONFIG.md by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/193
+* [Structure] docs: Move the structure taxonomy into STRUCTURE.md by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/192
+* [Shell] docs: Move the shell script rules into SHELL_SCRIPTS.md by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/191
+* [Package] docs: Add the Gradle plugin id convention by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/166
 
 ## [v26.0.8](https://github.com/valkyrjaio/architecture/compare/v26.0.7...v26.0.8) - 2026-08-10
 
