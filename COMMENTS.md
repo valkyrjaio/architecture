@@ -56,7 +56,8 @@ $key = $this->getCacheKey($route, $locale);
 $key = $this->getCacheKey($route, $locale);
 ```
 
-Comment the one line in ten that needs a comment:
+Each comment below is true, and the wall still hides the warning that
+matters:
 
 ```php
 // Wrong — every line carries a true comment, so the one warning drowns.
