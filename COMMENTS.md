@@ -61,7 +61,7 @@ alone:
 ```php
 // Wrong — every line carries a true comment, so the one warning drowns.
 
-// The boot registers the config before any handler runs.
+// The service provider registers the config before any handler runs.
 $config = $container->getSingleton(ConfigContract::class);
 // The path is absolute.
 $path = $config->cachePath;
