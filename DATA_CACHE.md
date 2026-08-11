@@ -1265,7 +1265,6 @@ The cache saves boot cost. Thus its value depends on how many requests each boot
 PHP is the only language with a working cache generation mechanism today — the `cache:generate` CLI command. However
 this command will break the moment closure-based handler logic is implemented because:
 
-- The current command relies on the old dispatch-based route registration
 - Closure handlers cannot be serialized by the existing cache mechanism
 - The `#[Handler]` annotation and AST extraction via nikic/php-parser are not yet implemented
 

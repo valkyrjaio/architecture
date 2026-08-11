@@ -51,7 +51,7 @@ Every port shares the same architectural identity:
 - Reflection via `ReflectionClass::getFileName()` resolves class name to source file
 - nikic/php-parser provides full AST for the build tool
 - `::class` used for container bindings — compiler-verified, not a raw string
-- Dynamic method dispatch via reflection available but deprecated in favor of closure-based handlers
+- Closure-based handlers only — the framework calls no method through reflection
 
 **Worker mode:** FrankenPHP (Go runtime underneath), OpenSwoole/Swoole (coroutine-based C extension)
 

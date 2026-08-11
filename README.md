@@ -53,7 +53,7 @@ Cross-cutting architectural decisions that apply to all ports.
 | [`STRUCTURE.md`](STRUCTURE.md)                     | The structure taxonomy                                                            |
 | [`THROWABLES.md`](THROWABLES.md)                   | Exception naming convention, hierarchy, language mapping                          |
 | [`CONTAINER_BINDINGS.md`](CONTAINER_BINDINGS.md)   | Closure bindings, string constants, per-component files                           |
-| [`DISPATCH.md`](DISPATCH.md)                       | Handler contracts, typed signatures, dispatch deprecation                         |
+| [`HANDLERS.md`](HANDLERS.md)                       | Handler contracts, typed closure signatures, the supplier pattern                 |
 | [`DATA_CACHE.md`](DATA_CACHE.md)                   | Cache architecture, provider contracts, build flows                               |
 | [`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md)       | The component config shape                                                        |
 | [`BUILD_TOOL.md`](BUILD_TOOL.md)                   | Build tool design, Bin extraction, AST implementations                            |
@@ -127,8 +127,7 @@ four objects at boot.
 
 **Typed handler signatures move errors before production.** Explicit closure
 handlers with typed signatures catch wrong return types at compile time (Java,
-Go, TypeScript) or CI time (PHP, Python). The dispatch approach discovered
-these errors at request time in production.
+Go, TypeScript) or CI time (PHP, Python).
 
 **The AppConfig class is the build tool entry point.** No separate YAML file.
 The application config already lists all component providers — the build tool
@@ -168,7 +167,7 @@ Key Decisions At a Glance
   parameters
 - `#[Handler]` / `@Handler` / `@handler` — metadata marker in all languages,
   never active registrar
-- See [`DISPATCH.md`](DISPATCH.md)
+- See [`HANDLERS.md`](HANDLERS.md)
 
 ### Cache Generation
 
@@ -218,7 +217,7 @@ Read these files in order:
 2. [`THROWABLES.md`](THROWABLES.md) — exception hierarchy for your language
 3. [`CONTAINER_BINDINGS.md`](CONTAINER_BINDINGS.md) — binding key constants and
    closure factories
-4. [`DISPATCH.md`](DISPATCH.md) — handler contracts and typed closure
+4. [`HANDLERS.md`](HANDLERS.md) — handler contracts and typed closure
    signatures
 5. [`DATA_CACHE.md`](DATA_CACHE.md) — provider contracts and cache generation
 6. [`BUILD_TOOL.md`](BUILD_TOOL.md) — build tool implementation for your

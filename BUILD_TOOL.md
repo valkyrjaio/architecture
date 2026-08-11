@@ -213,7 +213,7 @@ public function publishers(): array
 
 public static function publishRouter(ContainerContract $c): void
 {
-    $c->setSingleton(RouterContract::class, new Router($c->getSingleton(DispatcherContract::class)));
+    $c->setSingleton(RouterContract::class, new Router($c->getSingleton(MatcherContract::class)));
 }
 ```
 
@@ -940,7 +940,6 @@ the constant:
 // Valkyrja/Container/ContainerConstants.php — shipped with framework
 class ContainerConstants {
     public const CONTAINER  = ContainerContract::class;
-    public const DISPATCHER = DispatcherContract::class;
     public const ROUTER     = RouterContract::class;
 }
 ```
@@ -951,7 +950,6 @@ class ContainerConstants {
 // io/valkyrja/container/ContainerConstants.java — shipped with framework
 public final class ContainerConstants {
     public static final Class<ContainerContract> CONTAINER = ContainerContract.class;
-    public static final Class<DispatcherContract> DISPATCHER = DispatcherContract.class;
     public static final Class<RouterContract> ROUTER = RouterContract.class;
 }
 ```
@@ -962,7 +960,6 @@ public final class ContainerConstants {
 // container/container_constants.go — shipped with framework
 const (
 ContainerClass = "valkyrja.container.manager.ContainerContract"
-DispatcherClass = "valkyrja.dispatch.dispatcher.DispatcherContract"
 RouterClass = "valkyrja.http.routing.dispatcher.RouterContract"
 )
 ```
@@ -973,7 +970,6 @@ RouterClass = "valkyrja.http.routing.dispatcher.RouterContract"
 # valkyrja/container/container_constants.py — shipped with framework
 class ContainerConstants:
     CONTAINER = "valkyrja.container.manager.ContainerContract"
-    DISPATCHER = "valkyrja.dispatch.dispatcher.DispatcherContract"
     ROUTER = "valkyrja.http.routing.dispatcher.RouterContract"
 ```
 
@@ -983,7 +979,6 @@ class ContainerConstants:
 // valkyrja/container/container-constants.ts — shipped with framework
 export const ContainerConstants = {
     CONTAINER: 'Valkyrja.Container.Manager.ContainerContract',
-    DISPATCHER: 'Valkyrja.Dispatch.Dispatcher.DispatcherContract',
     ROUTER: 'Valkyrja.Http.Routing.Dispatcher.RouterContract',
 } as const
 ```
@@ -2331,9 +2326,9 @@ exemptions.
 | Python     | ✅ works      | ❌ not yet built                                            | sindri Python AST implementation pending              |
 | TypeScript | ✅ works      | ❌ not yet built                                            | sindri TypeScript compiler API implementation pending |
 
-The PHP CLI command is the most pressing TODO. It will stop working correctly once closure-based handler logic replaces
-the current dispatch-based routing — the existing serialization mechanism cannot handle closures. The migration to
-`sindri` and `#[Handler]` annotation extraction needs to happen before handler logic ships in PHP.
+The PHP CLI command is the most pressing TODO. It will stop working correctly once closure-based handler logic ships —
+the existing serialization mechanism cannot handle closures. The migration to `sindri` and `#[Handler]` annotation
+extraction needs to happen before handler logic ships in PHP.
 
 ---
 
@@ -2499,8 +2494,8 @@ a validation of the architecture's self-consistency rather than a practical requ
 cases exist in the framework design.
 
 The PHP CLI command breaking change was identified as the most pressing near-term issue. It is the only currently
-working cache generation mechanism, and it will stop working when closure-based handler logic replaces dispatch-based
-routing. This migration is documented as a TODO that must happen before handler logic ships in PHP.
+working cache generation mechanism, and it will stop working when closure-based handler logic ships. This migration is
+documented as a TODO that must happen before handler logic ships in PHP.
 
 The separation of `Bin` from the framework into its own `sindri` repository was decided when it became clear that the
 build tool needed `nikic/php-parser` as a dependency. Keeping this in the framework would mean a parser library — a
