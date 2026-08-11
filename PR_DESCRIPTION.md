@@ -97,17 +97,14 @@ why it matters:
 > - **`ci.yml`** — runs the lint job before the build jobs, because every
 >   build job reuses the lint cache.
 
-## A decision lands in the description, not in a comment
+## A temporary explanation lands in the description, not in a comment
 
-A comment in code must stay true indefinitely, so a temporary explanation never
-goes in a comment — a version pinned pending a release, a workaround awaiting a
-fix. Put the explanation in the
-description instead. Nothing is lost: the description becomes the commit body,
-so the explanation is pinned to when it was true, and `git log` and `git blame`
-reach it.
+A comment in code or config must stay true indefinitely, so a temporary
+explanation never goes in a comment ([`COMMENTS.md`](COMMENTS.md)). Put the
+explanation in the description instead.
 
-State the decision in a sentence or two. The description takes the decision,
-not the essay around it.
+State the explanation in a sentence or two. The description takes the
+explanation, not the essay around it.
 
 ## The template
 
