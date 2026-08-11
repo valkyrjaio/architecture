@@ -56,6 +56,8 @@ It does not govern:
    to do.
 10. **No slang, no idiom, no humor.** They do not translate, and an agent reads
     them as fact.
+11. **Write a full sentence. Do not splice clauses with an em dash.** Give a
+    dash-joined afterthought its own sentence.
 
 Rules 1, 2, and 7 carry the most weight. This paragraph breaks all three:
 
@@ -82,6 +84,31 @@ opens a decision log to answer one question: what did we consider, and why did w
 reject it? A run-on sentence hides exactly that answer. **No section of a
 document is exempt** — a design record that a reader consults years later has the
 most to gain.
+
+## Full sentences instead of the em dash
+
+An em dash joins two clauses into one sentence. The reader holds the first
+clause while the second one arrives. Rule 1 removes that load. Write the second
+clause as its own sentence. A sentence that wants a dash-joined afterthought
+wants two sentences.
+
+The em dash stays where it is the correct tool:
+
+- A table cell, where the dash marks an empty value.
+- A label and the gloss after it, in a heading, a list item, or an example
+  marker.
+- An interruption that grammar requires, and that a comma cannot carry.
+
+> Wrong — one sentence carries three spliced clauses:
+>
+> The container resolves the binding on the first call — every later call reads
+> the cached instance — and a provider registers the binding before the first
+> call.
+
+> Right — each clause is a sentence:
+>
+> The container resolves the binding on the first call. Every later call reads
+> the cached instance. A provider registers the binding before the first call.
 
 ## Select before you write
 
