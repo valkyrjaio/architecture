@@ -99,7 +99,7 @@ writes the description as the commit body, so the explanation lives in git
 history permanently. The explanation stays attached to the commit that
 introduced it, and `git log` and `git blame` reach it. This is also why the
 commits you write carry no body — the squash commit's body comes from the
-pull request.
+pull request ([`AGENTS.md`](AGENTS.md) §7).
 
 The test is whether the comment states a _decision or invariant_ or a _current
 condition_. A decision stays in the comment. A condition goes to the pull
