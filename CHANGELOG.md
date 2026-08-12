@@ -1,6 +1,10 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.9...26.x)
+## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.10...26.x)
+
+## [v26.0.10](https://github.com/valkyrjaio/architecture/compare/v26.0.9...v26.0.10) - 2026-08-12
+
+* [Comment] docs: Move the comment content rules into COMMENTS.md by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/189
 
 ## [v26.0.9](https://github.com/valkyrjaio/architecture/compare/v26.0.8...v26.0.9) - 2026-08-11
 
