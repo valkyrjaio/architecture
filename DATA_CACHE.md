@@ -1266,7 +1266,7 @@ The cache saves boot cost. Thus its value depends on how many requests each boot
 
 A handler is a closure, which no cache mechanism can serialize. `sindri` writes source instead. `sindri` reads the
 handler expression from the AST and prints that expression into the generated file. `sindri` rewrites each type
-reference in the expression to its fully qualified name, because the generated file holds no use statements. See
+reference in the expression to its fully qualified name, because the generated file imports no type. See
 [`HANDLERS.md`](HANDLERS.md) for the handler design.
 
 ---
