@@ -2031,7 +2031,7 @@ Most modules have `Provider/` containing:
 - A `<Module>ServiceProvider` in every module but Application (service
   registration)
 - A `Provider/Contract/` directory in the Application, Container, and Event
-  modules, and in the Cli and Http routing subtrees
+  modules
 
 ### 3. Exception Handling
 
