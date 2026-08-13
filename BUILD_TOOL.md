@@ -2493,8 +2493,8 @@ The self-bootstrapping property — the build tool running sindri on itself to g
 a validation of the architecture's self-consistency rather than a practical requirement. It demonstrates that no special
 cases exist in the framework design.
 
-The framework's own cache command was the most pressing near-term issue. It serialized the cache, and no serializer
-accepts a closure handler. The resolution was to move generation into `sindri` and to write the handler as generated
+The framework's own cache command was the most pressing near-term issue. The command serialized the cache, and no
+serializer accepts a closure handler. This project moved generation into `sindri`, which writes the handler as generated
 source. The framework now holds no cache command, and `sindri` prints each handler expression that it reads from the
 AST.
 
