@@ -214,9 +214,7 @@ name and pattern.
 ### Cache generation in sindri — complete
 
 `sindri` walks the provider tree with nikic/php-parser and generates `AppContainerData`, `AppEventData`,
-`AppHttpRoutingData`, and `AppCliRoutingData`. `sindri` reads the `#[Route]`, `#[RouteHandler]`, and `#[Parameter]`
-attributes that the framework holds today. §4 covers the handler contracts, which the framework does not hold yet. The
-framework holds no cache generation command.
+`AppHttpRoutingData`, and `AppCliRoutingData`. The framework holds no cache generation command.
 
 ---
 
