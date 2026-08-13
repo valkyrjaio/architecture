@@ -2037,7 +2037,7 @@ Extensive Type module with:
 
 - Basic types (`Bool`, `Int`, `Float`, `String`, `Null`)
 - Collection types (`Array`, `Collection`)
-- Unique ID types (`UUID`, `ULID`, `VLID`)
+- Unique ID types (`Uid`, `Uuid`, `Ulid`, `Vlid`)
 - JSON and serialization support
 
 ### 5. HTTP Routing
