@@ -2326,9 +2326,8 @@ exemptions.
 | Python     | ✅ works      | ❌ not yet built | the Python `sindri` holds the version constants only           |
 | TypeScript | ✅ works      | ✅ built         | the TypeScript `sindri` also generates the cached config class |
 
-Go and Python are the two ports that wait for the build tool. The Go `sindri` and the Python `sindri` hold the version
-constants and no generator. An application in either language runs without the cache, which the framework fully
-supports.
+The Go `sindri` and the Python `sindri` hold the version constants and no generator. Those two ports wait for the
+generator. The framework fully supports an application that runs without the cache in either language.
 
 ---
 
