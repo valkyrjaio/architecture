@@ -1995,7 +1995,12 @@ _68 files, 28 directories_
 └── README.md
 ```
 
-### 25. Documentation Files (Root Level)
+---
+
+## Documentation Files at the Base Path
+
+These five files sit directly under `src/Valkyrja`. They belong to no module,
+and the 24 module counts above do not count them.
 
 ```
 ├── APPLICATION_STRUCTURE.md
