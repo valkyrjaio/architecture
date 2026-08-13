@@ -2493,9 +2493,9 @@ a validation of the architecture's self-consistency rather than a practical requ
 cases exist in the framework design.
 
 The framework's own cache generation command was the most pressing near-term issue. The command serialized the cache,
-and no serializer accepts a closure handler. This project moved generation into `sindri`, which writes the handler as generated
-source. The framework now holds no cache generation command, and `sindri` prints each handler expression that it reads
-from the AST.
+and no serializer accepts a closure handler. This project moved generation into `sindri`, which writes the handler as
+generated source. The framework now holds no cache generation command, and `sindri` prints each handler expression that
+it reads from the AST.
 
 The separation of `Bin` from the framework into its own `sindri` repository was decided when it became clear that the
 build tool needed `nikic/php-parser` as a dependency. Keeping this in the framework would mean a parser library — a
