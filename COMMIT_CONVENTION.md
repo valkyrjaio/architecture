@@ -19,25 +19,6 @@ So your branch commits are working notes that reviewers read and history
 discards. The **PR title becomes the permanent subject line** and the PR
 description becomes the permanent body. Write each for the job it actually does.
 
-### A branch may mix roots
-
-A branch commit does not have to carry the root that the pull request title
-carries, and two commits on one branch do not have to carry the same root. A
-pull request that starts on one root and moves to another keeps the commits it
-already has. The squash merge discards every branch subject, so the pull request
-title is the only root that reaches the permanent history.
-
-```
-commits    [Dependency] docs: Correct the dependency updater file references.
-           [Workflow] docs: Scope the composer sentence to PHP.
-PR title   [Workflow] docs: Correct the dependency updater file references
-merged     [Workflow] docs: Correct the dependency updater file references (#332)
-```
-
-Rewrite a branch subject only when you rebase for another reason. A force push
-that corrects a subject discards a reviewer's place in the diff, and it changes
-nothing that a reader sees after the merge.
-
 ## The shape
 
 ```
@@ -350,6 +331,25 @@ can finally be scoped: `[Http] ci:`, `[Container] test:`.
 `[Initial] Initial commit.`, with no type, since it is pushed directly and never
 sits in a pull request.
 
+## A branch may mix roots
+
+A branch commit does not have to carry the root that the pull request title
+carries, and two commits on one branch do not have to carry the same root. A
+pull request that starts on one root and moves to another keeps the commits it
+already has. The squash merge discards every branch subject, so the pull request
+title is the only root that reaches the permanent history.
+
+```
+commits    [Http] fix: Normalize the header casing.
+           [Cli] fix: Normalize the flag casing.
+PR title   [Middleware] fix(#123): Normalize the casing both protocols read
+merged     [Middleware] fix(#123): Normalize the casing both protocols read (#456)
+```
+
+Rewrite a branch subject only when you rebase for another reason. A force push
+that corrects a subject discards a reviewer's place in the diff, and it changes
+nothing that a reader sees after the merge.
+
 ## Examples
 
 **Good:**
@@ -394,10 +394,14 @@ Add caching.                               missing root and type
 ## Enforcement
 
 The `Commit Message Check` required status check runs on every pull request. It
-validates that the PR title and every commit in the PR carry a root and a known
-type, that PR titles carry no trailing period, that the branch's own commits do,
-and that no line exceeds 120 characters. It reads the root as a shape, and it
-accepts any root. See the last paragraph of this section.
+validates four things:
+
+- The PR title and every commit in the PR carry a root and a known type.
+- A PR title carries no trailing period.
+- Each of the branch's own commits carries one.
+- No line exceeds 120 characters.
+
+It reads the root as a shape, and it accepts any root.
 
 Its scope matches the period rule exactly: it checks commits _in a pull request_ —
 which are working-branch commits — and never sees a direct push to a protected
