@@ -2020,7 +2020,7 @@ and the 24 module counts above do not count them.
 
 Some modules have `Manager/` subdirectories with:
 
-- Multiple implementations (e.g., `RedisCache`, `LogCache`, `NullCache`)
+- One or more implementations (e.g., `RedisCache`, `LogCache`, `NullCache`)
 - A contract in `Manager/Contract/`
 
 ### 2. Service Providers
