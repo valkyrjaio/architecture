@@ -1180,13 +1180,13 @@ This means the build tool and cache generation infrastructure can be built incre
 correctly in all languages while the build tool is developed. Cache is a performance optimization, not a correctness
 requirement.
 
-|            | Class/constructor ref           | Direct method calls  | Works without cache | Cache status                                                   |
-| ---------- | ------------------------------- | -------------------- | ------------------- | -------------------------------------------------------------- |
-| PHP        | ✅ `::class`                    | ✅                   | ✅                  | CLI command exists — will break when handler logic implemented |
-| Java       | ✅ `.class`                     | ✅                   | ✅                  | Build tool not yet implemented                                 |
-| Go         | ❌ string const (bindings only) | ✅ interface methods | ✅                  | Build tool not yet implemented                                 |
-| Python     | ✅ class object                 | ✅                   | ✅                  | Build tool not yet implemented                                 |
-| TypeScript | ✅ constructor ref              | ✅                   | ✅                  | Build tool not yet implemented                                 |
+|            | Class/constructor ref           | Direct method calls  | Works without cache | Cache status                      |
+| ---------- | ------------------------------- | -------------------- | ------------------- | --------------------------------- |
+| PHP        | ✅ `::class`                    | ✅                   | ✅                  | `sindri` generates the data files |
+| Java       | ✅ `.class`                     | ✅                   | ✅                  | `sindri` generates the data files |
+| Go         | ❌ string const (bindings only) | ✅ interface methods | ✅                  | Build tool not yet implemented    |
+| Python     | ✅ class object                 | ✅                   | ✅                  | Build tool not yet implemented    |
+| TypeScript | ✅ constructor ref              | ✅                   | ✅                  | `sindri` generates the data files |
 
 ### Without Cache, Declare Routes With `getRoutes()`
 
@@ -1260,28 +1260,25 @@ The cache saves boot cost. Thus its value depends on how many requests each boot
 
 ---
 
-## PHP Cache CLI Command — Near-Term Breaking Change
+## The Framework Holds No Cache Command
 
-PHP is the only language with a working cache generation mechanism today — the `cache:generate` CLI command. However
-this command will break the moment closure-based handler logic is implemented because:
+`sindri` generates every cache file. The framework holds no cache generation command in any language.
 
-- Closure handlers cannot be serialized by the existing cache mechanism
-- The `#[Handler]` annotation and AST extraction via nikic/php-parser are not yet implemented
-
-**The PHP CLI command is a known TODO** — it needs to be migrated to the sindri tool approach before handler
-logic ships. Until then PHP runs without cache in the same way as all other languages, which is fully supported.
+A handler is a closure, which no cache mechanism can serialize. `sindri` writes source instead. It reads the handler
+expression from the AST and prints that expression into the generated file, in the same way that a developer writes the
+closure by hand. See [`HANDLERS.md`](HANDLERS.md) for the handler design.
 
 ---
 
 ## Cache Generation Build Status
 
-| Language   | Without cache | Cache generation                     | Notes                                        |
-| ---------- | ------------- | ------------------------------------ | -------------------------------------------- |
-| PHP        | ✅ works      | ⚠️ CLI command exists but will break | Migrate to sindri before handler logic ships |
-| Java       | ✅ works      | ❌ not yet built                     | sindri Java implementation pending           |
-| Go         | ✅ works      | ❌ not yet built                     | sindri Go implementation pending             |
-| Python     | ✅ works      | ❌ not yet built                     | sindri Python implementation pending         |
-| TypeScript | ✅ works      | ❌ not yet built                     | sindri TypeScript implementation pending     |
+| Language   | Without cache | Cache generation | Notes                                                          |
+| ---------- | ------------- | ---------------- | -------------------------------------------------------------- |
+| PHP        | ✅ works      | ✅ built         | `sindri data:generate` reads the application config            |
+| Java       | ✅ works      | ✅ built         | the Java `sindri` also generates the gRPC data class           |
+| Go         | ✅ works      | ❌ not yet built | the Go `sindri` holds the version constants only               |
+| Python     | ✅ works      | ❌ not yet built | the Python `sindri` holds the version constants only           |
+| TypeScript | ✅ works      | ✅ built         | the TypeScript `sindri` also generates the cached config class |
 
 ---
 
