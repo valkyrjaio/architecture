@@ -346,8 +346,8 @@ they return `::class` references directly — never constant references.
 1. **Throwable renaming and abstraction** — foundational, everything else builds on stable exception types
 2. **Provider contract interfaces** — needed before build tool work
 3. **publishers() map migration** — needed before build tool work
-4. **Handler contracts and #[Handler] attribute** — needed before cache generation
-5. **#[Parameter] attribute** — needed before cache generation
-6. **Bin extraction to sindri** — the file generation and `make:*` commands, which cache generation did not carry over
+4. **Handler contracts and #[Handler] attribute**
+5. **#[Parameter] attribute**
+6. **Bin extraction to sindri** — no package holds the file generation and `make:*` commands
 7. **Container constants files** — additive, can happen incrementally per component
 8. **Closure-based container bindings** — additive, can happen incrementally per component
