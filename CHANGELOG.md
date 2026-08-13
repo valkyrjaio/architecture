@@ -1,6 +1,13 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.10...26.x)
+## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.11...26.x)
+
+## [v26.0.11](https://github.com/valkyrjaio/architecture/compare/v26.0.10...v26.0.11) - 2026-08-13
+
+* [Workflow] ci: Update .github workflow refs to v26.24.4 by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/architecture/pull/202
+* [Handlers] docs: Retire DISPATCH.md as HANDLERS.md and prune the removed component by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/201
+* [Process] docs: Require a full sentence instead of an em dash splice by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/200
+* [Workflow] ci: Run the checks on a pull request that targets any branch by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/203
 
 ## [v26.0.10](https://github.com/valkyrjaio/architecture/compare/v26.0.9...v26.0.10) - 2026-08-12
 
