@@ -341,11 +341,12 @@ title reaches the permanent history.
 A branch commit does not have to carry the type that the pull request title
 carries. Two commits on one branch do not have to carry the same type.
 
-What the change does decides the type. The release bump reads the type on the
-pull request title, and never the type on a branch commit. A change that adds a
-capability or marks the public API as deprecated takes `feat` or `deprecate` on
-the pull request title. A change that breaks a public contract takes `!`
-immediately before the colon. See [`VERSIONING.md`](VERSIONING.md).
+What the change does decides the type on the pull request title. The release
+bump reads that type, and never the type on a branch commit. A change that adds
+a capability or marks the public API as deprecated takes `feat` or `deprecate`
+on the pull request title. A change that breaks a public contract takes `!` on
+the pull request title, even when no branch commit carries it. See
+[`VERSIONING.md`](VERSIONING.md).
 
 ```
 commits    [Http] refactor: Align the HTTP terminal stage names.
