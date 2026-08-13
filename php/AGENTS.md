@@ -204,8 +204,8 @@ categories and their remedies.
 
 - **`sindri` (build tool)** holds `nikic/php-parser` and all code generation.
   `sindri` generates each cache file, and the framework holds no cache
-  generation command.
-  `sindri` is a dev-only dependency; the framework has zero AST deps.
+  generation command. `sindri` is a dev-only dependency; the framework has zero
+  AST deps.
 - **CI-tool config repos** (`ci/*`) are tested by asserting the full rule set is
   configured exactly as expected (`assertSame` lock on `getRules()`), plus branch
   tests for any custom expressions/rules. See
