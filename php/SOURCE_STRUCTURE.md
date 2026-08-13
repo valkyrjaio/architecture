@@ -2027,8 +2027,10 @@ Some modules have `Manager/` subdirectories with:
 Most modules have `Provider/` containing:
 
 - A `<Module>ComponentProvider` (dependency injection setup)
-- A `<Module>ServiceProvider` (service registration)
-- A `Provider/Contract/` directory, in the modules that declare a provider contract
+- A `<Module>ServiceProvider` in every module but Application (service
+  registration)
+- A `Provider/Contract/` directory, in the modules that declare a provider
+  contract
 
 ### 3. Exception Handling
 
