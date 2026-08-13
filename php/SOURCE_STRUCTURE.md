@@ -2014,73 +2014,12 @@ and the 24 module counts above do not count them.
 
 ---
 
-## Key Architectural Patterns
+## Related Documents
 
-### 1. Manager Pattern
+A tree shows a file. It does not show what the file means, or what the file
+extends. Two documents carry that:
 
-Some modules have `Manager/` subdirectories with:
-
-- One or more implementations (e.g., `RedisCache`, `LogCache`, `NullCache`)
-- A contract in `Manager/Contract/`
-
-### 2. Service Providers
-
-Most modules have a `Provider/` directory. A `Provider/` directory holds:
-
-- A `<Module>ComponentProvider` (dependency injection setup)
-- A `<Module>ServiceProvider`, except in the Application module (service
-  registration)
-- A `Contract/` directory in five of them: the Application, Container, and Event
-  modules, and the Cli and Http routing subtrees
-
-### 3. Exception Handling
-
-Structured exception hierarchy:
-
-- A `<Module>InvalidArgumentException` and a `<Module>RuntimeException` in most
-  modules, in the module's own `Throwable/Exception/Abstract/` directory
-- A `ValkyrjaInvalidArgumentException` and a `ValkyrjaRuntimeException` in the
-  Throwable module's `Exception/Abstract/` directory, which each module's pair
-  extends
-- Concrete exceptions directly in `Throwable/Exception/`, in 11 of the 24
-  modules (`CryptDecodeFailureException`, `ViewInvalidPathException`)
-- A `<Module>Throwable` contract in most modules (`ApiThrowable`,
-  `SessionThrowable`)
-- A `ValkyrjaThrowable` contract in the Throwable module's `Contract/`
-  directory, which every `<Module>Throwable` extends
-
-### 4. Type System
-
-Extensive Type module with:
-
-- Basic types (`Bool`, `Int`, `Float`, `String`, `Null`)
-- Collection types (`Array`, `Collection`)
-- Unique ID types (`Uid`, `Uuid`, `Ulid`, `Vlid`)
-- JSON and serialization support
-
-### 5. HTTP Routing
-
-Comprehensive HTTP request/response handling:
-
-- Route matching and dispatch
-- Middleware pipeline
-- Controller abstractions
-- Response factories
-
-### 6. ORM Layer
-
-Complete database abstraction:
-
-- Multiple database drivers (MySQL, PostgreSQL, SQLite)
-- Query builders for different operations
-- Schema migrations
-- Entity mapping
-
-### 7. Session Management
-
-Multiple session implementations:
-
-- Cookie-based
-- Cache-based
-- JWT-based
-- Token-based (both HTTP headers and CLI options)
+- [`../STRUCTURE.md`](../STRUCTURE.md) — what each directory segment means, and
+  the naming rules each segment carries.
+- [`../THROWABLES.md`](../THROWABLES.md) — the throwable and exception
+  hierarchy, which a directory listing cannot show.
