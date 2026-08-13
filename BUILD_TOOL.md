@@ -2503,9 +2503,8 @@ purely development and build-time concern — would be a production dependency o
 out keeps the framework clean and the separation of runtime vs build-time concerns explicit.
 
 The move also revealed that `Bin`'s file generation and scaffolding features were always development tooling, not
-framework concerns. The build tool now holds the cache generation that `Bin` held. The scaffolding and the `make:*`
-commands went to no package, and they wait for the build tool. This simplifies the framework base code and makes the
-runtime package leaner.
+framework concerns. Every file generation feature that lived in the framework now lives in the build tool where it
+belongs. This simplifies the framework base code and makes the runtime package leaner.
 
 The pattern established for PHP — separate build tool repository, dev-only dependency, no AST tooling in the framework —
 is replicated across all five language ports. In all cases the framework ships with zero build or AST dependencies. The

@@ -348,6 +348,6 @@ they return `::class` references directly — never constant references.
 3. **publishers() map migration** — needed before build tool work
 4. **Handler contracts and #[Handler] attribute**
 5. **#[Parameter] attribute**
-6. **File generation and `make:*` commands to sindri** — `sindri` does not hold them yet
+6. **Bin extraction to sindri**
 7. **Container constants files** — additive, can happen incrementally per component
 8. **Closure-based container bindings** — additive, can happen incrementally per component
