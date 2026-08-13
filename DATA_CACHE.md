@@ -1274,7 +1274,7 @@ closure by hand. See [`HANDLERS.md`](HANDLERS.md) for the handler design.
 
 | Language   | Without cache | Cache generation | Notes                                                          |
 | ---------- | ------------- | ---------------- | -------------------------------------------------------------- |
-| PHP        | ✅ works      | ✅ built         | `sindri data:generate` reads the application config            |
+| PHP        | ✅ works      | ✅ built         | the PHP `sindri` reads the config with nikic/php-parser        |
 | Java       | ✅ works      | ✅ built         | the Java `sindri` also generates the gRPC data class           |
 | Go         | ✅ works      | ❌ not yet built | the Go `sindri` holds the version constants only               |
 | Python     | ✅ works      | ❌ not yet built | the Python `sindri` holds the version constants only           |

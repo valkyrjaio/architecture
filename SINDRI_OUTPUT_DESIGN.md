@@ -60,7 +60,7 @@ form a visually distinct frame.
 │   Built on Valkyrja v26.1.0 (date: March 31 2026 11:22:55 MST)
 │   Running on PHP 8.4.7
 │   ~/app
-╰── Forging application cache · cache:generate
+╰── Forging application cache · generate
 ```
 
 ```php
@@ -76,7 +76,7 @@ echo <<<TEXT
     │   Built on Valkyrja v26.1.0 (date: March 31 2026 11:22:55 MST)
     │   Running on PHP 8.4.7
     │   ~/app
-    ╰── Forging application cache · cache:generate
+    ╰── Forging application cache · generate
 
     TEXT;
 ```
@@ -91,9 +91,9 @@ The banner has three logical parts:
    `·`
 2. The project's working directory
 
-**Bottom row** — `╰── Forging application cache · cache:generate` — names
+**Bottom row** — `╰── Forging application cache · generate` — names
 the action narratively ("Forging application cache") and preserves the
-exact subcommand that produced it (`cache:generate`). Additional flags are
+exact subcommand that produced it (`generate`). Additional flags are
 appended after the subcommand name.
 
 The bottom row serves triple duty: it closes the banner frame visually,
