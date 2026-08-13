@@ -4,9 +4,16 @@
 
 ## Statistics
 
-- **Total PHP Files:** 1,140
+- **Total PHP Files:** 1,182
+- **Total Markdown Files:** 32
 - **Total Directories:** 619
 - **Major Modules:** 24
+
+Each tree below shows every directory and every file in the module. The
+directory total counts every directory below the base path. It does not count
+the base path. A module count reads `_N files, M directories_`. `N` counts every
+PHP file and every Markdown file in the module. `M` counts the module directory
+and every directory below it.
 
 ---
 
@@ -20,17 +27,17 @@ _13 files, 12 directories_
 ├── Constant/
 │   └── Status.php
 ├── Manager/
-│   ├── Api.php
-│   └── Contract/
-│       └── ApiContract.php
+│   ├── Contract/
+│   │   └── ApiContract.php
+│   └── Api.php
 ├── Middleware/
 │   └── ApiThrowableCaughtMiddleware.php
 ├── Model/
+│   ├── Contract/
+│   │   ├── JsonContract.php
+│   │   └── JsonDataContract.php
 │   ├── Json.php
-│   ├── JsonData.php
-│   └── Contract/
-│       ├── JsonContract.php
-│       └── JsonDataContract.php
+│   └── JsonData.php
 ├── Provider/
 │   ├── ApiComponentProvider.php
 │   └── ApiServiceProvider.php
@@ -45,42 +52,45 @@ _13 files, 12 directories_
 
 ### 2. Application Module
 
-_26 files, 16 directories_
+_27 files, 18 directories_
 
 ```
 ├── Constant/
 │   └── ApplicationInfo.php
 ├── Data/
+│   ├── Contract/
+│   │   ├── CliConfigContract.php
+│   │   ├── ConfigContract.php
+│   │   └── HttpConfigContract.php
 │   ├── CliConfig.php
 │   ├── Config.php
-│   ├── HttpConfig.php
-│   └── Contract/
-│       ├── CliConfigContract.php
-│       ├── ConfigContract.php
-│       └── HttpConfigContract.php
+│   └── HttpConfig.php
 ├── Directory/
 │   └── Directory.php
 ├── Entry/
+│   ├── Abstract/
+│   │   ├── App.php
+│   │   └── WorkerHttp.php
+│   ├── FrankenPhp/
+│   │   └── FrankenPhpHttp.php
+│   ├── OpenSwoole/
+│   │   └── OpenSwooleHttp.php
+│   ├── RoadRunner/
+│   │   └── RoadRunnerHttp.php
 │   ├── Cli.php
-│   ├── Http.php
-│   └── Abstract/
-│       ├── App.php
-│       └── WorkerHttp.php
-├── Env/
-│   └── Env.php
+│   └── Http.php
 ├── Kernel/
-│   ├── Valkyrja.php
+│   ├── Contract/
+│   │   └── ApplicationContract.php
 │   ├── ChildApplication.php
-│   └── Contract/
-│       └── ApplicationContract.php
+│   └── Valkyrja.php
 ├── Provider/
+│   ├── Contract/
+│   │   └── ComponentProviderContract.php
 │   ├── ApplicationComponentProvider.php
 │   ├── CliApplicationComponentProvider.php
 │   ├── CliWithHttpApplicationComponentProvider.php
-│   ├── HttpApplicationComponentProvider.php
-│   └── Contract/
-│       ├── ComponentProviderContract.php
-│       └── PublishableComponentProviderContract.php
+│   └── HttpApplicationComponentProvider.php
 ├── Throwable/
 │   ├── Contract/
 │   │   └── ApplicationThrowable.php
@@ -88,10 +98,7 @@ _26 files, 16 directories_
 │       └── Abstract/
 │           ├── ApplicationInvalidArgumentException.php
 │           └── ApplicationRuntimeException.php
-├── README.md
-├── APPLICATION_STRUCTURE.md
-├── GETTING_STARTED.md
-└── LIFECYCLE.md
+└── README.md
 ```
 
 ### 3. Attribute Module
@@ -100,9 +107,9 @@ _10 files, 10 directories_
 
 ```
 ├── Collector/
-│   ├── Collector.php
-│   └── Contract/
-│       └── CollectorContract.php
+│   ├── Contract/
+│   │   └── CollectorContract.php
+│   └── Collector.php
 ├── Contract/
 │   └── ReflectionAwareAttributeContract.php
 ├── Provider/
@@ -122,49 +129,82 @@ _10 files, 10 directories_
 
 ### 4. Auth Module
 
-_72 files, 23 directories_
+_75 files, 23 directories_
 
 ```
 ├── Authenticator/
+│   ├── Abstract/
+│   │   └── Authenticator.php
+│   ├── Contract/
+│   │   └── AuthenticatorContract.php
 │   └── SessionAuthenticator.php
 ├── Constant/
 │   ├── RouteName.php
 │   ├── SessionItemId.php
 │   └── UserField.php
 ├── Data/
+│   ├── Attempt/
+│   │   ├── Contract/
+│   │   │   ├── AuthenticationAttemptContract.php
+│   │   │   ├── ForgotPasswordAttemptContract.php
+│   │   │   ├── LockAttemptContract.php
+│   │   │   ├── ResetPasswordAttemptContract.php
+│   │   │   └── UnlockAttemptContract.php
+│   │   ├── AuthenticationAttempt.php
+│   │   ├── ForgotPasswordAttempt.php
+│   │   ├── LockAttempt.php
+│   │   ├── ResetPasswordAttempt.php
+│   │   └── UnlockAttempt.php
+│   ├── Contract/
+│   │   ├── AuthConfigContract.php
+│   │   └── AuthenticatedUsersContract.php
+│   ├── Retrieval/
+│   │   ├── Contract/
+│   │   │   └── RetrievalContract.php
+│   │   ├── RetrievalById.php
+│   │   ├── RetrievalByIdAndUsername.php
+│   │   ├── RetrievalByResetToken.php
+│   │   └── RetrievalByUsername.php
+│   ├── AuthConfig.php
+│   ├── AuthSessionConfig.php
 │   └── AuthenticatedUsers.php
 ├── Entity/
-│   ├── User.php
-│   ├── VerifiableUser.php
-│   ├── LockableUser.php
-│   ├── MailableUser.php
 │   ├── Contract/
-│   │   ├── UserContract.php
-│   │   ├── VerifiableUserContract.php
+│   │   ├── AntiPhishCodeUserContract.php
+│   │   ├── DeviceAuthenticatedUserContract.php
+│   │   ├── LastOnlineUserContract.php
 │   │   ├── LockableUserContract.php
 │   │   ├── MailableUserContract.php
-│   │   ├── TwoFactorUserContract.php
-│   │   ├── PinUserContract.php
-│   │   ├── DeviceAuthenticatedUserContract.php
-│   │   ├── AntiPhishCodeUserContract.php
-│   │   ├── LastOnlineUserContract.php
 │   │   ├── PermissibleUserContract.php
-│   │   └── UserDeviceContract.php
-│   └── Trait/
-│       ├── UserFields.php
-│       ├── UserMethods.php
-│       ├── VerifiableUserFields.php
-│       ├── VerifiableUserMethods.php
-│       ├── LockableUserFields.php
-│       └── LockableUserMethods.php
+│   │   ├── PinUserContract.php
+│   │   ├── TwoFactorUserContract.php
+│   │   ├── UserContract.php
+│   │   ├── UserDeviceContract.php
+│   │   ├── UserRecoveryCodeContract.php
+│   │   └── VerifiableUserContract.php
+│   ├── Trait/
+│   │   ├── LockableUserFields.php
+│   │   ├── LockableUserMethods.php
+│   │   ├── MailableUserFields.php
+│   │   ├── MailableUserMethods.php
+│   │   ├── UserFields.php
+│   │   ├── UserMethods.php
+│   │   ├── VerifiableUserFields.php
+│   │   └── VerifiableUserMethods.php
+│   ├── LockableUser.php
+│   ├── MailableUser.php
+│   ├── User.php
+│   └── VerifiableUser.php
 ├── Hasher/
-│   ├── PhpPasswordHasher.php
-│   └── Contract/
-│       └── PasswordHasherContract.php
+│   ├── Contract/
+│   │   └── PasswordHasherContract.php
+│   └── PhpPasswordHasher.php
 ├── Provider/
 │   ├── AuthComponentProvider.php
 │   └── AuthServiceProvider.php
 ├── Store/
+│   ├── Contract/
+│   │   └── StoreContract.php
 │   ├── InMemoryStore.php
 │   ├── NullStore.php
 │   └── OrmStore.php
@@ -172,6 +212,9 @@ _72 files, 23 directories_
 │   ├── Contract/
 │   │   └── AuthThrowable.php
 │   └── Exception/
+│       ├── Abstract/
+│       │   ├── AuthInvalidArgumentException.php
+│       │   └── AuthRuntimeException.php
 │       ├── AuthInvalidAuthenticatedUsersSessionValueException.php
 │       ├── AuthInvalidAuthenticationException.php
 │       ├── AuthInvalidCurrentAuthenticationException.php
@@ -184,30 +227,32 @@ _72 files, 23 directories_
 │       ├── AuthNoImpersonatedUserException.php
 │       ├── AuthTokenizationException.php
 │       ├── AuthUnexpectedPasswordValueException.php
-│       ├── AuthUnexpectedUsernameValueException.php
-│       └── [Additional exception classes...]
-├── Attempt/
-├── Retrieval/
-├── README.md
-└── [Authenticator-related files]
+│       └── AuthUnexpectedUsernameValueException.php
+└── README.md
 ```
 
 ### 5. Broadcast Module
 
-_13 files, 10 directories_
+_19 files, 10 directories_
 
 ```
 ├── Broadcaster/
-│   ├── PusherBroadcaster.php
+│   ├── Contract/
+│   │   └── BroadcasterContract.php
 │   ├── CryptPusherBroadcaster.php
 │   ├── LogBroadcaster.php
 │   ├── NullBroadcaster.php
-│   └── Contract/
-│       └── BroadcasterContract.php
+│   └── PusherBroadcaster.php
 ├── Data/
-│   ├── Message.php
-│   └── Contract/
-│       └── MessageContract.php
+│   ├── Contract/
+│   │   ├── BroadcastConfigContract.php
+│   │   ├── BroadcastLogConfigContract.php
+│   │   ├── BroadcastPusherConfigContract.php
+│   │   └── MessageContract.php
+│   ├── BroadcastConfig.php
+│   ├── BroadcastLogConfig.php
+│   ├── BroadcastPusherConfig.php
+│   └── Message.php
 ├── Provider/
 │   ├── BroadcastComponentProvider.php
 │   └── BroadcastServiceProvider.php
@@ -223,22 +268,32 @@ _13 files, 10 directories_
 
 ### 6. Cache Module
 
-_12 files, 10 directories_
+_20 files, 12 directories_
 
 ```
+├── Data/
+│   ├── Contract/
+│   │   ├── CacheConfigContract.php
+│   │   ├── CacheLogConfigContract.php
+│   │   ├── CacheNullConfigContract.php
+│   │   └── CacheRedisConfigContract.php
+│   ├── CacheConfig.php
+│   ├── CacheLogConfig.php
+│   ├── CacheNullConfig.php
+│   └── CacheRedisConfig.php
 ├── Manager/
-│   ├── RedisCache.php
+│   ├── Contract/
+│   │   └── CacheContract.php
 │   ├── LogCache.php
 │   ├── NullCache.php
-│   └── Contract/
-│       └── CacheContract.php
-├── Tagger/
-│   ├── Tagger.php
-│   └── Contract/
-│       └── TaggerContract.php
+│   └── RedisCache.php
 ├── Provider/
 │   ├── CacheComponentProvider.php
 │   └── CacheServiceProvider.php
+├── Tagger/
+│   ├── Contract/
+│   │   └── TaggerContract.php
+│   └── Tagger.php
 ├── Throwable/
 │   ├── Contract/
 │   │   └── CacheThrowable.php
@@ -251,16 +306,20 @@ _12 files, 10 directories_
 
 ### 7. CLI Module
 
-_172 files, 85 directories — **Large Module**_
+_172 files, 84 directories — **Large Module**_
 
 ```
 ├── Interaction/
 │   ├── Argument/
+│   │   ├── Contract/
+│   │   │   └── ArgumentContract.php
+│   │   ├── Factory/
+│   │   │   └── ArgumentFactory.php
 │   │   └── Argument.php
 │   ├── Data/
-│   │   ├── CliInteractionConfig.php
-│   │   └── Contract/
-│   │       └── CliInteractionConfigContract.php
+│   │   ├── Contract/
+│   │   │   └── CliInteractionConfigContract.php
+│   │   └── CliInteractionConfig.php
 │   ├── Enum/
 │   │   ├── BackgroundColor.php
 │   │   ├── ExitCode.php
@@ -268,86 +327,266 @@ _172 files, 85 directories — **Large Module**_
 │   │   ├── Style.php
 │   │   └── TextColor.php
 │   ├── Format/
-│   │   ├── Format.php
+│   │   ├── Contract/
+│   │   │   └── FormatContract.php
 │   │   ├── BackgroundColorFormat.php
+│   │   ├── Format.php
 │   │   ├── StyleFormat.php
-│   │   ├── TextColorFormat.php
-│   │   └── Contract/
-│   │       └── FormatContract.php
+│   │   └── TextColorFormat.php
 │   ├── Formatter/
-│   │   ├── Formatter.php
+│   │   ├── Contract/
+│   │   │   └── FormatterContract.php
 │   │   ├── ErrorFormatter.php
-│   │   ├── SuccessFormatter.php
-│   │   ├── WarningFormatter.php
+│   │   ├── Formatter.php
 │   │   ├── HighlightedTextFormatter.php
-│   │   └── QuestionFormatter.php
+│   │   ├── QuestionFormatter.php
+│   │   ├── SuccessFormatter.php
+│   │   └── WarningFormatter.php
 │   ├── Input/
+│   │   ├── Contract/
+│   │   │   └── InputContract.php
+│   │   ├── Factory/
+│   │   │   └── InputFactory.php
 │   │   └── Input.php
 │   ├── Message/
+│   │   ├── Contract/
+│   │   │   ├── AnswerContract.php
+│   │   │   ├── MessageContract.php
+│   │   │   ├── ProgressContract.php
+│   │   │   └── QuestionContract.php
+│   │   ├── Answer.php
+│   │   ├── Banner.php
+│   │   ├── ErrorMessage.php
+│   │   ├── Header.php
 │   │   ├── Message.php
 │   │   ├── Messages.php
-│   │   ├── Banner.php
-│   │   ├── Answer.php
-│   │   ├── ErrorMessage.php
-│   │   ├── SuccessMessage.php
-│   │   ├── WarningMessage.php
-│   │   ├── Question.php
 │   │   ├── NewLine.php
-│   │   └── Progress.php
+│   │   ├── Progress.php
+│   │   ├── Question.php
+│   │   ├── SuccessMessage.php
+│   │   └── WarningMessage.php
 │   ├── Option/
+│   │   ├── Contract/
+│   │   │   └── OptionContract.php
+│   │   ├── Factory/
+│   │   │   └── OptionFactory.php
 │   │   └── Option.php
 │   ├── Output/
-│   │   ├── Output.php
-│   │   ├── StreamOutput.php
+│   │   ├── Contract/
+│   │   │   ├── EmptyOutputContract.php
+│   │   │   ├── FileOutputContract.php
+│   │   │   ├── OutputContract.php
+│   │   │   ├── PlainOutputContract.php
+│   │   │   └── StreamOutputContract.php
+│   │   ├── Factory/
+│   │   │   ├── Contract/
+│   │   │   │   └── OutputFactoryContract.php
+│   │   │   └── OutputFactory.php
+│   │   ├── EmptyOutput.php
 │   │   ├── FileOutput.php
+│   │   ├── Output.php
 │   │   ├── PlainOutput.php
-│   │   └── EmptyOutput.php
-│   ├── Writer/
-│   │   └── QuestionWriter.php
+│   │   └── StreamOutput.php
 │   ├── Provider/
 │   │   ├── CliInteractionComponentProvider.php
 │   │   └── CliInteractionServiceProvider.php
-│   └── [Additional interaction files]
+│   ├── Throwable/
+│   │   ├── Contract/
+│   │   │   └── CliInteractionThrowable.php
+│   │   └── Exception/
+│   │       ├── Abstract/
+│   │       │   ├── CliInteractionInvalidArgumentException.php
+│   │       │   └── CliInteractionRuntimeException.php
+│   │       ├── CliInteractionExpectedQuestionOutputException.php
+│   │       ├── CliInteractionInvalidEmptyValueException.php
+│   │       ├── CliInteractionInvalidNonEmptyValueException.php
+│   │       ├── CliInteractionInvalidOptionNameException.php
+│   │       ├── CliInteractionNoFormatterException.php
+│   │       └── CliInteractionNoValidationCallableException.php
+│   └── Writer/
+│       ├── Contract/
+│       │   └── WriterContract.php
+│       └── QuestionWriter.php
 ├── Middleware/
+│   ├── Contract/
+│   │   ├── InputReceivedMiddlewareContract.php
+│   │   ├── ProcessExitingMiddlewareContract.php
+│   │   ├── RouteDispatchedMiddlewareContract.php
+│   │   ├── RouteMatchedMiddlewareContract.php
+│   │   ├── RouteNotMatchedMiddlewareContract.php
+│   │   └── ThrowableCaughtMiddlewareContract.php
 │   ├── Handler/
-│   │   ├── ExitedHandler.php
+│   │   ├── Abstract/
+│   │   │   └── Handler.php
+│   │   ├── Contract/
+│   │   │   ├── HandlerContract.php
+│   │   │   ├── InputReceivedHandlerContract.php
+│   │   │   ├── ProcessExitingHandlerContract.php
+│   │   │   ├── RouteDispatchedHandlerContract.php
+│   │   │   ├── RouteMatchedHandlerContract.php
+│   │   │   ├── RouteNotMatchedHandlerContract.php
+│   │   │   └── ThrowableCaughtHandlerContract.php
 │   │   ├── InputReceivedHandler.php
+│   │   ├── ProcessExitingHandler.php
 │   │   ├── RouteDispatchedHandler.php
 │   │   ├── RouteMatchedHandler.php
 │   │   ├── RouteNotMatchedHandler.php
 │   │   └── ThrowableCaughtHandler.php
-│   └── Contract/
-│       ├── ExitedMiddlewareContract.php
-│       ├── InputReceivedMiddlewareContract.php
-│       ├── RouteNotMatchedMiddlewareContract.php
-│       └── ThrowableCaughtMiddlewareContract.php
-├── [Command, Dispatcher, Collector, Controller, etc.]
+│   ├── Provider/
+│   │   ├── CliMiddlewareComponentProvider.php
+│   │   └── CliMiddlewareServiceProvider.php
+│   └── Throwable/
+│       ├── Contract/
+│       │   └── CliMiddlewareThrowable.php
+│       └── Exception/
+│           └── Abstract/
+│               ├── CliMiddlewareInvalidArgumentException.php
+│               └── CliMiddlewareRuntimeException.php
+├── Routing/
+│   ├── Attribute/
+│   │   ├── Route/
+│   │   │   ├── Middleware.php
+│   │   │   ├── Name.php
+│   │   │   └── RouteHandler.php
+│   │   ├── ArgumentParameter.php
+│   │   ├── OptionParameter.php
+│   │   └── Route.php
+│   ├── Collection/
+│   │   ├── Contract/
+│   │   │   └── RouteCollectionContract.php
+│   │   └── RouteCollection.php
+│   ├── Collector/
+│   │   ├── Contract/
+│   │   │   └── RouteCollectorContract.php
+│   │   └── AttributeRouteCollector.php
+│   ├── Constant/
+│   │   ├── OptionName.php
+│   │   └── OptionShortName.php
+│   ├── Controller/
+│   │   └── Controller.php
+│   ├── Data/
+│   │   ├── Abstract/
+│   │   │   └── Parameter.php
+│   │   ├── Contract/
+│   │   │   ├── ArgumentParameterContract.php
+│   │   │   ├── CliRoutingConfigContract.php
+│   │   │   ├── OptionParameterContract.php
+│   │   │   ├── ParameterContract.php
+│   │   │   └── RouteContract.php
+│   │   ├── Option/
+│   │   │   ├── HelpOptionParameter.php
+│   │   │   ├── NoInteractionOptionParameter.php
+│   │   │   ├── QuietOptionParameter.php
+│   │   │   ├── SilentOptionParameter.php
+│   │   │   └── VersionOptionParameter.php
+│   │   ├── ArgumentParameter.php
+│   │   ├── CliRoutingData.php
+│   │   ├── OptionParameter.php
+│   │   └── Route.php
+│   ├── Dispatcher/
+│   │   ├── Contract/
+│   │   │   └── RouterContract.php
+│   │   └── Router.php
+│   ├── Enum/
+│   │   ├── ArgumentMode.php
+│   │   ├── ArgumentValueMode.php
+│   │   ├── OptionMode.php
+│   │   └── OptionValueMode.php
+│   ├── Provider/
+│   │   ├── Contract/
+│   │   │   └── CliRouteProviderContract.php
+│   │   ├── CliRoutingCliRouteProvider.php
+│   │   ├── CliRoutingComponentProvider.php
+│   │   └── CliRoutingServiceProvider.php
+│   └── Throwable/
+│       ├── Contract/
+│       │   └── CliRoutingThrowable.php
+│       └── Exception/
+│           ├── Abstract/
+│           │   ├── CliRoutingInvalidArgumentException.php
+│           │   └── CliRoutingRuntimeException.php
+│           ├── CliRoutingArgumentValuesValidationException.php
+│           ├── CliRoutingInvalidArgumentNameException.php
+│           ├── CliRoutingInvalidHelpTextCallableException.php
+│           ├── CliRoutingInvalidOptionNameException.php
+│           ├── CliRoutingInvalidOptionWithValueException.php
+│           ├── CliRoutingInvalidRouteNameException.php
+│           ├── CliRoutingNoCastException.php
+│           ├── CliRoutingNoHelpTextException.php
+│           ├── CliRoutingNoOutputDispatchException.php
+│           └── CliRoutingOptionValuesValidationException.php
+├── Server/
+│   ├── Command/
+│   │   ├── HelpCommand.php
+│   │   ├── ListBashCommand.php
+│   │   ├── ListCommand.php
+│   │   └── VersionCommand.php
+│   ├── Constant/
+│   │   └── CommandName.php
+│   ├── Data/
+│   │   └── Contract/
+│   │       ├── CliHelpCommandConfigContract.php
+│   │       ├── CliNoInteractionConfigContract.php
+│   │       ├── CliQuietInteractionConfigContract.php
+│   │       ├── CliSilentInteractionConfigContract.php
+│   │       └── CliVersionCommandConfigContract.php
+│   ├── Handler/
+│   │   ├── Contract/
+│   │   │   └── InputHandlerContract.php
+│   │   └── InputHandler.php
+│   ├── Middleware/
+│   │   ├── InputReceived/
+│   │   │   ├── CheckForHelpOptionsMiddleware.php
+│   │   │   ├── CheckForVersionOptionsMiddleware.php
+│   │   │   └── CheckGlobalInteractionOptionsMiddleware.php
+│   │   ├── RouteNotMatched/
+│   │   │   └── CheckCommandForTypoMiddleware.php
+│   │   └── ThrowableCaught/
+│   │       ├── LogThrowableCaughtMiddleware.php
+│   │       └── OutputThrowableCaughtMiddleware.php
+│   ├── Provider/
+│   │   ├── CliServerComponentProvider.php
+│   │   └── CliServerServiceProvider.php
+│   ├── Support/
+│   │   └── Exiter.php
+│   └── Throwable/
+│       ├── Contract/
+│       │   └── CliServerThrowable.php
+│       └── Exception/
+│           └── Abstract/
+│               ├── CliServerInvalidArgumentException.php
+│               └── CliServerRuntimeException.php
+├── Throwable/
+│   ├── Contract/
+│   │   └── CliThrowable.php
+│   └── Exception/
+│       └── Abstract/
+│           ├── CliInvalidArgumentException.php
+│           └── CliRuntimeException.php
 └── README.md
 ```
 
 ### 8. Container Module
 
-_17 files, 12 directories_
+_16 files, 11 directories_
 
 ```
-├── Manager/
-│   ├── Container.php
-│   ├── ChildContainer.php
-│   ├── NativeChildContainer.php
-│   └── Contract/
-│       ├── ContainerContract.php
-│       └── ProvidersAwareContract.php
-├── Manager/Trait/
-│   └── ProvidersAware.php
 ├── Data/
 │   └── ContainerData.php
-├── Enum/
-│   └── InvalidReferenceMode.php
+├── Manager/
+│   ├── Contract/
+│   │   ├── ContainerContract.php
+│   │   └── ProvidersAwareContract.php
+│   ├── Trait/
+│   │   └── ProvidersAware.php
+│   ├── ChildContainer.php
+│   ├── Container.php
+│   └── NativeChildContainer.php
 ├── Provider/
+│   ├── Contract/
+│   │   └── ServiceProviderContract.php
 │   ├── ContainerComponentProvider.php
-│   ├── ContainerServiceProvider.php
-│   └── Contract/
-│       └── ServiceProviderContract.php
+│   └── ContainerServiceProvider.php
 ├── Throwable/
 │   ├── Contract/
 │   │   └── ContainerThrowable.php
@@ -362,14 +601,18 @@ _17 files, 12 directories_
 
 ### 9. Crypt Module
 
-_14 files, 8 directories_
+_16 files, 10 directories_
 
 ```
+├── Data/
+│   ├── Contract/
+│   │   └── CryptConfigContract.php
+│   └── CryptConfig.php
 ├── Manager/
-│   ├── SodiumCrypt.php
+│   ├── Contract/
+│   │   └── CryptContract.php
 │   ├── NullCrypt.php
-│   └── Contract/
-│       └── CryptContract.php
+│   └── SodiumCrypt.php
 ├── Provider/
 │   ├── CryptComponentProvider.php
 │   └── CryptServiceProvider.php
@@ -390,66 +633,75 @@ _14 files, 8 directories_
 
 ### 10. Event Module
 
-_20 files, 17 directories_
+_21 files, 17 directories_
 
 ```
 ├── Attribute/
 │   ├── Listener.php
 │   └── ListenerHandler.php
 ├── Collection/
-│   ├── ListenerCollection.php
-│   └── Contract/
-│       └── ListenerCollectionContract.php
+│   ├── Contract/
+│   │   └── ListenerCollectionContract.php
+│   └── ListenerCollection.php
 ├── Collector/
-│   ├── AttributeListenerCollector.php
-│   └── Contract/
-│       └── ListenerCollectorContract.php
+│   ├── Contract/
+│   │   └── ListenerCollectorContract.php
+│   └── AttributeListenerCollector.php
 ├── Contract/
 │   ├── ArgumentsCapableEventContract.php
-│   ├── DispatchCollectableEventContract.php
-│   └── (Additional contracts)
+│   └── DispatchCollectableEventContract.php
 ├── Data/
+│   ├── Contract/
+│   │   └── ListenerContract.php
 │   ├── EventData.php
-│   ├── Listener.php
-│   └── Contract/
-│       └── ListenerContract.php
+│   └── Listener.php
 ├── Dispatcher/
-│   ├── EventDispatcher.php
-│   └── Contract/
-│       └── EventDispatcherContract.php
+│   ├── Contract/
+│   │   └── EventDispatcherContract.php
+│   └── EventDispatcher.php
 ├── Provider/
+│   ├── Contract/
+│   │   └── ListenerProviderContract.php
 │   ├── EventComponentProvider.php
-│   ├── EventServiceProvider.php
-│   └── Contract/
-│       └── ListenerProviderContract.php
+│   └── EventServiceProvider.php
 ├── Throwable/
 │   ├── Contract/
 │   │   └── EventThrowable.php
 │   └── Exception/
-│       └── Abstract/
-│           ├── EventInvalidArgumentException.php
-│           └── EventRuntimeException.php
+│       ├── Abstract/
+│       │   ├── EventInvalidArgumentException.php
+│       │   └── EventRuntimeException.php
+│       └── EventInvalidEventException.php
 └── README.md
 ```
 
 ### 11. Filesystem Module
 
-_17 files, 10 directories_
+_25 files, 11 directories_
 
 ```
-├── Manager/
-│   ├── FlysystemFilesystem.php
-│   ├── LocalFlysystemFilesystem.php
-│   ├── S3FlysystemFilesystem.php
-│   ├── InMemoryFilesystem.php
-│   ├── NullFilesystem.php
-│   └── Contract/
-│       └── FilesystemContract.php
 ├── Data/
+│   ├── Contract/
+│   │   ├── FilesystemConfigContract.php
+│   │   ├── FilesystemFlysystemConfigContract.php
+│   │   ├── FilesystemFlysystemLocalConfigContract.php
+│   │   └── FilesystemFlysystemS3ConfigContract.php
+│   ├── FilesystemConfig.php
+│   ├── FilesystemFlysystemConfig.php
+│   ├── FilesystemFlysystemLocalConfig.php
+│   ├── FilesystemFlysystemS3Config.php
 │   ├── InMemoryFile.php
 │   └── InMemoryMetadata.php
 ├── Enum/
 │   └── Visibility.php
+├── Manager/
+│   ├── Contract/
+│   │   └── FilesystemContract.php
+│   ├── FlysystemFilesystem.php
+│   ├── InMemoryFilesystem.php
+│   ├── LocalFlysystemFilesystem.php
+│   ├── NullFilesystem.php
+│   └── S3FlysystemFilesystem.php
 ├── Provider/
 │   ├── FilesystemComponentProvider.php
 │   └── FilesystemServiceProvider.php
@@ -467,106 +719,493 @@ _17 files, 10 directories_
 
 ### 12. HTTP Module
 
-_297 files, 158 directories — **Largest Module**_
+_300 files, 161 directories — **Largest Module**_
 
 ```
 ├── Client/
+│   ├── Data/
+│   │   ├── Contract/
+│   │   │   └── HttpClientConfigContract.php
+│   │   └── HttpClientConfig.php
 │   ├── Manager/
+│   │   ├── Contract/
+│   │   │   └── ClientContract.php
 │   │   ├── GuzzleClient.php
 │   │   ├── LogClient.php
-│   │   ├── NullClient.php
-│   │   └── Contract/
-│   │       └── ClientContract.php
+│   │   └── NullClient.php
 │   ├── Provider/
 │   │   ├── HttpClientComponentProvider.php
 │   │   └── HttpClientServiceProvider.php
 │   └── Throwable/
-│       └── Contract/
-│           └── HttpClientThrowable.php
-├── Middleware/
-│   ├── Handler/
+│       ├── Contract/
+│       │   └── HttpClientThrowable.php
+│       └── Exception/
+│           └── Abstract/
+│               ├── HttpClientInvalidArgumentException.php
+│               └── HttpClientRuntimeException.php
+├── Message/
+│   ├── Constant/
+│   │   ├── ContentTypeValue.php
+│   │   ├── HeaderName.php
+│   │   ├── HeaderValue.php
+│   │   └── Port.php
+│   ├── Contract/
+│   │   └── MessageContract.php
+│   ├── Enum/
+│   │   ├── ProtocolVersion.php
+│   │   ├── RequestMethod.php
+│   │   ├── SameSite.php
+│   │   ├── StatusCode.php
+│   │   └── StatusText.php
+│   ├── File/
+│   │   ├── Collection/
+│   │   │   ├── Contract/
+│   │   │   │   └── UploadedFileCollectionContract.php
+│   │   │   └── UploadedFileCollection.php
+│   │   ├── Constant/
+│   │   │   └── UploadErrorExceptionMessage.php
+│   │   ├── Contract/
+│   │   │   └── UploadedFileContract.php
+│   │   ├── Enum/
+│   │   │   └── UploadError.php
+│   │   ├── Factory/
+│   │   │   ├── PsrUploadedFileFactory.php
+│   │   │   └── UploadedFileFactory.php
+│   │   ├── Psr/
+│   │   │   └── UploadedFile.php
+│   │   ├── Throwable/
+│   │   │   ├── Contract/
+│   │   │   │   └── UploadedFileThrowable.php
+│   │   │   └── Exception/
+│   │   │       ├── Abstract/
+│   │   │       │   ├── UploadedFileInvalidArgumentException.php
+│   │   │       │   └── UploadedFileRuntimeException.php
+│   │   │       ├── UploadedFileAlreadyMovedException.php
+│   │   │       ├── UploadedFileInvalidDirectoryException.php
+│   │   │       ├── UploadedFileInvalidFilesArrayStructureException.php
+│   │   │       ├── UploadedFileInvalidKeyException.php
+│   │   │       ├── UploadedFileInvalidParamException.php
+│   │   │       ├── UploadedFileInvalidTmpNameException.php
+│   │   │       ├── UploadedFileInvalidUploadErrorException.php
+│   │   │       ├── UploadedFileInvalidUploadedFileException.php
+│   │   │       ├── UploadedFileInvalidValueException.php
+│   │   │       ├── UploadedFileMoveFailureException.php
+│   │   │       ├── UploadedFileUnableToWriteFileException.php
+│   │   │       └── UploadedFileUploadErrorException.php
+│   │   └── UploadedFile.php
+│   ├── Header/
+│   │   ├── Collection/
+│   │   │   ├── Contract/
+│   │   │   │   └── HeaderCollectionContract.php
+│   │   │   └── HeaderCollection.php
+│   │   ├── Contract/
+│   │   │   └── HeaderContract.php
+│   │   ├── Factory/
+│   │   │   ├── CookieFactory.php
+│   │   │   ├── HeaderFactory.php
+│   │   │   └── PsrHeaderFactory.php
+│   │   ├── Throwable/
+│   │   │   ├── Contract/
+│   │   │   │   └── HttpHeaderThrowable.php
+│   │   │   └── Exception/
+│   │   │       ├── Abstract/
+│   │   │       │   ├── HttpHeaderInvalidArgumentException.php
+│   │   │       │   └── HttpHeaderRuntimeException.php
+│   │   │       ├── HttpHeaderInvalidHeaderNameException.php
+│   │   │       ├── HttpHeaderInvalidHeaderParamException.php
+│   │   │       ├── HttpHeaderInvalidNameException.php
+│   │   │       ├── HttpHeaderInvalidValueException.php
+│   │   │       ├── HttpHeaderUnsupportedMethodException.php
+│   │   │       ├── HttpHeaderUnsupportedOffsetSetException.php
+│   │   │       └── HttpHeaderUnsupportedOffsetUnsetException.php
+│   │   ├── Value/
+│   │   │   ├── Component/
+│   │   │   │   ├── Contract/
+│   │   │   │   │   └── ComponentContract.php
+│   │   │   │   └── Component.php
+│   │   │   ├── Contract/
+│   │   │   │   ├── CookieContract.php
+│   │   │   │   └── ValueContract.php
+│   │   │   ├── Cookie.php
+│   │   │   └── Value.php
+│   │   ├── ContentType.php
+│   │   ├── Header.php
+│   │   ├── Location.php
+│   │   ├── Referer.php
+│   │   └── SetCookie.php
+│   ├── Param/
 │   │   ├── Abstract/
-│   │   │   └── Handler.php
-│   │   ├── RequestReceivedHandler.php
-│   │   ├── RouteMatchedHandler.php
-│   │   ├── RouteDispatchedHandler.php
-│   │   ├── RouteNotMatchedHandler.php
-│   │   ├── SendingResponseHandler.php
-│   │   ├── TerminatedHandler.php
-│   │   ├── ThrowableCaughtHandler.php
-│   │   └── Contract/
-│   │       ├── HandlerContract.php
-│   │       ├── RequestReceivedHandlerContract.php
-│   │       ├── RouteDispatchedHandlerContract.php
-│   │       ├── RouteMatchedHandlerContract.php
-│   │       ├── RouteNotMatchedHandlerContract.php
-│   │       ├── SendingResponseHandlerContract.php
-│   │       ├── TerminatedHandlerContract.php
-│   │       └── ThrowableCaughtHandlerContract.php
+│   │   │   └── ParamCollection.php
+│   │   ├── Contract/
+│   │   │   ├── AttributeParamCollectionContract.php
+│   │   │   ├── CookieParamCollectionContract.php
+│   │   │   ├── ParamCollectionContract.php
+│   │   │   ├── ParsedBodyParamCollectionContract.php
+│   │   │   ├── ParsedJsonParamCollectionContract.php
+│   │   │   ├── QueryParamCollectionContract.php
+│   │   │   └── ServerParamCollectionContract.php
+│   │   ├── AttributeParamCollection.php
+│   │   ├── CookieParamCollection.php
+│   │   ├── ParsedBodyParamCollection.php
+│   │   ├── ParsedJsonParamCollection.php
+│   │   ├── QueryParamCollection.php
+│   │   └── ServerParamCollection.php
 │   ├── Provider/
-│   │   ├── HttpMiddlewareComponentProvider.php
-│   │   └── HttpMiddlewareServiceProvider.php
+│   │   ├── HttpMessageComponentProvider.php
+│   │   └── HttpMessageServiceProvider.php
+│   ├── Request/
+│   │   ├── Contract/
+│   │   │   ├── JsonServerRequestContract.php
+│   │   │   ├── RequestContract.php
+│   │   │   └── ServerRequestContract.php
+│   │   ├── Factory/
+│   │   │   ├── PsrRequestFactory.php
+│   │   │   ├── RequestFactory.php
+│   │   │   └── ServerFactory.php
+│   │   ├── Psr/
+│   │   │   ├── Request.php
+│   │   │   └── ServerRequest.php
+│   │   ├── Throwable/
+│   │   │   ├── Contract/
+│   │   │   │   └── HttpRequestThrowable.php
+│   │   │   └── Exception/
+│   │   │       ├── Abstract/
+│   │   │       │   ├── HttpRequestInvalidArgumentException.php
+│   │   │       │   └── HttpRequestRuntimeException.php
+│   │   │       ├── HttpRequestInvalidMethodException.php
+│   │   │       └── HttpRequestInvalidRequestTargetException.php
+│   │   ├── JsonServerRequest.php
+│   │   ├── Request.php
+│   │   └── ServerRequest.php
+│   ├── Response/
+│   │   ├── Contract/
+│   │   │   ├── EmptyResponseContract.php
+│   │   │   ├── HtmlResponseContract.php
+│   │   │   ├── JsonResponseContract.php
+│   │   │   ├── RedirectResponseContract.php
+│   │   │   ├── ResponseContract.php
+│   │   │   └── TextResponseContract.php
+│   │   ├── Factory/
+│   │   │   ├── Contract/
+│   │   │   │   └── ResponseFactoryContract.php
+│   │   │   └── ResponseFactory.php
+│   │   ├── Psr/
+│   │   │   └── Response.php
+│   │   ├── Throwable/
+│   │   │   ├── Contract/
+│   │   │   │   └── HttpResponseThrowable.php
+│   │   │   └── Exception/
+│   │   │       ├── Abstract/
+│   │   │       │   ├── HttpResponseInvalidArgumentException.php
+│   │   │       │   └── HttpResponseRuntimeException.php
+│   │   │       ├── HttpRequestInvalidJsonCallbackException.php
+│   │   │       └── HttpRequestInvalidRedirectStatusCodeException.php
+│   │   ├── EmptyResponse.php
+│   │   ├── HtmlResponse.php
+│   │   ├── JsonResponse.php
+│   │   ├── RedirectResponse.php
+│   │   ├── Response.php
+│   │   ├── TextResponse.php
+│   │   └── XmlResponse.php
+│   ├── Stream/
+│   │   ├── Contract/
+│   │   │   └── StreamContract.php
+│   │   ├── Enum/
+│   │   │   ├── Mode.php
+│   │   │   ├── ModeTranslation.php
+│   │   │   └── PhpWrapper.php
+│   │   ├── Factory/
+│   │   │   ├── PsrStreamFactory.php
+│   │   │   └── StreamFactory.php
+│   │   ├── Psr/
+│   │   │   └── Stream.php
+│   │   ├── Throwable/
+│   │   │   ├── Contract/
+│   │   │   │   └── HttpStreamThrowable.php
+│   │   │   └── Exception/
+│   │   │       ├── Abstract/
+│   │   │       │   ├── HttpStreamInvalidArgumentException.php
+│   │   │       │   └── HttpStreamRuntimeException.php
+│   │   │       ├── HttpStreamInvalidLengthException.php
+│   │   │       ├── HttpStreamInvalidStreamException.php
+│   │   │       ├── HttpStreamNoStreamAvailableException.php
+│   │   │       ├── HttpStreamStreamReadException.php
+│   │   │       ├── HttpStreamStreamSeekException.php
+│   │   │       ├── HttpStreamStreamTellException.php
+│   │   │       ├── HttpStreamStreamWriteException.php
+│   │   │       ├── HttpStreamUnreadableStreamException.php
+│   │   │       ├── HttpStreamUnseekableStreamException.php
+│   │   │       └── HttpStreamUnwritableStreamException.php
+│   │   └── Stream.php
+│   ├── Throwable/
+│   │   ├── Contract/
+│   │   │   └── HttpMessageThrowable.php
+│   │   └── Exception/
+│   │       ├── Abstract/
+│   │       │   ├── HttpMessageInvalidArgumentException.php
+│   │       │   └── HttpMessageRuntimeException.php
+│   │       ├── HttpNotFoundResponseException.php
+│   │       ├── HttpRedirectResponseException.php
+│   │       └── HttpResponseException.php
+│   ├── Trait/
+│   │   └── Message.php
+│   └── Uri/
+│       ├── Constant/
+│       │   └── Char.php
+│       ├── Contract/
+│       │   └── UriContract.php
+│       ├── Data/
+│       │   └── HostPortAccumulator.php
+│       ├── Enum/
+│       │   └── Scheme.php
+│       ├── Factory/
+│       │   ├── MarshalUriFactory.php
+│       │   ├── PsrUriFactory.php
+│       │   └── UriFactory.php
+│       ├── Psr/
+│       │   └── Uri.php
+│       ├── Throwable/
+│       │   ├── Contract/
+│       │   │   └── HttpMessageThrowable.php
+│       │   └── Exception/
+│       │       ├── Abstract/
+│       │       │   ├── HttpUriInvalidArgumentException.php
+│       │       │   └── HttpUriRuntimeException.php
+│       │       ├── HttpUriInvalidFromStringException.php
+│       │       ├── HttpUriInvalidPathException.php
+│       │       ├── HttpUriInvalidPortException.php
+│       │       ├── HttpUriInvalidQueryException.php
+│       │       └── NoPortExceptionHttpUri.php
+│       ├── Type/
+│       │   └── Port.php
+│       └── Uri.php
+├── Middleware/
 │   ├── Contract/
 │   │   ├── RequestReceivedMiddlewareContract.php
+│   │   ├── ResponseSentMiddlewareContract.php
 │   │   ├── RouteDispatchedMiddlewareContract.php
 │   │   ├── RouteMatchedMiddlewareContract.php
 │   │   ├── RouteNotMatchedMiddlewareContract.php
 │   │   ├── SendingResponseMiddlewareContract.php
-│   │   ├── TerminatedMiddlewareContract.php
 │   │   └── ThrowableCaughtMiddlewareContract.php
+│   ├── Handler/
+│   │   ├── Abstract/
+│   │   │   └── Handler.php
+│   │   ├── Contract/
+│   │   │   ├── HandlerContract.php
+│   │   │   ├── RequestReceivedHandlerContract.php
+│   │   │   ├── ResponseSentHandlerContract.php
+│   │   │   ├── RouteDispatchedHandlerContract.php
+│   │   │   ├── RouteMatchedHandlerContract.php
+│   │   │   ├── RouteNotMatchedHandlerContract.php
+│   │   │   ├── SendingResponseHandlerContract.php
+│   │   │   └── ThrowableCaughtHandlerContract.php
+│   │   ├── RequestReceivedHandler.php
+│   │   ├── ResponseSentHandler.php
+│   │   ├── RouteDispatchedHandler.php
+│   │   ├── RouteMatchedHandler.php
+│   │   ├── RouteNotMatchedHandler.php
+│   │   ├── SendingResponseHandler.php
+│   │   └── ThrowableCaughtHandler.php
+│   ├── Provider/
+│   │   ├── HttpMiddlewareComponentProvider.php
+│   │   └── HttpMiddlewareServiceProvider.php
 │   └── Throwable/
-│       └── Contract/
-│           └── HttpMiddlewareThrowable.php
+│       ├── Contract/
+│       │   └── HttpMiddlewareThrowable.php
+│       └── Exception/
+│           └── Abstract/
+│               ├── HttpMiddlewareInvalidArgumentException.php
+│               └── HttpMiddlewareRuntimeException.php
 ├── Routing/
-│   ├── Controller/
-│   │   ├── Controller.php
-│   │   └── ApiController.php
-│   ├── Constant/
-│   │   └── Regex.php
-│   ├── Data/
-│   │   ├── Route.php
+│   ├── Attribute/
+│   │   ├── Route/
+│   │   │   ├── RequestMethod/
+│   │   │   │   ├── Any.php
+│   │   │   │   ├── Connect.php
+│   │   │   │   ├── Delete.php
+│   │   │   │   ├── Get.php
+│   │   │   │   ├── Head.php
+│   │   │   │   ├── Options.php
+│   │   │   │   ├── Patch.php
+│   │   │   │   ├── Post.php
+│   │   │   │   ├── Put.php
+│   │   │   │   └── Trace.php
+│   │   │   ├── Middleware.php
+│   │   │   ├── Name.php
+│   │   │   ├── Path.php
+│   │   │   ├── RequestMethod.php
+│   │   │   ├── RequestStruct.php
+│   │   │   ├── ResponseStruct.php
+│   │   │   └── RouteHandler.php
 │   │   ├── DynamicRoute.php
 │   │   ├── Parameter.php
+│   │   └── Route.php
+│   ├── Cli/
+│   │   └── Command/
+│   │       ├── Constant/
+│   │       │   └── CommandName.php
+│   │       └── ListCommand.php
+│   ├── Collection/
+│   │   ├── Contract/
+│   │   │   └── RouteCollectionContract.php
+│   │   └── RouteCollection.php
+│   ├── Collector/
+│   │   ├── Contract/
+│   │   │   └── RouteCollectorContract.php
+│   │   └── AttributeRouteCollector.php
+│   ├── Constant/
+│   │   └── Regex.php
+│   ├── Controller/
+│   │   ├── ApiController.php
+│   │   └── Controller.php
+│   ├── Data/
+│   │   ├── Contract/
+│   │   │   ├── DynamicRouteContract.php
+│   │   │   ├── ParameterContract.php
+│   │   │   └── RouteContract.php
+│   │   ├── DynamicRoute.php
 │   │   ├── HttpRoutingData.php
-│   │   └── Contract/
-│   │       ├── RouteContract.php
-│   │       ├── DynamicRouteContract.php
-│   │       └── ParameterContract.php
+│   │   ├── Parameter.php
+│   │   └── Route.php
+│   ├── Dispatcher/
+│   │   ├── Contract/
+│   │   │   └── RouterContract.php
+│   │   └── Router.php
 │   ├── Factory/
-│   │   ├── RoutingResponseFactory.php
-│   │   └── Contract/
-│   │       └── RoutingResponseFactoryContract.php
-│   ├── Url/
-│   │   ├── Url.php
-│   │   └── Contract/
-│   │       └── UrlContract.php
-│   └── [Additional routing files]
+│   │   ├── Contract/
+│   │   │   └── RoutingResponseFactoryContract.php
+│   │   ├── RouteFactory.php
+│   │   └── RoutingResponseFactory.php
+│   ├── Matcher/
+│   │   ├── Contract/
+│   │   │   └── MatcherContract.php
+│   │   └── Matcher.php
+│   ├── Processor/
+│   │   ├── Contract/
+│   │   │   └── ProcessorContract.php
+│   │   └── Processor.php
+│   ├── Provider/
+│   │   ├── Contract/
+│   │   │   └── HttpRouteProviderContract.php
+│   │   ├── HttpRoutingCliComponentProvider.php
+│   │   ├── HttpRoutingCliRouteProvider.php
+│   │   ├── HttpRoutingCliServiceProvider.php
+│   │   ├── HttpRoutingComponentProvider.php
+│   │   └── HttpRoutingServiceProvider.php
+│   ├── Throwable/
+│   │   ├── Contract/
+│   │   │   └── HttpRoutingThrowable.php
+│   │   └── Exception/
+│   │       ├── Abstract/
+│   │       │   ├── HttpRoutingInvalidArgumentException.php
+│   │       │   └── HttpRoutingRuntimeException.php
+│   │       ├── HttpRoutingInvalidDynamicRouteNameException.php
+│   │       ├── HttpRoutingInvalidMethodTypeException.php
+│   │       ├── HttpRoutingInvalidParameterRegexException.php
+│   │       ├── HttpRoutingInvalidRouteNameException.php
+│   │       ├── HttpRoutingInvalidRouteParameterException.php
+│   │       ├── HttpRoutingInvalidRoutePathException.php
+│   │       ├── HttpRoutingInvalidRouteRegexException.php
+│   │       ├── HttpRoutingNoCastException.php
+│   │       ├── HttpRoutingNoRequestStructException.php
+│   │       └── HttpRoutingNoResponseStructException.php
+│   └── Url/
+│       ├── Contract/
+│       │   └── UrlContract.php
+│       └── Url.php
+├── Server/
+│   ├── Data/
+│   │   ├── Contract/
+│   │   │   └── HttpServerConfigContract.php
+│   │   └── HttpServerConfig.php
+│   ├── Handler/
+│   │   ├── Contract/
+│   │   │   ├── ExceptionResponseRequestHandlerContract.php
+│   │   │   └── RequestHandlerContract.php
+│   │   └── RequestHandler.php
+│   ├── Middleware/
+│   │   ├── RequestReceived/
+│   │   │   └── RedirectTrailingSlashMiddleware.php
+│   │   ├── RouteMatched/
+│   │   │   ├── RequestStructMiddleware.php
+│   │   │   └── ResponseStructMiddleware.php
+│   │   ├── RouteNotMatched/
+│   │   │   └── ViewRouteNotMatchedMiddleware.php
+│   │   ├── SendingResponse/
+│   │   │   └── NoCacheResponseMiddleware.php
+│   │   ├── ThrowableCaught/
+│   │   │   ├── LogThrowableCaughtMiddleware.php
+│   │   │   └── ViewThrowableCaughtMiddleware.php
+│   │   └── CacheResponseMiddleware.php
+│   ├── Provider/
+│   │   ├── HttpServerComponentProvider.php
+│   │   └── HttpServerServiceProvider.php
+│   ├── Psr/
+│   │   └── RequestHandler.php
+│   └── Throwable/
+│       ├── Contract/
+│       │   └── HttpServerThrowable.php
+│       └── Exception/
+│           └── Abstract/
+│               ├── HttpServerInvalidArgumentException.php
+│               └── HttpServerRuntimeException.php
+├── Struct/
+│   ├── Contract/
+│   │   └── StructContract.php
+│   ├── Request/
+│   │   ├── Contract/
+│   │   │   └── RequestStructContract.php
+│   │   └── Trait/
+│   │       ├── JsonRequestStruct.php
+│   │       ├── ParsedBodyRequestStruct.php
+│   │       ├── QueryRequestStruct.php
+│   │       └── RequestStruct.php
+│   ├── Response/
+│   │   ├── Contract/
+│   │   │   └── ResponseStructContract.php
+│   │   └── Trait/
+│   │       └── ResponseStruct.php
+│   └── Throwable/
+│       ├── Contract/
+│       │   └── HttpStructThrowable.php
+│       └── Exception/
+│           ├── Abstract/
+│           │   ├── HttpStructInvalidArgumentException.php
+│           │   └── HttpStructRuntimeException.php
+│           └── HttpStructJsonServerRequestExpectedException.php
 ├── Throwable/
 │   ├── Contract/
 │   │   └── HttpThrowable.php
 │   └── Exception/
 │       └── Abstract/
 │           ├── HttpInvalidArgumentException.php
-│           └── [Additional HTTP exception files...]
-├── Request/
-├── Response/
-├── Attribute/
-├── [Many more HTTP-related modules...]
+│           └── HttpRuntimeException.php
 └── README.md
 ```
 
 ### 13. JWT Module
 
-_10 files, 9 directories_
+_18 files, 11 directories_
 
 ```
+├── Data/
+│   ├── Contract/
+│   │   ├── JwtConfigContract.php
+│   │   ├── JwtEdDsaConfigContract.php
+│   │   ├── JwtHsConfigContract.php
+│   │   └── JwtRsConfigContract.php
+│   ├── JwtConfig.php
+│   ├── JwtEdDsaConfig.php
+│   ├── JwtHsConfig.php
+│   └── JwtRsConfig.php
 ├── Enum/
 │   └── Algorithm.php
 ├── Manager/
+│   ├── Contract/
+│   │   └── JwtContract.php
 │   ├── FirebaseJwt.php
-│   ├── NullJwt.php
-│   └── Contract/
-│       └── JwtContract.php
+│   └── NullJwt.php
 ├── Provider/
 │   ├── JwtComponentProvider.php
 │   └── JwtServiceProvider.php
@@ -582,18 +1221,22 @@ _10 files, 9 directories_
 
 ### 14. Log Module
 
-_12 files, 10 directories_
+_14 files, 12 directories_
 
 ```
+├── Data/
+│   ├── Contract/
+│   │   └── LogConfigContract.php
+│   └── LogConfig.php
 ├── Enum/
 │   └── LogLevel.php
 ├── Logger/
 │   ├── Abstract/
 │   │   └── Logger.php
-│   ├── PsrLogger.php
+│   ├── Contract/
+│   │   └── LoggerContract.php
 │   ├── NullLogger.php
-│   └── Contract/
-│       └── LoggerContract.php
+│   └── PsrLogger.php
 ├── Provider/
 │   ├── LogComponentProvider.php
 │   └── LogServiceProvider.php
@@ -610,24 +1253,30 @@ _12 files, 10 directories_
 
 ### 15. Mail Module
 
-_17 files, 10 directories_
+_23 files, 10 directories_
 
 ```
 ├── Data/
-│   ├── Message.php
-│   ├── Recipient.php
+│   ├── Contract/
+│   │   ├── AttachmentContract.php
+│   │   ├── MailConfigContract.php
+│   │   ├── MailMailgunConfigContract.php
+│   │   ├── MailPhpMailerConfigContract.php
+│   │   ├── MessageContract.php
+│   │   └── RecipientContract.php
 │   ├── Attachment.php
-│   └── Contract/
-│       ├── MessageContract.php
-│       ├── RecipientContract.php
-│       └── AttachmentContract.php
+│   ├── MailConfig.php
+│   ├── MailMailgunConfig.php
+│   ├── MailPhpMailerConfig.php
+│   ├── Message.php
+│   └── Recipient.php
 ├── Mailer/
-│   ├── PhpMailer.php
-│   ├── MailgunMailer.php
+│   ├── Contract/
+│   │   └── MailerContract.php
 │   ├── LogMailer.php
+│   ├── MailgunMailer.php
 │   ├── NullMailer.php
-│   └── Contract/
-│       └── MailerContract.php
+│   └── PhpMailer.php
 ├── Provider/
 │   ├── MailComponentProvider.php
 │   └── MailServiceProvider.php
@@ -643,80 +1292,144 @@ _17 files, 10 directories_
 
 ### 16. ORM Module
 
-_90 files, 32 directories — **Complex Module**_
+_101 files, 35 directories — **Complex Module**_
 
 ```
 ├── Constant/
 │   ├── DateFormat.php
 │   └── Statement.php
 ├── Data/
+│   ├── Contract/
+│   │   ├── OrmConfigContract.php
+│   │   ├── OrmMysqlConfigContract.php
+│   │   ├── OrmPgsqlConfigContract.php
+│   │   └── OrmSqliteConfigContract.php
+│   ├── Join/
+│   │   ├── FullOuterJoin.php
+│   │   ├── InnerJoin.php
+│   │   ├── LeftJoin.php
+│   │   ├── OuterJoin.php
+│   │   └── RightJoin.php
+│   ├── Where/
+│   │   ├── AndNotWhere.php
+│   │   ├── AndWhere.php
+│   │   ├── NotWhere.php
+│   │   ├── OrNotWhere.php
+│   │   └── OrWhere.php
+│   ├── DatedMetadata.php
+│   ├── EntityCast.php
+│   ├── EntityMetadata.php
 │   ├── Id.php
+│   ├── Join.php
+│   ├── OrderBy.php
+│   ├── OrmConfig.php
+│   ├── OrmMysqlConfig.php
+│   ├── OrmPgsqlConfig.php
+│   ├── OrmSqliteConfig.php
+│   ├── SoftDeleteMetadata.php
 │   ├── Value.php
 │   ├── Where.php
-│   ├── WhereGroup.php
-│   ├── OrderBy.php
-│   ├── Join.php
-│   ├── EntityCast.php
-│   ├── Where/
-│   │   ├── AndWhere.php
-│   │   ├── AndNotWhere.php
-│   │   └── OrWhere.php
-│   └── Join/
-│       ├── InnerJoin.php
-│       ├── LeftJoin.php
-│       ├── RightJoin.php
-│       ├── OuterJoin.php
-│       └── FullOuterJoin.php
+│   └── WhereGroup.php
+├── Entity/
+│   ├── Abstract/
+│   │   ├── DatedEntity.php
+│   │   ├── Entity.php
+│   │   └── SoftDeleteEntity.php
+│   ├── Contract/
+│   │   ├── DatedEntityContract.php
+│   │   ├── EntityContract.php
+│   │   └── SoftDeleteEntityContract.php
+│   └── Trait/
+│       ├── DatedFields.php
+│       └── SoftDeleteFields.php
 ├── Enum/
 │   ├── Comparison.php
-│   ├── JoinType.php
 │   ├── JoinOperator.php
+│   ├── JoinType.php
 │   ├── SortOrder.php
 │   └── WhereType.php
 ├── Factory/
-│   ├── DateFactory.php
-│   └── [Other factories...]
+│   └── DateFactory.php
 ├── Manager/
 │   ├── Abstract/
 │   │   └── PdoManager.php
+│   ├── Contract/
+│   │   └── ManagerContract.php
 │   ├── MysqlManager.php
-│   ├── PgsqlManager.php
-│   ├── SqliteManager.php
 │   ├── NullManager.php
-│   └── Contract/
-│       └── ManagerContract.php
+│   ├── PgsqlManager.php
+│   └── SqliteManager.php
 ├── Middleware/
 │   └── EntityRouteMatchedMiddleware.php
 ├── Provider/
 │   ├── OrmComponentProvider.php
 │   └── OrmServiceProvider.php
 ├── QueryBuilder/
-│   ├── SqlSelectQueryBuilder.php
+│   ├── Abstract/
+│   │   └── SqlQueryBuilder.php
+│   ├── Contract/
+│   │   ├── DeleteQueryBuilderContract.php
+│   │   ├── InsertQueryBuilderContract.php
+│   │   ├── QueryBuilderContract.php
+│   │   ├── SelectQueryBuilderContract.php
+│   │   └── UpdateQueryBuilderContract.php
+│   ├── Factory/
+│   │   ├── Contract/
+│   │   │   └── QueryBuilderFactoryContract.php
+│   │   └── SqlQueryBuilderFactory.php
+│   ├── SqlDeleteQueryBuilder.php
 │   ├── SqlInsertQueryBuilder.php
-│   ├── SqlUpdateQueryBuilder.php
-│   └── SqlDeleteQueryBuilder.php
+│   ├── SqlSelectQueryBuilder.php
+│   └── SqlUpdateQueryBuilder.php
+├── Registry/
+│   ├── Contract/
+│   │   └── EntityMetadataRegistryContract.php
+│   └── EntityMetadataRegistry.php
 ├── Repository/
+│   ├── Contract/
+│   │   └── RepositoryContract.php
 │   └── Repository.php
 ├── Schema/
 │   ├── Abstract/
 │   │   ├── Migration.php
 │   │   ├── SqlFileMigration.php
 │   │   └── TransactionalMigration.php
-│   ├── Contract/
-│   │   ├── MigrationContract.php
-│   │   ├── SchemaContract.php
-│   │   ├── TableContract.php
-│   │   ├── ColumnContract.php
-│   │   ├── ConstraintContract.php
-│   │   └── IndexContract.php
-│   └── [Schema implementation files...]
-├── Statement/
-│   ├── PdoStatement.php
-│   ├── NullStatement.php
 │   └── Contract/
-│       └── StatementContract.php
-├── README.md
-└── [Additional ORM files...]
+│       ├── ColumnContract.php
+│       ├── ConstraintContract.php
+│       ├── IndexContract.php
+│       ├── MigrationContract.php
+│       ├── SchemaContract.php
+│       └── TableContract.php
+├── Statement/
+│   ├── Contract/
+│   │   └── StatementContract.php
+│   ├── NullStatement.php
+│   └── PdoStatement.php
+├── Throwable/
+│   ├── Contract/
+│   │   └── OrmThrowable.php
+│   └── Exception/
+│       ├── Abstract/
+│       │   ├── OrmInvalidArgumentException.php
+│       │   └── OrmRuntimeException.php
+│       ├── OrmArrayCastingException.php
+│       ├── OrmEntityNotFoundException.php
+│       ├── OrmExecuteException.php
+│       ├── OrmFetchException.php
+│       ├── OrmInvalidColumnNumberException.php
+│       ├── OrmInvalidEntityException.php
+│       ├── OrmInvalidMigrationFileException.php
+│       ├── OrmMigrationExecutionException.php
+│       ├── OrmNoLastIdException.php
+│       ├── OrmNoPgsqlLastIdException.php
+│       ├── OrmNotFoundException.php
+│       ├── OrmStatementPreparationFailureException.php
+│       ├── OrmUnexpectedIdValueException.php
+│       ├── OrmUnregisteredEntityException.php
+│       ├── OrmUnsupportedCountException.php
+│       └── OrmWhereException.php
+└── README.md
 ```
 
 ### 17. Reflection Module
@@ -728,9 +1441,9 @@ _9 files, 8 directories_
 │   ├── ReflectionComponentProvider.php
 │   └── ReflectionServiceProvider.php
 ├── Reflector/
-│   ├── Reflector.php
-│   └── Contract/
-│       └── ReflectorContract.php
+│   ├── Contract/
+│   │   └── ReflectorContract.php
+│   └── Reflector.php
 ├── Throwable/
 │   ├── Contract/
 │   │   └── ReflectionThrowable.php
@@ -744,40 +1457,48 @@ _9 files, 8 directories_
 
 ### 18. Session Module
 
-_28 files, 17 directories_
+_35 files, 18 directories_
 
 ```
+├── Data/
+│   ├── Contract/
+│   │   ├── SessionConfigContract.php
+│   │   ├── SessionCookieConfigContract.php
+│   │   ├── SessionJwtConfigContract.php
+│   │   └── SessionTokenConfigContract.php
+│   ├── SessionConfig.php
+│   ├── SessionCookieConfig.php
+│   ├── SessionJwtConfig.php
+│   └── SessionTokenConfig.php
 ├── Manager/
 │   ├── Abstract/
 │   │   └── Session.php
-│   ├── PhpSession.php
-│   ├── CacheSession.php
-│   ├── LogSession.php
-│   ├── NullSession.php
+│   ├── Contract/
+│   │   └── SessionContract.php
 │   ├── Cookie/
 │   │   ├── CookieSession.php
 │   │   └── EncryptedCookieSession.php
 │   ├── Jwt/
-│   │   ├── Http/
-│   │   │   ├── HeaderJwtSession.php
-│   │   │   └── EncryptedHeaderJwtSession.php
-│   │   └── Cli/
-│   │       ├── OptionJwtSession.php
-│   │       └── EncryptedOptionJwtSession.php
+│   │   ├── Cli/
+│   │   │   ├── EncryptedOptionJwtSession.php
+│   │   │   └── OptionJwtSession.php
+│   │   └── Http/
+│   │       ├── EncryptedHeaderJwtSession.php
+│   │       └── HeaderJwtSession.php
 │   ├── Token/
-│   │   ├── Http/
-│   │   │   ├── HeaderTokenSession.php
-│   │   │   └── EncryptedHeaderTokenSession.php
-│   │   └── Cli/
-│   │       ├── OptionTokenSession.php
-│   │       └── EncryptedOptionTokenSession.php
-│   └── Contract/
-│       └── SessionContract.php
-├── Data/
-│   └── CookieParams.php
+│   │   ├── Cli/
+│   │   │   ├── EncryptedOptionTokenSession.php
+│   │   │   └── OptionTokenSession.php
+│   │   └── Http/
+│   │       ├── EncryptedHeaderTokenSession.php
+│   │       └── HeaderTokenSession.php
+│   ├── CacheSession.php
+│   ├── LogSession.php
+│   ├── NullSession.php
+│   └── PhpSession.php
 ├── Provider/
 │   ├── SessionComponentProvider.php
-│   └── [Additional provider files...]
+│   └── SessionServiceProvider.php
 ├── Throwable/
 │   ├── Contract/
 │   │   └── SessionThrowable.php
@@ -795,19 +1516,23 @@ _28 files, 17 directories_
 
 ### 19. SMS Module
 
-_12 files, 10 directories_
+_16 files, 10 directories_
 
 ```
 ├── Data/
+│   ├── Contract/
+│   │   ├── MessageContract.php
+│   │   ├── SmsConfigContract.php
+│   │   └── SmsVonageConfigContract.php
 │   ├── Message.php
-│   └── Contract/
-│       └── MessageContract.php
+│   ├── SmsConfig.php
+│   └── SmsVonageConfig.php
 ├── Messenger/
-│   ├── VonageMessenger.php
+│   ├── Contract/
+│   │   └── MessengerContract.php
 │   ├── LogMessenger.php
 │   ├── NullMessenger.php
-│   └── Contract/
-│       └── MessengerContract.php
+│   └── VonageMessenger.php
 ├── Provider/
 │   ├── SmsComponentProvider.php
 │   └── SmsServiceProvider.php
@@ -823,19 +1548,12 @@ _12 files, 10 directories_
 
 ### 20. Support Module
 
-_6 files, 6 directories_
+_3 files, 2 directories_
 
 ```
-├── Generator/
-│   ├── Abstract/
-│   │   └── FileGenerator.php
-│   ├── Enum/
-│   │   └── GenerateStatus.php
-│   └── Contract/
-│       └── FileGeneratorContract.php
 ├── Time/
-│   ├── Time.php
-│   └── Microtime.php
+│   ├── Microtime.php
+│   └── Time.php
 └── README.md
 ```
 
@@ -850,12 +1568,12 @@ _7 files, 7 directories_
 │   └── Abstract/
 │       ├── ValkyrjaInvalidArgumentException.php
 │       └── ValkyrjaRuntimeException.php
+├── Factory/
+│   └── ThrowableFactory.php
 ├── Handler/
-│   ├── Abstract/
-│   │   └── ThrowableHandler.php
-│   ├── WhoopsThrowableHandler.php
-│   └── Contract/
-│       └── ThrowableHandlerContract.php
+│   ├── Contract/
+│   │   └── ThrowableHandlerContract.php
+│   └── WhoopsThrowableHandler.php
 └── README.md
 ```
 
@@ -867,47 +1585,213 @@ _168 files, 83 directories — **Large Type System**_
 ├── Abstract/
 │   └── Type.php
 ├── Array/
+│   ├── Contract/
+│   │   └── ArrayContract.php
+│   ├── Factory/
+│   │   └── ArrayFactory.php
+│   ├── Support/
+│   │   └── ArrayOf.php
+│   ├── Throwable/
+│   │   └── Exception/
+│   │       ├── ArrayInvalidEncodedArrayException.php
+│   │       ├── ArrayInvalidFalseValueException.php
+│   │       ├── ArrayInvalidNonEmptyException.php
+│   │       ├── ArrayInvalidNullValueException.php
+│   │       ├── ArrayInvalidStringKeysException.php
+│   │       └── ArrayInvalidTrueValueException.php
 │   ├── ArrayT.php
 │   └── NonEmptyArray.php
 ├── Bool/
+│   ├── Contract/
+│   │   ├── BoolContract.php
+│   │   ├── FalseContract.php
+│   │   └── TrueContract.php
 │   ├── BoolT.php
-│   ├── TrueT.php
-│   └── FalseT.php
+│   ├── FalseT.php
+│   └── TrueT.php
 ├── Collection/
+│   ├── Contract/
+│   │   └── CollectionContract.php
 │   └── Collection.php
+├── Contract/
+│   └── TypeContract.php
 ├── Data/
-│   ├── Cast.php
 │   ├── ArrayCast.php
-│   ├── OriginalCast.php
-│   └── OriginalArrayCast.php
+│   ├── Cast.php
+│   ├── OriginalArrayCast.php
+│   └── OriginalCast.php
 ├── Enum/
-│   ├── Type.php
-│   └── CastType.php
+│   ├── Contract/
+│   │   ├── ArrayableContract.php
+│   │   ├── BackedEnumContract.php
+│   │   ├── EnumContract.php
+│   │   └── JsonSerializableContract.php
+│   ├── Support/
+│   │   └── Enumerable.php
+│   ├── Throwable/
+│   │   └── Exception/
+│   │       ├── EnumCannotModifyException.php
+│   │       └── EnumInvalidValueException.php
+│   ├── Trait/
+│   │   ├── Arrayable.php
+│   │   ├── Enumerable.php
+│   │   └── JsonSerializable.php
+│   ├── CastType.php
+│   └── Type.php
 ├── Float/
+│   ├── Contract/
+│   │   └── FloatContract.php
+│   ├── Throwable/
+│   │   └── Exception/
+│   │       └── FloatInvalidFromValueException.php
 │   └── FloatT.php
 ├── Id/
+│   ├── Contract/
+│   │   ├── IdContract.php
+│   │   ├── IntIdContract.php
+│   │   └── StringIdContract.php
+│   ├── Throwable/
+│   │   └── Exception/
+│   │       └── IdInvalidFromValueException.php
 │   ├── Id.php
 │   ├── IntId.php
 │   └── StringId.php
 ├── Int/
+│   ├── Contract/
+│   │   └── IntContract.php
+│   ├── Throwable/
+│   │   └── Exception/
+│   │       └── IntInvalidFromValueException.php
 │   └── IntT.php
 ├── Json/
+│   ├── Contract/
+│   │   ├── JsonContract.php
+│   │   └── JsonObjectContract.php
 │   ├── Json.php
 │   └── JsonObject.php
+├── Model/
+│   ├── Abstract/
+│   │   ├── CastableModel.php
+│   │   ├── IndexedModel.php
+│   │   └── Model.php
+│   ├── Contract/
+│   │   ├── CastableModelContract.php
+│   │   ├── ExposableIndexedModelContract.php
+│   │   ├── ExposableModelContract.php
+│   │   ├── IndexedModelContract.php
+│   │   └── ModelContract.php
+│   ├── Trait/
+│   │   ├── Castable.php
+│   │   ├── Exposable.php
+│   │   ├── ExposableIndexable.php
+│   │   ├── Indexable.php
+│   │   ├── ProtectedExposable.php
+│   │   └── UnpackForNewInstance.php
+│   └── README.md
 ├── Null/
+│   ├── Contract/
+│   │   └── NullContract.php
 │   └── NullT.php
 ├── Object/
+│   ├── Contract/
+│   │   ├── ObjectContract.php
+│   │   └── SerializedObjectContract.php
+│   ├── Enum/
+│   │   └── PropertyVisibilityFilter.php
+│   ├── Factory/
+│   │   └── ObjectFactory.php
+│   ├── Support/
+│   │   └── Cls.php
+│   ├── Throwable/
+│   │   ├── Contract/
+│   │   │   └── ObjectThrowable.php
+│   │   └── Exception/
+│   │       ├── InvalidEncodedObjectException.php
+│   │       ├── InvalidObjectPropertyProvidedException.php
+│   │       ├── InvalidObjectProvidedException.php
+│   │       └── InvalidSerializedObjectException.php
 │   ├── ObjectT.php
 │   └── SerializedObject.php
 ├── String/
-│   ├── StringT.php
-│   └── NonEmptyString.php
+│   ├── Contract/
+│   │   └── StringContract.php
+│   ├── Factory/
+│   │   ├── MbStringFactory.php
+│   │   ├── StringCaseFactory.php
+│   │   └── StringFactory.php
+│   ├── Throwable/
+│   │   └── Exception/
+│   │       └── StringInvalidEmptyStringException.php
+│   ├── NonEmptyString.php
+│   └── StringT.php
+├── Throwable/
+│   ├── Contract/
+│   │   └── TypeThrowable.php
+│   └── Exception/
+│       └── Abstract/
+│           ├── TypeInvalidArgumentException.php
+│           └── TypeRuntimeException.php
 ├── Uid/
+│   ├── Contract/
+│   │   └── UidContract.php
+│   ├── Factory/
+│   │   └── UidFactory.php
+│   ├── Throwable/
+│   │   ├── Contract/
+│   │   │   └── UidThrowable.php
+│   │   └── Exception/
+│   │       ├── InvalidUidException.php
+│   │       └── UidInvalidFromValueException.php
 │   └── Uid.php
 ├── Ulid/
-│   ├── Ulid.php
-│   └── README.md
+│   ├── Contract/
+│   │   └── UlidContract.php
+│   ├── Factory/
+│   │   └── UlidFactory.php
+│   ├── Throwable/
+│   │   ├── Contract/
+│   │   │   └── UlidThrowable.php
+│   │   └── Exception/
+│   │       ├── InvalidUlidException.php
+│   │       ├── UlidInvalidFromValueException.php
+│   │       └── UlidRandomBytesFailureException.php
+│   ├── README.md
+│   └── Ulid.php
 ├── Uuid/
+│   ├── Contract/
+│   │   ├── UuidContract.php
+│   │   ├── UuidV1Contract.php
+│   │   ├── UuidV3Contract.php
+│   │   ├── UuidV4Contract.php
+│   │   ├── UuidV5Contract.php
+│   │   ├── UuidV6Contract.php
+│   │   ├── UuidV7Contract.php
+│   │   └── UuidV8Contract.php
+│   ├── Enum/
+│   │   └── Version.php
+│   ├── Factory/
+│   │   ├── UuidFactory.php
+│   │   ├── UuidV1Factory.php
+│   │   ├── UuidV3Factory.php
+│   │   ├── UuidV4Factory.php
+│   │   ├── UuidV5Factory.php
+│   │   ├── UuidV6Factory.php
+│   │   ├── UuidV7Factory.php
+│   │   └── UuidV8Factory.php
+│   ├── Throwable/
+│   │   ├── Contract/
+│   │   │   └── UuidThrowable.php
+│   │   └── Exception/
+│   │       ├── InvalidUuidException.php
+│   │       ├── InvalidUuidV1Exception.php
+│   │       ├── InvalidUuidV3Exception.php
+│   │       ├── InvalidUuidV4Exception.php
+│   │       ├── InvalidUuidV5Exception.php
+│   │       ├── InvalidUuidV6Exception.php
+│   │       ├── InvalidUuidV7Exception.php
+│   │       ├── InvalidUuidV8Exception.php
+│   │       └── UuidInvalidFromValueException.php
+│   ├── README.md
 │   ├── Uuid.php
 │   ├── UuidV1.php
 │   ├── UuidV3.php
@@ -915,24 +1799,39 @@ _168 files, 83 directories — **Large Type System**_
 │   ├── UuidV5.php
 │   ├── UuidV6.php
 │   ├── UuidV7.php
-│   ├── UuidV8.php
-│   └── README.md
+│   └── UuidV8.php
 ├── Vlid/
-│   ├── Vlid.php
-│   ├── VlidV1.php
-│   ├── VlidV2.php
-│   ├── VlidV3.php
-│   ├── VlidV4.php
 │   ├── Contract/
 │   │   ├── VlidContract.php
 │   │   ├── VlidV1Contract.php
 │   │   ├── VlidV2Contract.php
+│   │   ├── VlidV3Contract.php
 │   │   └── VlidV4Contract.php
-│   └── README.md
-├── Contract/
-│   ├── TypeContract.php
-│   └── [Multiple type-specific contracts...]
-└── [Additional type system files...]
+│   ├── Enum/
+│   │   └── Version.php
+│   ├── Factory/
+│   │   ├── VlidFactory.php
+│   │   ├── VlidV1Factory.php
+│   │   ├── VlidV2Factory.php
+│   │   ├── VlidV3Factory.php
+│   │   └── VlidV4Factory.php
+│   ├── Throwable/
+│   │   ├── Contract/
+│   │   │   └── VlidThrowable.php
+│   │   └── Exception/
+│   │       ├── InvalidVlidException.php
+│   │       ├── InvalidVlidV1Exception.php
+│   │       ├── InvalidVlidV2Exception.php
+│   │       ├── InvalidVlidV3Exception.php
+│   │       ├── InvalidVlidV4Exception.php
+│   │       └── VlidInvalidFromValueException.php
+│   ├── README.md
+│   ├── Vlid.php
+│   ├── VlidV1.php
+│   ├── VlidV2.php
+│   ├── VlidV3.php
+│   └── VlidV4.php
+└── README.md
 ```
 
 ### 23. Validation Module
@@ -947,38 +1846,34 @@ _33 files, 16 directories_
 │   │   └── Rule.php
 │   ├── Contract/
 │   │   └── RuleContract.php
-│   ├── Is/
-│   │   ├── Required.php
-│   │   ├── NotEmpty.php
-│   │   ├── IsEmpty.php
-│   │   ├── Email.php
-│   │   ├── Equal.php
-│   │   ├── NotEqual.php
-│   │   ├── IsBool.php
-│   │   ├── IsString.php
-│   │   └── IsNumeric.php
-│   ├── String/
-│   │   ├── Min.php
-│   │   ├── Max.php
-│   │   ├── Regex.php
-│   │   ├── Alpha.php
-│   │   ├── Lowercase.php
-│   │   ├── Uppercase.php
-│   │   ├── StartsWith.php
-│   │   ├── EndsWith.php
-│   │   └── Contains.php
 │   ├── Int/
 │   │   ├── GreaterThan.php
 │   │   └── LessThan.php
-│   └── Orm/
-│       ├── Abstract/
-│       │   └── EntityRule.php
-│       ├── EntityExists.php
-│       └── EntityNotExists.php
-├── Validator/
-│   ├── Validator.php
-│   └── Contract/
-│       └── ValidatorContract.php
+│   ├── Is/
+│   │   ├── Email.php
+│   │   ├── Equal.php
+│   │   ├── IsBool.php
+│   │   ├── IsEmpty.php
+│   │   ├── IsNumeric.php
+│   │   ├── IsString.php
+│   │   ├── NotEmpty.php
+│   │   ├── NotEqual.php
+│   │   └── Required.php
+│   ├── Orm/
+│   │   ├── Abstract/
+│   │   │   └── EntityRule.php
+│   │   ├── EntityExists.php
+│   │   └── EntityNotExists.php
+│   └── String/
+│       ├── Alpha.php
+│       ├── Contains.php
+│       ├── EndsWith.php
+│       ├── Lowercase.php
+│       ├── Max.php
+│       ├── Min.php
+│       ├── Regex.php
+│       ├── StartsWith.php
+│       └── Uppercase.php
 ├── Throwable/
 │   ├── Contract/
 │   │   └── ValidationThrowable.php
@@ -987,75 +1882,101 @@ _33 files, 16 directories_
 │       │   ├── ValidationInvalidArgumentException.php
 │       │   └── ValidationRuntimeException.php
 │       └── ValidationRuleFailureException.php
+├── Validator/
+│   ├── Contract/
+│   │   └── ValidatorContract.php
+│   └── Validator.php
 └── README.md
 ```
 
 ### 24. View Module
 
-_58 files, 26 directories_
+_68 files, 28 directories_
 
 ```
+├── Data/
+│   ├── Contract/
+│   │   ├── ViewConfigContract.php
+│   │   ├── ViewOrkaConfigContract.php
+│   │   ├── ViewPhpConfigContract.php
+│   │   └── ViewTwigConfigContract.php
+│   ├── ViewConfig.php
+│   ├── ViewOrkaConfig.php
+│   ├── ViewPhpConfig.php
+│   └── ViewTwigConfig.php
 ├── Factory/
-│   ├── ViewResponseFactory.php
-│   └── Contract/
-│       └── ViewResponseFactoryContract.php
+│   ├── Contract/
+│   │   └── ViewResponseFactoryContract.php
+│   └── ViewResponseFactory.php
 ├── Orka/
 │   ├── Constant/
-│   │   └── OrkaReplacement.php
+│   │   ├── OrkaReplacement.php
+│   │   └── OrkaReplacementCollection.php
 │   └── Replacement/
 │       ├── Block/
 │       │   ├── Block.php
-│       │   ├── StartBlock.php
 │       │   ├── EndBlock.php
+│       │   ├── StartBlock.php
 │       │   └── TrimBlock.php
 │       ├── Comment/
+│       │   ├── EndMultiline.php
 │       │   ├── SingleLine.php
-│       │   ├── StartMultiline.php
-│       │   └── EndMultiline.php
+│       │   └── StartMultiline.php
+│       ├── Contract/
+│       │   └── ReplacementContract.php
 │       ├── Debug/
 │       │   └── Dd.php
-│       ├── Layout.php
 │       ├── Partial/
 │       │   ├── Partial.php
 │       │   ├── PartialWithVariables.php
 │       │   ├── TrimPartial.php
 │       │   └── TrimPartialWithVariables.php
 │       ├── Statement/
-│       │   ├── Break_.php
 │       │   ├── Conditional/
-│       │   │   ├── If_.php
+│       │   │   ├── Block/
+│       │   │   │   ├── ElseHasBlock.php
+│       │   │   │   ├── HasBlock.php
+│       │   │   │   └── UnlessBlock.php
 │       │   │   ├── ElseIf_.php
-│       │   │   ├── Else_.php
-│       │   │   ├── Unless.php
 │       │   │   ├── ElseUnless.php
+│       │   │   ├── Else_.php
+│       │   │   ├── Empty_.php
 │       │   │   ├── EndIf_.php
+│       │   │   ├── If_.php
 │       │   │   ├── Isset_.php
-│       │   │   └── Empty_.php
-│       │   └── Iterate/
-│       │       ├── For_.php
-│       │       ├── EndFor_.php
-│       │       ├── Foreach_.php
-│       │       └── EndForeach_.php
+│       │   │   ├── NotEmpty.php
+│       │   │   └── Unless.php
+│       │   ├── Iterate/
+│       │   │   ├── EndFor_.php
+│       │   │   ├── EndForeach_.php
+│       │   │   ├── For_.php
+│       │   │   └── Foreach_.php
+│       │   ├── Switch/
+│       │   │   ├── Case_.php
+│       │   │   ├── Default_.php
+│       │   │   ├── EndSwitch_.php
+│       │   │   └── Switch_.php
+│       │   └── Break_.php
 │       ├── Variable/
 │       │   ├── Escaped.php
-│       │   ├── Unescaped.php
 │       │   ├── SetVariable.php
-│       │   └── SetVariables.php
-│       └── Contract/
-│           └── ReplacementContract.php
+│       │   ├── SetVariables.php
+│       │   └── Unescaped.php
+│       └── Layout.php
 ├── Provider/
 │   ├── ViewComponentProvider.php
+│   ├── ViewOrkaServiceProvider.php
 │   └── ViewServiceProvider.php
 ├── Renderer/
-│   ├── PhpRenderer.php
-│   ├── TwigRenderer.php
+│   ├── Contract/
+│   │   └── RendererContract.php
 │   ├── OrkaRenderer.php
-│   └── Contract/
-│       └── RendererContract.php
+│   ├── PhpRenderer.php
+│   └── TwigRenderer.php
 ├── Template/
-│   ├── Template.php
-│   └── Contract/
-│       └── TemplateContract.php
+│   ├── Contract/
+│   │   └── TemplateContract.php
+│   └── Template.php
 ├── Throwable/
 │   ├── Contract/
 │   │   └── ViewThrowable.php
@@ -1066,18 +1987,17 @@ _58 files, 26 directories_
 │       ├── ViewEscapeEncodingFailureException.php
 │       ├── ViewInvalidPathException.php
 │       ├── ViewOrkaCacheFailureException.php
-│       ├── ViewRenderFailureException.php
-│       └── [Additional view exceptions...]
+│       └── ViewRenderFailureException.php
 └── README.md
 ```
 
 ### 25. Documentation Files (Root Level)
 
 ```
-├── README.md
 ├── APPLICATION_STRUCTURE.md
 ├── GETTING_STARTED.md
 ├── LIFECYCLE.md
+├── README.md
 └── VERSIONING_AND_RELEASE_PROCESS.md
 ```
 
@@ -1087,7 +2007,7 @@ _58 files, 26 directories_
 
 ### 1. Manager Pattern
 
-Most modules have `Manager/` subdirectories with:
+Some modules have `Manager/` subdirectories with:
 
 - Multiple implementations (e.g., `RedisCache`, `LogCache`, `NullCache`)
 - Contract/Interface definitions
@@ -1095,7 +2015,7 @@ Most modules have `Manager/` subdirectories with:
 
 ### 2. Service Providers
 
-Every module has `Provider/` containing:
+Most modules have `Provider/` containing:
 
 - `ComponentProvider` (dependency injection setup)
 - `ServiceProvider` (service registration)
