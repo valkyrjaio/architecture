@@ -485,11 +485,10 @@ root kinds, and worked examples:
   squashed PR title and any direct push to a protected branch.
 - **PR title** — **no** trailing period, and the issue reference is required
   when an issue exists. The root and the type are chosen for the whole change,
-  so neither has to match any one branch commit. What the change does then
-  decides the type. The release bump reads the type on the title, and never the
-  type on a branch commit. A change that adds a capability, marks API
-  deprecated, or breaks a public contract therefore takes `feat`, `deprecate`,
-  or `!` on the title.
+  so neither has to match any one branch commit. The release bump reads the
+  type on the title, and never the type on a branch commit. A change that adds
+  a capability, marks the public API as deprecated, or breaks a public contract
+  therefore takes `feat`, `deprecate`, or `!` on the title.
 - **Types:** `feat`, `fix`, `deprecate`, `docs`, `test`, `refactor`, `perf`,
   `style`, `build`, `ci`, `chore`, `revert`. Append `!` before the colon on
   anything that breaks a public contract. No type marks a change as automated —
