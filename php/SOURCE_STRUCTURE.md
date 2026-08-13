@@ -2045,8 +2045,8 @@ Structured exception hierarchy:
 - Module-specific exceptions
 - A `<Module>Throwable` contract in most modules (`ApiThrowable`,
   `SessionThrowable`)
-- A `ValkyrjaThrowable` contract at the framework root, which every
-  `<Module>Throwable` extends
+- A `ValkyrjaThrowable` contract in the Throwable module's `Contract/`
+  directory, which every `<Module>Throwable` extends
 
 ### 4. Type System
 
