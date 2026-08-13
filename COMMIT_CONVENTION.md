@@ -331,13 +331,12 @@ can finally be scoped: `[Http] ci:`, `[Container] test:`.
 `[Initial] Initial commit.`, with no type, since it is pushed directly and never
 sits in a pull request.
 
-## A branch may mix roots
+## A branch may mix roots and types
 
 A branch commit does not have to carry the root that the pull request title
-carries. Two commits on one branch do not have to carry the same root. A pull
-request that starts on one root and moves to another keeps the commits it
-already has. The squash merge discards every branch subject, so only the root in
-the pull request title reaches the permanent history.
+carries. Two commits on one branch do not have to carry the same root. The
+squash merge discards every branch subject, so only the root in the pull request
+title reaches the permanent history.
 
 The type behaves the same way. The example under `## The shape` pairs a `fix`
 commit and a `test` commit under one `fix` title. The pull request title carries
