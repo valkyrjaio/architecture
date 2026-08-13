@@ -405,8 +405,8 @@ fixtures.
   the very first commit of a brand-new repo stays `[Initial] Initial commit.`,
   which needs no type since it is pushed directly and never sits in a PR.
 - **PR titles:** the root and the type of the whole change, plus `(#123)` when an
-  issue tracks the work, **no** trailing period. Neither has to match any one
-  branch commit. Fill the PR template (Description, Types of changes,
+  issue tracks the work, **no** trailing period. Neither the root nor the type has
+  to match any one branch commit. Fill the PR template (Description, Types of changes,
   Changes — bold path — em dash — what changed).
 - **Branch targeting:** improvements/fixes → lowest affected `NN.x`; features →
   `master` _in principle_, but note `master` may be frozen and `NN.x` is the live
