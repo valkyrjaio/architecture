@@ -2010,7 +2010,7 @@ _68 files, 28 directories_
 Some modules have `Manager/` subdirectories with:
 
 - Multiple implementations (e.g., `RedisCache`, `LogCache`, `NullCache`)
-- Contract/Interface definitions
+- A contract in `Manager/Contract/`
 - Provider pattern for service registration
 
 ### 2. Service Providers
@@ -2027,7 +2027,7 @@ Structured exception hierarchy:
 
 - Abstract base exceptions (`InvalidArgumentException`, `RuntimeException`)
 - Module-specific exceptions
-- `ThrowableContract` interfaces
+- A `<Module>Throwable` contract for each module (`ValkyrjaThrowable`, `ApiThrowable`, `SessionThrowable`)
 
 ### 4. Type System
 
