@@ -12,10 +12,12 @@
 
 Each tree below shows every directory and every file in the module. The file
 total counts every file below the base path, whatever the extension. The PHP
-total and the Markdown total divide that file total. The directory total counts
-every directory below the base path. It does not count the base path. A module
-count reads `_N files, M directories_`. `N` counts every file in the module. `M`
-counts the module directory and every directory below it.
+total and the Markdown total add up to that file total. The directory total
+counts every directory below the base path. The directory total does not count
+the base path.
+
+A module count reads `_N files, M directories_`. `N` counts every file in the
+module. `M` counts the module directory and every directory below it.
 
 ---
 
