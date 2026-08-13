@@ -406,11 +406,12 @@ fixtures.
   which needs no type since it is pushed directly and never sits in a PR.
 - **PR titles:** the root and the type of the whole change, plus `(#123)` when
   an issue tracks the work, **no** trailing period. Neither the root nor the
-  type has to match any one branch commit. The release bump reads the type on
-  the title, and never the type on a branch commit. A branch carrying a `feat`,
-  a `deprecate`, or a breaking commit therefore takes `feat`, `deprecate`, or
-  `!` there. Fill the PR template (Description, Types of changes, Changes —
-  bold path — em dash — what changed).
+  type has to match any one branch commit, with one limit on the type. The
+  release bump reads the type on the title, and never the type on a branch
+  commit. A branch carrying a `feat`, a `deprecate`, or a breaking commit
+  therefore takes `feat`, `deprecate`, or `!` on the title. Fill the PR
+  template (Description, Types of changes, Changes — bold path — em dash —
+  what changed).
 - **Branch targeting:** improvements/fixes → lowest affected `NN.x`; features →
   `master` _in principle_, but note `master` may be frozen and `NN.x` is the live
   line — check. Branch prefixes: `feature/`, `improvement/`, `fix/`, `docs/`.
