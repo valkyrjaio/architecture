@@ -2036,8 +2036,10 @@ Structured exception hierarchy:
 
 - Abstract base exceptions under `Throwable/Exception/Abstract/` (`<Module>InvalidArgumentException`, `<Module>RuntimeException`)
 - Module-specific exceptions
-- A `<Module>Throwable` contract for each module (`ApiThrowable`, `SessionThrowable`)
-- A `ValkyrjaThrowable` contract at the framework root, which every `<Module>Throwable` extends
+- A `<Module>Throwable` contract in most modules (`ApiThrowable`,
+  `SessionThrowable`)
+- A `ValkyrjaThrowable` contract at the framework root, which every
+  `<Module>Throwable` extends
 
 ### 4. Type System
 
