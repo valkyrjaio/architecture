@@ -306,7 +306,7 @@ _20 files, 12 directories_
 
 ### 7. CLI Module
 
-_172 files, 84 directories — **Large Module**_
+_172 files, 84 directories_
 
 ```
 ├── Interaction/
@@ -719,7 +719,7 @@ _25 files, 11 directories_
 
 ### 12. HTTP Module
 
-_300 files, 161 directories — **Largest Module**_
+_300 files, 161 directories_
 
 ```
 ├── Client/
@@ -1292,7 +1292,7 @@ _23 files, 10 directories_
 
 ### 16. ORM Module
 
-_101 files, 35 directories — **Complex Module**_
+_101 files, 35 directories_
 
 ```
 ├── Constant/
@@ -1579,7 +1579,7 @@ _7 files, 7 directories_
 
 ### 22. Type Module
 
-_168 files, 83 directories — **Large Type System**_
+_168 files, 83 directories_
 
 ```
 ├── Abstract/
