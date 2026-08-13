@@ -338,12 +338,13 @@ carries. Two commits on one branch do not have to carry the same root. The
 squash merge discards every branch subject, so only the root in the pull request
 title reaches the permanent history.
 
-The type behaves the same way. The example under `## The shape` pairs a `fix`
-commit and a `test` commit under one `fix` title. The pull request title carries
-the root and the type of the whole change. The release bump reads the type on
-that title, and never the type on a branch commit. A branch that carries a
-`feat` commit, a `deprecate` commit, or a breaking commit therefore takes
-`feat`, `deprecate`, or `!` on the title. See [`VERSIONING.md`](VERSIONING.md).
+The type behaves the same way, with one limit. The pull request title carries
+the root and the type of the whole change. The example under `## The shape`
+pairs a `fix` commit and a `test` commit under one `fix` title. The release bump
+reads the type on that title, and never the type on a branch commit. A branch
+that carries a `feat` commit, a `deprecate` commit, or a breaking commit
+therefore takes `feat`, `deprecate`, or `!` on the title. See
+[`VERSIONING.md`](VERSIONING.md).
 
 ```
 commits    [Http] refactor: Align the HTTP terminal stage names.
