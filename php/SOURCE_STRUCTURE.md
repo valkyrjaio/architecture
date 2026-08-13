@@ -2042,8 +2042,8 @@ Structured exception hierarchy:
 - A `ValkyrjaInvalidArgumentException` and a `ValkyrjaRuntimeException` in the
   Throwable module's `Exception/Abstract/` directory, which each module's pair
   extends
-- Concrete exceptions directly in `Throwable/Exception/`
-  (`CryptDecodeFailureException`, `ViewInvalidPathException`)
+- Concrete exceptions directly in `Throwable/Exception/`, in 11 of the 24
+  modules (`CryptDecodeFailureException`, `ViewInvalidPathException`)
 - A `<Module>Throwable` contract in most modules (`ApiThrowable`,
   `SessionThrowable`)
 - A `ValkyrjaThrowable` contract in the Throwable module's `Contract/`
