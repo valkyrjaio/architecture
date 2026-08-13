@@ -1180,7 +1180,7 @@ This means the build tool and cache generation infrastructure can be built incre
 correctly in all languages while the build tool is developed. Cache is a performance optimization, not a correctness
 requirement.
 
-|            | Class/constructor ref           | Direct method calls  | Works without cache | Cache status                                                                            |
+|            | Class/constructor ref           | Direct method calls  | Works without cache | Cache generation                                                                        |
 | ---------- | ------------------------------- | -------------------- | ------------------- | --------------------------------------------------------------------------------------- |
 | PHP        | ✅ `::class`                    | ✅                   | ✅                  | ✅ built — the PHP `sindri` generates the data files                                    |
 | Java       | ✅ `.class`                     | ✅                   | ✅                  | ✅ built — the Java `sindri` generates the data files and the gRPC data class           |
