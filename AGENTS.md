@@ -483,8 +483,9 @@ root kinds, and worked examples:
   reference is permitted but not required. The period marks a ledger entry on a
   working branch; a permanent subject line takes none, which covers both the
   squashed PR title and any direct push to a protected branch.
-- **PR title** — same root and type, **no** trailing period, and the issue
-  reference is required when an issue exists.
+- **PR title** — **no** trailing period, and the issue reference is required
+  when an issue exists. The root and the type are chosen for the whole change,
+  so neither has to match any one branch commit.
 - **Types:** `feat`, `fix`, `deprecate`, `docs`, `test`, `refactor`, `perf`,
   `style`, `build`, `ci`, `chore`, `revert`. Append `!` before the colon on
   anything that breaks a public contract. No type marks a change as automated —

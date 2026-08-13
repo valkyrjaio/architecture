@@ -339,11 +339,15 @@ request that starts on one root and moves to another keeps the commits it
 already has. The squash merge discards every branch subject, so only the root in
 the pull request title reaches the permanent history.
 
+The type behaves the same way. The example under `## The shape` pairs a `fix`
+commit and a `test` commit under one `fix` title. The pull request title carries
+the root and the type of the whole change.
+
 ```
-commits    [Http] fix: Align the HTTP terminal stage names.
-           [Cli] fix: Align the CLI terminal stage names.
-PR title   [Middleware] fix(#123): Align the terminal stage names across protocols
-merged     [Middleware] fix(#123): Align the terminal stage names across protocols (#456)
+commits    [Http] refactor: Align the HTTP terminal stage names.
+           [Cli] refactor: Align the CLI terminal stage names.
+PR title   [Middleware] refactor(#123): Align the terminal stage names across protocols
+merged     [Middleware] refactor(#123): Align the terminal stage names across protocols (#456)
 ```
 
 A force push that corrects a subject discards a reviewer's place in the diff,
@@ -399,7 +403,7 @@ validates four things:
 - The PR title and every commit in the PR carry a root and a known type.
 - A PR title carries no trailing period.
 - Each of the branch's own commits carries a trailing period.
-- No line exceeds 120 characters.
+- No line of a commit message in the pull request exceeds 120 characters.
 
 It reads the root as a shape, and it accepts any root.
 
