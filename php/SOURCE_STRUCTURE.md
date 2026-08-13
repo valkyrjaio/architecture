@@ -8,7 +8,7 @@
 - **Total PHP Files:** 1,182
 - **Total Markdown Files:** 32
 - **Total Directories:** 619
-- **Major Modules:** 24
+- **Modules:** 24
 
 Each tree below shows every directory and every file in the module. The file
 total counts every file below the base path, whatever the extension. The PHP
