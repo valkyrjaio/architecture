@@ -2037,8 +2037,8 @@ Most modules have `Provider/` containing:
 
 Structured exception hierarchy:
 
-- A `<Module>InvalidArgumentException` and a `<Module>RuntimeException` in the
-  module's own `Throwable/Exception/Abstract/` directory
+- A `<Module>InvalidArgumentException` and a `<Module>RuntimeException` in most
+  modules, in the module's own `Throwable/Exception/Abstract/` directory
 - A `ValkyrjaInvalidArgumentException` and a `ValkyrjaRuntimeException` in the
   Throwable module's `Exception/Abstract/` directory, which each module's pair
   extends
