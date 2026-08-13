@@ -205,7 +205,7 @@ name and pattern.
 
 **Reference:** `BUILD_TOOL.md`
 
-### Move the file generation to sindri
+### Move the file generation and the `make:*` commands to sindri
 
 - Move all file generation, scaffolding, and `make:*` commands to `sindri`
 - The framework must have zero AST or build tooling dependencies after this change
