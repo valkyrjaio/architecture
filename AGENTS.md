@@ -729,13 +729,14 @@ Both groups fail on the same input — long sentences, passive voice, ambiguous
 pronouns, and one idea written two ways. STE removes that input.
 
 The essentials: one instruction per sentence, the active voice, one term for
-one thing, and a repeated noun instead of an ambiguous pronoun. Include a
+one thing, and a repeated noun instead of an ambiguous pronoun. Write a full
+sentence, and give a dash-joined afterthought its own sentence. Include a
 sentence only when it changes what the reader does or decides. Every rule that
 has a code shape gets a generic code example, and the example shows PHP first.
 When you edit an existing document, rewrite the paragraph you touch, not the
 whole file.
 
-The scope, the ten writing rules, the selection rule, and the rules for code
+The scope, the eleven writing rules, the selection rule, and the rules for code
 examples: [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md).
 
 ---
