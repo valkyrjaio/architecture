@@ -2318,13 +2318,13 @@ exemptions.
 
 ## Current Implementation Status
 
-| Language   | Without cache | Cache generation | Notes                                              |
-| ---------- | ------------- | ---------------- | -------------------------------------------------- |
-| PHP        | ✅ works      | ✅ built         | reads the application config with nikic/php-parser |
-| Java       | ✅ works      | ✅ built         | also generates the gRPC data class                 |
-| Go         | ✅ works      | ❌ not yet built | sindri Go AST implementation pending               |
-| Python     | ✅ works      | ❌ not yet built | sindri Python AST implementation pending           |
-| TypeScript | ✅ works      | ✅ built         | also generates the cached config class             |
+| Language   | Without cache | Cache generation | Notes                                                          |
+| ---------- | ------------- | ---------------- | -------------------------------------------------------------- |
+| PHP        | ✅ works      | ✅ built         | the PHP `sindri` reads the config with nikic/php-parser        |
+| Java       | ✅ works      | ✅ built         | the Java `sindri` also generates the gRPC data class           |
+| Go         | ✅ works      | ❌ not yet built | the Go `sindri` holds the version constants only               |
+| Python     | ✅ works      | ❌ not yet built | the Python `sindri` holds the version constants only           |
+| TypeScript | ✅ works      | ✅ built         | the TypeScript `sindri` also generates the cached config class |
 
 Go and Python are the two ports that wait for the build tool. The Go `sindri` and the Python `sindri` hold the version
 constants and no generator. An application in either language runs without the cache, which the framework fully
