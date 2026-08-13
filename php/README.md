@@ -205,11 +205,9 @@ name and pattern.
 
 **Reference:** `BUILD_TOOL.md`
 
-### Extract Bin component to separate repository
+### Move the file generation to sindri
 
-- Create `sindri` as a separate Composer package
-- Move all file generation, scaffolding, and `make:*` commands to the new package
-- Add `nikic/php-parser` as a dependency of `sindri`, not the framework
+- Move all file generation, scaffolding, and `make:*` commands to `sindri`
 - The framework must have zero AST or build tooling dependencies after this change
 - `sindri` is a `require-dev` dependency only — never in production
 
@@ -344,10 +342,10 @@ they return `::class` references directly — never constant references.
 ## Priority Order
 
 1. **Throwable renaming and abstraction** — foundational, everything else builds on stable exception types
-2. **Provider contract interfaces** — needed before build tool work
-3. **publishers() map migration** — needed before build tool work
+2. **Provider contract interfaces**
+3. **publishers() map migration**
 4. **Handler contracts and #[Handler] attribute**
 5. **#[Parameter] attribute**
-6. **Bin extraction to sindri**
+6. **File generation and `make:*` commands to sindri**
 7. **Container constants files** — additive, can happen incrementally per component
 8. **Closure-based container bindings** — additive, can happen incrementally per component
