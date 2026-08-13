@@ -1180,13 +1180,13 @@ This means the build tool and cache generation infrastructure can be built incre
 correctly in all languages while the build tool is developed. Cache is a performance optimization, not a correctness
 requirement.
 
-|            | Class/constructor ref           | Direct method calls  | Works without cache | Cache status                      |
-| ---------- | ------------------------------- | -------------------- | ------------------- | --------------------------------- |
-| PHP        | ✅ `::class`                    | ✅                   | ✅                  | `sindri` generates the data files |
-| Java       | ✅ `.class`                     | ✅                   | ✅                  | `sindri` generates the data files |
-| Go         | ❌ string const (bindings only) | ✅ interface methods | ✅                  | Build tool not yet implemented    |
-| Python     | ✅ class object                 | ✅                   | ✅                  | Build tool not yet implemented    |
-| TypeScript | ✅ constructor ref              | ✅                   | ✅                  | `sindri` generates the data files |
+|            | Class/constructor ref           | Direct method calls  | Works without cache | Cache status                                         |
+| ---------- | ------------------------------- | -------------------- | ------------------- | ---------------------------------------------------- |
+| PHP        | ✅ `::class`                    | ✅                   | ✅                  | the PHP `sindri` generates the data files            |
+| Java       | ✅ `.class`                     | ✅                   | ✅                  | the Java `sindri` generates the data files           |
+| Go         | ❌ string const (bindings only) | ✅ interface methods | ✅                  | the Go `sindri` holds the version constants only     |
+| Python     | ✅ class object                 | ✅                   | ✅                  | the Python `sindri` holds the version constants only |
+| TypeScript | ✅ constructor ref              | ✅                   | ✅                  | the TypeScript `sindri` generates the data files     |
 
 ### Without Cache, Declare Routes With `getRoutes()`
 
