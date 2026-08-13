@@ -1180,12 +1180,12 @@ This means the build tool and cache generation infrastructure can be built incre
 correctly in all languages while the build tool is developed. Cache is a performance optimization, not a correctness
 requirement.
 
-|            | Class/constructor ref           | Direct method calls  | Works without cache | Cache status                                         |
-| ---------- | ------------------------------- | -------------------- | ------------------- | ---------------------------------------------------- |
-| PHP        | ✅ `::class`                    | ✅                   | ✅                  | ✅ built — the PHP `sindri` generates the data files |
-| Java       | ✅ `.class`                     | ✅                   | ✅                  | ✅ built — the Java `sindri` generates the data files and the gRPC data class |
-| Go         | ❌ string const (bindings only) | ✅ interface methods | ✅                  | ❌ not yet built — sindri Go implementation pending |
-| Python     | ✅ class object                 | ✅                   | ✅                  | ❌ not yet built — sindri Python implementation pending |
+|            | Class/constructor ref           | Direct method calls  | Works without cache | Cache status                                                                            |
+| ---------- | ------------------------------- | -------------------- | ------------------- | --------------------------------------------------------------------------------------- |
+| PHP        | ✅ `::class`                    | ✅                   | ✅                  | ✅ built — the PHP `sindri` generates the data files                                    |
+| Java       | ✅ `.class`                     | ✅                   | ✅                  | ✅ built — the Java `sindri` generates the data files and the gRPC data class           |
+| Go         | ❌ string const (bindings only) | ✅ interface methods | ✅                  | ❌ not yet built — sindri Go implementation pending                                     |
+| Python     | ✅ class object                 | ✅                   | ✅                  | ❌ not yet built — sindri Python implementation pending                                 |
 | TypeScript | ✅ constructor ref              | ✅                   | ✅                  | ✅ built — the TypeScript `sindri` generates the data files and the cached config class |
 
 ### Without Cache, Declare Routes With `getRoutes()`
