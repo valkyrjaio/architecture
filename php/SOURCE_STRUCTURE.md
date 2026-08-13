@@ -17,7 +17,9 @@ counts every directory below the base path. The directory total does not count
 the base path.
 
 A module count reads `_N files, M directories_`. `N` counts every file in the
-module. `M` counts the module directory and every directory below it.
+module. `M` counts the module directory and every directory below it. Each tree
+starts inside the module directory and never lists it, so a tree holds `N` plus
+`M` minus one entries.
 
 ---
 
