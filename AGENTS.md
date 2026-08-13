@@ -77,7 +77,7 @@ These hold in **every** language. Do not violate them in a port.
   into exactly four generated classes — `AppContainerData`, `AppEventData`,
   `AppHttpRoutingData`, `AppCliRoutingData`. The framework loads four objects at
   boot.
-- **Typed handler signatures, not dynamic dispatch.** Handlers are explicit
+- **Handler signatures are typed.** Handlers are explicit
   typed closures — HTTP → `ResponseContract`, CLI → `OutputContract`, Listener →
   `any`. Parameters are `(ContainerContract, map<string, mixed>)`; request/route
   come from the container, not the signature. `#[Handler]` / `@Handler` /
@@ -748,7 +748,7 @@ Read these in order when starting or extending a port:
 2. [`STRUCTURE.md`](STRUCTURE.md) — the structure taxonomy
 3. [`THROWABLES.md`](THROWABLES.md) — exception hierarchy
 4. [`CONTAINER_BINDINGS.md`](CONTAINER_BINDINGS.md) — binding keys & closures
-5. [`DISPATCH.md`](DISPATCH.md) — handler contracts
+5. [`HANDLERS.md`](HANDLERS.md) — handler contracts
 6. [`DATA_CACHE.md`](DATA_CACHE.md) — provider contracts & cache generation
 7. [`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md) — the component config shape
 8. [`BUILD_TOOL.md`](BUILD_TOOL.md) — `sindri` implementation

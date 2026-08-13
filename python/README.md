@@ -1,6 +1,6 @@
 # Python Port — Implementation Notes
 
-> Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `DISPATCH.md`, `DATA_CACHE.md`, `BUILD_TOOL.md`,
+> Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `HANDLERS.md`, `DATA_CACHE.md`, `BUILD_TOOL.md`,
 > `PROVIDER_CONTRACTS.md`
 > Port order: Container → Event → Application → CLI → HTTP → Bin
 
@@ -188,7 +188,7 @@ All provider methods must return simple list/dict literals — no conditional lo
 
 ## 4. Handler Contracts — Typed Callable Aliases
 
-**Reference:** `DISPATCH.md`
+**Reference:** `HANDLERS.md`
 
 ### Three Callable type aliases
 

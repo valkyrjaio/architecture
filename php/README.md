@@ -1,6 +1,6 @@
 # PHP Port — Implementation Notes
 
-> Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `DISPATCH.md`, `DATA_CACHE.md`, `BUILD_TOOL.md`
+> Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `HANDLERS.md`, `DATA_CACHE.md`, `BUILD_TOOL.md`
 
 PHP is the reference implementation. All other ports are measured against it. The following changes are required to
 bring the existing implementation into alignment with the decisions made during cross-port planning.
@@ -74,14 +74,14 @@ final class HttpConstants
 All container bindings must use explicit closure factories. Remove all dynamic reflection-based instantiation:
 
 ```php
-// before — dynamic dispatch, reflection-based
+// Wrong — the container instantiates the class through reflection.
 $container->bind(RouterContract::class);
 
-// after — explicit closure factory
+// Right — an explicit closure factory names every dependency.
 $container->bind(
     RouterContract::class,
     static fn(ContainerContract $c): RouterContract => new Router(
-        $c->getSingleton(DispatcherContract::class)
+        $c->getSingleton(MatcherContract::class)
     )
 );
 ```
@@ -109,7 +109,7 @@ public static function publishRouter(ContainerContract $container): void
 {
     $container->setSingleton(
         RouterContract::class,
-        new Router($container->getSingleton(DispatcherContract::class))
+        new Router($container->getSingleton(MatcherContract::class))
     );
 }
 ```
@@ -126,7 +126,7 @@ class Router implements RouterContract
 {
     public static function make(ContainerContract $container, array $arguments = []): static
     {
-        return new static($container->getSingleton(DispatcherContract::class));
+        return new static($container->getSingleton(MatcherContract::class));
     }
 }
 
@@ -161,7 +161,7 @@ literals with no conditional logic, variables, or method calls other than constr
 
 ## 4. Handler Contracts — Typed Closures
 
-**Reference:** `DISPATCH.md`
+**Reference:** `HANDLERS.md`
 
 ### Add typed handler function types
 
@@ -201,26 +201,7 @@ name and pattern.
 
 ---
 
-## 5. Dispatch — Removal
-
-**Reference:** `DISPATCH.md`
-
-### Deprecate dispatch-based routing as the core mechanism
-
-- Add `@deprecated` to dispatch-based route handler methods
-- New routes must use `#[Handler]` attribute or explicit closure on the route object
-- Dispatch component removed entirely once existing routes and listeners migrate to closure handlers
-- Add deprecation notices to guide developers toward closure-based handlers
-
-### Remove dispatch from core routing pipeline
-
-The router and event dispatcher must invoke the handler closure directly if present. During the migration, dispatch is
-invoked as a fallback only when no closure handler is set. The fallback goes when the last dispatch-based route
-migrates.
-
----
-
-## 6. Bin → sindri
+## 5. Bin → sindri
 
 **Reference:** `BUILD_TOOL.md`
 
@@ -249,7 +230,7 @@ Once `sindri` is implemented, remove the `cache:generate` command from the frame
 
 ---
 
-## 7. Provider Contracts
+## 6. Provider Contracts
 
 **Reference:** `DATA_CACHE.md`
 
@@ -333,7 +314,7 @@ interface ListenerProviderContract
 
 ---
 
-## 8. Application Config as Build Tool Entry Point
+## 7. Application Config as Build Tool Entry Point
 
 **Reference:** `BUILD_TOOL.md`, `DATA_CACHE.md`
 
@@ -379,6 +360,5 @@ they return `::class` references directly — never constant references.
 5. **#[Parameter] attribute** — needed before cache generation
 6. **Bin extraction to sindri** — needed before handler logic ships (CLI command will break)
 7. **sindri implementation** — PHP cache generation via AST
-8. **Dispatch removal** — additive, can happen alongside or after handler contracts
-9. **Container constants files** — additive, can happen incrementally per component
-10. **Closure-based container bindings** — additive, can happen incrementally per component
+8. **Container constants files** — additive, can happen incrementally per component
+9. **Closure-based container bindings** — additive, can happen incrementally per component

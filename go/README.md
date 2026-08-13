@@ -1,6 +1,6 @@
 # Go Port — Implementation Notes
 
-> Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `DISPATCH.md`,
+> Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `HANDLERS.md`,
 > `DATA_CACHE.md`, `BUILD_TOOL.md`, `CONTRACTS_GO.md`
 > Port order: Container → Event → Application → CLI → HTTP → Bin
 
@@ -200,7 +200,7 @@ logic.
 
 ## 4. Handler Contracts — Typed Function Types
 
-**Reference:** `DISPATCH.md`
+**Reference:** `HANDLERS.md`
 
 ### Three named function types
 

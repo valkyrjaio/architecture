@@ -164,15 +164,15 @@ class HttpServiceProvider implements ServiceProviderContract
     public function publishers(): array
     {
         return [
-            RouterContract::class            => [self::class, 'publishRouter'],
-            RouteDispatcherContract::class   => [self::class, 'publishDispatcher'],
-            MiddlewareContract::class        => [self::class, 'publishMiddleware'],
+            RouterContract::class     => [self::class, 'publishRouter'],
+            MatcherContract::class    => [self::class, 'publishMatcher'],
+            MiddlewareContract::class => [self::class, 'publishMiddleware'],
         ];
     }
 
     public static function publishRouter(ContainerContract $c): void
     {
-        $c->setSingleton(RouterContract::class, new Router($c->getSingleton(DispatcherContract::class)));
+        $c->setSingleton(RouterContract::class, new Router($c->getSingleton(MatcherContract::class)));
     }
 
     // ... other publisher methods
@@ -220,9 +220,9 @@ via `#[Handler]` callable on annotated controllers). No inline closures or lambd
 separate `getHandlers()` method (or similar), leaving each route without a handler at definition time, and rely on the
 router or collection to pair routes with handlers later. That approach is rejected for two reasons:
 
-1. **Unnecessary coupling in the collection and router/dispatcher.** The router and route collection have no reason to
+1. **Unnecessary coupling in the collection and the router.** The router and route collection have no reason to
    know about handler wiring. Keeping that logic inside them adds a layer of complexity that belongs nowhere near
-   dispatch — it is purely a registration concern.
+   route resolution — handler wiring is purely a registration concern.
 2. **Deferred, non-local binding.** When a route carries its handler directly, the relationship is self-evident and
    statically verifiable. Splitting them forces a reader (and any static analyser or build tool) to reconcile two
    separate lists and trust that they stay in sync. The Route object is the natural owner of its handler data; the

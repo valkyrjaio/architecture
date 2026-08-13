@@ -270,7 +270,7 @@ container, and bootstraps from `Entry\App`.
 **With a `Config`,** setup runs normally. The config class is slimmed to Container,
 Event, Cli, and Http. The app iterates its components, and makes sure it calls the core
 ones — `ApplicationComponent`, `ContainerComponent`, `EventComponent`, `CliComponent`,
-`HttpComponent`, `DispatcherComponent`, `AttributeComponent`, `ReflectionComponent`. That
+`HttpComponent`, `AttributeComponent`, `ReflectionComponent`. That
 is what happens now, except that no component holds a config class. The container sets
 `Config::class` as a singleton.
 

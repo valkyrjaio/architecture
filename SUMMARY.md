@@ -77,10 +77,9 @@ Each concern gets its own typed handler contract:
 - `CliHandlerContract` using `CliHandlerFunc`
 - `ListenerHandlerContract` using `ListenerHandlerFunc`
 
-The Dispatch component is dropped framework-wide — no port includes it, and the PHP and Java implementations are
-removed once their dispatch-based routes migrate to closure handlers.
+The Dispatch component is dropped framework-wide. No port includes it, and every implementation is removed.
 
-**Produced:** `DISPATCH.md`
+**Produced:** `HANDLERS.md`
 
 ---
 
@@ -253,7 +252,7 @@ Documented per-language notes including:
 | `PORTS.md`                | Language port list, per-language characteristics, comparison table         |
 | `THROWABLES.md`           | Exception naming convention, hierarchy, language mapping, decision tree    |
 | `CONTAINER_BINDINGS.md`   | Closure bindings, string constants, per-component constants files          |
-| `DISPATCH.md`             | Handler contracts, typed closure signatures, dispatch deprecation          |
+| `HANDLERS.md`             | Handler contracts, typed closure signatures, the supplier pattern          |
 | `DATA_CACHE.md`           | Cache architecture, provider contracts, AppConfig entry point, build flows |
 | `BUILD_TOOL.md`           | Build tool design, language AST implementations, Bin extraction            |
 | `CONTRACTS_JAVA.md`       | Java contracts and implementations with full code examples                 |
@@ -281,9 +280,8 @@ pre-compilation code generation step works in every language.
 **Four data classes for the entire application.** The build tool aggregates everything across all providers into exactly
 four classes — one per concern. The framework loads four objects at boot. No merging, no iteration.
 
-**Typed handler signatures move errors to before production.** The dispatch approach had no type enforcement — wrong
-method names were discovered at request time in production. Explicit closure handlers with typed signatures catch wrong
-return types and wrong parameters at compile time (Java, Go, TypeScript) or CI time (PHP, Python).
+**Typed handler signatures move errors to before production.** Explicit closure handlers with typed signatures catch
+wrong return types and wrong parameters at compile time (Java, Go, TypeScript) or CI time (PHP, Python).
 
 **Bin belongs outside the framework, and becomes sindri.** File generation and scaffolding are build-time concerns.
 Moving them to `sindri` removes all AST and build tooling from the framework's production dependency tree.

@@ -1,6 +1,6 @@
 # TypeScript / Node.js Port — Implementation Notes
 
-> Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `DISPATCH.md`,
+> Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `HANDLERS.md`,
 > `DATA_CACHE.md`, `BUILD_TOOL.md`, `CONTRACTS_TYPESCRIPT.md`
 > Port order: Container → Event → Application → CLI → HTTP → Bin
 
@@ -215,7 +215,7 @@ This means TypeScript works without cache exactly like PHP and Python.
 
 ## 5. Handler Contracts — Named Types
 
-**Reference:** `DISPATCH.md`
+**Reference:** `HANDLERS.md`
 
 ### Three named types — compiler enforced
 

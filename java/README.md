@@ -1,6 +1,6 @@
 # Java Port — Implementation Notes
 
-> Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `DISPATCH.md`,
+> Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `HANDLERS.md`,
 > `DATA_CACHE.md`, `BUILD_TOOL.md`, `CONTRACTS_JAVA.md`
 > Port order: Container → Event → Application → CLI → HTTP → Bin
 
@@ -87,20 +87,14 @@ All bindings use lambda factories — no reflection-based instantiation:
 
 ```java
 container.bind(
-        RouterContract .class,
-        c ->new
+    RouterContract.class,
+    c -> new Router(c.getSingleton(MatcherContract.class))
+);
 
-Router(c.getSingleton(DispatcherContract.class))
-        );
-
-        container.
-
-singleton(
-        RouterContract .class,
-        c ->new
-
-Router(c.getSingleton(DispatcherContract.class))
-        );
+container.singleton(
+    RouterContract.class,
+    c -> new Router(c.getSingleton(MatcherContract.class))
+);
 ```
 
 ---
@@ -162,7 +156,7 @@ conditional logic.
 
 ## 4. Handler Contracts — Typed Closures
 
-**Reference:** `DISPATCH.md`
+**Reference:** `HANDLERS.md`
 
 ### Three @FunctionalInterface types
 

@@ -1,41 +1,18 @@
-# Valkyrja Dispatch
+# Valkyrja Handlers
 
 ## Overview
 
-The Dispatch component was central to how routes (CLI and HTTP) and listeners were dispatched from their respective
-routers and the event dispatcher. It relied heavily on `::class` (PHP) and `.class` (Java) to dynamically resolve and
-call methods on controllers, actions, and listeners via reflection.
+A route (CLI and HTTP) and an event listener carry an explicit closure handler. The router calls the route's handler,
+and the event dispatcher calls the listener's handler.
 
-The component is dropped framework-wide: explicit closure-based handlers on routes and listeners replace it, no port
-includes it, and the PHP and Java implementations are removed once their dispatch-based routes migrate. This document
-records the replacement design.
-
----
-
-## Why Dispatch Cannot Be Central Across All Ports
-
-The Dispatch component's dynamic resolution works by:
-
-1. Receiving a class reference (`::class` / `.class`)
-2. Resolving the class from the container
-3. Dynamically determining which method to call
-4. Calling that method via reflection or dynamic dispatch
-
-Steps 2-4 are fundamentally incompatible with Go, TypeScript, and Python (in lambda/CGI contexts) because:
-
-- **Go** — no reflection-based method dispatch, no `::class` equivalent
-- **TypeScript** — types erased at runtime, no reliable class reference mechanism post-compile
-- **Python** — technically possible via `getattr` but not reliable across all deployment contexts and fights the
-  language's grain for a framework-level concern
-
-A framework component that only works in two of five ports cannot be central to how the framework functions.
+Each handler has a typed signature, and the language enforces that signature. This document records the handler design
+for every port.
 
 ---
 
 ## The Typed Handler Signature
 
-A major benefit of the closure-based handler approach over dispatch is that the required closure signature can be fully
-type-hinted and enforced at the language level. Each handler type has its own specific signature:
+The language enforces the closure signature. Each handler type has its own signature:
 
 | Handler type   | Parameters                                | Return type        |
 | -------------- | ----------------------------------------- | ------------------ |
@@ -73,8 +50,7 @@ static fn(ContainerContract $c, array<string, mixed> $args): mixed => (
 )
 ```
 
-This moves validation from runtime (dispatch discovering the wrong method at request time) to compile time or static
-analysis time — a wrong signature is caught before the application ever runs.
+The compiler or the static analyzer checks the signature. A wrong signature never reaches a running application.
 
 ---
 
@@ -164,7 +140,7 @@ type ListenerHandlerFunc = (
 
 ---
 
-## The Replacement: Handler and CacheableHandler Contracts
+## Handler and CacheableHandler Contracts
 
 Each concern gets its own `HandlerContract` using its specific named handler type. The base `HandlerContract` defines
 the method names. Each concern's contract tightens the type.
@@ -484,18 +460,12 @@ listener.setHandler((container, args) =>
 
 ---
 
-### The Type Safety Advantage Over Dispatch
+### Where the Language Catches a Wrong Handler
+
+The handler is a method pointer on the route provider. The handler and the route definition are on the same class, so
+`sindri` reads one file.
 
 ```php
-// old dispatch — no type safety, validated at runtime only
-$route->setHandler(UserController::class);
-$route->setHandlerMethod('index');
-// wrong method name?       RuntimeException at request time — in production
-// wrong return type?       RuntimeException at request time — in production
-// method doesn't exist?    RuntimeException at request time — in production
-
-// new handler — method pointer on the route provider, type enforced before shipping
-// handler lives on the same class as the route definition — Sindri reads one file
 HttpRoute::get('/users/{id}', [self::class, 'showUser'])
 
 public static function showUser(ContainerContract $c, array<string, mixed> $args): ResponseContract
@@ -508,16 +478,16 @@ public static function showUser(ContainerContract $c, array<string, mixed> $args
 // controller not in container? ContainerException at bootstrap, not request time
 ```
 
-In Java, Go, and TypeScript the enforcement is even stronger — these are compile errors, not static analysis warnings. A
-wrong handler signature never reaches a running binary.
+Java, Go, and TypeScript enforce the signature more strictly than PHP. A wrong signature is a compile error, not a
+static analysis warning, so it never reaches a running binary.
 
-|                      | PHP (dispatch) | PHP (handler)      | Java               | Go                 | Python             | TypeScript         |
-| -------------------- | -------------- | ------------------ | ------------------ | ------------------ | ------------------ | ------------------ |
-| Enforcement          | ❌ none        | ⚠️ PHPStan         | ✅ compiler        | ✅ compiler        | ⚠️ mypy            | ✅ compiler        |
-| When caught          | Runtime        | CI                 | Compile            | Compile            | CI                 | Compile            |
-| HTTP return type     | ❌             | `ResponseContract` | `ResponseContract` | `ResponseContract` | `ResponseContract` | `ResponseContract` |
-| CLI return type      | ❌             | `OutputContract`   | `OutputContract`   | `OutputContract`   | `OutputContract`   | `OutputContract`   |
-| Listener return type | ❌             | `mixed`            | `Object`           | `any`              | `Any`              | `unknown`          |
+|                      | PHP                | Java               | Go                 | Python             | TypeScript         |
+| -------------------- | ------------------ | ------------------ | ------------------ | ------------------ | ------------------ |
+| Enforcement          | ⚠️ PHPStan         | ✅ compiler        | ✅ compiler        | ⚠️ mypy            | ✅ compiler        |
+| When caught          | CI                 | Compile            | Compile            | CI                 | Compile            |
+| HTTP return type     | `ResponseContract` | `ResponseContract` | `ResponseContract` | `ResponseContract` | `ResponseContract` |
+| CLI return type      | `OutputContract`   | `OutputContract`   | `OutputContract`   | `OutputContract`   | `OutputContract`   |
+| Listener return type | `mixed`            | `Object`           | `any`              | `Any`              | `unknown`          |
 
 ---
 
@@ -656,27 +626,6 @@ never writes a `CacheableHandler` string.
 
 The `CacheableHandler` contract exists as an escape hatch for edge cases where automatic extraction is not possible or
 the developer wants explicit control over the cached form.
-
----
-
-## Dispatch Component Removal
-
-The Dispatch component is removed framework-wide. No port includes it, and the PHP and Java implementations are
-removed once their dispatch-based routes and listeners migrate to closure handlers.
-
-**What changes:**
-
-- Routes and listeners no longer require Dispatch to function
-- The router and event dispatcher invoke the handler closure directly
-- New routes and listeners must use closure handlers
-
-**Migration path:**
-
-1. Introduce `Handler` and `CacheableHandler` contracts on routes and listeners
-2. New routes use closure handlers — Dispatch not involved
-3. Existing routes continue to work via Dispatch (backwards compatibility during migration)
-4. Deprecation warnings added to Dispatch-based route definitions
-5. Dispatch removed from the core pipeline and then from the framework entirely
 
 ---
 
@@ -819,15 +768,10 @@ listener collection — same pattern, `ListenerContract` instead of `RouteContra
 
 ### PHP
 
-Dispatch removed once existing routes migrate. Closure handlers are the canonical approach. The `#[Handler]` attribute
-drives both runtime dispatch and cache generation (via build tool AST extraction).
+The closure handler is the only mechanism. The `#[Handler]` attribute drives the runtime call and the cache generation.
+The build tool extracts the closure through AST.
 
 ```php
-// old — dispatch-based (deprecated)
-$route->setHandler(UserController::class);
-$route->setHandlerMethod('index');
-
-// new — closure-based
 $route->setHandler(
     static fn(ContainerContract $c, array $args): Response
         => $c->getSingleton(UserController::class)->index($args[0])
@@ -836,35 +780,21 @@ $route->setHandler(
 
 ### Java
 
-Dispatch removed once existing routes migrate. Annotation processor extracts `@Handler` lambda via Trees API at compile
-time, generates cache data classes via JavaPoet. No developer-written `CacheableHandler` string needed.
+The closure handler is the only mechanism. The annotation processor extracts the `@Handler` lambda through the Trees API
+at compile time, then generates the cache data classes through JavaPoet. The developer writes no `CacheableHandler`
+string.
 
 ```java
-// old — dispatch-based (deprecated)
-route.setHandler(UserController .class);
-route.
-
-setHandlerMethod("index");
-
-// new — closure-based
-route.
-
-setHandler(
+route.setHandler(
     (ContainerContract c, List<Object> args) ->
-        c.
-
-getSingleton(UserController .class).
-
-index((Request) args.
-
-get(0))
-        );
+        c.getSingleton(UserController.class).index((Request) args.get(0))
+);
 ```
 
 ### Go
 
-Dispatch never existed in Go — not applicable. Explicit closure registration is the only mechanism. Build tool uses
-go/analysis to extract handler closures from route provider source files.
+Explicit closure registration is the only mechanism. The build tool uses go/analysis to extract the handler closure from
+the route provider source files.
 
 ```go
 // go — always explicit
@@ -877,8 +807,8 @@ return c.GetSingleton(UserControllerClass).(*UserController).Index(args[0])
 
 ### Python
 
-Decorators self-register at import time. Build tool uses `ast` module + `inspect.getfile()` to extract handler closures
-for cache generation. Dispatch not applicable.
+Decorators self-register at import time. The build tool uses the `ast` module and `inspect.getfile()` to extract the
+handler closure for cache generation.
 
 ```python
 # python — decorator-based registration
@@ -1121,81 +1051,26 @@ difference reflects a genuine architectural distinction, not an inconsistency.
 
 ---
 
-## Discussion Summary
+## Why `sindri` Does Not Generate the Handler
 
-The Dispatch component's architecture was examined when planning the Go and Python ports. The component works by
-receiving a class reference and using reflection or dynamic method calls to invoke the appropriate handler — a pattern
-that works elegantly in PHP and Java but has no equivalent in Go (no reflection-based method dispatch), TypeScript (
-types erased at runtime), or Python in a reliable cross-deployment form.
+The developer writes the handler. `sindri` extracts the handler that the developer wrote, and generates none of its own.
+Three reasons hold:
 
-The first realization was that Dispatch conflates two concerns: knowing what to call (the class and method reference)
-and actually calling it (the dynamic invocation). Closure-based handlers collapse these into one: the closure IS the
-invocation, explicitly written by the developer.
+**A generated handler breaks the no-cache runtime path.** The framework must run correctly before anyone runs the build
+tool. A route whose handler exists only in a generated cache file has no handler on the no-cache path. The no-cache path
+must behave the same as the cached path.
 
-The second realization was that closure-based dispatch is strictly better architecture even in PHP and Java. Closures
-are faster (no reflection overhead), more transparent (you can read exactly what will be called), and naturally
-testable (trivially replaceable in tests). The dynamic dispatch was a convenience that came at a real cost.
+**A generated handler needs dependency inference.** To write a handler for a method, `sindri` must read the method
+signature, resolve each parameter type to a container binding, and write the matching `getSingleton()` call. That
+inference fails on a complex or an ambiguous signature. The developer knows which binding the method needs.
 
-The Handler and CacheableHandler contracts were designed to be the cross-language solution. Handler carries the
-executable closure used at runtime. CacheableHandler carries the string representation used only at cache generation
-time — never at runtime. The developer writes both for CGI/lambda deployments, but the build tool's AST extraction
-capabilities mean this double-write burden is eliminated for PHP, Java, Python, Go, and TypeScript in practice.
+**A generated handler blocks custom logic.** A developer who logs a call, transforms a value, or branches before the
+call to the method has no place for that code. A generated handler is a fixed template.
 
-The annotation/attribute approach for PHP, Java, and Python allows the framework to provide a clean developer
-experience — the developer annotates the action method and the framework handles the rest. Go and TypeScript use
-explicit registration which is honest to their philosophy of explicit-over-implicit.
+The developer writes a handler method next to the implementation method, and that cost is real. In exchange the handler
+is explicit, a reader sees what it calls, the compiler or the analyzer checks it, a test replaces it in isolation, and
+it behaves the same with a cache and without one.
 
-The initial decision retained Dispatch as an optional component for backwards compatibility. A later decision
-superseded it: the component is removed framework-wide. Closure handlers replace it in every port, and the PHP and
-Java implementations go once their dispatch-based routes migrate.
-
-A further benefit of the closure-based handler approach — identified after the initial design — is typed closure
-signatures. The dispatch approach had no type enforcement on what method was called or what it returned. Errors were
-discovered at request time in production. With explicit closures, each language can enforce the handler signature at the
-level the language supports — compile time for Java, Go, and TypeScript; static analysis time for PHP and Python. This
-moves an entire class of runtime errors to before the application ships.
-
-Each handler concern has its own specific return type: HTTP handlers return `ResponseContract`, CLI handlers return
-`OutputContract`, and event listeners return `any` / `mixed`. The second parameter — `map<string, mixed>` of named
-arguments — is consistent across all three. `ServerRequestContract` and `RouteContract` are intentionally absent from
-the handler signature. They are always available via the container when needed, keeping the signature minimal and
-avoiding coupling HTTP-specific objects to CLI and listener handlers.
-
-### The Hybrid Dispatch + Handler Thought — Considered and Rejected
-
-A hybrid approach was considered: keep the dispatch object (class + method reference) alongside the handler closure, and
-construct the handler from the dispatch object at runtime or build time. This would have allowed developers to keep
-writing dispatch-style registrations while the framework transparently produced the equivalent closure.
-
-It doesn't work, and neither does constructing handlers via AST generation:
-
-**Runtime construction is reflection.** Building a closure from a class reference and method name at runtime is exactly
-what Dispatch already does — dynamic invocation via reflection. The hybrid just hides this behind a different API
-without solving the underlying problem for Go, TypeScript, and Python where reflection-based method dispatch doesn't
-exist.
-
-**AST-generated handlers break the no-cache runtime path.** If Sindri generates the handler closure from a dispatch
-object at build time, the runtime path without a cache has no handler — the dispatch object alone is not executable. The
-no-cache path must work identically to the cached path. A framework that only works correctly after running the build
-tool is not the framework Valkyrja is.
-
-**AST-generated handlers require dependency inference.** To generate a handler closure from a dispatch object, Sindri
-would have to figure out which dependencies to pass to the target method — reading its signature, resolving each
-parameter type to a container binding, and writing the corresponding `$container->getSingleton(...)` calls. This is too
-much magic, too many assumptions, and it breaks the moment a method has a complex or ambiguous signature. The developer
-is the right person to write this logic, not the build tool.
-
-**AST-generated handlers limit custom logic.** A developer who wants to do something beyond a simple `getSingleton` call
-before invoking their method — logging, transformation, conditional behaviour — has no place to put it. The generated
-handler would be a fixed template. Writing the handler directly gives the developer full control over what happens in
-that closure.
-
-The extra burden on the developer — writing a handler method alongside their implementation method — is real and
-acknowledged. The tradeoff is worth it: the handler is explicit, readable, statically checkable by the compiler or
-analyser, testable in isolation, and works identically with and without cache. The dispatch object goes away regardless
-of which alternative is considered.
-
-**Future consideration:** A Sindri feature that optionally generates handler scaffolding from annotated methods could
-reduce the boilerplate cost for developers who opt in. This would be strictly opt-in, generate handler method stubs for
-the developer to review and customise rather than silently inject logic at build time, and would not affect the runtime
-path in any way. Not supported in the current version.
+**Future consideration:** `sindri` could generate handler scaffolding from an annotated method, for a developer who opts
+in. It would write a handler stub for the developer to review and change. It would inject no logic at build time, and it
+would not change the runtime path. The current version does not support this.
