@@ -4,16 +4,18 @@
 
 ## Statistics
 
+- **Total Files:** 1,214
 - **Total PHP Files:** 1,182
 - **Total Markdown Files:** 32
 - **Total Directories:** 619
 - **Major Modules:** 24
 
-Each tree below shows every directory and every file in the module. The
-directory total counts every directory below the base path. It does not count
-the base path. A module count reads `_N files, M directories_`. `N` counts every
-PHP file and every Markdown file in the module. `M` counts the module directory
-and every directory below it.
+Each tree below shows every directory and every file in the module. The file
+total counts every file below the base path, whatever the extension. The PHP
+total and the Markdown total divide that file total. The directory total counts
+every directory below the base path. It does not count the base path. A module
+count reads `_N files, M directories_`. `N` counts every file in the module. `M`
+counts the module directory and every directory below it.
 
 ---
 
