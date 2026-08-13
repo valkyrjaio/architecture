@@ -2322,12 +2322,12 @@ exemptions.
 | ---------- | ------------- | ---------------- | ---------------------------------------------------------------------------- |
 | PHP        | ✅ works      | ✅ built         | the PHP `sindri` generates the data files                                    |
 | Java       | ✅ works      | ✅ built         | the Java `sindri` generates the data files and the gRPC data class           |
-| Go         | ✅ works      | ❌ not yet built | the Go `sindri` holds the version constants only                             |
-| Python     | ✅ works      | ❌ not yet built | the Python `sindri` holds the version constants only                         |
+| Go         | ✅ works      | ❌ not yet built | sindri Go implementation pending                                             |
+| Python     | ✅ works      | ❌ not yet built | sindri Python implementation pending                                         |
 | TypeScript | ✅ works      | ✅ built         | the TypeScript `sindri` generates the data files and the cached config class |
 
-The Go `sindri` and the Python `sindri` hold the version constants only. Those two ports wait for cache generation. The
-framework fully supports an application that runs without the cache in either language.
+Go and Python wait for cache generation. The framework fully supports an application that runs without the cache in
+either language.
 
 ---
 
