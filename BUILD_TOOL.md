@@ -2322,8 +2322,8 @@ exemptions.
 | ---------- | ------------- | ---------------- | ---------------------------------------------------------------------------- |
 | PHP        | ✅ works      | ✅ built         | the PHP `sindri` generates the data files                                    |
 | Java       | ✅ works      | ✅ built         | the Java `sindri` generates the data files and the gRPC data class           |
-| Go         | ✅ works      | ❌ not yet built | sindri Go implementation pending                                             |
-| Python     | ✅ works      | ❌ not yet built | sindri Python implementation pending                                         |
+| Go         | ✅ works      | ❌ not yet built | —                                                                            |
+| Python     | ✅ works      | ❌ not yet built | —                                                                            |
 | TypeScript | ✅ works      | ✅ built         | the TypeScript `sindri` generates the data files and the cached config class |
 
 Go and Python wait for cache generation. The framework fully supports an application that runs without the cache in
@@ -2494,8 +2494,8 @@ cases exist in the framework design.
 
 The framework's own cache command was the most pressing near-term issue. The command serialized the cache, and no
 serializer accepts a closure handler. This project moved generation into `sindri`, which writes the handler as generated
-source. The framework now holds no cache command, and `sindri` prints each handler expression that it reads from the
-AST.
+source. The framework now holds no cache generation command, and `sindri` prints each handler expression that it reads
+from the AST.
 
 The separation of `Bin` from the framework into its own `sindri` repository was decided when it became clear that the
 build tool needed `nikic/php-parser` as a dependency. Keeping this in the framework would mean a parser library — a

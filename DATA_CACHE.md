@@ -1184,8 +1184,8 @@ requirement.
 | ---------- | ------------------------------- | -------------------- | ------------------- | --------------------------------------------------------------------------------------- |
 | PHP        | ✅ `::class`                    | ✅                   | ✅                  | ✅ built — the PHP `sindri` generates the data files                                    |
 | Java       | ✅ `.class`                     | ✅                   | ✅                  | ✅ built — the Java `sindri` generates the data files and the gRPC data class           |
-| Go         | ❌ string const (bindings only) | ✅ interface methods | ✅                  | ❌ not yet built — sindri Go implementation pending                                     |
-| Python     | ✅ class object                 | ✅                   | ✅                  | ❌ not yet built — sindri Python implementation pending                                 |
+| Go         | ❌ string const (bindings only) | ✅ interface methods | ✅                  | ❌ not yet built                                                                        |
+| Python     | ✅ class object                 | ✅                   | ✅                  | ❌ not yet built                                                                        |
 | TypeScript | ✅ constructor ref              | ✅                   | ✅                  | ✅ built — the TypeScript `sindri` generates the data files and the cached config class |
 
 ### Without Cache, Declare Routes With `getRoutes()`
@@ -1260,7 +1260,7 @@ The cache saves boot cost. Thus its value depends on how many requests each boot
 
 ---
 
-## The Framework Holds No Cache Command
+## The Framework Holds No Cache Generation Command
 
 `sindri` generates each cache file, and no framework holds a cache generation command in any language.
 
@@ -1277,8 +1277,8 @@ design.
 | ---------- | ------------- | ---------------- | ---------------------------------------------------------------------------- |
 | PHP        | ✅ works      | ✅ built         | the PHP `sindri` generates the data files                                    |
 | Java       | ✅ works      | ✅ built         | the Java `sindri` generates the data files and the gRPC data class           |
-| Go         | ✅ works      | ❌ not yet built | sindri Go implementation pending                                             |
-| Python     | ✅ works      | ❌ not yet built | sindri Python implementation pending                                         |
+| Go         | ✅ works      | ❌ not yet built | —                                                                            |
+| Python     | ✅ works      | ❌ not yet built | —                                                                            |
 | TypeScript | ✅ works      | ✅ built         | the TypeScript `sindri` generates the data files and the cached config class |
 
 ---
