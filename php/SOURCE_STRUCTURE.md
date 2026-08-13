@@ -2030,8 +2030,8 @@ Most modules have `Provider/` containing:
 - A `<Module>ComponentProvider` (dependency injection setup)
 - A `<Module>ServiceProvider` in every module but Application (service
   registration)
-- A `Provider/Contract/` directory, in the modules that declare a provider
-  contract
+- A `Provider/Contract/` directory in the Application, Container, and Event
+  modules, and in the Cli and Http routing subtrees
 
 ### 3. Exception Handling
 
