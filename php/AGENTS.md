@@ -202,10 +202,9 @@ categories and their remedies.
 
 ## PHP-specific notes
 
-- **`sindri` (build tool)** holds `nikic/php-parser` and all code generation. The
-  legacy `cache:generate` command will break once handler logic ships — migrate
-  to `sindri` before then. `sindri` is a dev-only dependency; the framework has
-  zero AST deps.
+- **`sindri` (build tool)** holds `nikic/php-parser` and all code generation. It
+  generates each cache file, and the framework holds no cache command. `sindri`
+  is a dev-only dependency; the framework has zero AST deps.
 - **CI-tool config repos** (`ci/*`) are tested by asserting the full rule set is
   configured exactly as expected (`assertSame` lock on `getRules()`), plus branch
   tests for any custom expressions/rules. See

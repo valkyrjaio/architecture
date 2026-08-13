@@ -213,20 +213,10 @@ name and pattern.
 - The framework must have zero AST or build tooling dependencies after this change
 - `sindri` is a `require-dev` dependency only — never in production
 
-### Migrate cache generation to sindri
+### Cache generation in sindri — complete
 
-The existing `cache:generate` CLI command will break when handler logic is implemented. It must be migrated to the
-`sindri` AST-based approach before handler logic ships:
-
-1. Implement nikic/php-parser provider tree walk
-2. Implement `#[Handler]` attribute extraction
-3. Implement FQN resolution via use statement map
-4. Implement `ProcessorContract::route()` invocation for regex compilation
-5. Generate `AppContainerData`, `AppEventData`, `AppHttpRoutingData`, `AppCliRoutingData`
-
-### Remove cache:generate CLI command from framework
-
-Once `sindri` is implemented, remove the `cache:generate` command from the framework's CLI component entirely.
+`sindri` walks the provider tree with nikic/php-parser and generates `AppContainerData`, `AppEventData`,
+`AppHttpRoutingData`, and `AppCliRoutingData`. The framework holds no cache command.
 
 ---
 
