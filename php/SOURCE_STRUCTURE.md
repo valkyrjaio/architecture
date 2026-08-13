@@ -2027,7 +2027,7 @@ Most modules have `Provider/` containing:
 
 Structured exception hierarchy:
 
-- Abstract base exceptions (`InvalidArgumentException`, `RuntimeException`)
+- Abstract base exceptions under `Throwable/Exception/Abstract/` (`<Module>InvalidArgumentException`, `<Module>RuntimeException`)
 - Module-specific exceptions
 - A `<Module>Throwable` contract for each module (`ValkyrjaThrowable`, `ApiThrowable`, `SessionThrowable`)
 
