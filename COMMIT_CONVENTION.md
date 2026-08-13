@@ -334,21 +334,21 @@ sits in a pull request.
 ## A branch may mix roots
 
 A branch commit does not have to carry the root that the pull request title
-carries, and two commits on one branch do not have to carry the same root. A
-pull request that starts on one root and moves to another keeps the commits it
-already has. The squash merge discards every branch subject, so the pull request
-title is the only root that reaches the permanent history.
+carries. Two commits on one branch do not have to carry the same root. A pull
+request that starts on one root and moves to another keeps the commits it
+already has. The squash merge discards every branch subject, so only the root in
+the pull request title reaches the permanent history.
 
 ```
-commits    [Http] fix: Normalize the header casing.
-           [Cli] fix: Normalize the flag casing.
-PR title   [Middleware] fix(#123): Normalize the casing both protocols read
-merged     [Middleware] fix(#123): Normalize the casing both protocols read (#456)
+commits    [Http] fix: Align the HTTP terminal stage names.
+           [Cli] fix: Align the CLI terminal stage names.
+PR title   [Middleware] fix(#123): Align the terminal stage names across protocols
+merged     [Middleware] fix(#123): Align the terminal stage names across protocols (#456)
 ```
 
-Rewrite a branch subject only when you rebase for another reason. A force push
-that corrects a subject discards a reviewer's place in the diff, and it changes
-nothing that a reader sees after the merge.
+A force push that corrects a subject discards a reviewer's place in the diff,
+and it changes nothing that a reader sees after the merge. Rewrite a branch
+subject only when you rebase for another reason.
 
 ## Examples
 
@@ -398,7 +398,7 @@ validates four things:
 
 - The PR title and every commit in the PR carry a root and a known type.
 - A PR title carries no trailing period.
-- Each of the branch's own commits carries one.
+- Each of the branch's own commits carries a trailing period.
 - No line exceeds 120 characters.
 
 It reads the root as a shape, and it accepts any root.
