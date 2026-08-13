@@ -2025,13 +2025,13 @@ Some modules have `Manager/` subdirectories with:
 
 ### 2. Service Providers
 
-Most modules have `Provider/` containing:
+Most modules have a `Provider/` directory. A `Provider/` directory holds:
 
 - A `<Module>ComponentProvider` (dependency injection setup)
-- A `<Module>ServiceProvider` in every module but Application (service
+- A `<Module>ServiceProvider`, except in the Application module (service
   registration)
-- A `Provider/Contract/` directory in the Application, Container, and Event
-  modules
+- A `Contract/` directory in five of them: the Application, Container, and Event
+  modules, and the Cli and Http routing subtrees
 
 ### 3. Exception Handling
 
