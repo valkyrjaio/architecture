@@ -1260,7 +1260,7 @@ The cache saves boot cost. Thus its value depends on how many requests each boot
 
 ---
 
-## The Framework Holds No Cache Generation Command
+## No Framework Holds a Cache Generation Command
 
 `sindri` generates each cache file, and no framework holds a cache generation command in any language.
 

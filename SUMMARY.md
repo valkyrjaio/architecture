@@ -186,8 +186,8 @@ Established the complete cache generation architecture:
 - TypeScript: constructor references (`Array<new () => Contract>`) allow direct instantiation
 - Go: interface methods called directly on provider structs
 
-**Cache command note:** No framework holds a cache generation command in any language. `sindri` generates each cache
-file.
+**Cache generation command note:** No framework holds a cache generation command in any language. `sindri` generates
+each cache file.
 
 **Produced:** `DATA_CACHE.md`
 
