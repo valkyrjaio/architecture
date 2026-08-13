@@ -1275,11 +1275,11 @@ design.
 
 | Language   | Without cache | Cache generation | Notes                                                          |
 | ---------- | ------------- | ---------------- | -------------------------------------------------------------- |
-| PHP        | ✅ works      | ✅ built         | the PHP `sindri` reads the config with nikic/php-parser        |
-| Java       | ✅ works      | ✅ built         | the Java `sindri` also generates the gRPC data class           |
-| Go         | ✅ works      | ❌ not yet built | the Go `sindri` holds the version constants only               |
-| Python     | ✅ works      | ❌ not yet built | the Python `sindri` holds the version constants only           |
-| TypeScript | ✅ works      | ✅ built         | the TypeScript `sindri` also generates the cached config class |
+| PHP        | ✅ works      | ✅ built         | the PHP `sindri` generates the data files                          |
+| Java       | ✅ works      | ✅ built         | the Java `sindri` generates the data files and the gRPC data class |
+| Go         | ✅ works      | ❌ not yet built | the Go `sindri` holds the version constants only                   |
+| Python     | ✅ works      | ❌ not yet built | the Python `sindri` holds the version constants only               |
+| TypeScript | ✅ works      | ✅ built         | the TypeScript `sindri` generates the data files and the cached config class |
 
 ---
 
