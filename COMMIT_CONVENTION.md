@@ -343,15 +343,16 @@ carries. Two commits on one branch do not have to carry the same type. The
 example under `## The shape` pairs a `fix` commit and a `test` commit under one
 `fix` title.
 
-What the change does then decides the type. The release bump reads the type on
-the pull request title, and never the type on a branch commit. A change that
-adds a capability, marks the public API as deprecated, or breaks a public
-contract therefore takes `feat`, `deprecate`, or `!` on the pull request title.
-See [`VERSIONING.md`](VERSIONING.md).
+What the change does decides the type. The release bump reads the type on the
+pull request title, and never the type on a branch commit. A change that adds a
+capability or marks the public API as deprecated takes `feat` or `deprecate` on
+the pull request title. A change that breaks a public contract takes `!`
+immediately before the colon. See [`VERSIONING.md`](VERSIONING.md).
 
 ```
 commits    [Http] refactor: Align the HTTP terminal stage names.
            [Cli] refactor: Align the CLI terminal stage names.
+           [Middleware] test: Cover the renamed terminal stages.
 PR title   [Middleware] refactor(#123): Align the terminal stage names across protocols
 merged     [Middleware] refactor(#123): Align the terminal stage names across protocols (#456)
 ```
@@ -406,12 +407,11 @@ Add caching.                               missing root and type
 The `Commit Message Check` required status check runs on every pull request. It
 validates four things:
 
-- The PR title and every commit in the PR carry a root and a known type.
+- The PR title and every commit in the PR carry a bracketed root and a known
+  type.
 - A PR title carries no trailing period.
 - Each of the branch's own commits carries a trailing period.
 - No line of a commit message in the pull request exceeds 120 characters.
-
-It reads the root as a shape, and it accepts any root.
 
 Its scope matches the period rule exactly: it checks commits _in a pull request_ —
 which are working-branch commits — and never sees a direct push to a protected

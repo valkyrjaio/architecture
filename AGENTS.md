@@ -487,8 +487,9 @@ root kinds, and worked examples:
   when an issue exists. The root and the type are chosen for the whole change,
   so neither has to match any one branch commit. The release bump reads the
   type on the title, and never the type on a branch commit. A change that adds
-  a capability, marks the public API as deprecated, or breaks a public contract
-  therefore takes `feat`, `deprecate`, or `!` on the title.
+  a capability or marks the public API as deprecated takes `feat` or
+  `deprecate` on the title. A change that breaks a public contract takes `!`
+  immediately before the colon.
 - **Types:** `feat`, `fix`, `deprecate`, `docs`, `test`, `refactor`, `perf`,
   `style`, `build`, `ci`, `chore`, `revert`. Append `!` before the colon on
   anything that breaks a public contract. No type marks a change as automated —
