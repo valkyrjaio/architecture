@@ -1264,9 +1264,9 @@ The cache saves boot cost. Thus its value depends on how many requests each boot
 
 `sindri` generates every cache file. The framework holds no cache generation command in any language.
 
-A handler is a closure, which no cache mechanism can serialize. `sindri` writes source instead. It reads the handler
-expression from the AST and prints that expression into the generated file, in the same way that a developer writes the
-closure by hand. See [`HANDLERS.md`](HANDLERS.md) for the handler design.
+A handler is a closure, which no cache mechanism can serialize. `sindri` writes source instead. `sindri` reads the
+handler expression from the AST and prints that expression into the generated file. The generated file holds the same
+closure that a developer writes by hand. See [`HANDLERS.md`](HANDLERS.md) for the handler design.
 
 ---
 
