@@ -345,7 +345,7 @@ What the change does decides the type on the pull request title. The release
 bump reads that type, and never the type on a branch commit. A change that adds
 a capability or marks the public API as deprecated takes `feat` or `deprecate`
 on the pull request title. A change that breaks a public contract takes `!` on
-the pull request title, even when no branch commit carries it. See
+the pull request title, even when no branch commit carries the marker. See
 [`VERSIONING.md`](VERSIONING.md).
 
 ```

@@ -489,7 +489,7 @@ root kinds, and worked examples:
   type on the title, and never the type on a branch commit. A change that adds
   a capability or marks the public API as deprecated takes `feat` or
   `deprecate` on the title. A change that breaks a public contract takes `!` on
-  the title, even when no branch commit carries it.
+  the title, even when no branch commit carries the marker.
 - **Types:** `feat`, `fix`, `deprecate`, `docs`, `test`, `refactor`, `perf`,
   `style`, `build`, `ci`, `chore`, `revert`. Append `!` before the colon on
   anything that breaks a public contract. No type marks a change as automated —
