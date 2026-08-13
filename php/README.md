@@ -348,7 +348,6 @@ they return `::class` references directly — never constant references.
 3. **publishers() map migration** — needed before build tool work
 4. **Handler contracts and #[Handler] attribute** — needed before cache generation
 5. **#[Parameter] attribute** — needed before cache generation
-6. **Bin extraction to sindri** — needed before handler logic ships (CLI command will break)
-7. **sindri implementation** — PHP cache generation via AST
-8. **Container constants files** — additive, can happen incrementally per component
-9. **Closure-based container bindings** — additive, can happen incrementally per component
+6. **Bin extraction to sindri** — the file generation and `make:*` commands, which cache generation did not carry over
+7. **Container constants files** — additive, can happen incrementally per component
+8. **Closure-based container bindings** — additive, can happen incrementally per component

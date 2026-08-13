@@ -201,7 +201,8 @@ Priority items:
 2. Provider contract interfaces
 3. `publishers()` map migration
 4. `#[Handler]` and `#[Parameter]` attributes
-5. Bin extraction to `valkyrja/sindri`
+5. Bin extraction to `valkyrja/sindri` — the file generation and `make:*`
+   commands, which cache generation did not carry over
 
 Starting a New Port
 -------------------
