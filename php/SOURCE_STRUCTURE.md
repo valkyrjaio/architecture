@@ -2022,7 +2022,6 @@ Some modules have `Manager/` subdirectories with:
 
 - Multiple implementations (e.g., `RedisCache`, `LogCache`, `NullCache`)
 - A contract in `Manager/Contract/`
-- Provider pattern for service registration
 
 ### 2. Service Providers
 
