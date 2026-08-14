@@ -1,6 +1,11 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.11...26.x)
+## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.12...26.x)
+
+## [v26.0.12](https://github.com/valkyrjaio/architecture/compare/v26.0.11...v26.0.12) - 2026-08-14
+
+* [Workflow] ci: Update .github workflow refs to v26.24.5 by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/architecture/pull/206
+* [Process] docs: Allow a branch to mix roots and types by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/207
 
 ## [v26.0.11](https://github.com/valkyrjaio/architecture/compare/v26.0.10...v26.0.11) - 2026-08-13
 
