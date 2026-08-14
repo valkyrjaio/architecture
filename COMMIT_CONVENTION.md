@@ -331,6 +331,35 @@ can finally be scoped: `[Http] ci:`, `[Container] test:`.
 `[Initial] Initial commit.`, with no type, since it is pushed directly and never
 sits in a pull request.
 
+## A branch may mix roots and types
+
+A branch commit does not have to carry the root that the pull request title
+carries. Two commits on one branch do not have to carry the same root. The
+squash merge discards every branch subject, so only the root in the pull request
+title reaches the permanent history.
+
+A branch commit does not have to carry the type that the pull request title
+carries. Two commits on one branch do not have to carry the same type.
+
+What the change does decides the type on the pull request title. The release
+bump reads that type, and never the type on a branch commit. A change that adds
+a capability or marks the public API as deprecated takes `feat` or `deprecate`
+on the pull request title. A change that breaks a public contract takes `!` on
+the pull request title, even when no branch commit carries the marker. See
+[`VERSIONING.md`](VERSIONING.md).
+
+```
+commits    [Http] refactor: Align the HTTP terminal stage names.
+           [Cli] refactor: Align the CLI terminal stage names.
+           [Middleware] test: Cover the renamed terminal stages.
+PR title   [Middleware] refactor(#123): Align the terminal stage names across protocols
+merged     [Middleware] refactor(#123): Align the terminal stage names across protocols (#456)
+```
+
+A force push that corrects a subject discards a reviewer's place in the diff,
+and it changes nothing that a reader sees after the merge. Rewrite a branch
+subject only when you rebase for another reason.
+
 ## Examples
 
 **Good:**
@@ -374,10 +403,14 @@ Add caching.                               missing root and type
 
 ## Enforcement
 
-The `Commit Message Check` required status check runs on every pull request and
-validates the root and type on the PR title and on every commit in the PR, that PR
-titles carry no trailing period, that the branch's own commits do, and that no line
-exceeds 120 characters.
+The `Commit Message Check` required status check runs on every pull request. It
+validates four things:
+
+- The PR title and every commit in the PR carry a bracketed root and a known
+  type.
+- A PR title carries no trailing period.
+- Each of the branch's own commits carries a trailing period.
+- No line of a commit message in the pull request exceeds 120 characters.
 
 Its scope matches the period rule exactly: it checks commits _in a pull request_ —
 which are working-branch commits — and never sees a direct push to a protected
