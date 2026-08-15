@@ -2318,17 +2318,16 @@ exemptions.
 
 ## Current Implementation Status
 
-| Language   | Without cache | Cache generation                                            | Notes                                                 |
-| ---------- | ------------- | ----------------------------------------------------------- | ----------------------------------------------------- |
-| PHP        | ✅ works      | ⚠️ CLI command exists — will break when handler logic ships | Migrate to sindri before handler logic implementation |
-| Java       | ✅ works      | ❌ not yet built                                            | sindri Java AST implementation pending                |
-| Go         | ✅ works      | ❌ not yet built                                            | sindri Go AST implementation pending                  |
-| Python     | ✅ works      | ❌ not yet built                                            | sindri Python AST implementation pending              |
-| TypeScript | ✅ works      | ❌ not yet built                                            | sindri TypeScript compiler API implementation pending |
+| Language   | Without cache | Cache generation | Notes                                                                        |
+| ---------- | ------------- | ---------------- | ---------------------------------------------------------------------------- |
+| PHP        | ✅ works      | ✅ built         | the PHP `sindri` generates the data files                                    |
+| Java       | ✅ works      | ✅ built         | the Java `sindri` generates the data files and the gRPC data class           |
+| Go         | ✅ works      | ❌ not yet built | —                                                                            |
+| Python     | ✅ works      | ❌ not yet built | —                                                                            |
+| TypeScript | ✅ works      | ✅ built         | the TypeScript `sindri` generates the data files and the cached config class |
 
-The PHP CLI command is the most pressing TODO. It will stop working correctly once closure-based handler logic ships —
-the existing serialization mechanism cannot handle closures. The migration to `sindri` and `#[Handler]` annotation
-extraction needs to happen before handler logic ships in PHP.
+Go and Python wait for cache generation. The framework fully supports an application that runs without the cache in
+either language.
 
 ---
 
@@ -2493,9 +2492,10 @@ The self-bootstrapping property — the build tool running sindri on itself to g
 a validation of the architecture's self-consistency rather than a practical requirement. It demonstrates that no special
 cases exist in the framework design.
 
-The PHP CLI command breaking change was identified as the most pressing near-term issue. It is the only currently
-working cache generation mechanism, and it will stop working when closure-based handler logic ships. This migration is
-documented as a TODO that must happen before handler logic ships in PHP.
+The framework's own cache generation command was the most pressing near-term issue. The command serialized the cache,
+and no serializer accepts a closure handler. This project moved generation into `sindri`, which writes the handler as
+generated source. The framework now holds no cache generation command, and `sindri` prints each handler expression that
+it reads from the AST.
 
 The separation of `Bin` from the framework into its own `sindri` repository was decided when it became clear that the
 build tool needed `nikic/php-parser` as a dependency. Keeping this in the framework would mean a parser library — a

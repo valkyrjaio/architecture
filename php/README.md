@@ -201,32 +201,20 @@ name and pattern.
 
 ---
 
-## 5. Bin → sindri
+## 5. File Generation → sindri
 
 **Reference:** `BUILD_TOOL.md`
 
-### Extract Bin component to separate repository
+### Move the file generation and the `make:*` commands to sindri
 
-- Create `sindri` as a separate Composer package
-- Move all file generation, scaffolding, and `make:*` commands to the new package
-- Add `nikic/php-parser` as a dependency of `sindri`, not the framework
+- Move all file generation, scaffolding, and `make:*` commands to `sindri`
 - The framework must have zero AST or build tooling dependencies after this change
 - `sindri` is a `require-dev` dependency only — never in production
 
-### Migrate cache generation to sindri
+### Cache generation in sindri — complete
 
-The existing `cache:generate` CLI command will break when handler logic is implemented. It must be migrated to the
-`sindri` AST-based approach before handler logic ships:
-
-1. Implement nikic/php-parser provider tree walk
-2. Implement `#[Handler]` attribute extraction
-3. Implement FQN resolution via use statement map
-4. Implement `ProcessorContract::route()` invocation for regex compilation
-5. Generate `AppContainerData`, `AppEventData`, `AppHttpRoutingData`, `AppCliRoutingData`
-
-### Remove cache:generate CLI command from framework
-
-Once `sindri` is implemented, remove the `cache:generate` command from the framework's CLI component entirely.
+`sindri` walks the provider tree with nikic/php-parser and generates `AppContainerData`, `AppEventData`,
+`AppHttpRoutingData`, and `AppCliRoutingData`. The framework holds no cache generation command.
 
 ---
 
@@ -354,11 +342,10 @@ they return `::class` references directly — never constant references.
 ## Priority Order
 
 1. **Throwable renaming and abstraction** — foundational, everything else builds on stable exception types
-2. **Provider contract interfaces** — needed before build tool work
-3. **publishers() map migration** — needed before build tool work
-4. **Handler contracts and #[Handler] attribute** — needed before cache generation
-5. **#[Parameter] attribute** — needed before cache generation
-6. **Bin extraction to sindri** — needed before handler logic ships (CLI command will break)
-7. **sindri implementation** — PHP cache generation via AST
-8. **Container constants files** — additive, can happen incrementally per component
-9. **Closure-based container bindings** — additive, can happen incrementally per component
+2. **Provider contract interfaces**
+3. **publishers() map migration**
+4. **Handler contracts and #[Handler] attribute**
+5. **#[Parameter] attribute**
+6. **File generation and `make:*` commands to sindri**
+7. **Container constants files** — additive, can happen incrementally per component
+8. **Closure-based container bindings** — additive, can happen incrementally per component
