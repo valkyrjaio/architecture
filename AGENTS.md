@@ -80,8 +80,8 @@ These hold in **every** language. Do not violate them in a port.
 - **Handler signatures are typed.** Handlers are explicit
   typed closures — HTTP → `ResponseContract`, CLI → `OutputContract`, Listener →
   `any`. Parameters are `(ContainerContract, map<string, mixed>)`; request/route
-  come from the container, not the signature. `#[Handler]` / `@Handler` /
-  `@handler` is a **metadata marker only**, never an active registrar.
+  come from the container, not the signature. `#[RouteHandler]` / `@RouteHandler` /
+  `@route_handler` is a **metadata marker only**, never an active registrar.
 - **`AppConfig` is the build tool entry point.** No `valkyrja.yaml`. The app
   config class already lists the component providers; `sindri` reads it via AST.
 - **A component config holds only component-wide settings.** Each adapter gets

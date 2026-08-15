@@ -61,20 +61,21 @@ bindings free of forced class imports.
 
 Provider list methods return **instances**, not class objects:
 
-| Method                      | Return type                                      | Reasoning                                                   |
-| --------------------------- | ------------------------------------------------ | ----------------------------------------------------------- |
-| `get_container_providers()` | `list[ServiceProviderContract]`                  | Returns provider instances called directly by the framework |
-| `get_event_providers()`     | `list[ListenerProviderContract]`                 | Returns provider instances called directly by the framework |
-| `get_cli_providers()`       | `list[CliRouteProviderContract]`                 | Returns provider instances called directly by the framework |
-| `get_http_providers()`      | `list[HttpRouteProviderContract]`                | Returns provider instances called directly by the framework |
-| `get_controller_classes()`  | `list[type]`                                     | Returns class objects carrying `@handler` decorated methods |
-| `get_listener_classes()`    | `list[type]`                                     | Returns class objects carrying `@handler` decorated methods |
-| `get_routes()`              | `list[RouteContract]`                            | Returns concrete route data objects                         |
-| `get_listeners()`           | `list[ListenerContract]`                         | Returns concrete listener data objects                      |
-| `publishers()`              | `dict[str, Callable[[ContainerContract], None]]` | Maps binding key to publisher function reference            |
+| Method                      | Return type                                      | Reasoning                                                            |
+| --------------------------- | ------------------------------------------------ | -------------------------------------------------------------------- |
+| `get_container_providers()` | `list[ServiceProviderContract]`                  | Returns provider instances called directly by the framework          |
+| `get_event_providers()`     | `list[ListenerProviderContract]`                 | Returns provider instances called directly by the framework          |
+| `get_cli_providers()`       | `list[CliRouteProviderContract]`                 | Returns provider instances called directly by the framework          |
+| `get_http_providers()`      | `list[HttpRouteProviderContract]`                | Returns provider instances called directly by the framework          |
+| `get_controller_classes()`  | `list[type]`                                     | Returns class objects carrying `@route_handler` decorated methods    |
+| `get_listener_classes()`    | `list[type]`                                     | Returns class objects carrying `@listener_handler` decorated methods |
+| `get_routes()`              | `list[RouteContract]`                            | Returns concrete route data objects                                  |
+| `get_listeners()`           | `list[ListenerContract]`                         | Returns concrete listener data objects                               |
+| `publishers()`              | `dict[str, Callable[[ContainerContract], None]]` | Maps binding key to publisher function reference                     |
 
 `list[type]` is used for controller and listener class lists because those classes do not implement a provider contract
-— they carry `@handler` decorators. `list[type]` is the honest and accurate type for any list of Python class objects.
+— they carry `@route_handler` decorators. `list[type]` is the honest and accurate type for any list of Python class
+objects.
 
 ---
 
@@ -194,7 +195,8 @@ class HttpComponentProvider(ComponentProviderContract):
 
 Container bindings provider. `publishers()` returns a map of binding key to publisher method reference. The build tool
 reads the map from AST, resolves each method reference via `inspect.getfile()`, and reads that method body. Publisher
-methods carry a `@handler` decorator — the build tool reads the decorator argument from AST for cache generation.
+methods carry a `@route_handler` decorator — the build tool reads the decorator argument from AST for cache
+generation.
 
 ```python
 # package: valkyrja.container.provider.contract
@@ -229,7 +231,7 @@ class ServiceProviderContract(ABC):
                 UserRepositoryClass: UserServiceProvider.publish_user_repository,
             }
 
-        @handler(lambda c, args: c.set_singleton(
+        @route_handler(lambda c, args: c.set_singleton(
             UserRepositoryClass, UserRepository(c.get_singleton(DatabaseClass))
         ))
         @staticmethod
@@ -274,7 +276,7 @@ class UserServiceProvider(ServiceProviderContract):
     @staticmethod
     def publish_user_repository(container: ContainerContract) -> None:
         """
-        Build tool reads the @handler decorator argument from AST.
+        Build tool reads the @route_handler decorator argument from AST.
         The decorator carries the closure used for cache generation.
         The method body is the runtime implementation.
         """
@@ -288,8 +290,8 @@ class UserServiceProvider(ServiceProviderContract):
 
 ## HttpRouteProviderContract
 
-HTTP route provider. Two sources: annotated controller classes (scanned for `@handler` decorated methods) and explicit
-route object definitions. Routes are complete data structures — they cannot be expressed as a publisher-style map
+HTTP route provider. Two sources: annotated controller classes (scanned for `@route_handler` decorated methods) and
+explicit route object definitions. Routes are complete data structures — they cannot be expressed as a publisher-style map
 without losing the metadata the router requires.
 
 ```python
@@ -310,7 +312,7 @@ class HttpRouteProviderContract(ABC):
         """
         Get a list of attributed controller or action classes.
         Build tool uses inspect.getfile() to locate each class source file,
-        then scans for @handler decorated methods.
+        then scans for @route_handler decorated methods.
         Returns empty list if using explicit routes only.
         Must return a simple list literal — no conditional logic permitted.
 
@@ -350,7 +352,7 @@ class UserHttpRouteProvider(HttpRouteProviderContract):
     def get_controller_classes() -> list[type]:
         """
         Build tool calls inspect.getfile(UserController) to locate source,
-        then scans for @handler decorated methods.
+        then scans for @route_handler decorated methods.
         Python classes are first-class type objects — list[type] is accurate.
         """
         return [
@@ -379,10 +381,10 @@ class UserHttpRouteProvider(HttpRouteProviderContract):
         return c.get_singleton(UserControllerClass).index(args)
 ```
 
-### Controller with @handler Decorator
+### Controller with @route_handler Decorator
 
-The `@handler` decorator is a **metadata marker only** — it does not self-register routes at import time. It attaches
-the closure as metadata on the method. The framework reads this metadata during bootstrap (no cache) and skips it
+The `@route_handler` decorator is a **metadata marker only** — it does not self-register routes at import time. It
+attaches the closure as metadata on the method. The framework reads this metadata during bootstrap (no cache) and skips it
 entirely when loading from cache.
 
 This is intentional and consistent with PHP's `#[Handler]` attribute — both are inert metadata that the framework reads
@@ -411,7 +413,7 @@ def handler(closure):
 
 class UserController:
 
-    @handler(lambda c, args: c.get_singleton(UserControllerClass).index(args[0]))
+    @route_handler(lambda c, args: c.get_singleton(UserControllerClass).index(args[0]))
     def index(self, request) -> Response:
         """
         Build tool reads _valkyrja_handler metadata from AST
@@ -421,15 +423,15 @@ class UserController:
         """
         pass
 
-    @handler(lambda c, args: c.get_singleton(UserControllerClass).store(args[0]))
+    @route_handler(lambda c, args: c.get_singleton(UserControllerClass).store(args[0]))
     def store(self, request) -> Response:
         pass
 ```
 
 ### Why Not Self-Registration
 
-Python decorators execute at module import time. If `@handler` self-registered routes, importing a controller module
-would immediately register its routes — even when loading from cache where those routes are already pre-built. The cache
+Python decorators execute at module import time. If `@route_handler` self-registered routes, importing a controller
+module would immediately register its routes — even when loading from cache where those routes are already pre-built. The cache
 data file imports the same controller classes anyway (to reference them in route objects), so the imports cannot be
 avoided. Self-registration would cause double registration or conflicting state.
 
@@ -493,7 +495,7 @@ class ListenerProviderContract(ABC):
         """
         Get a list of attributed listener classes.
         Build tool uses inspect.getfile() to locate each class source file,
-        then scans for @handler decorated methods.
+        then scans for @route_handler decorated methods.
         Must return a simple list literal — no conditional logic permitted.
 
         NOTE: Same as get_controller_classes() — live class objects in the list are

@@ -566,7 +566,7 @@ public function index(Request $request): Response
 **Java**
 
 ```java
-@Handler((ContainerContract c, List < Object > args) ->
+@RouteHandler((ContainerContract c, List < Object > args) ->
         c.
 
 getSingleton(UserController .class).
@@ -583,7 +583,7 @@ public Response index(Request request) {
 **Python**
 
 ```python
-@handler(lambda c, args: c.get_singleton(UserController).index(args[0]))
+@route_handler(lambda c, args: c.get_singleton(UserController).index(args[0]))
 def index(request: Request) -> Response:
     # actual implementation
     pass
@@ -768,8 +768,8 @@ listener collection — same pattern, `ListenerContract` instead of `RouteContra
 
 ### PHP
 
-The closure handler is the only mechanism. The `#[Handler]` attribute drives the runtime call and the cache generation.
-The build tool extracts the closure through AST.
+The closure handler is the only mechanism. The `#[RouteHandler]` attribute drives the runtime call and the cache
+generation. The build tool extracts the closure through AST.
 
 ```php
 $route->setHandler(
@@ -780,8 +780,9 @@ $route->setHandler(
 
 ### Java
 
-The closure handler is the only mechanism. The annotation processor extracts the `@Handler` lambda through the Trees API
-at compile time, then generates the cache data classes through JavaPoet. The developer writes no `CacheableHandler`
+The closure handler is the only mechanism. The annotation processor extracts the `@RouteHandler` lambda through the
+Trees API at compile time, then generates the cache data classes through JavaPoet. The developer writes no
+`CacheableHandler`
 string.
 
 ```java
@@ -812,7 +813,7 @@ handler closure for cache generation.
 
 ```python
 # python — decorator-based registration
-@handler(lambda c, args: c.get_singleton(UserController).index(args[0]))
+@route_handler(lambda c, args: c.get_singleton(UserController).index(args[0]))
 def index(request: Request) -> Response:
     pass
 ```
@@ -836,8 +837,8 @@ router.get('/users',
 
 For annotated controllers, annotations live on the **implementation method**. Sindri reads the annotations and
 constructs a route object — exactly the same shape as a route returned from `getRoutes()`. **No method body extraction.
-No import resolution of the callable.** The callable from `#[Handler]` is written directly into the generated cache data
-class as a literal, just as it appears in the source.
+No import resolution of the callable.** The callable from `#[RouteHandler]` is written directly into the generated
+cache data class as a literal, just as it appears in the source.
 
 This is identical to how service bindings work:
 
@@ -860,10 +861,10 @@ Go and TypeScript have no annotation support — routes are always registered ex
 ```
 #[Route]      — HTTP method + path — lives on the implementation method
 #[Parameter]  — dynamic segment constraints — lives on the implementation method
-#[Handler]    — callable reference — lives on the implementation method
+#[RouteHandler]    — callable reference — lives on the implementation method
 ```
 
-The callable in `#[Handler]` is the value written into the generated route object unchanged.
+The callable in `#[RouteHandler]` is the value written into the generated route object unchanged.
 
 ---
 
@@ -906,7 +907,7 @@ new \Valkyrja\Http\Routing\Data\HttpRoute(
 **Sindri reads — PHP:**
 
 ```
-1. Find #[Route], #[Parameter], #[Handler] on the implementation method
+1. Find #[Route], #[Parameter], #[RouteHandler] on the implementation method
 2. Extract path, HTTP method, parameter name/pattern, callable — all literals
 3. Construct route data from extracted literals
 4. Write into generated AppHttpRoutingData — callable written as-is
@@ -923,7 +924,7 @@ public class UserController {
     // Callable written directly into generated cache — no body extraction.
     @Route(method = "GET", path = "/users/{id}")
     @Parameter(name = "id", pattern = "[0-9]+")
-    @Handler(clazz = UserController.class, method = "showHandler")
+    @RouteHandler(clazz = UserController.class, method = "showHandler")
     public ResponseContract show(String id) {
         // actual implementation — irrelevant to Sindri
     }
@@ -949,7 +950,7 @@ HandlerRef(UserController .class, "showHandler")  // written as-is
 **Sindri reads — Java:**
 
 ```
-1. Find @Route, @Parameter, @Handler on the implementation method
+1. Find @Route, @Parameter, @RouteHandler on the implementation method
 2. Extract path, HTTP method, parameter name/pattern, clazz + method — all literals
 3. Construct route data from extracted literals
 4. Write into generated AppHttpRoutingData — callable written as-is
@@ -966,7 +967,7 @@ class UserController:
     # The callable tuple is written directly into the generated cache — no body extraction.
     @route('GET', '/users/{id}')
     @parameter('id', pattern='[0-9]+')
-    @handler((UserController, 'show_handler'))  # callable tuple — written as-is
+    @route_handler((UserController, 'show_handler'))  # callable tuple — written as-is
     def show(self, id: str) -> ResponseContract:
         pass  # actual implementation — irrelevant to Sindri
 
@@ -990,7 +991,7 @@ HttpRoute(
 **Sindri reads — Python:**
 
 ```
-1. Find @route, @parameter, @handler decorators on the implementation method
+1. Find @route, @parameter, @route_handler decorators on the implementation method
 2. Extract path, HTTP method, parameter name/pattern, callable tuple — all literals
 3. Construct route data from extracted literals
 4. Write into generated AppHttpRoutingData — callable written as-is

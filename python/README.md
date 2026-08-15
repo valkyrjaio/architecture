@@ -13,7 +13,7 @@
 - **`@staticmethod @abstractmethod`** throughout — providers are stateless
 - **`inspect.getfile()`** for class-to-file resolution (equivalent of PHP's `ReflectionClass::getFileName()`)
 - **`ast` module** for build tool AST parsing
-- **Decorators are runtime-executable** — `@handler` self-registers at import time
+- **Decorators are runtime-executable** — `@route_handler` self-registers at import time
 - **`class_()` helper** for FQN derivation (`class` is reserved in Python)
 - **ASGI (Uvicorn/Hypercorn)** as the worker mode deployment model
 - **CGI mode** supported — Python is interpreted, cache optional in dev
@@ -121,7 +121,7 @@ get_container_providers() -> list[type]  # class objects
 get_event_providers()     -> list[type]
 get_cli_providers()       -> list[type]
 get_http_providers()      -> list[type]
-get_controller_classes()  -> list[type]  # classes with @handler decorators
+get_controller_classes()  -> list[type]  # classes with @route_handler decorators
 get_listener_classes()    -> list[type]
 get_routes()              -> list[RouteContract]  # concrete route objects
 get_listeners()           -> list[ListenerContract]
@@ -176,7 +176,7 @@ def publish_user_repository(container: ContainerContract) -> None:
 ```python
 class HttpRouteProviderContract(ABC):
     @staticmethod @ abstractmethod
-    def get_controller_classes() -> list[type]: ...  # classes with @handler decorators
+    def get_controller_classes() -> list[type]: ...  # classes with @route_handler decorators
 
     @staticmethod @ abstractmethod
     def get_routes() -> list[RouteContract]: ...
@@ -211,10 +211,10 @@ class HttpHandlerContract(ABC):
     def set_handler(self, handler: HttpHandlerFunc) -> 'HttpHandlerContract': ...
 ```
 
-### @handler decorator on controller methods
+### @route_handler decorator on controller methods
 
 ```python
-@handler(lambda c, args: c.get_singleton(UserControllerClass).show(args['id']))
+@route_handler(lambda c, args: c.get_singleton(UserControllerClass).show(args['id']))
 @parameter('id', pattern='[0-9]+')
 def show(self, id: int) -> ResponseContract:
     pass
@@ -281,7 +281,7 @@ per-name — and the framework would need no change to benefit — but it works 
 ```
 Without cache — every boot:
   ✗ Traverse the provider tree
-  ✗ Scan @handler decorators across all controllers
+  ✗ Scan @route_handler decorators across all controllers
   ✗ Build the route dispatcher index (regex compilation, path indexing)
   ✗ Register all container bindings
 
@@ -374,8 +374,8 @@ with no conditionals. The service provider stays clean with no framework-specifi
 
 ## 7. Decorators — Metadata Markers, Not Self-Registrars
 
-Python decorators execute at import time — but `@handler` must **not** self-register routes. It must be a metadata
-marker only:
+Python decorators execute at import time — but `@route_handler` must **not** self-register routes. It must be a
+metadata marker only:
 
 ```python
 def handler(closure):
@@ -387,7 +387,7 @@ def handler(closure):
 ```
 
 **Why not self-registration:** The cache data file imports controller classes to reference them in route objects. Those
-imports cannot be avoided. If `@handler` self-registered, loading from cache would cause double registration or
+imports cannot be avoided. If `@route_handler` self-registered, loading from cache would cause double registration or
 conflicting state — routes registered from cache AND from decorator execution on import.
 
 **How it works without cache:** The framework scans controller classes for `_valkyrja_handler` metadata during
@@ -396,7 +396,7 @@ bootstrap. It reads the metadata and registers routes from it.
 **How it works with cache:** The framework loads cache data files directly and never calls `get_controller_classes()` or
 scans for `_valkyrja_handler`. Decorator metadata is never read.
 
-The `@handler` decorator carries the closure for build tool extraction. The build tool reads `_valkyrja_handler`
+The `@route_handler` decorator carries the closure for build tool extraction. The build tool reads `_valkyrja_handler`
 metadata from AST via `inspect.getfile()` + `ast.parse()`.
 
 ### Accessing _valkyrja_handler at Runtime
@@ -510,7 +510,7 @@ ast.parse(source) → AST
         ↓
 collect_imports() → import map for FQN resolution
         ↓
-extract @handler decorators + @parameter decorators
+extract @route_handler decorators + @parameter decorators
         ↓
 resolve type references to FQN
         ↓
@@ -532,7 +532,7 @@ deploy with generated files
 5. Provider contracts with proper type hints
 6. Callable type aliases — HttpHandlerFunc, CliHandlerFunc, ListenerHandlerFunc
 7. Handler contracts per concern
-8. `@handler` and `@parameter` decorators
+8. `@route_handler` and `@parameter` decorators
 9. Route and listener data classes
 10. CGI and ASGI entry points
 11. sindri Python implementation

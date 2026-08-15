@@ -94,7 +94,7 @@ Build system is **Gradle (Kotlin DSL)** on the JVM (Java 21). Each tool runs fro
 | Testing + coverage       | JUnit 5 + Kover       | 100% line and branch   |
 
 - **Build tool (`sindri-kotlin`):** KSP (Kotlin Symbol Processing) — or the shared
-  Java annotation processor — reads `@Handler`/`@Provides` and generates the four
+  Java annotation processor — reads `@RouteHandler`/`@Provides` and generates the four
   cache data classes. Dev-only; the framework has zero AST/build deps.
 
 ### CI gate (run before done)
