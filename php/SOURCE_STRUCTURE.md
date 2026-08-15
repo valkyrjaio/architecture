@@ -2024,4 +2024,4 @@ extends. Three documents carry that:
 - [`../PROVIDERS.md`](../PROVIDERS.md) — the provider types, the naming
   convention, and the contract that each provider type satisfies.
 - [`../THROWABLES.md`](../THROWABLES.md) — the throwable and exception
-  hierarchy, which a tree cannot show.
+  hierarchy, and the naming rule that makes each name unique.
