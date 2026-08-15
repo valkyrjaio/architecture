@@ -259,13 +259,14 @@ public static function onUserCreated(ContainerContract $c, array $args): mixed
 
 ### Annotated Controllers — PHP, Java, Python
 
-For annotated controllers, `#[Handler]` / `@Handler` / `@handler` lives on the **implementation method** and carries a *
+For annotated controllers, `#[RouteHandler]` / `@RouteHandler` / `@route_handler` lives on the **implementation
+method** and carries a *
 _callable reference_* pointing to the static handler method. The handler may live on the same controller class, the
 route provider, or any other class — Sindri follows the callable reference to wherever the handler lives.
 
 ```
 Annotations live on:    the implementation method (show, store, index etc.)
-#[Handler] points to:   a callable (ClassName, methodName) — any class, anywhere
+#[RouteHandler] points to:   a callable (ClassName, methodName) — any class, anywhere
 Sindri reads:            the handler method body from whichever file the callable resolves to
 ```
 
@@ -318,7 +319,7 @@ class UserHttpRouteProvider implements HttpRouteProviderContract
 public class UserController {
     @Route(method = "GET", path = "/users/{id}")
     @Parameter(name = "id", pattern = "[0-9]+")
-    @Handler(clazz = UserController.class, method = "showHandler")
+    @RouteHandler(clazz = UserController.class, method = "showHandler")
     public ResponseContract show(String id) { /* actual implementation */ }
 
     // Sindri resolves clazz + method → this file → reads this method
@@ -334,7 +335,7 @@ public class UserController {
 class UserController:
     @route('GET', '/users/{id}')
     @parameter('id', pattern='[0-9]+')
-    @handler((UserController, 'show_handler'))  # callable tuple
+    @route_handler((UserController, 'show_handler'))  # callable tuple
     def show(self, id: str) -> ResponseContract:
         pass  # actual implementation — not read by Sindri
 
@@ -400,8 +401,8 @@ are structural problems in the application that the developer must resolve.
 
 ```
 ✅ #[Handler([ClassName::class, 'methodName'])]   — PHP callable on any class
-✅ @Handler(clazz = ClassName.class, method = "m") — Java callable on any class
-✅ @handler((ClassName, 'method_name'))            — Python callable on any class
+✅ @RouteHandler(clazz = ClassName.class, method = "m") — Java callable on any class
+✅ @route_handler((ClassName, 'method_name'))            — Python callable on any class
 
 ✅ Annotation lives on the implementation method (the instance method)
 ✅ Handler method must be static — anywhere in the codebase
@@ -1341,8 +1342,8 @@ Identical to Step 3c with:
 **Input:** file path of a controller class (resolved in Step 3c or 3d).
 
 Sindri reads annotation literals and constructs route data objects — **no method body extraction, no import resolution
-of the callable**. The callable from `#[Handler]` is written directly into the generated output as-is, exactly like a
-callable in an explicit `getRoutes()` route or a service binding:
+of the callable**. The callable from `#[RouteHandler]` is written directly into the generated output as-is, exactly
+like a callable in an explicit `getRoutes()` route or a service binding:
 
 ```
 // service binding — callable literal written as-is
@@ -1362,7 +1363,7 @@ imports     → map of simple name → FQN
               needed only to resolve the callable class name to FQN for the output literal
 
 per method:
-  callable    → (ClassName, methodName) from #[Handler] — written as-is into output
+  callable    → (ClassName, methodName) from #[RouteHandler] — written as-is into output
   parameters  → list from #[Parameter] / @Parameter annotations
                 each: name (string literal), pattern (string literal)
   path        → from route annotation — string literal
@@ -1378,7 +1379,7 @@ per method:
 2. Collect all import statements → import map
 3. Walk all class methods:
    For each implementation method:
-     a. Check for @Handler / #[Handler] annotation:
+     a. Check for @RouteHandler / #[RouteHandler] annotation:
         - Extract callable literal: (ClassName, methodName)
         - Resolve ClassName via imports → FQN (so output contains FQN, not short name)
      b. Check for @Parameter / #[Parameter] annotations (may be multiple):
@@ -1398,8 +1399,9 @@ per method:
 
 **Goal:** Extract listeners from annotated/decorated methods. PHP, Java, Python only.
 
-`#[Handler]` / `@Handler` / `@handler` lives on the **implementation method** and carries a **callable reference** —
-same pattern as annotated controllers. The handler may live on the listener class itself, the listener provider, or any
+`#[RouteHandler]` / `@RouteHandler` / `@route_handler` lives on the **implementation method** and carries a **callable
+reference** — same pattern as annotated controllers. The handler may live on the listener class itself, the listener
+provider, or any
 other class.
 
 **Pattern:**
@@ -1409,7 +1411,7 @@ other class.
 2. Collect all import statements → import map (for resolving callable class names)
 3. Walk all class methods:
    For each method:
-     a. Check for @Handler / #[Handler] / @handler annotation:
+     a. Check for @RouteHandler / #[RouteHandler] / @route_handler annotation:
         - Extract callable: (ClassName, methodName)
         - Resolve ClassName via listener file's imports → FQN
      b. Check for @ListensTo / #[ListensTo] annotation:
@@ -1559,10 +1561,10 @@ foreach ($componentProviders as $providerClass) {
 }
 ```
 
-**Annotation extraction (`#[Handler]` on controller methods):**
+**Annotation extraction (`#[RouteHandler]` on controller methods):**
 
 ```php
-// find methods with #[Handler] attribute
+// find methods with #[RouteHandler] attribute
 class HandlerAttributeVisitor extends NodeVisitorAbstract
 {
     public function enterNode(Node $node): void
@@ -1675,7 +1677,7 @@ public class ValkyrjaAnnotationProcessor extends AbstractProcessor {
             Set<? extends TypeElement> annotations,
             RoundEnvironment roundEnv
     ) {
-        // collect all @Handler annotated methods
+        // collect all @RouteHandler annotated methods
         for (Element element : roundEnv.getElementsAnnotatedWith(Handler.class)) {
             if (element.getKind() != ElementKind.METHOD) continue;
             processHandlerMethod((ExecutableElement) element);
@@ -1692,7 +1694,7 @@ private void processHandlerMethod(ExecutableElement method) {
     // get the source tree for this method
     MethodTree methodTree = (MethodTree) trees.getTree(method);
 
-    // find the @Handler annotation and extract lambda source text
+    // find the @RouteHandler annotation and extract lambda source text
     for (AnnotationMirror annotation : method.getAnnotationMirrors()) {
         if (!annotation.getAnnotationType().toString().equals(Handler.class.getName())) continue;
 
@@ -1974,11 +1976,11 @@ def extract_provider_list(
     return []
 ```
 
-**Decorator extraction (`@handler` on controller methods):**
+**Decorator extraction (`@route_handler` on controller methods):**
 
 ```python
 def extract_handlers(controller_class: type) -> list[dict]:
-    """Extract @handler decorated methods from a controller class via AST."""
+    """Extract @route_handler decorated methods from a controller class via AST."""
     filepath = inspect.getfile(controller_class)
     source = open(filepath).read()
     tree = ast.parse(source)
@@ -1989,7 +1991,7 @@ def extract_handlers(controller_class: type) -> list[dict]:
         if not isinstance(node, ast.FunctionDef): continue
 
         for decorator in node.decorator_list:
-            # find @handler(...) decorator
+            # find @route_handler(...) decorator
             if not isinstance(decorator, ast.Call): continue
             if not isinstance(decorator.func, ast.Name): continue
             if decorator.func.id != 'handler': continue
@@ -2385,7 +2387,7 @@ Moving it out:
 
 - Reads the application `AppConfig` class
 - Walks provider tree via AST
-- Extracts `#[Handler]` annotations and explicit route definitions
+- Extracts `#[RouteHandler]` annotations and explicit route definitions
 - Runs `ProcessorContract::route()` for regex compilation
 - Generates `AppContainerData`, `AppEventData`, `AppHttpRoutingData`, `AppCliRoutingData`
 
@@ -2393,7 +2395,7 @@ Moving it out:
 
 - `valkyrja new project-name` — creates a blank Valkyrja application with the correct directory structure
 - `valkyrja make:provider ProviderName` — generates a blank service provider
-- `valkyrja make:controller ControllerName` — generates a blank controller with example `#[Handler]`
+- `valkyrja make:controller ControllerName` — generates a blank controller with example `#[RouteHandler]`
 - `valkyrja make:listener ListenerName` — generates a blank event listener
 - `valkyrja make:command CommandName` — generates a blank CLI command
 

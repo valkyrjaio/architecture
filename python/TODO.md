@@ -151,8 +151,8 @@ container.bind(
 
 ## Handler Contracts
 
-- [ ] Implement `@handler` decorator as **metadata marker only** — attaches `_valkyrja_handler` to method, does NOT
-      self-register
+- [ ] Implement `@route_handler` decorator as **metadata marker only** — attaches `_valkyrja_handler` to method, does
+      NOT self-register
 
 ```python
 def handler(closure):

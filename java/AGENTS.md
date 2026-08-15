@@ -139,7 +139,7 @@ SpotBugs → `junit` (JaCoCo 100%). Use `./gradlew spotlessApply` to auto-format
 - **Framework source shipping:** Java must publish a `-sources.jar` as a required
   build dependency (the cache-optional runtime needs source available).
 - **`sindri` (build tool)** uses the Trees API + JavaPoet as an annotation
-  processor to read `@Handler`/`@Provides` and generate the four cache data
+  processor to read `@RouteHandler`/`@Provides` and generate the four cache data
   classes. Dev-only; the framework has zero AST/build deps.
 - **Runtime entry adapters.** The worker entries for the servlet / embedded
   runtimes live in `io.valkyrja.application.entry.<runtime>` (`jetty`, `netty`,

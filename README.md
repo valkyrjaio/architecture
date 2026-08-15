@@ -165,7 +165,7 @@ Key Decisions At a Glance
 - Parameters: `(ContainerContract, map<string, mixed>)` — `ServerRequestContract`
   and `RouteContract` available via container when needed, not explicit
   parameters
-- `#[Handler]` / `@Handler` / `@handler` — metadata marker in all languages,
+- `#[RouteHandler]` / `@RouteHandler` / `@route_handler` — metadata marker in all languages,
   never active registrar
 - See [`HANDLERS.md`](HANDLERS.md)
 
@@ -175,7 +175,7 @@ Key Decisions At a Glance
   four data classes
 - Routes: `Parameter` objects carry segment constraints, `ProcessorContract`
   compiles regex, stored pre-compiled
-- Python `@handler` is metadata only — `_valkyrja_handler` on the function,
+- Python `@route_handler` is metadata only — `_valkyrja_handler` on the function,
   read by framework at bootstrap, skipped when cache loaded
 - See [`DATA_CACHE.md`](DATA_CACHE.md)
 
@@ -200,7 +200,7 @@ Priority items:
 1. Throwable renaming and abstraction
 2. Provider contract interfaces
 3. `publishers()` map migration
-4. `#[Handler]` and `#[Parameter]` attributes
+4. `#[RouteHandler]` and `#[Parameter]` attributes
 5. File generation and `make:*` commands to `valkyrja/sindri`
 
 Starting a New Port

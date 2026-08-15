@@ -182,10 +182,10 @@ Define the three handler function types as docblock-enforced closure signatures:
 
 Each concern gets its own handler contract extending the base `HandlerContract` with the typed closure signature.
 
-### Add #[Handler] attribute to route/listener data classes
+### Add the handler attributes to route/listener data classes
 
-Routes and listeners need `#[Handler]` attribute support on controller/action methods. The attribute carries the typed
-closure:
+Routes need `#[RouteHandler]` attribute support on controller/action methods, and listeners need `#[ListenerHandler]`.
+Each attribute carries the typed closure:
 
 ```php
 #[Handler(static fn(ContainerContract $c, array<string, mixed> $args): ResponseContract
@@ -344,7 +344,7 @@ they return `::class` references directly — never constant references.
 1. **Throwable renaming and abstraction** — foundational, everything else builds on stable exception types
 2. **Provider contract interfaces**
 3. **publishers() map migration**
-4. **Handler contracts and #[Handler] attribute**
+4. **Handler contracts and #[RouteHandler] attribute**
 5. **#[Parameter] attribute**
 6. **File generation and `make:*` commands to sindri**
 7. **Container constants files** — additive, can happen incrementally per component

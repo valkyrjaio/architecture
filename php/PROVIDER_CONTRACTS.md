@@ -8,7 +8,8 @@ returning provider instances directly, aligning with all other Valkyrja language
 - `new X()` used in array literals — PHP-Parser's `Expr\New_` AST node carries the class name directly
 - Instance methods on `ComponentProviderContract` — the framework instantiates providers and calls methods directly
 - `publishers()` is an instance method returning a map of binding key to static callable reference
-- `#[Handler]` attribute on annotated controller/listener methods — build tool reads attribute argument from AST
+- `#[RouteHandler]` on annotated controller methods, and `#[ListenerHandler]` on annotated listener methods — build
+  tool reads attribute argument from AST
 - All methods must return simple array literals with no conditional logic
 
 ### PHP Works Without Cache
@@ -234,7 +235,7 @@ class UserServiceProvider implements ServiceProviderContract
 
 ## HttpRouteProviderContract
 
-HTTP route provider. Two sources: annotated controller classes (scanned for `#[Handler]`) and explicit route object
+HTTP route provider. Two sources: annotated controller classes (scanned for `#[RouteHandler]`) and explicit route object
 definitions.
 
 ```php
@@ -246,7 +247,7 @@ interface HttpRouteProviderContract
 {
     /**
      * Get a list of attributed controller or action classes.
-     * Build tool scans each class for #[Handler] attributes.
+     * Build tool scans each class for #[RouteHandler] attributes.
      * Returns empty array if using explicit routes only.
      * Must return a simple array literal — no conditional logic.
      *
@@ -312,8 +313,8 @@ class UserHttpRouteProvider implements HttpRouteProviderContract
 
 ## Annotated Controller — PHP
 
-`#[Handler]` lives on the **implementation method** and carries a callable reference — class + method name. The handler
-may live on the controller, the route provider, or any other class.
+`#[RouteHandler]` lives on the **implementation method** and carries a callable reference — class + method name. The
+handler may live on the controller, the route provider, or any other class.
 
 **Handler on the same controller:**
 
@@ -361,7 +362,7 @@ class UserController
 ```php
 class UserController
 {
-    // #[Handler] points to the route provider — Sindri follows the callable
+    // #[RouteHandler] points to the route provider — Sindri follows the callable
     #[Route(method: 'GET', path: '/users/{id}')]
     #[Parameter(name: 'id', pattern: '[0-9]+')]
     #[Handler(class: UserHttpRouteProvider::class, method: 'showUser')]

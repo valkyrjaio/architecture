@@ -520,7 +520,7 @@ public class UserServiceProvider implements ServiceProviderContract {
         );
     }
 
-    @Handler((ContainerContract c, List<Object> args) ->
+    @RouteHandler((ContainerContract c, List<Object> args) ->
             c.setSingleton(UserRepositoryContract.class,
                     new UserRepository(c.getSingleton(DatabaseContract.class))))
     public static void publishUserRepository(ContainerContract container) {
@@ -574,7 +574,7 @@ class UserServiceProvider(ServiceProviderContract):
             UserRepositoryClass: UserServiceProvider.publish_user_repository,
         }
 
-    @handler(lambda c, args: c.set_singleton(
+    @route_handler(lambda c, args: c.set_singleton(
         UserRepositoryClass, UserRepository(c.get_singleton(DatabaseClass))
     ))
     @staticmethod
@@ -835,8 +835,8 @@ ObjectCreation: Parameter
 
 **Path 2: Parameter annotations on controller action methods**
 
-For annotated controllers (PHP, Java, Python) parameters live on the method alongside `#[Handler]` / `@Handler` /
-`@handler`:
+For annotated controllers (PHP, Java, Python) parameters live on the method alongside `#[RouteHandler]` /
+`@RouteHandler` / `@route_handler`:
 
 ```php
 // PHP
@@ -849,7 +849,7 @@ public function show(int $id, int $postId): Response {}
 
 ```java
 // Java
-@Handler((ContainerContract c, List<Object> args) ->
+@RouteHandler((ContainerContract c, List<Object> args) ->
     c.getSingleton(UserController.class).show((int) args.get(0), (int) args.get(1)))
 @Parameter(name = "id",     pattern = "[0-9]+")
 @Parameter(name = "postId", pattern = "[0-9]+")
@@ -858,7 +858,7 @@ public Response show(int id, int postId) {}
 
 ```python
 # Python
-@handler(lambda c, args: c.get_singleton(UserControllerClass).show(args[0], args[1]))
+@route_handler(lambda c, args: c.get_singleton(UserControllerClass).show(args[0], args[1]))
 @parameter('id', pattern='[0-9]+')
 @parameter('postId', pattern='[0-9]+')
 def show(self, id: int, post_id: int) -> Response:
@@ -1081,7 +1081,7 @@ publishers() map literal
         ↓
 resolve each method reference to its source location
         ↓
-PHP / Java: read #[Handler] / @Handler annotation on method → extract closure
+PHP / Java: read #[RouteHandler] / @RouteHandler annotation on method → extract closure
 Go / TypeScript / Python: read method body directly → extract function
         ↓
 resolve all type references to FQN
