@@ -1,6 +1,14 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.12...26.x)
+## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.13...26.x)
+
+## [v26.0.13](https://github.com/valkyrjaio/architecture/compare/v26.0.12...v26.0.13) - 2026-08-15
+
+* [Workflow] ci: Update .github workflow refs to v26.24.6 by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/architecture/pull/208
+* [SourceStructure] docs: Regenerate the snapshot from the PHP source tree by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/205
+* [Cache] docs: Correct the cache generation status in the design documents by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/204
+* [Handler] docs: Name the route and listener handler attributes as they ship by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/210
+* [Handler] docs: Name the PHP attribute in the Python contracts reference by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/211
 
 ## [v26.0.12](https://github.com/valkyrjaio/architecture/compare/v26.0.11...v26.0.12) - 2026-08-14
 
