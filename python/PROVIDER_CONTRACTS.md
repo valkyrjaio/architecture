@@ -387,8 +387,8 @@ The `@route_handler` decorator is a **metadata marker only** — it does not sel
 attaches the closure as metadata on the method. The framework reads this metadata during bootstrap (no cache) and skips it
 entirely when loading from cache.
 
-This is intentional and consistent with PHP's `#[Handler]` attribute — both are inert metadata that the framework reads
-when needed, not active registrars.
+This is intentional and consistent with PHP's `#[RouteHandler]` attribute — both are inert metadata that the framework
+reads when needed, not active registrars.
 
 ```python
 from valkyrja.http.routing.handler import handler
