@@ -2019,7 +2019,7 @@ and the 24 module counts above do not count them.
 A tree shows a file. It does not show what the file means, or what the file
 extends. Two documents carry that:
 
-- [`../STRUCTURE.md`](../STRUCTURE.md) — what each directory segment means, and
-  the naming rules each segment carries.
+- [`../STRUCTURE.md`](../STRUCTURE.md) — the taxonomy kinds, and the name
+  suffix, the segment, and the modifier that each kind takes.
 - [`../THROWABLES.md`](../THROWABLES.md) — the throwable and exception
   hierarchy, which a directory listing cannot show.
