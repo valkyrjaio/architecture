@@ -2016,7 +2016,7 @@ and the 24 module counts above do not count them.
 
 ## Related Documents
 
-A tree shows a file. It does not show what the file means, or what the file
+A tree shows a file. A tree does not show what a file means, or what a file
 extends. Three documents carry that:
 
 - [`../STRUCTURE.md`](../STRUCTURE.md) — the taxonomy kinds, and the name
