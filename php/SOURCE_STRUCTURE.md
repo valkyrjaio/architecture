@@ -2017,9 +2017,11 @@ and the 24 module counts above do not count them.
 ## Related Documents
 
 A tree shows a file. It does not show what the file means, or what the file
-extends. Two documents carry that:
+extends. Three documents carry that:
 
 - [`../STRUCTURE.md`](../STRUCTURE.md) — the taxonomy kinds, and the name
   suffix, the segment, and the modifier that each kind takes.
+- [`../PROVIDERS.md`](../PROVIDERS.md) — the provider types, the naming
+  convention, and the contract that each provider type satisfies.
 - [`../THROWABLES.md`](../THROWABLES.md) — the throwable and exception
   hierarchy, which a directory listing cannot show.
