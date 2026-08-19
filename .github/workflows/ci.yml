@@ -26,7 +26,7 @@ jobs:
   trailing-newline-check:
     name: Trailing Newline Check
     if: github.event_name == 'pull_request'
-    uses: valkyrjaio/.github/.github/workflows/_trailing-newline-check.yml@f3c08751f14a5470fe63b15a82d52552ac84767d
+    uses: valkyrjaio/.github/.github/workflows/_trailing-newline-check.yml@058874a43d572ee0648c8cb7f8d952e4adacc45c
     permissions:
       pull-requests: write
       contents: read
@@ -37,7 +37,7 @@ jobs:
   markdown-check:
     name: Markdown Check
     if: github.event_name == 'pull_request'
-    uses: valkyrjaio/.github/.github/workflows/_markdown-check.yml@f3c08751f14a5470fe63b15a82d52552ac84767d
+    uses: valkyrjaio/.github/.github/workflows/_markdown-check.yml@058874a43d572ee0648c8cb7f8d952e4adacc45c
     permissions:
       pull-requests: write
       contents: read
@@ -52,7 +52,7 @@ jobs:
   copyright-header-check:
     name: Copyright Header Check
     if: github.event_name == 'pull_request'
-    uses: valkyrjaio/.github/.github/workflows/_copyright-header-check.yml@f3c08751f14a5470fe63b15a82d52552ac84767d
+    uses: valkyrjaio/.github/.github/workflows/_copyright-header-check.yml@058874a43d572ee0648c8cb7f8d952e4adacc45c
     permissions:
       pull-requests: write
       contents: read
