@@ -1,6 +1,10 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.14...26.x)
+## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.15...26.x)
+
+## [v26.0.15](https://github.com/valkyrjaio/architecture/compare/v26.0.14...v26.0.15) - 2026-08-20
+
+* [Workflow] ci: Update .github workflow refs to v26.25.1 by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/architecture/pull/213
 
 ## [v26.0.14](https://github.com/valkyrjaio/architecture/compare/v26.0.13...v26.0.14) - 2026-08-16
 
