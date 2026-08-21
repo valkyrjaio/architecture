@@ -70,14 +70,15 @@ Four kinds of sentence always fail the test:
 
 The Description holds sentences. It carries no heading of its own, no code
 block, and no walkthrough of a failure. The diff holds the code, and one clause
-carries the failure that the change answers.
+carries the failure that the change answers. A table and a verification note
+stay permitted under the test above, and the `Closes #123` line stays required.
 
-The Description states what changed, and why the change is right. Use the
-fewest words that carry each one. There is no sentence count, because a count
-sets a target and an author writes to a target. Density is what makes a
-description hard to read. Cut a sentence that states neither the what nor the
-why, and cut a word that earns nothing. A long Description usually carries
-something an issue holds better.
+The Description states what changed, and why the change is right. There is no
+sentence count, because a count sets a target and an author writes to a target.
+The test above is the measure, and it governs a word as well as a sentence. Cut
+a sentence that states neither the what nor the why. Cut a word that adds
+nothing to the sentence around it. A Description that is still long after that
+cut usually carries something an issue holds better.
 
 > Wrong — a title line and a walkthrough of the mechanism stand in for the
 > sentence that says what changed:
