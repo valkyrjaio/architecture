@@ -220,8 +220,8 @@ Then:
     of the work and report the count instead of a failure. Handle each one. A
     guard written from memory handles the failure the author remembered. See
     §7.
-18. **Push work that is ready to review.** A push says the change is ready to
-    read. Review your own diff first. See §7.
+18. **Push work that is ready to review.** Review your own diff before you push
+    it. See §7.
 
 ---
 
@@ -544,7 +544,7 @@ root kinds, and worked examples:
 
 ### Push work that is ready to review
 
-**A push says the change is ready to read.** Review the diff yourself first,
+**A push says the change is ready to review.** Review the diff yourself first,
 against these guides, the way the reviewer reads it. A change that still moves
 spends one review round for each push, and each round reports the same kind of
 finding again.
@@ -564,8 +564,11 @@ not:
 - **A fix that answers part of the finding it came from.** A finding that lists
   criteria is a checklist. Read the fix back against the list before you resolve
   the thread.
+- **A commit that reverses an earlier commit on the branch.** The diff of one
+  commit does not show the reversal, and the pull request carries both.
 - **A failure of the call you wrapped that no guard handles.** §3, rule 17. One
-  call reports several failures, and each one takes an answer:
+  call reports several failures, and each one takes a guard. This example
+  writes the guards for the two the return value reports:
 
   ```php
   // fwrite returns false for a failed write, and returns a count below the
@@ -581,9 +584,16 @@ not:
   }
   ```
 
+**Apply a fix in the context of the whole change.** A finding quotes a few
+lines. A fix that reads only those lines lands in a file that earlier fixes
+already changed. The fix then reverses an earlier decision, or it falsifies
+prose an earlier commit wrote. Read the whole file, and read the earlier
+commits on the branch. Say in the message when a commit reverses an earlier
+one.
+
 **Write the prose last.** A `README.md` paragraph, a doc comment, and the pull
-request description each describe code, so each one goes stale when the code
-moves. Write them when the code stops moving. Read each paragraph again before
+request description each describe code. Each one goes stale when the code
+moves, so write them when the code stops moving. Read each paragraph again before
 the push that carries it.
 
 ### Asking for a review
