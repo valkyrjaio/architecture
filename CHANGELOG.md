@@ -1,6 +1,10 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.15...26.x)
+## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.16...26.x)
+
+## [v26.0.16](https://github.com/valkyrjaio/architecture/compare/v26.0.15...v26.0.16) - 2026-08-21
+
+* [SourceStructure] docs: Replace the patterns section with document pointers by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/209
 
 ## [v26.0.15](https://github.com/valkyrjaio/architecture/compare/v26.0.14...v26.0.15) - 2026-08-20
 
