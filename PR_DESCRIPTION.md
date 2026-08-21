@@ -77,7 +77,7 @@ The Description states what changed in one paragraph, and why the change is
 right in one more. Two paragraphs is the maximum. A table, a verification note,
 and the `Closes #123` line sit outside that maximum, under the test above.
 
-> Wrong — a heading and a listing carry the reader through the mechanism:
+> Wrong — a title line and a walkthrough of the mechanism carry the reader:
 >
 > **Why the exiter sets the exit code**
 >

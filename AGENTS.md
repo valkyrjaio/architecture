@@ -566,20 +566,19 @@ not:
 - **A failure of the call you wrapped that no guard handles.** §3, rule 17. One
   call reports several failures, and each one takes an answer:
 
-```php
-// fwrite returns false for a failed write, and returns a count below the length
-// for a partial write. The error handler turns the warning into a throwable, so
-// a guard here answers the two returns.
-$written = fwrite($stream, $data);
+  ```php
+  // fwrite returns false for a failed write, and returns a count below the
+  // length for a partial write. Each return takes its own guard.
+  $written = fwrite($stream, $data);
 
-if ($written === false) {
-    throw new ComponentStreamWriteException('The stream write failed');
-}
+  if ($written === false) {
+      throw new ComponentStreamWriteException('The stream write failed');
+  }
 
-if ($written < strlen($data)) {
-    throw new ComponentStreamWriteException('The stream wrote part of the data');
-}
-```
+  if ($written < strlen($data)) {
+      throw new ComponentStreamWriteException('The stream wrote part of the data');
+  }
+  ```
 
 **Write the prose last.** A `README.md` paragraph, a doc comment, and the pull
 request description each describe code, so each one goes stale when the code
