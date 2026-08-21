@@ -208,6 +208,19 @@ Then:
     enhances the signature, plus the annotations — states what the type does.
     The one exception is a test fixture's one-line block, which says what the
     fixture is for. Full rules and examples: [`COMMENTS.md`](COMMENTS.md).
+16. **Verify a claim before you write it.** A sentence about another file is a
+    claim, and you check a claim rather than assert it. Open the file, and read
+    the code the sentence describes. This governs a comment, a `README.md`, a
+    pull request description, and a review reply. Warning: a wrong claim
+    outlives wrong code, because the next reader trusts prose and does not
+    check it.
+17. **Know how a call fails before you wrap it.** Name each way the call
+    fails first. A call fails through a return value, through a diagnostic it
+    raises, and through a partial result. Handle each one. A guard written from
+    memory handles the failure the author remembered, and a review reports the
+    rest one round at a time.
+18. **Push work that is ready to review.** A push says the change is ready to
+    read. Review your own diff first. See §7.
 
 ---
 
@@ -527,6 +540,29 @@ root kinds, and worked examples:
   it holds the what and the why, and it keeps no sentence the diff already
   shows. Full rules:
   [`PR_DESCRIPTION.md`](PR_DESCRIPTION.md).
+
+### Push work that is ready to review
+
+**A push says the change is ready to read.** Review the diff yourself first,
+against these guides, the way the reviewer reads it. A change that still moves
+spends one review round for each push, and each round reports the same kind of
+finding again.
+
+Read the diff for these, because a self-review finds them and a compiler does
+not:
+
+- **A claim you did not check.** See §3, rule 16.
+- **A test that passes for a wrong implementation.** See
+  [`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md) §1.
+- **A document that this change made false.** A later commit on the branch
+  moves the code under prose that an earlier commit wrote.
+- **A rule with a shape you can count.** The word limits and the writing rules
+  in [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md).
+
+**Write the prose last.** A `README.md` paragraph, a doc comment, and the pull
+request description each describe code, so each one goes stale when the code
+moves. Write them when the code stops moving. Read the whole section again
+before the push that carries it.
 
 ### Asking for a review
 

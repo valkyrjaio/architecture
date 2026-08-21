@@ -68,6 +68,36 @@ Four kinds of sentence always fail the test:
 > framework throws on a missing key instead of guessing a default, and the
 > document did not say so.
 
+## The Description is prose
+
+The Description holds sentences. It carries no heading of its own, no code
+block, and no walkthrough of a failure. The diff holds the code, and the tests
+hold the failure.
+
+Write one paragraph for what changed, and one for why the change is right. A
+third paragraph states a deliberate deviation that the diff cannot explain.
+A description that runs longer buries the sentence the reader needs.
+
+> Wrong — a heading and a code block carry the reader through the mechanism:
+>
+> ## Why the exiter sets the exit code
+>
+> `Exiter.exit` called `process.exit(code)`, which ends the process before the
+> event loop drains. A stream holds the text in a buffer and schedules the
+> write, so the write never reaches the operating system.
+>
+> ```ts
+> static exit(code: number = 0): void {
+>     process.exitCode = code;
+> }
+> ```
+
+> Right — the same change, in prose:
+>
+> Set the exit code instead of ending the process, because a process that ends
+> at once drops a write a stream has buffered. The command then reports success
+> for output that never arrived.
+
 ## A stable name sets the level of detail
 
 "Update a method for naming consistency" names no method, and a restated
