@@ -72,14 +72,12 @@ The Description holds sentences. It carries no heading of its own, no code
 block, and no walkthrough of a failure. The diff holds the code, and one clause
 carries the failure that the change answers.
 
-The Description states what changed, and why the change is right. Each one
-takes the sentences it needs and no more. A Description that runs to several
-paragraphs usually carries something an issue holds better, and the pull
-request links that issue instead.
-
-There is no sentence count and no paragraph count. A count sets a target, and
-an author writes to a target. The test above is the measure: a sentence that
-states neither the what nor the why is fluff at any length.
+The Description states what changed, and why the change is right. Use the
+fewest words that carry each one. There is no sentence count, because a count
+sets a target and an author writes to a target. Density is what makes a
+description hard to read. Cut a sentence that states neither the what nor the
+why, and cut a word that earns nothing. A long Description usually carries
+something an issue holds better.
 
 > Wrong — a title line and a walkthrough of the mechanism stand in for the
 > sentence that says what changed:
