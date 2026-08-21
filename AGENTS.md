@@ -593,7 +593,7 @@ one.
 
 **Write the prose last.** A `README.md` paragraph, a doc comment, and the pull
 request description each describe code. Each one goes stale when the code
-moves, so write them when the code stops moving. Read each paragraph again before
+moves, so write each one when the code stops moving. Read each one again before
 the push that carries it.
 
 ### Asking for a review
