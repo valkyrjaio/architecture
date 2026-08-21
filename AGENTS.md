@@ -215,10 +215,10 @@ Then:
     outlives wrong code, because the next reader trusts prose and does not
     check it.
 17. **Know how a call fails before you wrap it.** Name each way the call
-    fails first. A call fails through a return value, through a diagnostic it
-    raises, and through a partial result. Handle each one. A guard written from
-    memory handles the failure the author remembered, and a review reports the
-    rest one round at a time.
+    fails first. A call reports a failure through a return value, through a
+    warning, and through a throwable, and it can also store part of the data.
+    Handle each one. A guard written from memory handles the failure the author
+    remembered. See §7.
 18. **Push work that is ready to review.** A push says the change is ready to
     read. Review your own diff first. See §7.
 
@@ -558,6 +558,19 @@ not:
   moves the code under prose that an earlier commit wrote.
 - **A rule with a shape you can count.** The word limits and the writing rules
   in [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md).
+- **A failure of the call you wrapped that no guard handles.** §3, rule 17. One
+  call reports several failures, and each one takes a guard:
+
+```php
+// fwrite returns false for a failed write, returns a count below the length for
+// a partial write, and raises a warning that an error handler turns into a
+// throwable. Each one needs its own answer.
+$written = @fwrite($stream, $data);
+
+if ($written === false || $written === 0) {
+    throw new ComponentStreamWriteException('The stream took nothing');
+}
+```
 
 **Write the prose last.** A `README.md` paragraph, a doc comment, and the pull
 request description each describe code, so each one goes stale when the code

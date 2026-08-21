@@ -30,11 +30,10 @@ through every revision of the pull request.
 ## Test every sentence
 
 Keep a sentence only when it states what changed or why the change is right,
-and the diff cannot show it. Discard every other sentence. Most descriptions
-keep three to six sentences, but the count is a symptom, not the test — a
-description inside that budget can still fail, one sentence at a time. Add a
-table or a verification note only when it carries something a reviewer would
-otherwise miss.
+and the diff cannot show it. Discard every other sentence. A sentence that
+survives the test still fails when it is one of many, so the section below sets
+the length. Add a table or a verification note only when it carries something a
+reviewer would otherwise miss.
 
 Four kinds of sentence always fail the test:
 
@@ -72,25 +71,18 @@ Four kinds of sentence always fail the test:
 
 The Description holds sentences. It carries no heading of its own, no code
 block, and no walkthrough of a failure. The diff holds the code, and the tests
-hold the failure.
+hold the failure. A table stays permitted under the test above.
 
-Write one paragraph for what changed, and one for why the change is right. A
-third paragraph states a deliberate deviation that the diff cannot explain.
-A description that runs longer buries the sentence the reader needs.
+Write a concise description for what changed and for why the change is right.
+Each one usually takes a maximum of one paragraph.
 
-> Wrong — a heading and a code block carry the reader through the mechanism:
+> Wrong — a heading and a listing carry the reader through the mechanism:
 >
-> ## Why the exiter sets the exit code
+> **Why the exiter sets the exit code**
 >
-> `Exiter.exit` called `process.exit(code)`, which ends the process before the
-> event loop drains. A stream holds the text in a buffer and schedules the
-> write, so the write never reaches the operating system.
->
-> ```ts
-> static exit(code: number = 0): void {
->     process.exitCode = code;
-> }
-> ```
+> `Exiter::exit()` ends the process before the buffer drains, so a write the
+> buffer still holds never reaches the operating system. The listing below
+> shows the body that replaces it.
 
 > Right — the same change, in prose:
 >
