@@ -40,9 +40,9 @@ why.
 
 ### An expected value from the code under test proves nothing
 
-Coverage counts the lines a test runs. It does not check that the test reports a
-wrong implementation. A test whose expected value comes from the code under test
-runs every line. It still passes when that code is wrong.
+Coverage counts the lines a test runs. Coverage does not check that the test
+reports a wrong implementation. A test whose expected value comes from the code
+under test runs every line. The test still passes when that code is wrong.
 
 Write the expected value as a literal. Then name the wrong implementation the
 test still passes under. When you can name a real one, the test needs a

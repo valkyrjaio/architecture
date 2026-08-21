@@ -30,10 +30,10 @@ through every revision of the pull request.
 ## Test every sentence
 
 Keep a sentence only when it states what changed or why the change is right,
-and the diff cannot show it. Discard every other sentence. A sentence that
-survives the test still fails when it is one of many, so the section below sets
-the length. Add a table or a verification note only when it carries something a
-reviewer would otherwise miss.
+and the diff cannot show it. Discard every other sentence. A description that
+keeps many surviving sentences still buries the one the reader needs, so
+"The Description is prose" below sets the length. Add a table or a verification
+note only when it carries something a reviewer would otherwise miss.
 
 Four kinds of sentence always fail the test:
 
@@ -70,8 +70,8 @@ Four kinds of sentence always fail the test:
 ## The Description is prose
 
 The Description holds sentences. It carries no heading of its own, no code
-block, and no walkthrough of a failure. The diff holds the code, and the tests
-hold the failure.
+block, and no walkthrough of a failure. The diff holds the code, and one clause
+carries the failure that the change answers.
 
 The Description states what changed in one paragraph, and why the change is
 right in one more. Two paragraphs is the maximum. A table, a verification note,
