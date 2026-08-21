@@ -73,8 +73,8 @@ The Description holds sentences. It carries no heading of its own, no code
 block, and no walkthrough of a failure. The diff holds the code, and the tests
 hold the failure. A table stays permitted under the test above.
 
-Write a concise description for what changed and for why the change is right.
-Each one usually takes a maximum of one paragraph.
+The Description states what changed in one paragraph, and why the change is
+right in one more. Two paragraphs is the maximum.
 
 > Wrong — a heading and a listing carry the reader through the mechanism:
 >

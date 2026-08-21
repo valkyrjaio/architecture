@@ -214,11 +214,11 @@ Then:
     pull request description, and a review reply. Warning: a wrong claim
     outlives wrong code, because the next reader trusts prose and does not
     check it.
-17. **Know how a call fails before you wrap it.** Name each way the call
-    fails first. A call reports a failure through a return value, through a
-    warning, and through a throwable, and it can also store part of the data.
-    Handle each one. A guard written from memory handles the failure the author
-    remembered. See §7.
+17. **Know how a call fails before you wrap it.** Name each way the call fails
+    before you write the guard. A call reports a failure through a return
+    value, through a warning, and through a throwable. A call can also do part
+    of the work and report no failure at all. Handle each one. A guard written
+    from memory handles the failure the author remembered. See §7.
 18. **Push work that is ready to review.** A push says the change is ready to
     read. Review your own diff first. See §7.
 
@@ -562,13 +562,17 @@ not:
   call reports several failures, and each one takes a guard:
 
 ```php
-// fwrite returns false for a failed write, returns a count below the length for
-// a partial write, and raises a warning that an error handler turns into a
-// throwable. Each one needs its own answer.
-$written = @fwrite($stream, $data);
+// fwrite returns false for a failed write, and returns a count below the length
+// for a partial write. It also raises a warning, and the error handler turns
+// that warning into a throwable. Each one takes its own guard.
+$written = fwrite($stream, $data);
 
-if ($written === false || $written === 0) {
-    throw new ComponentStreamWriteException('The stream took nothing');
+if ($written === false) {
+    throw new ComponentStreamWriteException('The stream write failed');
+}
+
+if ($written < strlen($data)) {
+    throw new ComponentStreamWriteException('The stream wrote part of the data');
 }
 ```
 
