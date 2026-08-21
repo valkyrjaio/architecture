@@ -30,10 +30,9 @@ through every revision of the pull request.
 ## Test every sentence
 
 Keep a sentence only when it states what changed or why the change is right,
-and the diff cannot show it. Discard every other sentence. A description that
-keeps many surviving sentences still buries the one the reader needs, so
-"The Description is prose" below sets the length. Add a table or a verification
-note only when it carries something a reviewer would otherwise miss.
+and the diff cannot show it. Discard every other sentence. Add a table or a
+verification note only when it carries something a reviewer would otherwise
+miss.
 
 Four kinds of sentence always fail the test:
 
@@ -73,10 +72,14 @@ The Description holds sentences. It carries no heading of its own, no code
 block, and no walkthrough of a failure. The diff holds the code, and one clause
 carries the failure that the change answers.
 
-The Description states what changed in one paragraph, and why the change is
-right in one more. Two paragraphs is the maximum. A table, a verification note,
-and the `Closes #123` line sit outside that maximum. A table and a verification
-note stay under the test above.
+The Description states what changed, and why the change is right. Each one
+takes the sentences it needs and no more. A Description that runs to several
+paragraphs usually carries something an issue holds better, and the pull
+request links that issue instead.
+
+There is no sentence count and no paragraph count. A count sets a target, and
+an author writes to a target. The test above is the measure: a sentence that
+states neither the what nor the why is fluff at any length.
 
 > Wrong — a title line and a walkthrough of the mechanism stand in for the
 > sentence that says what changed:
