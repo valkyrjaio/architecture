@@ -217,8 +217,9 @@ Then:
 17. **Know how a call fails before you wrap it.** Name each way the call fails
     before you write the guard. A call reports a failure through a return
     value, through a warning, and through a throwable. A call can also do part
-    of the work and report no failure at all. Handle each one. A guard written
-    from memory handles the failure the author remembered. See §7.
+    of the work and report the count instead of a failure. Handle each one. A
+    guard written from memory handles the failure the author remembered. See
+    §7.
 18. **Push work that is ready to review.** A push says the change is ready to
     read. Review your own diff first. See §7.
 
@@ -582,8 +583,8 @@ not:
 
 **Write the prose last.** A `README.md` paragraph, a doc comment, and the pull
 request description each describe code, so each one goes stale when the code
-moves. Write them when the code stops moving. Read the whole section again
-before the push that carries it.
+moves. Write them when the code stops moving. Read each paragraph again before
+the push that carries it.
 
 ### Asking for a review
 

@@ -75,21 +75,23 @@ hold the failure.
 
 The Description states what changed in one paragraph, and why the change is
 right in one more. Two paragraphs is the maximum. A table, a verification note,
-and the `Closes #123` line sit outside that maximum, under the test above.
+and the `Closes #123` line sit outside that maximum. A table and a verification
+note stay under the test above.
 
-> Wrong — a title line and a walkthrough of the mechanism carry the reader:
+> Wrong — a title line and a walkthrough of the mechanism stand in for the
+> sentence that says what changed:
 >
 > **Why the exiter sets the exit code**
 >
 > `Exiter::exit()` ends the process before the buffer drains, so a write the
-> buffer still holds never reaches the operating system. The listing below
-> shows the body that replaces it.
+> buffer still holds never reaches the operating system. The command then
+> reports success for output that never arrived, and the listing below shows
+> the body that replaces it.
 
-> Right — the same change, in prose:
+> Right — one sentence says what changed, and one clause says why:
 >
 > Set the exit code instead of ending the process, because a process that ends
-> at once drops a write a stream has buffered. The command then reports success
-> for output that never arrived.
+> at once drops a write a stream has buffered.
 
 ## A stable name sets the level of detail
 
