@@ -554,17 +554,22 @@ not:
 - **A claim you did not check.** See §3, rule 16.
 - **A test that passes for a wrong implementation.** See
   [`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md) §1.
-- **A document that this change made false.** A later commit on the branch
-  moves the code under prose that an earlier commit wrote.
+- **A document that this change made false.** A `README.md`, a design document,
+  or a doc comment describes behavior that the diff changed. A later commit on
+  the branch also moves the code under prose that an earlier commit wrote. See
+  §3, rule 11.
 - **A rule with a shape you can count.** The word limits and the writing rules
   in [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md).
+- **A fix that answers part of the finding it came from.** A finding that lists
+  criteria is a checklist. Read the fix back against the list before you resolve
+  the thread.
 - **A failure of the call you wrapped that no guard handles.** §3, rule 17. One
-  call reports several failures, and each one takes a guard:
+  call reports several failures, and each one takes an answer:
 
 ```php
 // fwrite returns false for a failed write, and returns a count below the length
-// for a partial write. It also raises a warning, and the error handler turns
-// that warning into a throwable. Each one takes its own guard.
+// for a partial write. The error handler turns the warning into a throwable, so
+// a guard here answers the two returns.
 $written = fwrite($stream, $data);
 
 if ($written === false) {

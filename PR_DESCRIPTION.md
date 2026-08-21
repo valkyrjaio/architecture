@@ -71,10 +71,11 @@ Four kinds of sentence always fail the test:
 
 The Description holds sentences. It carries no heading of its own, no code
 block, and no walkthrough of a failure. The diff holds the code, and the tests
-hold the failure. A table stays permitted under the test above.
+hold the failure.
 
 The Description states what changed in one paragraph, and why the change is
-right in one more. Two paragraphs is the maximum.
+right in one more. Two paragraphs is the maximum. A table, a verification note,
+and the `Closes #123` line sit outside that maximum, under the test above.
 
 > Wrong — a heading and a listing carry the reader through the mechanism:
 >
