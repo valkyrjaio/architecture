@@ -66,18 +66,17 @@ Four kinds of sentence always fail the test:
 > framework throws on a missing key instead of guessing a default, and the
 > document did not say so.
 
-## The description is prose
+## The description's prose is sentences
 
-The description's prose holds sentences. It carries no heading of its own, no
-code block, and no walkthrough of a failure. The diff holds the code, and one
-clause carries the failure that the change answers. A table and a verification
-note stay permitted under the test above, and the `Closes #123` line stays
-required. The template's Types of changes and Changes sections stand outside
-this shape.
+The prose in a description carries no heading of its own, no code block, and no
+walkthrough of a failure. The diff holds the code, and one clause carries the
+failure that the change answers. A table and a verification note stay permitted
+under the test above, and the `Closes #123` line stays required. The template's
+Types of changes and Changes sections stand outside this shape.
 
-A promotion pull request is the exception. Its description carries the
-resolution notes that [`BRANCH_PROMOTION.md`](BRANCH_PROMOTION.md) requires,
-and it never becomes a commit.
+A promotion pull request is the exception, and its description never becomes a
+commit. [`BRANCH_PROMOTION.md`](BRANCH_PROMOTION.md) states what that
+description carries when a cherry-pick conflicts.
 
 The description states what changed, and why the change is right. There is no
 sentence count, because a count sets a target and an author writes to a target.
