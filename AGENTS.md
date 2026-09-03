@@ -561,7 +561,7 @@ not. Read the branch's commits for the reversal below:
   the branch also moves the code under prose that an earlier commit wrote. See
   §3, rule 11.
 - **A line that breaks a documentation rule.** The writing rules, the selection
-  rule, and the rules for a code example, in
+  rule, and the rules for code examples, in
   [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md).
 - **A fix that answers part of the finding it came from.** A finding that lists
   criteria is a checklist. Read the fix back against the list before you resolve
