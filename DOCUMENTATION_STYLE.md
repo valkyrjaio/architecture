@@ -222,6 +222,8 @@ Read the block, then look for the same lines in the source tree.
   The block is the **API surface**. Keep it.
 - No source file holds the block, and the block shows a caller how to use the
   API. The block is an **example**. Keep it.
+- A rule about the copy marks the block as the wrong form. The block is a
+  **demonstration**. Keep it, and keep it short.
 
 The source tree decides, and the writer's intent does not. A block that a writer
 meant as an example is still a copy when a real file holds the same body.
@@ -246,9 +248,6 @@ document states what the body guarantees.
 A reader who needs the real code opens the file. Name the class, state what the
 class does, and stop there.
 
-This example exhibits the failure, because a rule about a copy needs one copy to
-point at. Every other example in this document is generic.
-
 ```php
 // Wrong — the document copies a real class to say which commands it registers.
 class CliRoutingCliRouteProvider implements CliRouteProviderContract
@@ -266,8 +265,8 @@ class CliRoutingCliRouteProvider implements CliRouteProviderContract
 > Right — the prose names the class and states what the class does:
 >
 > `CliRoutingComponentProvider::getCliProviders()` returns
-> `CliRoutingCliRouteProvider`, which lists the four built-in command classes
-> and carries a static handler for each.
+> `CliRoutingCliRouteProvider`, which lists the built-in command classes and
+> carries a static handler for each.
 
 ### Keep what the block conveys
 
@@ -275,10 +274,9 @@ Warning: a removal that drops information is worse than the copy. State what the
 block conveys before you remove the block. The replacement carries the same
 information.
 
-The block above conveys two things. It shows the shape of
-`CliRouteProviderContract`, and it shows that the built-in commands come from an
-ordinary route provider. Prose carries the second. A caller-facing example
-carries the first.
+A copied class body usually conveys two things. It shows the shape of a
+contract, and it shows which real class satisfies the contract. A caller-facing
+example carries the first. Prose that names the class carries the second.
 
 ### Verify every name
 
