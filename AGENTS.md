@@ -545,10 +545,10 @@ root kinds, and worked examples:
 
 ### Push work that is ready to review
 
-**A push says the change is ready to review.** Warning: a change that still
-moves spends one review round for each push, and each round reports the same
-kind of finding again. Review the diff yourself first, against these guides,
-the way the reviewer reads it.
+**A push says the change is ready to review.** Warning: each push to a labeled
+pull request spends one review round, and a change that still moves spends
+several. Each round reports the same kind of finding again. Review the diff
+yourself first, against these guides, the way the reviewer reads it.
 
 Read the diff for these, because a self-review finds them and a compiler does
 not:
