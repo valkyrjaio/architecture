@@ -307,7 +307,7 @@ interface CliHandlerContract extends HandlerContract
 }
 
 // usage
-$command->setHandler(
+$cliCommand->setHandler(
     static fn(ContainerContract $c, RouteContract $route): OutputContract
         => $c->getSingleton(SendEmailCommand::class)->run($route)
 );
@@ -777,7 +777,7 @@ The closure handler is the only mechanism. The `#[RouteHandler]` attribute drive
 generation. The build tool extracts the closure through AST.
 
 ```php
-$route->setHandler(
+$httpRoute->setHandler(
     static fn(ContainerContract $c, RouteContract $route): ResponseContract
         => $c->getSingleton(UserController::class)->index($route)
 );
