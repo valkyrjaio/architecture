@@ -551,7 +551,7 @@ several. Each round reports the same kind of finding again. Review the diff
 yourself first, against these guides, the way the reviewer reads it.
 
 Read the diff for these, because a self-review finds them and a compiler does
-not. One item below takes the branch's commits instead:
+not. Read the branch's commits for the reversal below:
 
 - **A claim you did not check.** See §3, rule 16.
 - **A test that passes for a wrong implementation.** See
