@@ -238,12 +238,12 @@ SetHandler(ListenerHandlerFunc) ListenerHandlerContract
 
 ```go
 // HTTP
-route.SetHandler(func (c ContainerContract, route RouteContract) ResponseContract {
+httpRoute.SetHandler(func (c ContainerContract, route RouteContract) ResponseContract {
 return c.GetSingleton(UserControllerClass).(*UserController).Show(route)
 })
 
 // CLI
-command.SetHandler(func (c ContainerContract, route RouteContract) OutputContract {
+cliCommand.SetHandler(func (c ContainerContract, route RouteContract) OutputContract {
 return c.GetSingleton(SendEmailCommandClass).(*SendEmailCommand).Run(route)
 })
 

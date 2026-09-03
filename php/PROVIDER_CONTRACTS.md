@@ -324,6 +324,7 @@ namespace App\Http\Controller;
 use Valkyrja\Container\Manager\Contract\ContainerContract;
 use Valkyrja\Http\Message\Response\Contract\ResponseContract;
 use Valkyrja\Http\Routing\Attribute\Handler;
+use Valkyrja\Http\Routing\Data\Contract\RouteContract;
 use Valkyrja\Http\Routing\Attribute\Parameter;
 use Valkyrja\Http\Routing\Attribute\Route;
 

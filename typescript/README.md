@@ -262,12 +262,12 @@ interface ListenerHandlerContract {
 
 ```typescript
 // HTTP
-route.setHandler((container, route) =>
+httpRoute.setHandler((container, route) =>
     container.getSingleton<UserController>(UserControllerClass).show(route)
 )
 
 // CLI
-command.setHandler((container, route) =>
+cliCommand.setHandler((container, route) =>
     container.getSingleton<SendEmailCommand>(SendEmailCommandClass).run(route)
 )
 

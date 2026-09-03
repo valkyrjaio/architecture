@@ -24,15 +24,6 @@ A route handler takes the matched route, so the handler reads the route's own da
 route contract in its own namespace, so the HTTP `RouteContract` and the CLI `RouteContract` are two distinct types. A
 listener takes a `map<string, mixed>`, because an event carries named arguments and no route.
 
-A route with a dynamic segment is a `DynamicRouteContract`, which extends `RouteContract` and adds the matched
-parameters. A handler for such a route reads a parameter by name:
-
-```php
-static fn(ContainerContract $c, DynamicRouteContract $route): ResponseContract => (
-    $c->getSingleton(UserController::class)->show($route->getParameter('id'))
-)
-```
-
 `ServerRequestContract` is **not** an explicit parameter. The container holds the request, and a handler that needs the
 request resolves the request. Keeping the request out of the signature:
 
@@ -42,10 +33,7 @@ request resolves the request. Keeping the request out of the signature:
 ```php
 // HTTP handler — fetch the request from the container only if needed
 static fn(ContainerContract $c, RouteContract $route): ResponseContract => (
-    $c->getSingleton(UserController::class)->show(
-        $route,
-        $c->getSingleton(ServerRequestContract::class), // available if needed
-    )
+    $c->getSingleton(UserController::class)->show($route)
 )
 
 // CLI handler — same signature shape, different concern
@@ -254,7 +242,7 @@ SetHandler(HttpHandlerFunc) HttpHandlerContract
 }
 
 // usage — compiler enforces HttpHandlerFunc
-route.SetHandler(func (c ContainerContract, route RouteContract) ResponseContract {
+httpRoute.SetHandler(func (c ContainerContract, route RouteContract) ResponseContract {
 return c.GetSingleton(UserControllerClass).(*UserController).Show(route)
 })
 ```
@@ -284,7 +272,7 @@ interface HttpHandlerContract extends HandlerContract {
 }
 
 // usage — tsc enforces HttpHandlerFunc
-route.setHandler((container, route) =>
+httpRoute.setHandler((container, route) =>
     container.getSingleton<UserController>(UserControllerClass).show(route)
 )
 ```
@@ -343,7 +331,7 @@ SetHandler(CliHandlerFunc) CliHandlerContract
 }
 
 // usage
-command.SetHandler(func (c ContainerContract, route RouteContract) OutputContract {
+cliCommand.SetHandler(func (c ContainerContract, route RouteContract) OutputContract {
 return c.GetSingleton(SendEmailCommandClass).(*SendEmailCommand).Run(route)
 })
 ```
@@ -373,7 +361,7 @@ interface CliHandlerContract extends HandlerContract {
 }
 
 // usage
-command.setHandler((container, route) =>
+cliCommand.setHandler((container, route) =>
     container.getSingleton<SendEmailCommand>(SendEmailCommandClass).run(route)
 )
 ```
@@ -565,8 +553,8 @@ method rather than manually constructing route objects with handlers:
 
 ```php
 #[Handler(static fn(ContainerContract $c, RouteContract $route): ResponseContract
-    => $c->getSingleton(UserController::class)->index($c->getSingleton(ServerRequestContract::class)))]
-public function index(ServerRequestContract $request): ResponseContract
+    => $c->getSingleton(UserController::class)->index($route))]
+public function index(RouteContract $route): ResponseContract
 {
     // actual implementation
 }
@@ -580,9 +568,9 @@ public function index(ServerRequestContract $request): ResponseContract
 
 getSingleton(UserController .class).
 
-index(c.getSingleton(ServerRequestContract .class)))
+index(route))
 
-public ResponseContract index(ServerRequestContract request) {
+public ResponseContract index(RouteContract route) {
     // actual implementation
 }
 ```
@@ -590,8 +578,8 @@ public ResponseContract index(ServerRequestContract request) {
 **Python**
 
 ```python
-@route_handler(lambda c, route: c.get_singleton(UserController).index(c.get_singleton(ServerRequestContract)))
-def index(request: ServerRequestContract) -> ResponseContract:
+@route_handler(lambda c, route: c.get_singleton(UserController).index(route))
+def index(route: RouteContract) -> ResponseContract:
     # actual implementation
     pass
 ```
@@ -603,7 +591,7 @@ For **Go** and **TypeScript** — where no annotations exist — explicit regist
 ```go
 router.Get("/users",
 valkyrja.Handler(func(c ContainerContract, route RouteContract) any {
-return c.GetSingleton(UserControllerClass).(*UserController).Index(c.GetSingleton(ServerRequestContractClass))
+return c.GetSingleton(UserControllerClass).(*UserController).Index(route)
 }),
 )
 ```
@@ -613,7 +601,7 @@ return c.GetSingleton(UserControllerClass).(*UserController).Index(c.GetSingleto
 ```typescript
 router.get('/users',
     handler((c: ContainerContract, route: RouteContract) =>
-        c.getSingleton(UserController).index(c.getSingleton(ServerRequestContract)))
+        c.getSingleton(UserController).index(route))
 )
 ```
 
@@ -781,7 +769,7 @@ generation. The build tool extracts the closure through AST.
 ```php
 $route->setHandler(
     static fn(ContainerContract $c, RouteContract $route): ResponseContract
-        => $c->getSingleton(UserController::class)->index($c->getSingleton(ServerRequestContract::class))
+        => $c->getSingleton(UserController::class)->index($route)
 );
 ```
 
@@ -795,7 +783,7 @@ string.
 ```java
 route.setHandler(
     (ContainerContract c, RouteContract route) ->
-        c.getSingleton(UserController.class).index(c.getSingleton(ServerRequestContract.class))
+        c.getSingleton(UserController.class).index(route)
 );
 ```
 
@@ -808,7 +796,7 @@ the route provider source files.
 // go — always explicit
 router.Get("/users",
 valkyrja.Handler(func(c ContainerContract, route RouteContract) any {
-return c.GetSingleton(UserControllerClass).(*UserController).Index(c.GetSingleton(ServerRequestContractClass))
+return c.GetSingleton(UserControllerClass).(*UserController).Index(route)
 }),
 )
 ```
@@ -820,8 +808,8 @@ handler closure for cache generation.
 
 ```python
 # python — decorator-based registration
-@route_handler(lambda c, route: c.get_singleton(UserController).index(c.get_singleton(ServerRequestContract)))
-def index(request: ServerRequestContract) -> ResponseContract:
+@route_handler(lambda c, route: c.get_singleton(UserController).index(route))
+def index(route: RouteContract) -> ResponseContract:
     pass
 ```
 
@@ -834,7 +822,7 @@ route provider source files.
 // typescript — explicit registration
 router.get('/users',
     handler((c: ContainerContract, route: RouteContract) =>
-        c.getSingleton(UserController).index(c.getSingleton(ServerRequestContract)))
+        c.getSingleton(UserController).index(route))
 )
 ```
 

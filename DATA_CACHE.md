@@ -954,15 +954,15 @@ return new \Valkyrja\Http\Routing\Data\HttpRoutingData(
             parameters: [
                 new \Valkyrja\Http\Routing\Data\Parameter('id', '[0-9]+'),
             ],
-            handler: static fn(\Valkyrja\Container\ContainerContract $c, array $args): \App\Http\Response
-                => $c->getSingleton(\App\Http\Controllers\UserController::class)->show($args[0]),
+            handler: static fn(\Valkyrja\Container\ContainerContract $c, \Valkyrja\Http\Routing\Data\Contract\RouteContract $route): \App\Http\Response
+                => $c->getSingleton(\App\Http\Controllers\UserController::class)->show($route),
         ),
         // routes from OrderHttpRouteProvider (explicit getRoutes())
         'order.index' => new \Valkyrja\Http\Routing\Data\HttpRoute(
             path:    '/orders',
             method:  'GET',
-            handler: static fn(\Valkyrja\Container\ContainerContract $c, array $args): \App\Http\Response
-                => $c->getSingleton(\App\Http\Controllers\OrderController::class)->index($args[0]),
+            handler: static fn(\Valkyrja\Container\ContainerContract $c, \Valkyrja\Http\Routing\Data\Contract\RouteContract $route): \App\Http\Response
+                => $c->getSingleton(\App\Http\Controllers\OrderController::class)->index($route),
         ),
         // ... all other routes from all other providers
     ],

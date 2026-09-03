@@ -321,11 +321,10 @@ package app.http.controllers;
 
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.http.routing.data.contract.ResponseContract;
+import io.valkyrja.http.routing.data.contract.RouteContract;
 import io.valkyrja.http.routing.annotation.Handler;
 import io.valkyrja.http.routing.annotation.Parameter;
 import io.valkyrja.http.routing.annotation.Route;
-
-import java.util.Map;
 
 public class UserController {
 
