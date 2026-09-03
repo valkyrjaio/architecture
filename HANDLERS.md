@@ -16,35 +16,33 @@ The language enforces the closure signature. Each handler type has its own signa
 
 | Handler type   | Parameters                                | Return type        |
 | -------------- | ----------------------------------------- | ------------------ |
-| HTTP route     | `ContainerContract`, `map<string, mixed>` | `ResponseContract` |
-| CLI route      | `ContainerContract`, `map<string, mixed>` | `OutputContract`   |
+| HTTP route     | `ContainerContract`, `RouteContract`      | `ResponseContract` |
+| CLI route      | `ContainerContract`, `RouteContract`      | `OutputContract`   |
 | Event listener | `ContainerContract`, `map<string, mixed>` | `any` / `mixed`    |
 
-The second parameter is `map<string, mixed>` in all three cases — named arguments from the matched route, command, or
-event. The return type differs per concern.
+A route handler takes the matched route, so the handler reads the route's own data. A listener takes a
+`map<string, mixed>`, because an event carries named arguments and no route.
 
-`ServerRequestContract` and `RouteContract` are **not** explicit parameters. They are always available via the container
-when needed. Keeping them out of the signature:
+`ServerRequestContract` is **not** an explicit parameter. The container holds the request, and a handler that needs the
+request resolves the request. Keeping the request out of the signature:
 
-- Makes the signature uniform and minimal across all handler types
-- Avoids passing HTTP-specific objects to CLI handlers where they make no sense
-- Lets the developer decide what to resolve — no unnecessary overhead for handlers that don't need them
+- Avoids passing an HTTP-specific object to a CLI handler, where the object makes no sense
+- Lets the developer decide what to resolve, so a handler pays for nothing it does not use
 
 ```php
-// HTTP handler — fetch request from container only if needed
-static fn(ContainerContract $c, array<string, mixed> $args): ResponseContract => (
+// HTTP handler — fetch the request from the container only if needed
+static fn(ContainerContract $c, RouteContract $route): ResponseContract => (
     $c->getSingleton(UserController::class)->show(
         $c->getSingleton(ServerRequestContract::class), // available if needed
-        $args['id']
     )
 )
 
 // CLI handler — same signature shape, different concern
-static fn(ContainerContract $c, array<string, mixed> $args): OutputContract => (
-    $c->getSingleton(UserCommand::class)->run($args)
+static fn(ContainerContract $c, RouteContract $route): OutputContract => (
+    $c->getSingleton(UserCommand::class)->run($route)
 )
 
-// Listener — same shape, returns any
+// Listener — takes the event's named arguments, returns any
 static fn(ContainerContract $c, array<string, mixed> $args): mixed => (
     $c->getSingleton(UserCreatedListener::class)->handle($args['user_id'])
 )
@@ -62,10 +60,10 @@ Each concern gets its own named handler type. All five languages define three ty
 
 ```php
 // HTTP
-/** Closure(ContainerContract, array<string, mixed>): ResponseContract */
+/** Closure(ContainerContract, RouteContract): ResponseContract */
 
 // CLI
-/** Closure(ContainerContract, array<string, mixed>): OutputContract */
+/** Closure(ContainerContract, RouteContract): OutputContract */
 
 // Event listener
 /** Closure(ContainerContract, array<string, mixed>): mixed */
@@ -77,13 +75,13 @@ Each concern gets its own named handler type. All five languages define three ty
 // HTTP
 @FunctionalInterface
 public interface HttpHandlerFunc {
-    ResponseContract handle(ContainerContract container, Map<String, Object> arguments);
+    ResponseContract handle(ContainerContract container, RouteContract route);
 }
 
 // CLI
 @FunctionalInterface
 public interface CliHandlerFunc {
-    OutputContract handle(ContainerContract container, Map<String, Object> arguments);
+    OutputContract handle(ContainerContract container, RouteContract route);
 }
 
 // Event listener
@@ -97,10 +95,10 @@ public interface ListenerHandlerFunc {
 
 ```go
 // HTTP
-type HttpHandlerFunc func (container ContainerContract, arguments map[string]any) ResponseContract
+type HttpHandlerFunc func (container ContainerContract, route RouteContract) ResponseContract
 
 // CLI
-type CliHandlerFunc func (container ContainerContract, arguments map[string]any) OutputContract
+type CliHandlerFunc func (container ContainerContract, route RouteContract) OutputContract
 
 // Event listener
 type ListenerHandlerFunc func (container ContainerContract, arguments map[string]any) any
@@ -111,8 +109,8 @@ type ListenerHandlerFunc func (container ContainerContract, arguments map[string
 ```python
 from typing import Callable, Any
 
-HttpHandlerFunc = Callable[[ContainerContract, dict[str, Any]], ResponseContract]
-CliHandlerFunc = Callable[[ContainerContract, dict[str, Any]], OutputContract]
+HttpHandlerFunc = Callable[[ContainerContract, RouteContract], ResponseContract]
+CliHandlerFunc = Callable[[ContainerContract, RouteContract], OutputContract]
 ListenerHandlerFunc = Callable[[ContainerContract, dict[str, Any]], Any]
 ```
 
@@ -122,13 +120,13 @@ ListenerHandlerFunc = Callable[[ContainerContract, dict[str, Any]], Any]
 // HTTP
 type HttpHandlerFunc = (
     container: ContainerContract,
-    arguments: Record<string, unknown>
+    route: RouteContract
 ) => ResponseContract
 
 // CLI
 type CliHandlerFunc = (
     container: ContainerContract,
-    arguments: Record<string, unknown>
+    route: RouteContract
 ) => OutputContract
 
 // Event listener
@@ -199,20 +197,20 @@ interface HandlerContract {
 interface HttpHandlerContract extends HandlerContract
 {
     /**
-     * @return Closure(ContainerContract, array<string, mixed>): ResponseContract
+     * @return Closure(ContainerContract, RouteContract): ResponseContract
      */
     public function getHandler(): Closure;
 
     /**
-     * @param Closure(ContainerContract, array<string, mixed>): ResponseContract $handler
+     * @param Closure(ContainerContract, RouteContract): ResponseContract $handler
      */
     public function setHandler(Closure $handler): static;
 }
 
 // usage — PHPStan enforces signature
 $route->setHandler(
-    static fn(ContainerContract $c, array<string, mixed> $args): ResponseContract
-        => $c->getSingleton(UserController::class)->show($args['id'])
+    static fn(ContainerContract $c, RouteContract $route): ResponseContract
+        => $c->getSingleton(UserController::class)->show($route)
 );
 ```
 
@@ -227,12 +225,12 @@ public interface HttpHandlerContract {
 // usage — compiler enforces HttpHandlerFunc
 route.
 
-setHandler((container, arguments) ->
+setHandler((container, route) ->
         container.
 
 getSingleton(UserController .class).
 
-show(arguments.get("id"))
+show(route)
         );
 // wrong return type? compile error
 ```
@@ -245,8 +243,8 @@ SetHandler(HttpHandlerFunc) HttpHandlerContract
 }
 
 // usage — compiler enforces HttpHandlerFunc
-route.SetHandler(func (c ContainerContract, args map[string]any) ResponseContract {
-return c.GetSingleton(UserControllerClass).(*UserController).Show(args["id"])
+route.SetHandler(func (c ContainerContract, route RouteContract) ResponseContract {
+return c.GetSingleton(UserControllerClass).(*UserController).Show(route)
 })
 ```
 
@@ -262,7 +260,7 @@ class HttpHandlerContract(HandlerContract, ABC):
 
 # usage
 route.set_handler(
-    lambda c, args: c.get_singleton(UserControllerClass).show(args['id'])
+    lambda c, route: c.get_singleton(UserControllerClass).show(route)
 )
 ```
 
@@ -275,8 +273,8 @@ interface HttpHandlerContract extends HandlerContract {
 }
 
 // usage — tsc enforces HttpHandlerFunc
-route.setHandler((container, args) =>
-    container.getSingleton<UserController>(UserControllerClass).show(args['id'] as string)
+route.setHandler((container, route) =>
+    container.getSingleton<UserController>(UserControllerClass).show(route)
 )
 ```
 
@@ -289,20 +287,20 @@ route.setHandler((container, args) =>
 interface CliHandlerContract extends HandlerContract
 {
     /**
-     * @return Closure(ContainerContract, array<string, mixed>): OutputContract
+     * @return Closure(ContainerContract, RouteContract): OutputContract
      */
     public function getHandler(): Closure;
 
     /**
-     * @param Closure(ContainerContract, array<string, mixed>): OutputContract $handler
+     * @param Closure(ContainerContract, RouteContract): OutputContract $handler
      */
     public function setHandler(Closure $handler): static;
 }
 
 // usage
 $command->setHandler(
-    static fn(ContainerContract $c, array<string, mixed> $args): OutputContract
-        => $c->getSingleton(SendEmailCommand::class)->run($args)
+    static fn(ContainerContract $c, RouteContract $route): OutputContract
+        => $c->getSingleton(SendEmailCommand::class)->run($route)
 );
 ```
 
@@ -334,8 +332,8 @@ SetHandler(CliHandlerFunc) CliHandlerContract
 }
 
 // usage
-command.SetHandler(func (c ContainerContract, args map[string]any) OutputContract {
-return c.GetSingleton(SendEmailCommandClass).(*SendEmailCommand).Run(args)
+command.SetHandler(func (c ContainerContract, route RouteContract) OutputContract {
+return c.GetSingleton(SendEmailCommandClass).(*SendEmailCommand).Run(route)
 })
 ```
 
@@ -351,7 +349,7 @@ class CliHandlerContract(HandlerContract, ABC):
 
 # usage
 command.set_handler(
-    lambda c, args: c.get_singleton(SendEmailCommandClass).run(args)
+    lambda c, route: c.get_singleton(SendEmailCommandClass).run(route)
 )
 ```
 
@@ -364,8 +362,8 @@ interface CliHandlerContract extends HandlerContract {
 }
 
 // usage
-command.setHandler((container, args) =>
-    container.getSingleton<SendEmailCommand>(SendEmailCommandClass).run(args)
+command.setHandler((container, route) =>
+    container.getSingleton<SendEmailCommand>(SendEmailCommandClass).run(route)
 )
 ```
 
@@ -468,9 +466,9 @@ The handler is a method pointer on the route provider. The handler and the route
 ```php
 HttpRoute::get('/users/{id}', [self::class, 'showUser'])
 
-public static function showUser(ContainerContract $c, array<string, mixed> $args): ResponseContract
+public static function showUser(ContainerContract $c, RouteContract $route): ResponseContract
 {
-    return $c->getSingleton(UserController::class)->show($args['id']);
+    return $c->getSingleton(UserController::class)->show($route);
 }
 // wrong return type?           PHPStan catches it at CI time
 // missing parameter?           PHPStan catches it at CI time
@@ -555,8 +553,8 @@ method rather than manually constructing route objects with handlers:
 **PHP**
 
 ```php
-#[Handler(static fn(ContainerContract $c, array $args): Response
-    => $c->getSingleton(UserController::class)->index($args[0]))]
+#[Handler(static fn(ContainerContract $c, RouteContract $route): Response
+    => $c->getSingleton(UserController::class)->index())]
 public function index(Request $request): Response
 {
     // actual implementation
@@ -566,14 +564,12 @@ public function index(Request $request): Response
 **Java**
 
 ```java
-@RouteHandler((ContainerContract c, List < Object > args) ->
+@RouteHandler((ContainerContract c, RouteContract route) ->
         c.
 
 getSingleton(UserController .class).
 
-index((Request) args.
-
-get(0)))
+index())
 
 public Response index(Request request) {
     // actual implementation
@@ -583,7 +579,7 @@ public Response index(Request request) {
 **Python**
 
 ```python
-@route_handler(lambda c, args: c.get_singleton(UserController).index(args[0]))
+@route_handler(lambda c, route: c.get_singleton(UserController).index())
 def index(request: Request) -> Response:
     # actual implementation
     pass
@@ -595,8 +591,8 @@ For **Go** and **TypeScript** — where no annotations exist — explicit regist
 
 ```go
 router.Get("/users",
-valkyrja.Handler(func(c ContainerContract, args []any) any {
-return c.GetSingleton(UserControllerClass).(*UserController).Index(args[0])
+valkyrja.Handler(func(c ContainerContract, route RouteContract) any {
+return c.GetSingleton(UserControllerClass).(*UserController).Index()
 }),
 )
 ```
@@ -605,8 +601,8 @@ return c.GetSingleton(UserControllerClass).(*UserController).Index(args[0])
 
 ```typescript
 router.get('/users',
-    handler((c: ContainerContract, args: any[]) =>
-        c.getSingleton(UserController).index(args[0]))
+    handler((c: ContainerContract, route: RouteContract) =>
+        c.getSingleton(UserController).index())
 )
 ```
 
@@ -773,8 +769,8 @@ generation. The build tool extracts the closure through AST.
 
 ```php
 $route->setHandler(
-    static fn(ContainerContract $c, array $args): Response
-        => $c->getSingleton(UserController::class)->index($args[0])
+    static fn(ContainerContract $c, RouteContract $route): Response
+        => $c->getSingleton(UserController::class)->index()
 );
 ```
 
@@ -787,8 +783,8 @@ string.
 
 ```java
 route.setHandler(
-    (ContainerContract c, List<Object> args) ->
-        c.getSingleton(UserController.class).index((Request) args.get(0))
+    (ContainerContract c, RouteContract route) ->
+        c.getSingleton(UserController.class).index()
 );
 ```
 
@@ -800,8 +796,8 @@ the route provider source files.
 ```go
 // go — always explicit
 router.Get("/users",
-valkyrja.Handler(func(c ContainerContract, args []any) any {
-return c.GetSingleton(UserControllerClass).(*UserController).Index(args[0])
+valkyrja.Handler(func(c ContainerContract, route RouteContract) any {
+return c.GetSingleton(UserControllerClass).(*UserController).Index()
 }),
 )
 ```
@@ -813,7 +809,7 @@ handler closure for cache generation.
 
 ```python
 # python — decorator-based registration
-@route_handler(lambda c, args: c.get_singleton(UserController).index(args[0]))
+@route_handler(lambda c, route: c.get_singleton(UserController).index())
 def index(request: Request) -> Response:
     pass
 ```
@@ -826,8 +822,8 @@ route provider source files.
 ```typescript
 // typescript — explicit registration
 router.get('/users',
-    handler((c: ContainerContract, args: any[]) =>
-        c.getSingleton(UserController).index(args[0]))
+    handler((c: ContainerContract, route: RouteContract) =>
+        c.getSingleton(UserController).index())
 )
 ```
 
@@ -885,9 +881,9 @@ class UserController
     }
 
     // The handler — may be on this class or any other class
-    public static function showHandler(ContainerContract $c, array $args): ResponseContract
+    public static function showHandler(ContainerContract $c, RouteContract $route): ResponseContract
     {
-        return $c->getSingleton(self::class)->show($args['id']);
+        return $c->getSingleton(self::class)->show($route);
     }
 }
 ```
@@ -929,8 +925,8 @@ public class UserController {
         // actual implementation — irrelevant to Sindri
     }
 
-    public static ResponseContract showHandler(ContainerContract c, Map<String, Object> args) {
-        return c.getSingleton(UserController.class).show((String) args.get("id"));
+    public static ResponseContract showHandler(ContainerContract c, RouteContract route) {
+        return c.getSingleton(UserController.class).show(route);
     }
 }
 ```
@@ -972,8 +968,8 @@ class UserController:
         pass  # actual implementation — irrelevant to Sindri
 
     @staticmethod
-    def show_handler(c: ContainerContract, args: dict) -> ResponseContract:
-        return c.get_singleton(UserController).show(args['id'])
+    def show_handler(c: ContainerContract, route: RouteContract) -> ResponseContract:
+        return c.get_singleton(UserController).show(route)
 ```
 
 Generated output:
