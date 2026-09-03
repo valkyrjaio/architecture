@@ -545,10 +545,10 @@ root kinds, and worked examples:
 
 ### Push work that is ready to review
 
-**A push says the change is ready to review.** Review the diff yourself first,
-against these guides, the way the reviewer reads it. A change that still moves
-spends one review round for each push, and each round reports the same kind of
-finding again.
+**A push says the change is ready to review.** Warning: a change that still
+moves spends one review round for each push, and each round reports the same
+kind of finding again. Review the diff yourself first, against these guides,
+the way the reviewer reads it.
 
 Read the diff for these, because a self-review finds them and a compiler does
 not:
@@ -642,8 +642,9 @@ statement was right.
 
 Each finding gets one of three answers:
 
-- **The finding is right.** Push the fix, then resolve the thread in the same
-  turn. Do not wait for the reviewer to confirm.
+- **The finding is right.** Read the fix back against the finding, in the
+  context of the whole change. Push the fix, then resolve the thread in the
+  same turn. See **Push work that is ready to review** above.
 - **The finding is wrong, or you disagree.** Leave the thread open and reply with
   the evidence. The user decides, not you.
 - **The finding is right and out of scope.** Leave the thread open, open an
