@@ -181,7 +181,8 @@ the `HttpRoutingData` structure, which holds four pre-built indexes:
 | `dynamicPaths` | the dynamic paths: method → path → route key     |
 | `regexes`      | the compiled regexes: method → regex → route key |
 
-The router reads an index and never scans the route list. `sindri` builds every index in `AppHttpRoutingData` once, at generation time.
+The router reads an index and never scans the route list. `sindri` builds every index in `AppHttpRoutingData` once, at
+generation time.
 
 **AppCliRoutingData** — all CLI routes from every `CliRouteProvider` across all components and the application,
 equivalent structure to HTTP routing data.
@@ -774,7 +775,7 @@ explicit definitions for Go/TypeScript.
 Routes with dynamic segments require `Parameter` objects defining each segment's name and pattern. The build tool
 extracts this data from AST, runs the framework's own `ProcessorContract::route()` to compile the regex, and writes the
 pre-compiled result into the aggregated `AppHttpRoutingData` class. See "The Four Generated Data Classes" above for the
-full `HttpRoutingData` structure.
+four indexes that `HttpRoutingData` holds.
 
 ### Two Sources of Parameter Data
 

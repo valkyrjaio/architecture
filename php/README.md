@@ -109,7 +109,7 @@ public static function publishNotifier(ContainerContract $container): void
 {
     $container->setSingleton(
         NotifierContract::class,
-        new TeamsNotifier($container->getSingleton(HttpClientContract::class))
+        new TeamsNotifier()
     );
 }
 ```
@@ -125,25 +125,25 @@ contract and carries no registration code.
 A service class may instead expose a static `make()` factory that the publisher delegates to:
 
 ```php
-class TeamsNotifier implements NotifierContract
+class SlackNotifier implements NotifierContract
 {
-    public function __construct(private HttpClientContract $client) {}
+    public function __construct(private ClientContract $client) {}
 
     public static function make(ContainerContract $container, array $arguments = []): static
     {
-        return new static($container->getSingleton(HttpClientContract::class));
+        return new static($container->getSingleton(ClientContract::class));
     }
 }
 
 public static function publishNotifier(ContainerContract $container): void
 {
-    $container->setSingleton(NotifierContract::class, TeamsNotifier::make($container));
+    $container->setSingleton(NotifierContract::class, SlackNotifier::make($container));
 }
 ```
 
-The signature matches the `callable` that `bind()` and `bindSingleton()` accept, so `[TeamsNotifier::class, 'make']` also works as a
-direct binding. Use this when a class owns a construction step that more than one caller must reuse. Otherwise
-construct the service in the publisher. Neither form uses reflection or autowiring.
+The signature matches the `callable` that `bind()` and `bindSingleton()` accept, so `[SlackNotifier::class, 'make']`
+also works as a direct binding. Use this when a class owns a construction step that more than one caller must reuse.
+Otherwise construct the service in the publisher. Neither form uses reflection or autowiring.
 
 ### Binding methods available in publisher callbacks
 
