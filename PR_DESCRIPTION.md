@@ -68,12 +68,16 @@ Four kinds of sentence always fail the test:
 
 ## The description is prose
 
-The description holds sentences. It carries no heading of its own, no code
-block, and no walkthrough of a failure. The diff holds the code, and one clause
-carries the failure that the change answers. A table and a verification note
-stay permitted under the test above, and the `Closes #123` line stays required.
-A promotion pull request is the exception, and
-[`BRANCH_PROMOTION.md`](BRANCH_PROMOTION.md) governs its description.
+The description's prose holds sentences. It carries no heading of its own, no
+code block, and no walkthrough of a failure. The diff holds the code, and one
+clause carries the failure that the change answers. A table and a verification
+note stay permitted under the test above, and the `Closes #123` line stays
+required. The template's Types of changes and Changes sections stand outside
+this shape.
+
+A promotion pull request is the exception. Its description carries the
+resolution notes that [`BRANCH_PROMOTION.md`](BRANCH_PROMOTION.md) requires,
+and it never becomes a commit.
 
 The description states what changed, and why the change is right. There is no
 sentence count, because a count sets a target and an author writes to a target.
