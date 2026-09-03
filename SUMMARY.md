@@ -64,12 +64,13 @@ dispatch which doesn't exist in Go, TypeScript, or Python reliably.
 
 **Replacement:** Closure-based handler contracts with fully typed signatures:
 
-- HTTP: `(ContainerContract, map<string, mixed>) → ResponseContract`
-- CLI: `(ContainerContract, map<string, mixed>) → OutputContract`
+- HTTP: `(ContainerContract, RouteContract) → ResponseContract`
+- CLI: `(ContainerContract, RouteContract) → OutputContract`
 - Listener: `(ContainerContract, map<string, mixed>) → any`
 
-`ServerRequestContract` and `RouteContract` are intentionally absent from handler signatures — available via container
-when needed, keeping signatures minimal and concern-agnostic.
+A route handler takes the matched route. A listener takes named arguments, because an event carries no route.
+`ServerRequestContract` is intentionally absent from every handler signature. The container holds the request, and a
+handler that needs the request resolves the request.
 
 Each concern gets its own typed handler contract:
 

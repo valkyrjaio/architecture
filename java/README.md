@@ -164,13 +164,13 @@ conditional logic.
 // HTTP
 @FunctionalInterface
 public interface HttpHandlerFunc {
-    ResponseContract handle(ContainerContract container, Map<String, Object> arguments);
+    ResponseContract handle(ContainerContract container, RouteContract route);
 }
 
 // CLI
 @FunctionalInterface
 public interface CliHandlerFunc {
-    OutputContract handle(ContainerContract container, Map<String, Object> arguments);
+    OutputContract handle(ContainerContract container, RouteContract route);
 }
 
 // Event listener
@@ -193,15 +193,15 @@ public interface HttpHandlerContract {
 ### @RouteHandler annotation on controller methods
 
 ```java
-@RouteHandler((ContainerContract c, Map < String, Object > args) ->
+@RouteHandler((ContainerContract c, RouteContract route) ->
         c.
 
 getSingleton(UserController .class).
 
-show(args.get("id")))
+show(route))
 
 @Parameter(name = "id", pattern = "[0-9]+")
-public ResponseContract show(String id) {
+public ResponseContract show(RouteContract route) {
 }
 ```
 

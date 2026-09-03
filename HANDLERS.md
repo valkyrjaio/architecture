@@ -20,8 +20,9 @@ The language enforces the closure signature. Each handler type has its own signa
 | CLI route      | `ContainerContract`, `RouteContract`      | `OutputContract`   |
 | Event listener | `ContainerContract`, `map<string, mixed>` | `any` / `mixed`    |
 
-A route handler takes the matched route, so the handler reads the route's own data. A listener takes a
-`map<string, mixed>`, because an event carries named arguments and no route.
+A route handler takes the matched route, so the handler reads the route's own data. Each concern declares its own
+route contract in its own namespace, so the HTTP `RouteContract` and the CLI `RouteContract` are two distinct types. A
+listener takes a `map<string, mixed>`, because an event carries named arguments and no route.
 
 `ServerRequestContract` is **not** an explicit parameter. The container holds the request, and a handler that needs the
 request resolves the request. Keeping the request out of the signature:
@@ -33,6 +34,7 @@ request resolves the request. Keeping the request out of the signature:
 // HTTP handler — fetch the request from the container only if needed
 static fn(ContainerContract $c, RouteContract $route): ResponseContract => (
     $c->getSingleton(UserController::class)->show(
+        $route,
         $c->getSingleton(ServerRequestContract::class), // available if needed
     )
 )
@@ -315,12 +317,12 @@ public interface CliHandlerContract {
 // usage
 command.
 
-setHandler((container, arguments) ->
+setHandler((container, route) ->
         container.
 
 getSingleton(SendEmailCommand .class).
 
-run(arguments)
+run(route)
 );
 ```
 
@@ -554,7 +556,7 @@ method rather than manually constructing route objects with handlers:
 
 ```php
 #[Handler(static fn(ContainerContract $c, RouteContract $route): Response
-    => $c->getSingleton(UserController::class)->index())]
+    => $c->getSingleton(UserController::class)->index($c->getSingleton(ServerRequestContract::class)))]
 public function index(Request $request): Response
 {
     // actual implementation
@@ -569,7 +571,7 @@ public function index(Request $request): Response
 
 getSingleton(UserController .class).
 
-index())
+index(c.getSingleton(ServerRequestContract .class)))
 
 public Response index(Request request) {
     // actual implementation
@@ -579,7 +581,7 @@ public Response index(Request request) {
 **Python**
 
 ```python
-@route_handler(lambda c, route: c.get_singleton(UserController).index())
+@route_handler(lambda c, route: c.get_singleton(UserController).index(c.get_singleton(ServerRequestContract)))
 def index(request: Request) -> Response:
     # actual implementation
     pass
@@ -875,7 +877,7 @@ class UserController
     #[Route('GET', '/users/{id}')]
     #[Parameter('id', pattern: '[0-9]+')]
     #[Handler([self::class, 'showHandler'])]
-    public function show(string $id): ResponseContract
+    public function show(RouteContract $route): ResponseContract
     {
         // actual implementation — irrelevant to Sindri
     }
@@ -921,7 +923,7 @@ public class UserController {
     @Route(method = "GET", path = "/users/{id}")
     @Parameter(name = "id", pattern = "[0-9]+")
     @RouteHandler(clazz = UserController.class, method = "showHandler")
-    public ResponseContract show(String id) {
+    public ResponseContract show(RouteContract route) {
         // actual implementation — irrelevant to Sindri
     }
 
@@ -964,7 +966,7 @@ class UserController:
     @route('GET', '/users/{id}')
     @parameter('id', pattern='[0-9]+')
     @route_handler((UserController, 'show_handler'))  # callable tuple — written as-is
-    def show(self, id: str) -> ResponseContract:
+    def show(self, route: RouteContract) -> ResponseContract:
         pass  # actual implementation — irrelevant to Sindri
 
     @staticmethod
