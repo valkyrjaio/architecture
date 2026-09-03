@@ -332,27 +332,27 @@ class UserController
     #[Route(method: 'GET', path: '/users/{id}')]
     #[Parameter(name: 'id', pattern: '[0-9]+')]
     #[Handler(class: UserController::class, method: 'showHandler')]
-    public function show(string $id): ResponseContract
+    public function show(RouteContract $route): ResponseContract
     {
-        return $this->userService->findById($id)->toResponse();
+        return $this->userService->findById($route->getName())->toResponse();
     }
 
     #[Route(method: 'POST', path: '/users')]
     #[Handler(class: UserController::class, method: 'storeHandler')]
-    public function store(array $data): ResponseContract
+    public function store(RouteContract $route): ResponseContract
     {
         // actual implementation
     }
 
     // Sindri resolves Handler → this file, reads this method body using this file's imports
-    public static function showHandler(ContainerContract $c, array $args): ResponseContract
+    public static function showHandler(ContainerContract $c, RouteContract $route): ResponseContract
     {
-        return $c->getSingleton(self::class)->show($args['id']);
+        return $c->getSingleton(self::class)->show($route);
     }
 
-    public static function storeHandler(ContainerContract $c, array $args): ResponseContract
+    public static function storeHandler(ContainerContract $c, RouteContract $route): ResponseContract
     {
-        return $c->getSingleton(self::class)->store($args);
+        return $c->getSingleton(self::class)->store($route);
     }
 }
 ```

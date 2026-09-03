@@ -244,14 +244,14 @@ class UserHttpRouteProvider implements HttpRouteProviderContract
         ];
     }
 
-    public static function showUser(ContainerContract $c, array $args): ResponseContract
+    public static function showUser(ContainerContract $c, RouteContract $route): ResponseContract
     {
-        return $c->getSingleton(UserController::class)->show($args['id']);
+        return $c->getSingleton(UserController::class)->show($route);
     }
 
-    public static function createUser(ContainerContract $c, array $args): ResponseContract
+    public static function createUser(ContainerContract $c, RouteContract $route): ResponseContract
     {
-        return $c->getSingleton(UserController::class)->create($args);
+        return $c->getSingleton(UserController::class)->create($route);
     }
 }
 ```

@@ -229,12 +229,12 @@ public function getRoutes(): array
     ];
 }
 
-public static function showUser(ContainerContract $c, array $args): ResponseContract
+public static function showUser(ContainerContract $c, RouteContract $route): ResponseContract
 {
-    return $c->getSingleton(UserController::class)->show($args['id']);
+    return $c->getSingleton(UserController::class)->show($route);
 }
 
-public static function createUser(ContainerContract $c, array $args): ResponseContract
+public static function createUser(ContainerContract $c, RouteContract $route): ResponseContract
 {
     return $c->getSingleton(UserController::class)->create($args);
 }
@@ -279,15 +279,15 @@ class UserController
     #[Route('GET', '/users/{id}')]
     #[Parameter('id', pattern: '[0-9]+')]
     #[Handler([self::class, 'showHandler'])]  // callable — class + method name
-    public function show(string $id): ResponseContract
+    public function show(RouteContract $route): ResponseContract
     {
         // actual implementation — not read by Sindri
     }
 
     // Sindri resolves [self::class, 'showHandler'] → this file → reads this method
-    public static function showHandler(ContainerContract $c, array $args): ResponseContract
+    public static function showHandler(ContainerContract $c, RouteContract $route): ResponseContract
     {
-        return $c->getSingleton(self::class)->show($args['id']);
+        return $c->getSingleton(self::class)->show($route);
     }
 }
 ```
@@ -306,9 +306,9 @@ class UserController
 class UserHttpRouteProvider implements HttpRouteProviderContract
 {
     // Sindri resolves callable → this file → reads this method + this file's imports
-    public static function showUser(ContainerContract $c, array $args): ResponseContract
+    public static function showUser(ContainerContract $c, RouteContract $route): ResponseContract
     {
-        return $c->getSingleton(UserController::class)->show($args['id']);
+        return $c->getSingleton(UserController::class)->show($route);
     }
 }
 ```
@@ -354,8 +354,8 @@ in the application:
 // ❌ inline closure — Sindri must resolve ContainerContract, UserController
 //    from the imports of this specific file AND know if they conflict
 //    with imports from other route providers
-HttpRoute::get('/users/{id}', static fn($c, $args) =>
-    $c->getSingleton(UserController::class)->show($args['id'])
+HttpRoute::get('/users/{id}', static fn($c, $route) =>
+    $c->getSingleton(UserController::class)->show($route)
 )
 
 // ✅ method pointer — Sindri reads the method body from this same file

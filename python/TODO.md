@@ -165,8 +165,8 @@ def handler(closure):
 
 - [ ] Implement `@parameter` decorator — attaches `_valkyrja_parameters` list to method
 - [ ] Define type aliases:
-  - [ ] `HttpHandlerFunc = Callable[[ContainerContract, dict[str, Any]], ResponseContract]`
-  - [ ] `CliHandlerFunc = Callable[[ContainerContract, dict[str, Any]], OutputContract]`
+  - [ ] `HttpHandlerFunc = Callable[[ContainerContract, RouteContract], ResponseContract]`
+  - [ ] `CliHandlerFunc = Callable[[ContainerContract, RouteContract], OutputContract]`
   - [ ] `ListenerHandlerFunc = Callable[[ContainerContract, dict[str, Any]], Any]`
 - [ ] Implement `HttpHandlerContract(ABC)` with `get_handler() -> HttpHandlerFunc`
 - [ ] Implement `CliHandlerContract(ABC)` with `get_handler() -> CliHandlerFunc`

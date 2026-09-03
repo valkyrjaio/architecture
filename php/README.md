@@ -194,10 +194,10 @@ Routes need `#[RouteHandler]` attribute support on controller/action methods, an
 Each attribute carries the typed closure:
 
 ```php
-#[Handler(static fn(ContainerContract $c, array<string, mixed> $args): ResponseContract
-    => $c->getSingleton(UserController::class)->show($args['id']))]
+#[Handler(static fn(ContainerContract $c, RouteContract $route): ResponseContract
+    => $c->getSingleton(UserController::class)->show($route))]
 #[Parameter('id', pattern: '[0-9]+')]
-public function show(int $id): ResponseContract {}
+public function show(RouteContract $route): ResponseContract {}
 ```
 
 ### Add #[Parameter] attribute

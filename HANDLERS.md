@@ -555,9 +555,9 @@ method rather than manually constructing route objects with handlers:
 **PHP**
 
 ```php
-#[Handler(static fn(ContainerContract $c, RouteContract $route): Response
+#[Handler(static fn(ContainerContract $c, RouteContract $route): ResponseContract
     => $c->getSingleton(UserController::class)->index($c->getSingleton(ServerRequestContract::class)))]
-public function index(Request $request): Response
+public function index(ServerRequestContract $request): ResponseContract
 {
     // actual implementation
 }
@@ -573,7 +573,7 @@ getSingleton(UserController .class).
 
 index(c.getSingleton(ServerRequestContract .class)))
 
-public Response index(Request request) {
+public ResponseContract index(ServerRequestContract request) {
     // actual implementation
 }
 ```
@@ -582,7 +582,7 @@ public Response index(Request request) {
 
 ```python
 @route_handler(lambda c, route: c.get_singleton(UserController).index(c.get_singleton(ServerRequestContract)))
-def index(request: Request) -> Response:
+def index(request: ServerRequestContract) -> ResponseContract:
     # actual implementation
     pass
 ```
@@ -771,7 +771,7 @@ generation. The build tool extracts the closure through AST.
 
 ```php
 $route->setHandler(
-    static fn(ContainerContract $c, RouteContract $route): Response
+    static fn(ContainerContract $c, RouteContract $route): ResponseContract
         => $c->getSingleton(UserController::class)->index($c->getSingleton(ServerRequestContract::class))
 );
 ```
@@ -812,7 +812,7 @@ handler closure for cache generation.
 ```python
 # python — decorator-based registration
 @route_handler(lambda c, route: c.get_singleton(UserController).index(c.get_singleton(ServerRequestContract)))
-def index(request: Request) -> Response:
+def index(request: ServerRequestContract) -> ResponseContract:
     pass
 ```
 

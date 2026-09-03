@@ -334,13 +334,13 @@ public class UserController {
     @Route(method = "GET", path = "/users/{id}")
     @Parameter(name = "id", pattern = "[0-9]+")
     @RouteHandler(clazz = UserController.class, method = "showHandler")
-    public ResponseContract show(String id) {
-        return userService.findById(id).toResponse();
+    public ResponseContract show(RouteContract route) {
+        return userService.findById(route.getName()).toResponse();
     }
 
     @Route(method = "POST", path = "/users")
     @RouteHandler(clazz = UserController.class, method = "storeHandler")
-    public ResponseContract store(Map<String, Object> data) {
+    public ResponseContract store(RouteContract route) {
         // actual implementation
     }
 

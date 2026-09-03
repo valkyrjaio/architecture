@@ -639,8 +639,8 @@ class UserHttpRouteProvider implements HttpRouteProviderContract
     public function getRoutes(): array
     {
         return [
-            HttpRoute::get('/orders', static fn(ContainerContract $c, array $args): Response
-                => $c->getSingleton(OrderController::class)->index($args[0])),
+            HttpRoute::get('/orders', static fn(ContainerContract $c, RouteContract $route): ResponseContract
+                => $c->getSingleton(OrderController::class)->index($route)),
         ];
     }
 }
@@ -664,8 +664,8 @@ public class UserHttpRouteProvider implements HttpRouteProviderContract {
 
     public List<RouteContract> getRoutes() {
         return List.of(
-                HttpRoute.get("/orders", (ContainerContract c, List<Object> args) ->
-                        c.getSingleton(OrderController.class).index((Request) args.get(0)))
+                HttpRoute.get("/orders", (ContainerContract c, RouteContract route) ->
+                        c.getSingleton(OrderController.class).index(route))
         );
     }
 }
@@ -688,8 +688,8 @@ return []string{}
 
 func (p *UserHttpRouteProvider) GetRoutes() []RouteContract {
 return []RouteContract{
-data.Get("/orders", func (c ContainerContract, args []any) any {
-return c.GetSingleton(OrderControllerClass).(*OrderController).Index(args[0])
+data.Get("/orders", func (c ContainerContract, route RouteContract) any {
+return c.GetSingleton(OrderControllerClass).(*OrderController).Index(route)
 }),
 }
 }
@@ -847,11 +847,11 @@ public function show(int $id, int $postId): Response {}
 
 ```java
 // Java
-@RouteHandler((ContainerContract c, List<Object> args) ->
-    c.getSingleton(UserController.class).show((int) args.get(0), (int) args.get(1)))
+@RouteHandler((ContainerContract c, RouteContract route) ->
+    c.getSingleton(UserController.class).show(route))
 @Parameter(name = "id",     pattern = "[0-9]+")
 @Parameter(name = "postId", pattern = "[0-9]+")
-public Response show(int id, int postId) {}
+public ResponseContract show(RouteContract route) {}
 ```
 
 ```python
@@ -1005,14 +1005,14 @@ public record AppHttpRoutingData(
                 "user.show", new app.http.routing.AuthenticatedRoute(
                     "/users/{id}", "GET",
                     List.of(new Parameter("id", "[0-9]+")),
-                    (ContainerContract c, List<Object> args) ->
-                        c.getSingleton(UserController.class).show((int) args.get(0))
+                    (ContainerContract c, RouteContract route) ->
+                        c.getSingleton(UserController.class).show(route)
                 ),
                 // routes from OrderHttpRouteProvider
                 "order.index", new HttpRoute(
                     "/orders", "GET", List.of(),
-                    (ContainerContract c, List<Object> args) ->
-                        c.getSingleton(OrderController.class).index(args.get(0))
+                    (ContainerContract c, RouteContract route) ->
+                        c.getSingleton(OrderController.class).index(route)
                 )
                 // ... all other routes
             ),
