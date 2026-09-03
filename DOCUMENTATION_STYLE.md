@@ -218,12 +218,8 @@ a component's `README.md` each obey it.
 Read the block, then look for the same lines in the source tree.
 
 - A real file holds the same body. The block is a **copy**. Remove it.
-- The block quotes a declaration, and the next section permits the declaration.
-  The block is the **API surface**. Keep it.
 - No source file holds the block, and the block shows a caller how to use the
   API. The block is an **example**. Keep it.
-- A rule about the copy marks the block as the wrong form. The block is a
-  **demonstration**. Keep it, and keep it short.
 
 The source tree decides, and the writer's intent does not. A block that a writer
 meant as an example is still a copy when a real file holds the same body.
@@ -248,15 +244,9 @@ document states what the body guarantees.
 A reader who needs the real code opens the file. Name the class, state what the
 class does, and stop there.
 
-```php
-// Wrong — the document copies a line out of a real handler body.
-return $container->getSingleton(ListCommand::class)->run();
-```
-
-> Right — the prose names the class and states what the class does:
->
-> `CliRoutingCliRouteProvider` carries a static handler for each built-in
-> command. Each handler resolves its command from the container and calls it.
+A code example shows a reader how to implement something. This rule says what a
+document must not hold, so this rule takes no code example. A block that
+demonstrates the copy is one more copy in the document.
 
 ### Keep what the block conveys
 
