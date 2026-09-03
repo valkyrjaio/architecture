@@ -66,18 +66,20 @@ Four kinds of sentence always fail the test:
 > framework throws on a missing key instead of guessing a default, and the
 > document did not say so.
 
-## The Description is prose
+## The description is prose
 
-The Description holds sentences. It carries no heading of its own, no code
+The description holds sentences. It carries no heading of its own, no code
 block, and no walkthrough of a failure. The diff holds the code, and one clause
 carries the failure that the change answers. A table and a verification note
 stay permitted under the test above, and the `Closes #123` line stays required.
+A promotion pull request is the exception, and
+[`BRANCH_PROMOTION.md`](BRANCH_PROMOTION.md) governs its description.
 
-The Description states what changed, and why the change is right. There is no
+The description states what changed, and why the change is right. There is no
 sentence count, because a count sets a target and an author writes to a target.
 The test above is the measure, and it governs a word as well as a sentence. Cut
 a sentence that states neither the what nor the why. Cut a word that adds
-nothing to the sentence around it. A Description that is still long after that
+nothing to the sentence around it. A description that is still long after that
 cut usually carries something an issue holds better.
 
 > Wrong — a title line and a walkthrough of the mechanism stand in for the
