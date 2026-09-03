@@ -68,8 +68,8 @@ Four kinds of sentence always fail the test:
 
 ## The description's prose is sentences, and one clause carries the failure
 
-The prose in a description carries no heading of its own, no code block, and no
-walkthrough of a failure. The diff holds the code, and one clause carries the
+The prose in a description carries no title line of its own, no code block, and
+no walkthrough of a failure. The diff holds the code, and one clause carries the
 failure that the change answers. A table and a verification note stay permitted
 under the test above, and the `Closes #123` line stays required. The template's
 Types of changes and Changes sections stand outside this shape.
