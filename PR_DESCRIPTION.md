@@ -79,8 +79,8 @@ commit. [`BRANCH_PROMOTION.md`](BRANCH_PROMOTION.md) states what that
 description carries when a cherry-pick conflicts.
 
 There is no sentence count, because a count sets a target and an author writes
-to a target. Cut a sentence that states neither the what nor the why. Cut a
-word that adds nothing to the sentence around it.
+to a target. Cut a sentence that fails the test above. Cut a word that adds
+nothing to the sentence around it.
 
 > Wrong — a title line and a walkthrough of the mechanism stand in for the
 > sentence that says what changed:
