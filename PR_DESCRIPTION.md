@@ -76,7 +76,7 @@ Types of changes and Changes sections stand outside this shape.
 
 A promotion pull request's description never becomes a commit, because the
 promotion lands by fast-forward. A promotion pull request whose cherry-pick
-conflicts is the exception to this section, and
+conflicts is the exception to the rules in this document, and
 [`BRANCH_PROMOTION.md`](BRANCH_PROMOTION.md) states what its description
 carries.
 
