@@ -551,7 +551,7 @@ several. Each round reports the same kind of finding again. Review the diff
 yourself first, against these guides, the way the reviewer reads it.
 
 Read the diff for these, because a self-review finds them and a compiler does
-not:
+not. One item below takes the branch's commits instead:
 
 - **A claim you did not check.** See §3, rule 16.
 - **A test that passes for a wrong implementation.** See
@@ -566,8 +566,7 @@ not:
   criteria is a checklist. Read the fix back against the list before you resolve
   the thread.
 - **A commit that reverses an earlier commit on the branch.** The diff shows
-  the net text and not the reversal, so read the branch's commits for this
-  item.
+  the net text and not the reversal.
 - **A failure of the call you wrapped that no guard handles.** §3, rule 17. One
   call reports several failures, and each one takes a guard. This example
   writes the guards for the two the return value reports:
