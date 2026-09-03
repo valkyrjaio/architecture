@@ -270,6 +270,7 @@ public interface HttpRouteProviderContract {
 package app.http.providers;
 
 import io.valkyrja.container.manager.contract.ContainerContract;
+import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.routing.data.HttpRoute;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
