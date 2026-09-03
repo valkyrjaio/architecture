@@ -475,7 +475,8 @@ the branch needs no prompt). Per change:
 1. **Branch** off the correct target branch with a `prefix/…` name (see **Branch
    names** below; e.g. `feature/contextual-bindings`).
 2. **Commit** — after confirmation — using the `[Root] type:` message format.
-3. **Push** the branch — after confirmation.
+3. **Push** the branch — after confirmation, and after you review your own
+   diff. See **Push work that is ready to review** below.
 4. **Ask whether to add the `claude-review` label**, and add it only if the user
    says so. See **Asking for a review** below.
 5. **Open a PR** — after confirmation — with its **base set to that same target
