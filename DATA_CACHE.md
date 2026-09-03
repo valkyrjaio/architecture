@@ -172,19 +172,16 @@ See "Container — Uniform Lambda Format" in `README_PYTHON.md` for full impleme
 type.
 
 **AppHttpRoutingData** — all HTTP routes from every `HttpRouteProvider` across all components and the application. Uses
-the `HttpRoutingData` structure with all four indexes pre-built:
+the `HttpRoutingData` structure, which holds four pre-built indexes:
 
-```php
-readonly class HttpRoutingData
-{
-    public function __construct(
-        public array $routes      = [], // all routes keyed by name/identifier
-        public array $paths       = [], // static paths: method → path → route key
-        public array $dynamicPaths = [], // dynamic paths: method → path → route key
-        public array $regexes     = [], // compiled regexes: method → regex → route key
-    ) {}
-}
-```
+| Index          | Holds                                            |
+| -------------- | ------------------------------------------------ |
+| `routes`       | every route, keyed by name                       |
+| `paths`        | the static paths: method → path → route key      |
+| `dynamicPaths` | the dynamic paths: method → path → route key     |
+| `regexes`      | the compiled regexes: method → regex → route key |
+
+The router reads an index and never scans the route list. Each index is built once, at generation time.
 
 **AppCliRoutingData** — all CLI routes from every `CliRouteProvider` across all components and the application,
 equivalent structure to HTTP routing data.

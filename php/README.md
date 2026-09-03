@@ -104,40 +104,27 @@ public function publishers(): array
         RouterContract::class => [self::class, 'publishRouter'],
     ];
 }
-
-public static function publishRouter(ContainerContract $container): void
-{
-    $container->setSingleton(
-        RouterContract::class,
-        new Router($container->getSingleton(MatcherContract::class))
-    );
-}
 ```
+
+Each publisher is a static method that takes the container and returns nothing. The publisher constructs the service
+inline, reads every dependency from the container by its contract, and registers the result with `setSingleton()`.
 
 ### Static `make()` factory — an optional alternative
 
-The publisher callback above constructs the service inline. This is what the framework does everywhere. A service class
-implements its contract and carries no registration code.
+The publisher constructs the service inline. This is what the framework does everywhere. A service class implements its
+contract and carries no registration code.
 
 A service class may instead expose a static `make()` factory that the publisher delegates to:
 
 ```php
-class Router implements RouterContract
-{
-    public static function make(ContainerContract $container, array $arguments = []): static
-    {
-        return new static($container->getSingleton(MatcherContract::class));
-    }
-}
-
-public static function publishRouter(ContainerContract $container): void
-{
-    $container->setSingleton(RouterContract::class, Router::make($container));
-}
+public static function make(ContainerContract $container, array $arguments = []): static
 ```
 
-The signature matches the `callable` that `bind()` and `bindSingleton()` accept, so `[Router::class, 'make']` also works
-as a direct binding. Use this when a class owns a construction step that more than one caller must reuse. Otherwise
+The factory reads its dependencies from the container and returns the new instance. The publisher then calls the
+factory instead of the constructor.
+
+The signature matches the `callable` that `bind()` and `bindSingleton()` accept, so a `make()` factory also works as a
+direct binding. Use this when a class owns a construction step that more than one caller must reuse. Otherwise
 construct the service in the publisher. Neither form uses reflection or autowiring.
 
 ### Binding methods available in publisher callbacks
@@ -245,27 +232,23 @@ interface ComponentProviderContract
 Example implementation:
 
 ```php
-class HttpComponentProvider implements ComponentProviderContract
+class AppComponentProvider implements ComponentProviderContract
 {
     public function getComponentProviders(ApplicationContract $app): array
     {
-        return [
-            new ContainerComponentProvider(),  // HTTP depends on Container
-            new EventComponentProvider(),       // HTTP depends on Event
-        ];
+        return [];
     }
 
     public function getContainerProviders(ApplicationContract $app): array
     {
         return [
-            new HttpServiceProvider(),
-            new HttpMiddlewareProvider(),
+            new AppServiceProvider(),
         ];
     }
 
     public function getEventProviders(ApplicationContract $app): array
     {
-        return [new HttpListenersProvider()];
+        return [new AppListenerProvider()];
     }
 
     public function getCliProviders(ApplicationContract $app): array
@@ -275,10 +258,14 @@ class HttpComponentProvider implements ComponentProviderContract
 
     public function getHttpProviders(ApplicationContract $app): array
     {
-        return [new HttpRoutesProvider()];
+        return [new AppHttpRouteProvider()];
     }
 }
 ```
+
+Each method returns a simple array literal. A method returns an empty array when the component adds nothing of that
+kind. A component that depends on another component names it in `getComponentProviders()`, and the framework registers
+the named component first.
 
 ### Implement HttpRouteProviderContract and CliRouteProviderContract
 
