@@ -38,7 +38,7 @@ accommodate a gap — a floor set to "whatever we happen to be at" legitimizes
 the gap and defeats the point. Cover the code, or exclude it narrowly and say
 why.
 
-### An expected value from the code under test proves nothing
+### A test cannot take its expected value from the code under test
 
 Coverage counts the lines a test runs. Coverage does not check that the test
 reports a wrong implementation. A test whose expected value comes from the code
