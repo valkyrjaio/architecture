@@ -172,19 +172,17 @@ See "Container — Uniform Lambda Format" in `README_PYTHON.md` for full impleme
 type.
 
 **AppHttpRoutingData** — all HTTP routes from every `HttpRouteProvider` across all components and the application. Uses
-the `HttpRoutingData` structure with all four indexes pre-built:
+the `HttpRoutingData` structure, which holds four pre-built indexes:
 
-```php
-readonly class HttpRoutingData
-{
-    public function __construct(
-        public array $routes      = [], // all routes keyed by name/identifier
-        public array $paths       = [], // static paths: method → path → route key
-        public array $dynamicPaths = [], // dynamic paths: method → path → route key
-        public array $regexes     = [], // compiled regexes: method → regex → route key
-    ) {}
-}
-```
+| Index          | Holds                                            |
+| -------------- | ------------------------------------------------ |
+| `routes`       | every route, keyed by route key                  |
+| `paths`        | the static paths: method → path → route key      |
+| `dynamicPaths` | the dynamic paths: method → path → route key     |
+| `regexes`      | the compiled regexes: method → regex → route key |
+
+The router reads an index and never scans the route list. `sindri` builds every index in `AppHttpRoutingData` once, at
+generation time.
 
 **AppCliRoutingData** — all CLI routes from every `CliRouteProvider` across all components and the application,
 equivalent structure to HTTP routing data.
@@ -777,7 +775,7 @@ explicit definitions for Go/TypeScript.
 Routes with dynamic segments require `Parameter` objects defining each segment's name and pattern. The build tool
 extracts this data from AST, runs the framework's own `ProcessorContract::route()` to compile the regex, and writes the
 pre-compiled result into the aggregated `AppHttpRoutingData` class. See "The Four Generated Data Classes" above for the
-full `HttpRoutingData` structure.
+four indexes that `HttpRoutingData` holds.
 
 ### Two Sources of Parameter Data
 

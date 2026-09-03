@@ -101,44 +101,50 @@ from earlier versions is removed — the publishers map is the sole source of tr
 public function publishers(): array
 {
     return [
-        RouterContract::class => [self::class, 'publishRouter'],
+        NotifierContract::class => [self::class, 'publishNotifier'],
     ];
 }
 
-public static function publishRouter(ContainerContract $container): void
+public static function publishNotifier(ContainerContract $container): void
 {
     $container->setSingleton(
-        RouterContract::class,
-        new Router($container->getSingleton(MatcherContract::class))
+        NotifierContract::class,
+        new TeamsNotifier()
     );
 }
 ```
 
+Each publisher is a static method that takes the container and returns nothing. The publisher constructs the service
+inline and registers the result with `setSingleton()`. A publisher that needs a dependency reads it from the container
+by its contract.
+
 ### Static `make()` factory — an optional alternative
 
-The publisher callback above constructs the service inline. This is what the framework does everywhere. A service class
-implements its contract and carries no registration code.
+The publisher constructs the service inline. This is what the framework does everywhere. A service class implements its
+contract and carries no registration code.
 
 A service class may instead expose a static `make()` factory that the publisher delegates to:
 
 ```php
-class Router implements RouterContract
+class SlackNotifier implements NotifierContract
 {
+    public function __construct(private string $webhookUrl) {}
+
     public static function make(ContainerContract $container, array $arguments = []): static
     {
-        return new static($container->getSingleton(MatcherContract::class));
+        return new static($container->getSingleton(HttpConfig::class)->key);
     }
 }
 
-public static function publishRouter(ContainerContract $container): void
+public static function publishNotifier(ContainerContract $container): void
 {
-    $container->setSingleton(RouterContract::class, Router::make($container));
+    $container->setSingleton(NotifierContract::class, SlackNotifier::make($container));
 }
 ```
 
-The signature matches the `callable` that `bind()` and `bindSingleton()` accept, so `[Router::class, 'make']` also works
-as a direct binding. Use this when a class owns a construction step that more than one caller must reuse. Otherwise
-construct the service in the publisher. Neither form uses reflection or autowiring.
+The signature matches the `callable` that `bind()` and `bindSingleton()` accept, so `[SlackNotifier::class, 'make']`
+also works as a direct binding. Use this when a class owns a construction step that more than one caller must reuse.
+Otherwise construct the service in the publisher. Neither form uses reflection or autowiring.
 
 ### Binding methods available in publisher callbacks
 

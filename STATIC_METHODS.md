@@ -73,14 +73,17 @@ $date = DateFactory::getFormattedDate(DateFormat::DEFAULT);
 
 ```php
 // Right — the named constructor returns its own type, so the type keeps it.
-class StringT extends Type implements StringContract
+class SlugT extends Type implements SlugContract
 {
     public static function fromValue(mixed $value): static
     {
-        return new static(StringFactory::fromMixed($value));
+        return new static(SlugFactory::fromMixed($value));
     }
 }
 ```
+
+The return type is `static`, so a subclass gets its own type back. The body
+delegates the conversion to the `*Factory` for the type.
 
 The rule reaches every segment that puts a static method on a data object. A
 `Contract\` interface declares the method, an `Abstract\` base holds a default,

@@ -217,27 +217,25 @@ Two distinct record styles are used depending on context:
 ### Framework records — Option A (components + compact constructor)
 
 Framework data records carry runtime state and may be instantiated with varying
-values. They use record components whose names match the interface method names
-exactly (so accessors are auto-generated), a compact constructor for defensive
-copying, and a no-arg constructor with defaults.
+values. Each record component takes the name of the interface method it
+satisfies, so the compiler generates the accessor. A compact constructor copies
+each collection, so a caller cannot mutate the record through the reference it
+passed in. A no-arg constructor delegates to the canonical constructor and
+defaults every component to an empty collection.
 
 ```java
-public record HttpRoutingData(
-        Map<String, Supplier<RouteContract>> routes,
-        Map<String, Map<String, String>> paths,
-        Map<String, Map<String, String>> dynamicPaths,
-        Map<String, Map<String, String>> regexes)
-        implements HttpRoutingDataContract {
+public record NotifierData(
+        Map<String, Supplier<ChannelContract>> channels,
+        Map<String, String> defaults)
+        implements NotifierDataContract {
 
-    public HttpRoutingData {
-        routes       = Map.copyOf(routes);
-        paths        = Map.copyOf(paths);
-        dynamicPaths = Map.copyOf(dynamicPaths);
-        regexes      = Map.copyOf(regexes);
+    public NotifierData {
+        channels = Map.copyOf(channels);
+        defaults = Map.copyOf(defaults);
     }
 
-    public HttpRoutingData() {
-        this(Map.of(), Map.of(), Map.of(), Map.of());
+    public NotifierData() {
+        this(Map.of(), Map.of());
     }
 }
 ```
