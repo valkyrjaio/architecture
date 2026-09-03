@@ -203,12 +203,12 @@ abstract class Logger implements LoggerContract {}
 
 ## An example, never a copy
 
-**A document does not hold a copy of an implementation. A document shows usage,
-and it states what the code does.**
+**A document does not hold a copy of the source. A document shows usage, and it
+states what the code does.**
 
-A copy of the source does neither. The copy drifts when the source moves, and the next
-reader trusts it. Rule 10 in [`AGENTS.md`](AGENTS.md) §3 describes the same
-failure for a comment.
+A copy of the source does neither. The copy drifts when the source moves, and
+the next reader trusts the copy. Rule 10 in [`AGENTS.md`](AGENTS.md) §3
+describes the same failure for a comment.
 
 This rule holds in every document. A convention document, a design document, and
 a component's `README.md` each obey it.
@@ -236,7 +236,7 @@ A document names the real API. A document never reproduces the implementation.
 | ---------------------------------------- | --------------------------------------- |
 | A class name, a method name, a namespace | A method body                           |
 | A contract declaration                   | A constructor body                      |
-| A method signature                       | A property list that holds real values  |
+| A method signature                       | A default value copied from a config    |
 | An enum's cases                          | A real class that implements a contract |
 
 A contract declares what a caller programs against, so a document quotes the
@@ -249,14 +249,11 @@ A reader who needs the real code opens the file. Name the class, state what the
 class does, and stop there.
 
 ```php
-// Wrong — the document copies a real method body to say what the method does.
-public static function listHandler(ContainerContract $container, RouteContract $route): OutputContract
-{
-    return $container->getSingleton(ListCommand::class)->run();
-}
+// Wrong — the document copies a line out of a real handler body.
+return $container->getSingleton(ListCommand::class)->run();
 ```
 
-> Right — the prose names the method and states what the method does:
+> Right — the prose names the class and states what the class does:
 >
 > `CliRoutingCliRouteProvider` carries a static handler for each built-in
 > command. Each handler resolves its command from the container and calls it.

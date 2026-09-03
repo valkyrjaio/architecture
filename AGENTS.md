@@ -738,8 +738,8 @@ one thing, and a repeated noun instead of an ambiguous pronoun. Write a full
 sentence, and give a dash-joined afterthought its own sentence. Include a
 sentence only when it changes what the reader does or decides. Every rule that
 has a code shape gets a generic code example, and the example shows PHP first.
-Write an example, and never a copy of an implementation. When you edit an
-existing document, rewrite the paragraph you touch, not the whole file.
+Write an example, never a copy of the source. When you edit an existing
+document, rewrite the paragraph you touch, not the whole file.
 
 The scope, the eleven writing rules, the selection rule, and the rules for code
 examples: [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md).
