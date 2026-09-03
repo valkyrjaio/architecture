@@ -24,6 +24,15 @@ A route handler takes the matched route, so the handler reads the route's own da
 route contract in its own namespace, so the HTTP `RouteContract` and the CLI `RouteContract` are two distinct types. A
 listener takes a `map<string, mixed>`, because an event carries named arguments and no route.
 
+A route with a dynamic segment is a `DynamicRouteContract`, which extends `RouteContract` and adds the matched
+parameters. A handler for such a route reads a parameter by name:
+
+```php
+static fn(ContainerContract $c, DynamicRouteContract $route): ResponseContract => (
+    $c->getSingleton(UserController::class)->show($route->getParameter('id'))
+)
+```
+
 `ServerRequestContract` is **not** an explicit parameter. The container holds the request, and a handler that needs the
 request resolves the request. Keeping the request out of the signature:
 

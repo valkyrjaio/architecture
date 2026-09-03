@@ -335,7 +335,7 @@ public class UserController {
     @Parameter(name = "id", pattern = "[0-9]+")
     @RouteHandler(clazz = UserController.class, method = "showHandler")
     public ResponseContract show(RouteContract route) {
-        return userService.findById(route.getName()).toResponse();
+        // actual implementation
     }
 
     @Route(method = "POST", path = "/users")

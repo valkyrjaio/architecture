@@ -271,13 +271,13 @@ func (p *UserHttpRouteProvider) GetControllerClasses() []string {
 
 func (p *UserHttpRouteProvider) GetRoutes() []dataContract.RouteContract {
 	return []dataContract.RouteContract{
-		data.Get("/users", func(c ctnContract.ContainerContract, route RouteContract) any {
+		data.Get("/users", func(c ctnContract.ContainerContract, route dataContract.RouteContract) any {
 			return c.GetSingleton(controllers.UserControllerClass).(*controllers.UserController).Index(route)
 		}),
-		data.Post("/users", func(c ctnContract.ContainerContract, route RouteContract) any {
+		data.Post("/users", func(c ctnContract.ContainerContract, route dataContract.RouteContract) any {
 			return c.GetSingleton(controllers.UserControllerClass).(*controllers.UserController).Store(route)
 		}),
-		data.Get("/orders", func(c ctnContract.ContainerContract, route RouteContract) any {
+		data.Get("/orders", func(c ctnContract.ContainerContract, route dataContract.RouteContract) any {
 			return c.GetSingleton(controllers.OrderControllerClass).(*controllers.OrderController).Index(route)
 		}),
 	}
@@ -340,7 +340,7 @@ Any method or function the build tool reads must return a single flat literal wi
 ```go
 // ✅ simple slice of route objects
 return []dataContract.RouteContract{
-data.Get("/users", func (c ContainerContract, route RouteContract) any { ... }),
+data.Get("/users", func (c ContainerContract, route dataContract.RouteContract) any { ... }),
 }
 
 // ✅ simple map with method reference

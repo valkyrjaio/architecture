@@ -236,7 +236,7 @@ public static function showUser(ContainerContract $c, RouteContract $route): Res
 
 public static function createUser(ContainerContract $c, RouteContract $route): ResponseContract
 {
-    return $c->getSingleton(UserController::class)->create($args);
+    return $c->getSingleton(UserController::class)->create($route);
 }
 ```
 
@@ -300,7 +300,7 @@ class UserController
     #[Route('GET', '/users/{id}')]
     #[Parameter('id', pattern: '[0-9]+')]
     #[Handler([UserHttpRouteProvider::class, 'showUser'])]  // points elsewhere
-    public function show(string $id): ResponseContract { /* ... */ }
+    public function show(RouteContract $route): ResponseContract { /* ... */ }
 }
 
 class UserHttpRouteProvider implements HttpRouteProviderContract

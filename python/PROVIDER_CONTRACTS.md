@@ -414,7 +414,7 @@ def handler(closure):
 class UserController:
 
     @route_handler(lambda c, route: c.get_singleton(UserControllerClass).index(route))
-    def index(self, request) -> Response:
+    def index(self, route: RouteContract) -> ResponseContract:
         """
         Build tool reads _valkyrja_handler metadata from AST
         when scanning this class for route handlers.
@@ -424,7 +424,7 @@ class UserController:
         pass
 
     @route_handler(lambda c, route: c.get_singleton(UserControllerClass).store(route))
-    def store(self, request) -> Response:
+    def store(self, route: RouteContract) -> ResponseContract:
         pass
 ```
 

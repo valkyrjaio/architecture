@@ -838,11 +838,11 @@ For annotated controllers (PHP, Java, Python) parameters live on the method alon
 
 ```php
 // PHP
-#[Handler(static fn(ContainerContract $c, array $args): Response
-    => $c->getSingleton(UserController::class)->show($args[0], $args[1]))]
+#[Handler(static fn(ContainerContract $c, RouteContract $route): ResponseContract
+    => $c->getSingleton(UserController::class)->show($route))]
 #[Parameter('id',     pattern: '[0-9]+')]
 #[Parameter('postId', pattern: '[0-9]+')]
-public function show(int $id, int $postId): Response {}
+public function show(RouteContract $route): ResponseContract {}
 ```
 
 ```java
@@ -859,7 +859,7 @@ public ResponseContract show(RouteContract route) {}
 @route_handler(lambda c, route: c.get_singleton(UserControllerClass).show(route))
 @parameter('id', pattern='[0-9]+')
 @parameter('postId', pattern='[0-9]+')
-def show(self, route: RouteContract) -> Response:
+def show(self, route: RouteContract) -> ResponseContract:
     pass
 ```
 
