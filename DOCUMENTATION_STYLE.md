@@ -170,7 +170,9 @@ the example and be correct.
 - **One idea per example, 20 lines or fewer.** Split a longer example.
 - **Show the wrong form, then the right form**, when a rule is easy to break.
   Mark each form, and say in a comment why it is wrong or right.
-- **Use real names from the framework.** Do not invent `Foo` or `Bar`.
+- **Use real names from the framework.** Do not invent `Foo` or `Bar`. Verify
+  every name in the source tree before you write it. See
+  [Verify every name](#verify-every-name).
 - **Tag every fence with its language** — `php`, `java`, `ts`, `go`, `python`,
   `bash`. Highlighting and tooling read the tag.
 - **Show PHP first**, because PHP is the reference implementation. Add a second
@@ -178,15 +180,8 @@ the example and be correct.
   its own language.
 - **Keep every example valid.** An example that does not compile teaches the
   wrong thing.
-- **Write a generic example in a convention or design document.** Warning: a
-  verbatim copy of real source drifts when the source changes. The document then
-  asserts something that is false — the failure that rule 10 in
-  [`AGENTS.md`](AGENTS.md) §3 describes for a comment. Show the shape in the
-  framework's naming style, and copy no real method. A generic example still
-  uses real framework names — the rule above forbids `Foo` and `Bar`.
-- **Documentation about the code is the exception — it shows the real code.** In
-  a component's `README.md`, and in a repo's own documents, the code is the
-  subject. There the example must match the source.
+- **Write an example, never a copy of the source.** See
+  [An example, never a copy](#an-example-never-a-copy).
 
 The taxonomy rule in [`STRUCTURE.md`](STRUCTURE.md) — "for `Abstract`, `Enum`, and
 `Trait` the segment carries the meaning, so the name must not repeat it" — takes
@@ -205,6 +200,99 @@ namespace Valkyrja\Log\Logger\Abstract;
 
 abstract class Logger implements LoggerContract {}
 ```
+
+## An example, never a copy
+
+**An implementation detail does not live in a document. Usage does.**
+
+A document shows a reader how to use the API, and what the API does. A copy of
+the source shows neither. The copy drifts when the source moves, and the next
+reader trusts it. Rule 10 in [`AGENTS.md`](AGENTS.md) §3 describes the same
+failure for a comment.
+
+This rule holds in every document. A convention document, a design document, and
+a component's `README.md` each obey it.
+
+### The test
+
+Read the block, then look for the same lines in the source tree.
+
+- A real class, a real method, or a real body holds the same lines. The block is
+  a **copy**. Remove it.
+- No source file holds the block, and the block shows a caller how to use the
+  API. The block is an **example**. Keep it.
+
+The source tree decides, and the writer's intent does not. A block that a writer
+meant as an example is still a copy when a real file holds the same lines.
+
+### The API surface is not a body
+
+A document names the real API. A document never reproduces the implementation.
+
+| A document shows this                    | A document never copies this            |
+| ---------------------------------------- | --------------------------------------- |
+| A class name, a method name, a namespace | A method body                           |
+| A contract declaration                   | A constructor body                      |
+| A method signature                       | A property list that holds real values  |
+| An enum's cases                          | A real class that implements a contract |
+
+A contract declares what a caller programs against, so a document quotes the
+contract. A body is how the framework satisfies the contract today, so a
+document states what the body guarantees.
+
+### Name the class, do not reproduce it
+
+A reader who needs the real code opens the file. Name the class, state what the
+class does, and stop there.
+
+This example exhibits the failure, because a rule about a copy needs one copy to
+point at. Every other example in this document is generic.
+
+```php
+// Wrong — the document copies a real class to say which commands it registers.
+class CliRoutingCliRouteProvider implements CliRouteProviderContract
+{
+    public function getControllerClasses(): array
+    {
+        return [
+            HelpCommand::class,
+            // ... the remaining built-in command classes
+        ];
+    }
+}
+```
+
+> Right — the prose names the class and states what the class does:
+>
+> `CliRoutingComponentProvider::getCliProviders()` returns
+> `CliRoutingCliRouteProvider`, which lists the four built-in command classes
+> and carries a static handler for each.
+
+### Keep what the block conveys
+
+Warning: a removal that drops information is worse than the copy. State what the
+block conveys before you remove the block. The replacement carries the same
+information.
+
+The block above conveys two things. It shows the shape of
+`CliRouteProviderContract`, and it shows that the built-in commands come from an
+ordinary route provider. Prose carries the second. A caller-facing example
+carries the first.
+
+### Verify every name
+
+Warning: an invented name fails the way a copy fails. A name that no source file
+holds, and a name that contradicts another document, each assert something that
+is false.
+
+- Confirm a real name in the source tree before you write the name.
+- Invent a name only for the caller's own code, such as an application class or
+  an application contract.
+- Reuse the invented names that this project established already.
+  [`CONTAINER.md`](CONTAINER.md) holds `NotifierContract`, `SlackNotifier`, and
+  `TeamsNotifier`. A second document uses those names, and it does not redefine
+  them.
+- Never write `Foo` or `Bar`.
 
 ## When you edit an existing document
 
