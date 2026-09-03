@@ -133,9 +133,9 @@ directly from AST via Trees API.
 
 ```java
 public interface HttpRouteProviderContract {
-    static List<Class<?>> getControllerClasses();
+    List<Class<?>> getControllerClasses();
 
-    static List<RouteContract> getRoutes();
+    List<RouteContract> getRoutes();
 }
 ```
 
@@ -143,9 +143,9 @@ public interface HttpRouteProviderContract {
 
 ```java
 public interface ListenerProviderContract {
-    static List<Class<?>> getListenerClasses();
+    List<Class<?>> getListenerClasses();
 
-    static List<ListenerContract> getListeners();
+    List<ListenerContract> getListeners();
 }
 ```
 

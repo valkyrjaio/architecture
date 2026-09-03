@@ -621,14 +621,14 @@ languages). Go and TypeScript use explicit routes only.
 ```php
 interface HttpRouteProviderContract
 {
-    public static function getControllerClasses(): array;
-    public static function getRoutes(): array;
+    public function getControllerClasses(): array;
+    public function getRoutes(): array;
 }
 
 // implementation
 class UserHttpRouteProvider implements HttpRouteProviderContract
 {
-    public static function getControllerClasses(): array
+    public function getControllerClasses(): array
     {
         return [
             UserController::class,
@@ -636,7 +636,7 @@ class UserHttpRouteProvider implements HttpRouteProviderContract
         ];
     }
 
-    public static function getRoutes(): array
+    public function getRoutes(): array
     {
         return [
             HttpRoute::get('/orders', static fn(ContainerContract $c, array $args): Response
@@ -650,19 +650,19 @@ class UserHttpRouteProvider implements HttpRouteProviderContract
 
 ```java
 public interface HttpRouteProviderContract {
-    static List<Class<?>> getControllerClasses();
+    List<Class<?>> getControllerClasses();
 
-    static List<RouteContract> getRoutes();
+    List<RouteContract> getRoutes();
 }
 
 // implementation
 public class UserHttpRouteProvider implements HttpRouteProviderContract {
 
-    public static List<Class<?>> getControllerClasses() {
+    public List<Class<?>> getControllerClasses() {
         return List.of(UserController.class, OrderController.class);
     }
 
-    public static List<RouteContract> getRoutes() {
+    public List<RouteContract> getRoutes() {
         return List.of(
                 HttpRoute.get("/orders", (ContainerContract c, List<Object> args) ->
                         c.getSingleton(OrderController.class).index((Request) args.get(0)))
@@ -760,8 +760,8 @@ Event listener providers follow the same shape as route providers.
 ```php
 interface ListenerProviderContract
 {
-    public static function getListenerClasses(): array;
-    public static function getListeners(): array;
+    public function getListenerClasses(): array;
+    public function getListeners(): array;
 }
 ```
 
