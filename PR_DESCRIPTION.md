@@ -94,8 +94,8 @@ nothing to the sentence around it.
 
 > Right — one sentence says what changed, and one clause says why:
 >
-> Set the exit code instead of ending the process, because a process that ends
-> at once drops a write a stream has buffered.
+> Set the exit code in `Exiter::exit()` instead of ending the process, because
+> a process that ends at once drops a write a stream has buffered.
 
 ## A stable name sets the level of detail
 
