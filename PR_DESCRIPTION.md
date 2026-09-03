@@ -74,9 +74,10 @@ failure that the change answers. A table and a verification note stay permitted
 under the test above, and the `Closes #123` line stays required. The template's
 Types of changes and Changes sections stand outside this shape.
 
-A promotion pull request is the exception, and its description never becomes a
-commit. [`BRANCH_PROMOTION.md`](BRANCH_PROMOTION.md) states what that
-description carries when a cherry-pick conflicts.
+A promotion pull request's description never becomes a commit, because the
+promotion lands by fast-forward. A cherry-pick that conflicts is the exception
+to the shape above, and [`BRANCH_PROMOTION.md`](BRANCH_PROMOTION.md) states what
+that description carries.
 
 There is no sentence count, because a count sets a target and an author writes
 to a target. Cut a sentence that fails the test above. Cut a word that adds
