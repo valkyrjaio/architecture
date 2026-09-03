@@ -81,7 +81,8 @@ description carries when a cherry-pick conflicts.
 There is no sentence count, because a count sets a target and an author writes
 to a target. Cut a sentence that states neither the what nor the why. Cut a
 word that adds nothing to the sentence around it. A description that is still
-long after that cut usually carries something an issue holds better.
+long after that cut carries the case for a decision, and the review thread
+holds that case.
 
 > Wrong — a title line and a walkthrough of the mechanism stand in for the
 > sentence that says what changed:
