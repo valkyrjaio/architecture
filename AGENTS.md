@@ -565,8 +565,9 @@ not:
 - **A fix that answers part of the finding it came from.** A finding that lists
   criteria is a checklist. Read the fix back against the list before you resolve
   the thread.
-- **A commit that reverses an earlier commit on the branch.** The diff of one
-  commit does not show the reversal, and the pull request carries both.
+- **A commit that reverses an earlier commit on the branch.** The diff shows
+  the net text and not the reversal, so read the branch's commits for this
+  item.
 - **A failure of the call you wrapped that no guard handles.** §3, rule 17. One
   call reports several failures, and each one takes a guard. This example
   writes the guards for the two the return value reports:
@@ -644,7 +645,8 @@ Each finding gets one of three answers:
 
 - **The finding is right.** Read the fix back against the finding, in the
   context of the whole change. Push the fix, then resolve the thread in the
-  same turn. See **Push work that is ready to review** above.
+  same turn. Do not wait for the reviewer to confirm. See **Push work that is
+  ready to review** above.
 - **The finding is wrong, or you disagree.** Leave the thread open and reply with
   the evidence. The user decides, not you.
 - **The finding is right and out of scope.** Leave the thread open, open an
