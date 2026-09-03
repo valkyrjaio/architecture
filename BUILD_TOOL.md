@@ -221,7 +221,7 @@ public static function publishRouter(ContainerContract $c): void
 
 ```php
 // getRoutes() points to handler methods on the same class
-public static function getRoutes(): array
+public function getRoutes(): array
 {
     return [
         HttpRoute::get('/users/{id}', [self::class, 'showUser']),
@@ -244,7 +244,7 @@ public static function createUser(ContainerContract $c, array $args): ResponseCo
 
 ```php
 // getListeners() points to handler methods on the same class
-public static function getListeners(): array
+public function getListeners(): array
 {
     return [
         Listener::on(UserCreatedEvent::class, [self::class, 'onUserCreated']),

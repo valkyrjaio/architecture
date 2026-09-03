@@ -194,8 +194,8 @@ Registers HTTP routes, either explicitly via `getRoutes()` or via annotated cont
 // PHP
 interface HttpRouteProviderContract
 {
-    public static function getControllerClasses(): array;  // PHP, Java, Python only
-    public static function getRoutes(): array;
+    public function getControllerClasses(): array;  // PHP, Java, Python only
+    public function getRoutes(): array;
 }
 ```
 
@@ -231,12 +231,12 @@ router or collection to pair routes with handlers later. That approach is reject
 ```php
 class UserHttpRouteProvider implements HttpRouteProviderContract
 {
-    public static function getControllerClasses(): array
+    public function getControllerClasses(): array
     {
         return [UserController::class, OrderController::class];
     }
 
-    public static function getRoutes(): array
+    public function getRoutes(): array
     {
         return [
             HttpRoute::get('/users/{id}', [self::class, 'showUser']),
@@ -266,8 +266,8 @@ Identical structure to `HttpRouteProviderContract`. CLI commands instead of HTTP
 ```php
 interface CliRouteProviderContract
 {
-    public static function getControllerClasses(): array;  // PHP, Java, Python only
-    public static function getRoutes(): array;
+    public function getControllerClasses(): array;  // PHP, Java, Python only
+    public function getRoutes(): array;
 }
 ```
 
@@ -282,8 +282,8 @@ Registers event listeners, either explicitly via `getListeners()` or via annotat
 // PHP
 interface ListenerProviderContract
 {
-    public static function getListenerClasses(): array;  // PHP, Java, Python only
-    public static function getListeners(): array;
+    public function getListenerClasses(): array;  // PHP, Java, Python only
+    public function getListeners(): array;
 }
 ```
 
@@ -297,12 +297,12 @@ GetListeners() []ListenerContract
 ```php
 class UserEventListenerProvider implements ListenerProviderContract
 {
-    public static function getListenerClasses(): array
+    public function getListenerClasses(): array
     {
         return [UserCreatedListener::class];
     }
 
-    public static function getListeners(): array
+    public function getListeners(): array
     {
         return [
             Listener::on(UserCreatedEvent::class, [self::class, 'onUserCreated']),

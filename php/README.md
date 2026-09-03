@@ -291,8 +291,8 @@ class HttpComponentProvider implements ComponentProviderContract
 ```php
 interface HttpRouteProviderContract
 {
-    public static function getControllerClasses(): array;
-    public static function getRoutes(): array;
+    public function getControllerClasses(): array;
+    public function getRoutes(): array;
 }
 ```
 
@@ -301,8 +301,8 @@ interface HttpRouteProviderContract
 ```php
 interface ListenerProviderContract
 {
-    public static function getListenerClasses(): array;
-    public static function getListeners(): array;
+    public function getListenerClasses(): array;
+    public function getListeners(): array;
 }
 ```
 
