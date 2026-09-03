@@ -31,6 +31,16 @@ request resolves the request. Keeping the request out of the signature:
 - Lets the developer decide what to resolve, so a handler pays for nothing it does not use
 
 ```php
+// The handler reads the route's own data, and it resolves the request when it needs the request.
+static fn(ContainerContract $c, RouteContract $route): ResponseContract => (
+    $c->getSingleton(AuditController::class)->record(
+        $route->getName(),
+        $c->getSingleton(ServerRequestContract::class),
+    )
+)
+```
+
+```php
 // HTTP handler — fetch the request from the container only if needed
 static fn(ContainerContract $c, RouteContract $route): ResponseContract => (
     $c->getSingleton(UserController::class)->show($route)
@@ -207,7 +217,7 @@ interface HttpHandlerContract extends HandlerContract
 }
 
 // usage — PHPStan enforces signature
-$route->setHandler(
+$httpRoute->setHandler(
     static fn(ContainerContract $c, RouteContract $route): ResponseContract
         => $c->getSingleton(UserController::class)->show($route)
 );
@@ -222,7 +232,7 @@ public interface HttpHandlerContract {
 }
 
 // usage — compiler enforces HttpHandlerFunc
-route.
+httpRoute.
 
 setHandler((container, route) ->
         container.
@@ -258,7 +268,7 @@ class HttpHandlerContract(HandlerContract, ABC):
 
 
 # usage
-route.set_handler(
+http_route.set_handler(
     lambda c, route: c.get_singleton(UserControllerClass).show(route)
 )
 ```
@@ -312,7 +322,7 @@ public interface CliHandlerContract {
 }
 
 // usage
-command.
+cliCommand.
 
 setHandler((container, route) ->
         container.
@@ -347,7 +357,7 @@ class CliHandlerContract(HandlerContract, ABC):
 
 
 # usage
-command.set_handler(
+cli_command.set_handler(
     lambda c, route: c.get_singleton(SendEmailCommandClass).run(route)
 )
 ```
@@ -781,7 +791,7 @@ Trees API at compile time, then generates the cache data classes through JavaPoe
 string.
 
 ```java
-route.setHandler(
+httpRoute.setHandler(
     (ContainerContract c, RouteContract route) ->
         c.getSingleton(UserController.class).index(route)
 );
