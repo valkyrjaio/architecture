@@ -75,9 +75,10 @@ under the test above, and the `Closes #123` line stays required. The template's
 Types of changes and Changes sections stand outside this shape.
 
 A promotion pull request's description never becomes a commit, because the
-promotion lands by fast-forward. A cherry-pick that conflicts is the exception
-to the shape above, and [`BRANCH_PROMOTION.md`](BRANCH_PROMOTION.md) states what
-that description carries.
+promotion lands by fast-forward. A promotion pull request whose cherry-pick
+conflicts is the exception to this section, and
+[`BRANCH_PROMOTION.md`](BRANCH_PROMOTION.md) states what its description
+carries.
 
 There is no sentence count, because a count sets a target and an author writes
 to a target. Cut a sentence that fails the test above. Cut a word that adds
