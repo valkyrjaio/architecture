@@ -1,6 +1,12 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.20...26.x)
+## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.21...26.x)
+
+## [v26.0.21](https://github.com/valkyrjaio/architecture/compare/v26.0.20...v26.0.21) - 2026-09-03
+
+* [Example] docs: Replace copied framework source with generic examples by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/219
+* [Provider] docs: Declare the provider contract methods as instance methods by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/221
+* [Example] docs: Require an example instead of a copy of the source by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/220
 
 ## [v26.0.20](https://github.com/valkyrjaio/architecture/compare/v26.0.19...v26.0.20) - 2026-08-29
 
