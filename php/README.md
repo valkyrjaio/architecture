@@ -101,8 +101,16 @@ from earlier versions is removed — the publishers map is the sole source of tr
 public function publishers(): array
 {
     return [
-        RouterContract::class => [self::class, 'publishRouter'],
+        NotifierContract::class => [self::class, 'publishNotifier'],
     ];
+}
+
+public static function publishNotifier(ContainerContract $container): void
+{
+    $container->setSingleton(
+        NotifierContract::class,
+        new TeamsNotifier($container->getSingleton(HttpClientContract::class))
+    );
 }
 ```
 
@@ -117,13 +125,23 @@ contract and carries no registration code.
 A service class may instead expose a static `make()` factory that the publisher delegates to:
 
 ```php
-public static function make(ContainerContract $container, array $arguments = []): static
+class TeamsNotifier implements NotifierContract
+{
+    public function __construct(private HttpClientContract $client) {}
+
+    public static function make(ContainerContract $container, array $arguments = []): static
+    {
+        return new static($container->getSingleton(HttpClientContract::class));
+    }
+}
+
+public static function publishNotifier(ContainerContract $container): void
+{
+    $container->setSingleton(NotifierContract::class, TeamsNotifier::make($container));
+}
 ```
 
-The factory reads its dependencies from the container and returns the new instance. The publisher then calls the
-factory instead of the constructor.
-
-The signature matches the `callable` that `bind()` and `bindSingleton()` accept, so a `make()` factory also works as a
+The signature matches the `callable` that `bind()` and `bindSingleton()` accept, so `[TeamsNotifier::class, 'make']` also works as a
 direct binding. Use this when a class owns a construction step that more than one caller must reuse. Otherwise
 construct the service in the publisher. Neither form uses reflection or autowiring.
 
@@ -232,23 +250,27 @@ interface ComponentProviderContract
 Example implementation:
 
 ```php
-class AppComponentProvider implements ComponentProviderContract
+class HttpComponentProvider implements ComponentProviderContract
 {
     public function getComponentProviders(ApplicationContract $app): array
     {
-        return [];
+        return [
+            new ContainerComponentProvider(),  // HTTP depends on Container
+            new EventComponentProvider(),       // HTTP depends on Event
+        ];
     }
 
     public function getContainerProviders(ApplicationContract $app): array
     {
         return [
-            new AppServiceProvider(),
+            new HttpServiceProvider(),
+            new HttpMiddlewareProvider(),
         ];
     }
 
     public function getEventProviders(ApplicationContract $app): array
     {
-        return [new AppListenerProvider()];
+        return [new HttpListenersProvider()];
     }
 
     public function getCliProviders(ApplicationContract $app): array
@@ -258,14 +280,10 @@ class AppComponentProvider implements ComponentProviderContract
 
     public function getHttpProviders(ApplicationContract $app): array
     {
-        return [new AppHttpRouteProvider()];
+        return [new HttpRoutesProvider()];
     }
 }
 ```
-
-Each method returns a simple array literal. A method returns an empty array when the component adds nothing of that
-kind. A component that depends on another component names it in `getComponentProviders()`, and the framework registers
-the named component first.
 
 ### Implement HttpRouteProviderContract and CliRouteProviderContract
 

@@ -181,7 +181,7 @@ the `HttpRoutingData` structure, which holds four pre-built indexes:
 | `dynamicPaths` | the dynamic paths: method → path → route key     |
 | `regexes`      | the compiled regexes: method → regex → route key |
 
-The router reads an index and never scans the route list. Each index is built once, at generation time.
+The router reads an index and never scans the route list. `sindri` builds every index in `AppHttpRoutingData` once, at generation time.
 
 **AppCliRoutingData** — all CLI routes from every `CliRouteProvider` across all components and the application,
 equivalent structure to HTTP routing data.

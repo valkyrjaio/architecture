@@ -101,36 +101,40 @@ interface ComponentProviderContract
 }
 ```
 
-### Implementation
-
-Each method returns a simple array literal. A component provider names the components it depends on in
-`getComponentProviders()`, and returns the providers of each kind from the four remaining methods. A method returns an
-empty array when the component adds nothing of that kind.
+### HttpComponentProvider Implementation
 
 ```php
-namespace App\Provider;
+namespace Valkyrja\Http\Provider;
 
 use Valkyrja\Application\Kernel\Contract\ApplicationContract;
 use Valkyrja\Application\Provider\Contract\ComponentProviderContract;
+use Valkyrja\Cli\Routing\Provider\Contract\CliRouteProviderContract;
+use Valkyrja\Container\Provider\Contract\ServiceProviderContract;
+use Valkyrja\Event\Provider\Contract\ListenerProviderContract;
+use Valkyrja\Http\Routing\Provider\Contract\HttpRouteProviderContract;
 
-class AppComponentProvider implements ComponentProviderContract
+class HttpComponentProvider implements ComponentProviderContract
 {
     public function getComponentProviders(ApplicationContract $app): array
     {
-        return [];
+        return [
+            new ContainerComponentProvider(),  // HTTP depends on Container
+            new EventComponentProvider(),       // HTTP depends on Event
+        ];
     }
 
     public function getContainerProviders(ApplicationContract $app): array
     {
         return [
-            new AppServiceProvider(),
+            new HttpContainerProvider(),
+            new HttpMiddlewareProvider(),
         ];
     }
 
     public function getEventProviders(ApplicationContract $app): array
     {
         return [
-            new AppListenerProvider(),
+            new HttpEventProvider(),
         ];
     }
 
@@ -142,7 +146,7 @@ class AppComponentProvider implements ComponentProviderContract
     public function getHttpProviders(ApplicationContract $app): array
     {
         return [
-            new AppHttpRouteProvider(),
+            new HttpRouteProvider(),
         ];
     }
 }
