@@ -184,6 +184,9 @@ Define the three handler function types as docblock-enforced closure signatures:
 /** Closure(ContainerContract, array<string, mixed>): mixed */
 ```
 
+A route handler takes the matched route. A listener takes named arguments. `ServerRequestContract` is not a parameter,
+so fetch the request from the container if needed.
+
 ### Add HttpHandlerContract, CliHandlerContract, ListenerHandlerContract
 
 Each concern gets its own handler contract extending the base `HandlerContract` with the typed closure signature.
