@@ -71,8 +71,9 @@ Four kinds of sentence always fail the test:
 The prose in a description carries no title line of its own, no code block, and
 no walkthrough of a failure. The diff holds the code, and one clause carries the
 failure that the change answers. A table and a verification note stay permitted
-under the test above, and the `Closes #123` line stays required. The template's
-Types of changes and Changes sections stand outside this shape.
+under the test above, and the `Closes #123` line stays required when an issue
+tracks the work. The template's Types of changes and Changes sections stand
+outside this shape.
 
 A promotion pull request's description never becomes a commit, because the
 promotion lands by fast-forward. A promotion pull request whose cherry-pick
