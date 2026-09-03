@@ -719,7 +719,7 @@ class UserHttpRouteProvider(HttpRouteProviderContract):
     def get_routes() -> list:
         return [
             HttpRoute.get('/orders',
-                          lambda c, args: c.get_singleton(OrderControllerClass).index(args[0]))
+                          lambda c, route: c.get_singleton(OrderControllerClass).index(route))
         ]
 ```
 
@@ -742,8 +742,8 @@ export class UserHttpRouteProvider implements HttpRouteProviderContract {
     getRoutes(): RouteContract[] {
         return [
             HttpRoute.get('/orders',
-                (c: ContainerContract, args: any[]) =>
-                    (c.getSingleton(OrderControllerClass) as OrderController).index(args[0]))
+                (c: ContainerContract, route: RouteContract) =>
+                    (c.getSingleton(OrderControllerClass) as OrderController).index(route))
         ]
     }
 }
@@ -856,10 +856,10 @@ public Response show(int id, int postId) {}
 
 ```python
 # Python
-@route_handler(lambda c, args: c.get_singleton(UserControllerClass).show(args[0], args[1]))
+@route_handler(lambda c, route: c.get_singleton(UserControllerClass).show(route))
 @parameter('id', pattern='[0-9]+')
 @parameter('postId', pattern='[0-9]+')
-def show(self, id: int, post_id: int) -> Response:
+def show(self, route: RouteContract) -> Response:
     pass
 ```
 

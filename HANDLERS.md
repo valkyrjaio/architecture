@@ -594,7 +594,7 @@ For **Go** and **TypeScript** — where no annotations exist — explicit regist
 ```go
 router.Get("/users",
 valkyrja.Handler(func(c ContainerContract, route RouteContract) any {
-return c.GetSingleton(UserControllerClass).(*UserController).Index()
+return c.GetSingleton(UserControllerClass).(*UserController).Index(c.GetSingleton(ServerRequestContractClass))
 }),
 )
 ```
@@ -604,7 +604,7 @@ return c.GetSingleton(UserControllerClass).(*UserController).Index()
 ```typescript
 router.get('/users',
     handler((c: ContainerContract, route: RouteContract) =>
-        c.getSingleton(UserController).index())
+        c.getSingleton(UserController).index(c.getSingleton(ServerRequestContract)))
 )
 ```
 
@@ -772,7 +772,7 @@ generation. The build tool extracts the closure through AST.
 ```php
 $route->setHandler(
     static fn(ContainerContract $c, RouteContract $route): Response
-        => $c->getSingleton(UserController::class)->index()
+        => $c->getSingleton(UserController::class)->index($c->getSingleton(ServerRequestContract::class))
 );
 ```
 
@@ -786,7 +786,7 @@ string.
 ```java
 route.setHandler(
     (ContainerContract c, RouteContract route) ->
-        c.getSingleton(UserController.class).index()
+        c.getSingleton(UserController.class).index(c.getSingleton(ServerRequestContract.class))
 );
 ```
 
@@ -799,7 +799,7 @@ the route provider source files.
 // go — always explicit
 router.Get("/users",
 valkyrja.Handler(func(c ContainerContract, route RouteContract) any {
-return c.GetSingleton(UserControllerClass).(*UserController).Index()
+return c.GetSingleton(UserControllerClass).(*UserController).Index(c.GetSingleton(ServerRequestContractClass))
 }),
 )
 ```
@@ -811,7 +811,7 @@ handler closure for cache generation.
 
 ```python
 # python — decorator-based registration
-@route_handler(lambda c, route: c.get_singleton(UserController).index())
+@route_handler(lambda c, route: c.get_singleton(UserController).index(c.get_singleton(ServerRequestContract)))
 def index(request: Request) -> Response:
     pass
 ```
@@ -825,7 +825,7 @@ route provider source files.
 // typescript — explicit registration
 router.get('/users',
     handler((c: ContainerContract, route: RouteContract) =>
-        c.getSingleton(UserController).index())
+        c.getSingleton(UserController).index(c.getSingleton(ServerRequestContract)))
 )
 ```
 

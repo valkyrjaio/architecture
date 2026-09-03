@@ -277,7 +277,8 @@ listener.setHandler((container, args) =>
 )
 ```
 
-`ServerRequestContract` and `RouteContract` are not parameters — fetch from
+A route handler takes the matched route. A listener takes named arguments.
+`ServerRequestContract` is not a parameter, so fetch the request from the
 container if needed.
 
 ---

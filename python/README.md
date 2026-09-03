@@ -220,7 +220,8 @@ def show(self, route: RouteContract) -> ResponseContract:
     pass
 ```
 
-`ServerRequestContract` and `RouteContract` are not parameters — fetch from container if needed.
+A route handler takes the matched route. A listener takes named arguments. `ServerRequestContract` is not a parameter,
+so fetch the request from the container if needed.
 
 ---
 

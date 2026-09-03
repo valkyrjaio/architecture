@@ -175,10 +175,10 @@ Define the three handler function types as docblock-enforced closure signatures:
 
 ```php
 // HTTP routes
-/** Closure(ContainerContract, array<string, mixed>): ResponseContract */
+/** Closure(ContainerContract, RouteContract): ResponseContract */
 
 // CLI routes
-/** Closure(ContainerContract, array<string, mixed>): OutputContract */
+/** Closure(ContainerContract, RouteContract): OutputContract */
 
 // Event listeners
 /** Closure(ContainerContract, array<string, mixed>): mixed */

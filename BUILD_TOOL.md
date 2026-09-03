@@ -320,11 +320,11 @@ public class UserController {
     @Route(method = "GET", path = "/users/{id}")
     @Parameter(name = "id", pattern = "[0-9]+")
     @RouteHandler(clazz = UserController.class, method = "showHandler")
-    public ResponseContract show(String id) { /* actual implementation */ }
+    public ResponseContract show(RouteContract route) { /* actual implementation */ }
 
     // Sindri resolves clazz + method → this file → reads this method
-    public static ResponseContract showHandler(ContainerContract c, Map<String, Object> args) {
-        return c.getSingleton(UserController.class).show((String) args.get("id"));
+    public static ResponseContract showHandler(ContainerContract c, RouteContract route) {
+        return c.getSingleton(UserController.class).show(route);
     }
 }
 ```
@@ -336,13 +336,13 @@ class UserController:
     @route('GET', '/users/{id}')
     @parameter('id', pattern='[0-9]+')
     @route_handler((UserController, 'show_handler'))  # callable tuple
-    def show(self, id: str) -> ResponseContract:
+    def show(self, route: RouteContract) -> ResponseContract:
         pass  # actual implementation — not read by Sindri
 
     # Sindri resolves callable → this file → reads this method
     @staticmethod
-    def show_handler(c: ContainerContract, args: dict) -> ResponseContract:
-        return c.get_singleton(UserController).show(args['id'])
+    def show_handler(c: ContainerContract, route: RouteContract) -> ResponseContract:
+        return c.get_singleton(UserController).show(route)
 ```
 
 ### Why Not Inline Closures

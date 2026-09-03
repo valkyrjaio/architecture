@@ -276,16 +276,16 @@ export class UserHttpRouteProvider implements HttpRouteProviderContract {
     }
 
     /** Handler methods live on the same class — all imports self-contained. */
-    indexUsers(c: ContainerContract, args: Record<string, unknown>): ResponseContract {
-        return (c.getSingleton(UserControllerClass) as UserController).index(args)
+    indexUsers(c: ContainerContract, route: RouteContract): ResponseContract {
+        return (c.getSingleton(UserControllerClass) as UserController).index(route)
     }
 
-    storeUser(c: ContainerContract, args: Record<string, unknown>): ResponseContract {
-        return (c.getSingleton(UserControllerClass) as UserController).store(args)
+    storeUser(c: ContainerContract, route: RouteContract): ResponseContract {
+        return (c.getSingleton(UserControllerClass) as UserController).store(route)
     }
 
-    indexOrders(c: ContainerContract, args: Record<string, unknown>): ResponseContract {
-        return (c.getSingleton(OrderControllerClass) as OrderController).index(args)
+    indexOrders(c: ContainerContract, route: RouteContract): ResponseContract {
+        return (c.getSingleton(OrderControllerClass) as OrderController).index(route)
     }
 }
 ```

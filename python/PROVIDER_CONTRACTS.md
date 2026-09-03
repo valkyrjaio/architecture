@@ -372,13 +372,13 @@ class UserHttpRouteProvider(HttpRouteProviderContract):
         ]
 
     @staticmethod
-    def index_orders(c: ContainerContract, args: dict) -> ResponseContract:
+    def index_orders(c: ContainerContract, route: RouteContract) -> ResponseContract:
         """Handler method lives on the same class — all imports self-contained."""
-        return c.get_singleton(OrderControllerClass).index(args)
+        return c.get_singleton(OrderControllerClass).index(route)
 
     @staticmethod
-    def index_users(c: ContainerContract, args: dict) -> ResponseContract:
-        return c.get_singleton(UserControllerClass).index(args)
+    def index_users(c: ContainerContract, route: RouteContract) -> ResponseContract:
+        return c.get_singleton(UserControllerClass).index(route)
 ```
 
 ### Controller with @route_handler Decorator
@@ -413,7 +413,7 @@ def handler(closure):
 
 class UserController:
 
-    @route_handler(lambda c, args: c.get_singleton(UserControllerClass).index(args[0]))
+    @route_handler(lambda c, route: c.get_singleton(UserControllerClass).index(route))
     def index(self, request) -> Response:
         """
         Build tool reads _valkyrja_handler metadata from AST
@@ -423,7 +423,7 @@ class UserController:
         """
         pass
 
-    @route_handler(lambda c, args: c.get_singleton(UserControllerClass).store(args[0]))
+    @route_handler(lambda c, route: c.get_singleton(UserControllerClass).store(route))
     def store(self, request) -> Response:
         pass
 ```
