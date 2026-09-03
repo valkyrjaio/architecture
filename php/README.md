@@ -115,7 +115,8 @@ public static function publishNotifier(ContainerContract $container): void
 ```
 
 Each publisher is a static method that takes the container and returns nothing. The publisher constructs the service
-inline, reads every dependency from the container by its contract, and registers the result with `setSingleton()`.
+inline and registers the result with `setSingleton()`. A publisher that needs a dependency reads it from the container
+by its contract.
 
 ### Static `make()` factory — an optional alternative
 
@@ -127,11 +128,11 @@ A service class may instead expose a static `make()` factory that the publisher 
 ```php
 class SlackNotifier implements NotifierContract
 {
-    public function __construct(private ClientContract $client) {}
+    public function __construct(private string $webhookUrl) {}
 
     public static function make(ContainerContract $container, array $arguments = []): static
     {
-        return new static($container->getSingleton(ClientContract::class));
+        return new static($container->getSingleton(HttpConfig::class)->key);
     }
 }
 

@@ -176,7 +176,7 @@ the `HttpRoutingData` structure, which holds four pre-built indexes:
 
 | Index          | Holds                                            |
 | -------------- | ------------------------------------------------ |
-| `routes`       | every route, keyed by name                       |
+| `routes`       | every route, keyed by route key                  |
 | `paths`        | the static paths: method → path → route key      |
 | `dynamicPaths` | the dynamic paths: method → path → route key     |
 | `regexes`      | the compiled regexes: method → regex → route key |
