@@ -203,10 +203,10 @@ abstract class Logger implements LoggerContract {}
 
 ## An example, never a copy
 
-**An implementation detail does not live in a document. Usage does.**
+**A document does not hold a copy of an implementation. A document shows usage,
+and it states what the code does.**
 
-A document shows a reader how to use the API, and what the API does. A copy of
-the source shows neither. The copy drifts when the source moves, and the next
+A copy of the source does neither. The copy drifts when the source moves, and the next
 reader trusts it. Rule 10 in [`AGENTS.md`](AGENTS.md) §3 describes the same
 failure for a comment.
 
@@ -217,13 +217,14 @@ a component's `README.md` each obey it.
 
 Read the block, then look for the same lines in the source tree.
 
-- A real class, a real method, or a real body holds the same lines. The block is
-  a **copy**. Remove it.
+- A real file holds the same body. The block is a **copy**. Remove it.
+- The block quotes a declaration, and the next section permits the declaration.
+  The block is the **API surface**. Keep it.
 - No source file holds the block, and the block shows a caller how to use the
   API. The block is an **example**. Keep it.
 
 The source tree decides, and the writer's intent does not. A block that a writer
-meant as an example is still a copy when a real file holds the same lines.
+meant as an example is still a copy when a real file holds the same body.
 
 ### The API surface is not a body
 
