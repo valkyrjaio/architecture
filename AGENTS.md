@@ -589,8 +589,8 @@ not:
 lines. A fix that reads only those lines lands in a file that earlier fixes
 already changed. The fix then reverses an earlier decision, or it falsifies
 prose an earlier commit wrote. Read the whole file, and read the earlier
-commits on the branch. Say in the message when a commit reverses an earlier
-one.
+commits on the branch. Say in the commit message when a commit reverses an
+earlier one.
 
 **Write the prose last.** A `README.md` paragraph, a doc comment, and the pull
 request description each describe code. Each one goes stale when the code
