@@ -66,7 +66,7 @@ Four kinds of sentence always fail the test:
 > framework throws on a missing key instead of guessing a default, and the
 > document did not say so.
 
-## The description's prose is sentences
+## The description's prose holds only sentences
 
 The prose in a description carries no heading of its own, no code block, and no
 walkthrough of a failure. The diff holds the code, and one clause carries the
@@ -78,12 +78,10 @@ A promotion pull request is the exception, and its description never becomes a
 commit. [`BRANCH_PROMOTION.md`](BRANCH_PROMOTION.md) states what that
 description carries when a cherry-pick conflicts.
 
-The description states what changed, and why the change is right. There is no
-sentence count, because a count sets a target and an author writes to a target.
-The test above is the measure, and it governs a word as well as a sentence. Cut
-a sentence that states neither the what nor the why. Cut a word that adds
-nothing to the sentence around it. A description that is still long after that
-cut usually carries something an issue holds better.
+There is no sentence count, because a count sets a target and an author writes
+to a target. Cut a sentence that states neither the what nor the why. Cut a
+word that adds nothing to the sentence around it. A description that is still
+long after that cut usually carries something an issue holds better.
 
 > Wrong — a title line and a walkthrough of the mechanism stand in for the
 > sentence that says what changed:
