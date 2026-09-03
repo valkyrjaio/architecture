@@ -66,7 +66,7 @@ Four kinds of sentence always fail the test:
 > framework throws on a missing key instead of guessing a default, and the
 > document did not say so.
 
-## The description's prose holds only sentences
+## The description's prose is sentences, and one clause carries the failure
 
 The prose in a description carries no heading of its own, no code block, and no
 walkthrough of a failure. The diff holds the code, and one clause carries the
