@@ -567,8 +567,8 @@ not. Read the branch's commits for the reversal below:
   the thread.
 - **A commit that reverses an earlier commit on the branch.** The diff shows
   the net text and not the reversal.
-- **A failure of the call you wrapped that no guard handles.** §3, rule 17. One
-  call reports several failures, and each one takes a guard. This example
+- **A failure of the call you wrapped that no guard handles.** See §3, rule 17.
+  One call reports several failures, and each one takes a guard. This example
   writes the guards for the two the return value reports:
 
   ```php
