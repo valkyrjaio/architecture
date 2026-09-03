@@ -560,8 +560,8 @@ not:
   or a doc comment describes behavior that the diff changed. A later commit on
   the branch also moves the code under prose that an earlier commit wrote. See
   §3, rule 11.
-- **A rule with a shape you can count.** The word limits and the writing rules
-  in [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md).
+- **A line that breaks a documentation rule.** The word limits and the writing
+  rules in [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md).
 - **A fix that answers part of the finding it came from.** A finding that lists
   criteria is a checklist. Read the fix back against the list before you resolve
   the thread.
@@ -572,8 +572,8 @@ not:
   writes the guards for the two the return value reports:
 
   ```php
-  // fwrite returns false for a failed write, and returns a count below the
-  // length for a partial write. Each return takes its own guard.
+  // fwrite returns false for a failed write, and a count below the length for
+  // a partial write.
   $written = fwrite($stream, $data);
 
   if ($written === false) {
