@@ -249,24 +249,17 @@ A reader who needs the real code opens the file. Name the class, state what the
 class does, and stop there.
 
 ```php
-// Wrong — the document copies a real class to say which commands it registers.
-class CliRoutingCliRouteProvider implements CliRouteProviderContract
+// Wrong — the document copies a real method body to say what the method does.
+public static function listHandler(ContainerContract $container, RouteContract $route): OutputContract
 {
-    public function getControllerClasses(): array
-    {
-        return [
-            HelpCommand::class,
-            // ... the remaining built-in command classes
-        ];
-    }
+    return $container->getSingleton(ListCommand::class)->run();
 }
 ```
 
-> Right — the prose names the class and states what the class does:
+> Right — the prose names the method and states what the method does:
 >
-> `CliRoutingComponentProvider::getCliProviders()` returns
-> `CliRoutingCliRouteProvider`, which lists the built-in command classes and
-> carries a static handler for each.
+> `CliRoutingCliRouteProvider` carries a static handler for each built-in
+> command. Each handler resolves its command from the container and calls it.
 
 ### Keep what the block conveys
 
@@ -274,9 +267,9 @@ Warning: a removal that drops information is worse than the copy. State what the
 block conveys before you remove the block. The replacement carries the same
 information.
 
-A copied class body usually conveys two things. It shows the shape of a
-contract, and it shows which real class satisfies the contract. A caller-facing
-example carries the first. Prose that names the class carries the second.
+A copied body usually conveys two things. It shows a shape that a caller
+reuses, and it shows which real class holds that shape. A caller-facing example
+carries the first. Prose that names the class carries the second.
 
 ### Verify every name
 
