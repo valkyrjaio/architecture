@@ -1,6 +1,10 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.21...26.x)
+## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.22...26.x)
+
+## [v26.0.22](https://github.com/valkyrjaio/architecture/compare/v26.0.21...v26.0.22) - 2026-09-04
+
+* [Process] docs: Record the standard a push meets by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/214
 
 ## [v26.0.21](https://github.com/valkyrjaio/architecture/compare/v26.0.20...v26.0.21) - 2026-09-03
 
