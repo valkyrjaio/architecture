@@ -346,7 +346,7 @@ from valkyrja.http.routing.data.contract import RouteContract
 from valkyrja.http.routing.provider.contract import HttpRouteProviderContract
 from valkyrja.http.routing.data import HttpRoute
 from app.http.controllers import UserController, OrderController
-from app.http.controllers.contract import OrderControllerClass
+from app.http.controllers.contract import OrderControllerClass, UserControllerClass
 
 
 class UserHttpRouteProvider(HttpRouteProviderContract):
