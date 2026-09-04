@@ -30,13 +30,21 @@ request resolves the request. Keeping the request out of the signature:
 - Avoids passing an HTTP-specific object to a CLI handler, where the object makes no sense
 - Lets the developer decide what to resolve, so a handler pays for nothing it does not use
 
+A matched dynamic route carries the value of each parameter that the route declares. The matcher attaches the values
+and gives the handler a `DynamicRouteContract`. The handler still declares `RouteContract`, because a narrower
+parameter type breaks the handler signature, so the handler narrows the type at run time.
+
 ```php
 static function (ContainerContract $c, RouteContract $route): ResponseContract {
     // The route is a parameter, so the handler reads the route's own data directly.
+    $id = $route instanceof DynamicRouteContract
+        ? $route->getParameter('id')->getValue()
+        : null;
+
     // The request is not a parameter, so the handler resolves the request it needs.
-    $c->getSingleton(LoggerContract::class)->info($route->getName(), [
-        'path' => $c->getSingleton(ServerRequestContract::class)->getUri()->getPath(),
-    ]);
+    $path = $c->getSingleton(ServerRequestContract::class)->getUri()->getPath();
+
+    $c->getSingleton(LoggerContract::class)->info($route->getName(), ['id' => $id, 'path' => $path]);
 
     return $c->getSingleton(UserController::class)->show($route);
 }
