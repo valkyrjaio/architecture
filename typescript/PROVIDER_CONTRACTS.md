@@ -252,6 +252,7 @@ export interface HttpRouteProviderContract {
 ### UserHttpRouteProvider Implementation
 
 ```typescript
+import type {ResponseContract} from '@valkyrja/http/message/response/contract'
 import type {RouteContract} from '@valkyrja/http/routing/data/contract'
 import type {HttpRouteProviderContract} from '@valkyrja/http/routing/provider/contract'
 import {HttpRoute} from '@valkyrja/http/routing/data'

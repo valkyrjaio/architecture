@@ -34,6 +34,11 @@ A matched dynamic route carries the value of each parameter that the route decla
 and gives the handler a `DynamicRouteContract`. The handler still declares `RouteContract`, because a narrower
 parameter type breaks the handler signature, so the handler narrows the type at run time.
 
+Warning: each port spells the narrowing differently, and TypeScript cannot spell it at all against a contract. PHP uses
+`instanceof`, Java uses `instanceof`, Go uses a type assertion, and Python uses `isinstance` against the ABC. A
+TypeScript contract has no run-time existence, so a TypeScript handler reads the parameter through a class or a type
+guard instead. See [`CONTRACTS.md`](CONTRACTS.md), _Type erasure_.
+
 ```php
 static function (ContainerContract $c, RouteContract $route): ResponseContract {
     // The route is a parameter, so the handler reads the route's own data directly.
