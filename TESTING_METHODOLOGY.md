@@ -38,6 +38,28 @@ accommodate a gap — a floor set to "whatever we happen to be at" legitimizes
 the gap and defeats the point. Cover the code, or exclude it narrowly and say
 why.
 
+### A test cannot take its expected value from the code under test
+
+Coverage counts the lines a test runs. Coverage does not check that the test
+reports a wrong implementation. A test whose expected value comes from the code
+under test runs every line. The test still passes when that code is wrong.
+
+Write the expected value as a literal. Then name the wrong implementation the
+test still passes under. When you can name a real one, the test needs a
+different expected value.
+
+```php
+// The code under test.
+file_put_contents($filepath, $message->getFormattedText());
+
+// Wrong — the expected value comes from the call the code makes, so the
+// assertion holds whatever getFormattedText returns.
+self::assertSame($message->getFormattedText(), file_get_contents($filepath));
+
+// Right — the literal fails when getFormattedText returns the wrong text.
+self::assertSame("\e[97;42mtext\e[39;49m", file_get_contents($filepath));
+```
+
 ---
 
 ## 2. Repository anatomy

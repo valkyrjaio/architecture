@@ -208,6 +208,20 @@ Then:
     enhances the signature, plus the annotations — states what the type does.
     The one exception is a test fixture's one-line block, which says what the
     fixture is for. Full rules and examples: [`COMMENTS.md`](COMMENTS.md).
+16. **Verify a claim before you write it.** A sentence about another file is a
+    claim, and you check a claim rather than assert it. Open the file, and read
+    the code the sentence describes. This governs a comment, a `README.md`, a
+    pull request description, and a review reply. Warning: a wrong claim
+    outlives wrong code, because the next reader trusts prose and does not
+    check it.
+17. **Know how a call fails before you wrap it.** Name each way the call fails
+    before you write the guard. A call reports a failure through a return
+    value, through a warning, and through a throwable. A call can also do part
+    of the work and report the count instead of a failure. Handle each one. A
+    guard written from memory handles the failure the author remembered. See
+    §7.
+18. **Push work that is ready to review.** Review your own diff before you push
+    it. See §7.
 
 ---
 
@@ -461,7 +475,8 @@ the branch needs no prompt). Per change:
 1. **Branch** off the correct target branch with a `prefix/…` name (see **Branch
    names** below; e.g. `feature/contextual-bindings`).
 2. **Commit** — after confirmation — using the `[Root] type:` message format.
-3. **Push** the branch — after confirmation.
+3. **Push** the branch — after confirmation, and after you review your own
+   diff. See **Push work that is ready to review** below.
 4. **Ask whether to add the `claude-review` label**, and add it only if the user
    says so. See **Asking for a review** below.
 5. **Open a PR** — after confirmation — with its **base set to that same target
@@ -528,6 +543,61 @@ root kinds, and worked examples:
   shows. Full rules:
   [`PR_DESCRIPTION.md`](PR_DESCRIPTION.md).
 
+### Push work that is ready to review
+
+**A push says the change is ready to review.** Warning: each push to a labeled
+pull request spends one review round, and a change that still moves spends
+several. Each round reports the same kind of finding again. Review the diff
+yourself first, against these guides, the way the reviewer reads it.
+
+Read the diff for these, because a self-review finds them and a compiler does
+not. Read the branch's commits for the reversal below:
+
+- **A claim you did not check.** See §3, rule 16.
+- **A test that passes for a wrong implementation.** See
+  [`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md) §1.
+- **A document that this change made false.** A `README.md`, a design document,
+  or a doc comment describes behavior that the diff changed. A later commit on
+  the branch also moves the code under prose that an earlier commit wrote. See
+  §3, rule 11.
+- **A line that breaks a documentation rule.** The writing rules, the selection
+  rule, and the rules for code examples, in
+  [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md).
+- **A fix that answers part of the finding it came from.** A finding that lists
+  criteria is a checklist. Read the fix back against the list before you resolve
+  the thread.
+- **A commit that reverses an earlier commit on the branch.** The diff shows
+  the net text and not the reversal.
+- **A failure of the call you wrapped that no guard handles.** See §3, rule 17.
+  One call reports several failures, and each one takes a guard. This example
+  writes the guards for the two the return value reports:
+
+  ```php
+  // fwrite returns false for a failed write, and a count below the length for
+  // a partial write.
+  $written = fwrite($stream, $data);
+
+  if ($written === false) {
+      throw new ComponentStreamWriteException('The stream write failed');
+  }
+
+  if ($written < strlen($data)) {
+      throw new ComponentStreamWriteException('The stream wrote part of the data');
+  }
+  ```
+
+**Apply a fix in the context of the whole change.** A finding quotes a few
+lines. An author who reads only those lines lands a fix in a file that earlier
+fixes already changed. The fix then reverses an earlier decision, or it
+falsifies prose an earlier commit wrote. Read the whole file, and read the
+earlier commits on the branch. Say in the commit message when a commit
+reverses an earlier one.
+
+**Write the prose last.** A `README.md` paragraph, a doc comment, and the pull
+request description each describe code. Each one goes stale when the code
+moves, so write each one when the code stops moving. Read each one again before
+the push that carries it.
+
 ### Asking for a review
 
 The `claude-review` label starts an automated review of the pull request. **Ask
@@ -573,8 +643,10 @@ statement was right.
 
 Each finding gets one of three answers:
 
-- **The finding is right.** Push the fix, then resolve the thread in the same
-  turn. Do not wait for the reviewer to confirm.
+- **The finding is right.** Read the fix back against the finding, in the
+  context of the whole change. Push the fix, then resolve the thread in the
+  same turn. Do not wait for the reviewer to confirm. See **Push work that is
+  ready to review** above.
 - **The finding is wrong, or you disagree.** Leave the thread open and reply with
   the evidence. The user decides, not you.
 - **The finding is right and out of scope.** Leave the thread open, open an

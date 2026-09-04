@@ -30,11 +30,9 @@ through every revision of the pull request.
 ## Test every sentence
 
 Keep a sentence only when it states what changed or why the change is right,
-and the diff cannot show it. Discard every other sentence. Most descriptions
-keep three to six sentences, but the count is a symptom, not the test — a
-description inside that budget can still fail, one sentence at a time. Add a
-table or a verification note only when it carries something a reviewer would
-otherwise miss.
+and the diff cannot show it. Discard every other sentence. Add a table or a
+verification note only when it carries something a reviewer would otherwise
+miss.
 
 Four kinds of sentence always fail the test:
 
@@ -67,6 +65,40 @@ Four kinds of sentence always fail the test:
 > Record in the component's `README.md` that the `app.env` key is required. The
 > framework throws on a missing key instead of guessing a default, and the
 > document did not say so.
+
+## The description's prose is sentences, and one clause carries the failure
+
+The prose in a description carries no title line of its own, no code block, and
+no walkthrough of a failure. The diff holds the code, and one clause carries the
+failure that the change answers. A table and a verification note stay permitted
+under the test above, and the `Closes #123` line stays required when an issue
+tracks the work. The template's Types of changes and Changes sections stand
+outside this shape.
+
+A promotion pull request's description never becomes a commit, because the
+promotion lands by fast-forward. A promotion pull request whose cherry-pick
+conflicts is the exception to the rules in this document, and
+[`BRANCH_PROMOTION.md`](BRANCH_PROMOTION.md) states what its description
+carries.
+
+There is no sentence count, because a count sets a target and an author writes
+to a target. Cut a sentence that fails the test above. Cut a word that adds
+nothing to the sentence around it.
+
+> Wrong — a title line and a walkthrough of the mechanism stand in for the
+> sentence that says what changed:
+>
+> **Why the exiter sets the exit code**
+>
+> `Exiter::exit()` ends the process before the buffer drains, so a write the
+> buffer still holds never reaches the operating system. The command then
+> reports success for output that never arrived, and the listing below shows
+> the body that replaces it.
+
+> Right — one sentence says what changed, and one clause says why:
+>
+> Set the exit code in `Exiter::exit()` instead of ending the process, because
+> a process that ends at once drops a write a stream has buffered.
 
 ## A stable name sets the level of detail
 
