@@ -31,11 +31,15 @@ request resolves the request. Keeping the request out of the signature:
 - Lets the developer decide what to resolve, so a handler pays for nothing it does not use
 
 ```php
-// $route->getName() is the matched route's own data, available without a container lookup.
-// The request is not a parameter, so a handler that needs the request resolves the request.
-static fn(ContainerContract $c, RouteContract $route): ResponseContract => (
-    $c->getSingleton(UserController::class)->show($route)
-)
+static function (ContainerContract $c, RouteContract $route): ResponseContract {
+    // The route is a parameter, so the handler reads the route's own data directly.
+    // The request is not a parameter, so the handler resolves the request it needs.
+    $c->getSingleton(LoggerContract::class)->info($route->getName(), [
+        'path' => $c->getSingleton(ServerRequestContract::class)->getUri()->getPath(),
+    ]);
+
+    return $c->getSingleton(UserController::class)->show($route);
+}
 ```
 
 ```php
