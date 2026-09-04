@@ -55,8 +55,9 @@ static function (ContainerContract $c, RouteContract $route): ResponseContract {
 }
 ```
 
-TypeScript narrows against the concrete class, because the contract has no run-time existence. The TypeScript contract
-declares `getParameters()` and no `getParameter(name)`, so the TypeScript handler finds the parameter by name:
+TypeScript narrows against the concrete `DynamicRoute` class, because the contract has no run-time existence.
+`DynamicRouteContract` declares `getParameters()` in TypeScript and adds `getParameter(name)` in PHP, so the TypeScript
+handler finds the parameter by name through the class it narrowed to:
 
 ```typescript
 (c: ContainerContract, route: RouteContract): ResponseContract => {
