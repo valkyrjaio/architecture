@@ -222,12 +222,12 @@ This means TypeScript works without cache exactly like PHP and Python.
 ```typescript
 type HttpHandlerFunc = (
     container: ContainerContract,
-    arguments: Record<string, unknown>
+    route: RouteContract
 ) => ResponseContract
 
 type CliHandlerFunc = (
     container: ContainerContract,
-    arguments: Record<string, unknown>
+    route: RouteContract
 ) => OutputContract
 
 type ListenerHandlerFunc = (
@@ -262,13 +262,13 @@ interface ListenerHandlerContract {
 
 ```typescript
 // HTTP
-route.setHandler((container, args) =>
-    container.getSingleton<UserController>(UserControllerClass).show(args['id'] as string)
+httpRoute.setHandler((container, route) =>
+    container.getSingleton<UserController>(UserControllerClass).show(route)
 )
 
 // CLI
-command.setHandler((container, args) =>
-    container.getSingleton<SendEmailCommand>(SendEmailCommandClass).run(args)
+cliCommand.setHandler((container, route) =>
+    container.getSingleton<SendEmailCommand>(SendEmailCommandClass).run(route)
 )
 
 // Listener
@@ -277,7 +277,8 @@ listener.setHandler((container, args) =>
 )
 ```
 
-`ServerRequestContract` and `RouteContract` are not parameters — fetch from
+A route handler takes the matched route. A listener takes named arguments.
+`ServerRequestContract` is not a parameter, so fetch the request from the
 container if needed.
 
 ---

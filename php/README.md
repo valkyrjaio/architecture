@@ -175,14 +175,17 @@ Define the three handler function types as docblock-enforced closure signatures:
 
 ```php
 // HTTP routes
-/** Closure(ContainerContract, array<string, mixed>): ResponseContract */
+/** Closure(ContainerContract, RouteContract): ResponseContract */
 
 // CLI routes
-/** Closure(ContainerContract, array<string, mixed>): OutputContract */
+/** Closure(ContainerContract, RouteContract): OutputContract */
 
 // Event listeners
 /** Closure(ContainerContract, array<string, mixed>): mixed */
 ```
+
+A route handler takes the matched route. A listener takes named arguments. `ServerRequestContract` is not a parameter,
+so fetch the request from the container if needed.
 
 ### Add HttpHandlerContract, CliHandlerContract, ListenerHandlerContract
 
@@ -194,10 +197,10 @@ Routes need `#[RouteHandler]` attribute support on controller/action methods, an
 Each attribute carries the typed closure:
 
 ```php
-#[Handler(static fn(ContainerContract $c, array<string, mixed> $args): ResponseContract
-    => $c->getSingleton(UserController::class)->show($args['id']))]
+#[Handler(static fn(ContainerContract $c, RouteContract $route): ResponseContract
+    => $c->getSingleton(UserController::class)->show($route))]
 #[Parameter('id', pattern: '[0-9]+')]
-public function show(int $id): ResponseContract {}
+public function show(RouteContract $route): ResponseContract {}
 ```
 
 ### Add #[Parameter] attribute

@@ -206,10 +206,10 @@ logic.
 
 ```go
 // HTTP
-type HttpHandlerFunc func (container ContainerContract, arguments map[string]any) ResponseContract
+type HttpHandlerFunc func (container ContainerContract, route RouteContract) ResponseContract
 
 // CLI
-type CliHandlerFunc func (container ContainerContract, arguments map[string]any) OutputContract
+type CliHandlerFunc func (container ContainerContract, route RouteContract) OutputContract
 
 // Event listener
 type ListenerHandlerFunc func (container ContainerContract, arguments map[string]any) any
@@ -238,13 +238,13 @@ SetHandler(ListenerHandlerFunc) ListenerHandlerContract
 
 ```go
 // HTTP
-route.SetHandler(func (c ContainerContract, args map[string]any) ResponseContract {
-return c.GetSingleton(UserControllerClass).(*UserController).Show(args["id"])
+httpRoute.SetHandler(func (c ContainerContract, route RouteContract) ResponseContract {
+return c.GetSingleton(UserControllerClass).(*UserController).Show(route)
 })
 
 // CLI
-command.SetHandler(func (c ContainerContract, args map[string]any) OutputContract {
-return c.GetSingleton(SendEmailCommandClass).(*SendEmailCommand).Run(args)
+cliCommand.SetHandler(func (c ContainerContract, route RouteContract) OutputContract {
+return c.GetSingleton(SendEmailCommandClass).(*SendEmailCommand).Run(route)
 })
 
 // Listener
@@ -253,7 +253,8 @@ return c.GetSingleton(UserCreatedListenerClass).(*UserCreatedListener).Handle(ar
 })
 ```
 
-`ServerRequestContract` and `RouteContract` are not parameters — fetch from
+A route handler takes the matched route. A listener takes named arguments.
+`ServerRequestContract` is not a parameter, so fetch the request from the
 container if needed.
 
 ---

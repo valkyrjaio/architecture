@@ -229,14 +229,14 @@ public function getRoutes(): array
     ];
 }
 
-public static function showUser(ContainerContract $c, array $args): ResponseContract
+public static function showUser(ContainerContract $c, RouteContract $route): ResponseContract
 {
-    return $c->getSingleton(UserController::class)->show($args['id']);
+    return $c->getSingleton(UserController::class)->show($route);
 }
 
-public static function createUser(ContainerContract $c, array $args): ResponseContract
+public static function createUser(ContainerContract $c, RouteContract $route): ResponseContract
 {
-    return $c->getSingleton(UserController::class)->create($args);
+    return $c->getSingleton(UserController::class)->create($route);
 }
 ```
 
@@ -279,15 +279,15 @@ class UserController
     #[Route('GET', '/users/{id}')]
     #[Parameter('id', pattern: '[0-9]+')]
     #[Handler([self::class, 'showHandler'])]  // callable — class + method name
-    public function show(string $id): ResponseContract
+    public function show(RouteContract $route): ResponseContract
     {
         // actual implementation — not read by Sindri
     }
 
     // Sindri resolves [self::class, 'showHandler'] → this file → reads this method
-    public static function showHandler(ContainerContract $c, array $args): ResponseContract
+    public static function showHandler(ContainerContract $c, RouteContract $route): ResponseContract
     {
-        return $c->getSingleton(self::class)->show($args['id']);
+        return $c->getSingleton(self::class)->show($route);
     }
 }
 ```
@@ -300,15 +300,15 @@ class UserController
     #[Route('GET', '/users/{id}')]
     #[Parameter('id', pattern: '[0-9]+')]
     #[Handler([UserHttpRouteProvider::class, 'showUser'])]  // points elsewhere
-    public function show(string $id): ResponseContract { /* ... */ }
+    public function show(RouteContract $route): ResponseContract { /* ... */ }
 }
 
 class UserHttpRouteProvider implements HttpRouteProviderContract
 {
     // Sindri resolves callable → this file → reads this method + this file's imports
-    public static function showUser(ContainerContract $c, array $args): ResponseContract
+    public static function showUser(ContainerContract $c, RouteContract $route): ResponseContract
     {
-        return $c->getSingleton(UserController::class)->show($args['id']);
+        return $c->getSingleton(UserController::class)->show($route);
     }
 }
 ```
@@ -320,11 +320,11 @@ public class UserController {
     @Route(method = "GET", path = "/users/{id}")
     @Parameter(name = "id", pattern = "[0-9]+")
     @RouteHandler(clazz = UserController.class, method = "showHandler")
-    public ResponseContract show(String id) { /* actual implementation */ }
+    public ResponseContract show(RouteContract route) { /* actual implementation */ }
 
     // Sindri resolves clazz + method → this file → reads this method
-    public static ResponseContract showHandler(ContainerContract c, Map<String, Object> args) {
-        return c.getSingleton(UserController.class).show((String) args.get("id"));
+    public static ResponseContract showHandler(ContainerContract c, RouteContract route) {
+        return c.getSingleton(UserController.class).show(route);
     }
 }
 ```
@@ -336,13 +336,13 @@ class UserController:
     @route('GET', '/users/{id}')
     @parameter('id', pattern='[0-9]+')
     @route_handler((UserController, 'show_handler'))  # callable tuple
-    def show(self, id: str) -> ResponseContract:
+    def show(self, route: RouteContract) -> ResponseContract:
         pass  # actual implementation — not read by Sindri
 
     # Sindri resolves callable → this file → reads this method
     @staticmethod
-    def show_handler(c: ContainerContract, args: dict) -> ResponseContract:
-        return c.get_singleton(UserController).show(args['id'])
+    def show_handler(c: ContainerContract, route: RouteContract) -> ResponseContract:
+        return c.get_singleton(UserController).show(route)
 ```
 
 ### Why Not Inline Closures
@@ -354,8 +354,8 @@ in the application:
 // ❌ inline closure — Sindri must resolve ContainerContract, UserController
 //    from the imports of this specific file AND know if they conflict
 //    with imports from other route providers
-HttpRoute::get('/users/{id}', static fn($c, $args) =>
-    $c->getSingleton(UserController::class)->show($args['id'])
+HttpRoute::get('/users/{id}', static fn($c, $route) =>
+    $c->getSingleton(UserController::class)->show($route)
 )
 
 // ✅ method pointer — Sindri reads the method body from this same file

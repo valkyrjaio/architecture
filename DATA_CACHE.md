@@ -639,8 +639,8 @@ class UserHttpRouteProvider implements HttpRouteProviderContract
     public function getRoutes(): array
     {
         return [
-            HttpRoute::get('/orders', static fn(ContainerContract $c, array $args): Response
-                => $c->getSingleton(OrderController::class)->index($args[0])),
+            HttpRoute::get('/orders', static fn(ContainerContract $c, RouteContract $route): ResponseContract
+                => $c->getSingleton(OrderController::class)->index($route)),
         ];
     }
 }
@@ -664,8 +664,8 @@ public class UserHttpRouteProvider implements HttpRouteProviderContract {
 
     public List<RouteContract> getRoutes() {
         return List.of(
-                HttpRoute.get("/orders", (ContainerContract c, List<Object> args) ->
-                        c.getSingleton(OrderController.class).index((Request) args.get(0)))
+                HttpRoute.get("/orders", (ContainerContract c, RouteContract route) ->
+                        c.getSingleton(OrderController.class).index(route))
         );
     }
 }
@@ -688,8 +688,8 @@ return []string{}
 
 func (p *UserHttpRouteProvider) GetRoutes() []RouteContract {
 return []RouteContract{
-data.Get("/orders", func (c ContainerContract, args []any) any {
-return c.GetSingleton(OrderControllerClass).(*OrderController).Index(args[0])
+data.Get("/orders", func (c ContainerContract, route RouteContract) any {
+return c.GetSingleton(OrderControllerClass).(*OrderController).Index(route)
 }),
 }
 }
@@ -719,7 +719,7 @@ class UserHttpRouteProvider(HttpRouteProviderContract):
     def get_routes() -> list:
         return [
             HttpRoute.get('/orders',
-                          lambda c, args: c.get_singleton(OrderControllerClass).index(args[0]))
+                          lambda c, route: c.get_singleton(OrderControllerClass).index(route))
         ]
 ```
 
@@ -742,8 +742,8 @@ export class UserHttpRouteProvider implements HttpRouteProviderContract {
     getRoutes(): RouteContract[] {
         return [
             HttpRoute.get('/orders',
-                (c: ContainerContract, args: any[]) =>
-                    (c.getSingleton(OrderControllerClass) as OrderController).index(args[0]))
+                (c: ContainerContract, route: RouteContract) =>
+                    (c.getSingleton(OrderControllerClass) as OrderController).index(route))
         ]
     }
 }
@@ -838,28 +838,28 @@ For annotated controllers (PHP, Java, Python) parameters live on the method alon
 
 ```php
 // PHP
-#[Handler(static fn(ContainerContract $c, array $args): Response
-    => $c->getSingleton(UserController::class)->show($args[0], $args[1]))]
+#[Handler(static fn(ContainerContract $c, RouteContract $route): ResponseContract
+    => $c->getSingleton(UserController::class)->show($route))]
 #[Parameter('id',     pattern: '[0-9]+')]
 #[Parameter('postId', pattern: '[0-9]+')]
-public function show(int $id, int $postId): Response {}
+public function show(RouteContract $route): ResponseContract {}
 ```
 
 ```java
 // Java
-@RouteHandler((ContainerContract c, List<Object> args) ->
-    c.getSingleton(UserController.class).show((int) args.get(0), (int) args.get(1)))
+@RouteHandler((ContainerContract c, RouteContract route) ->
+    c.getSingleton(UserController.class).show(route))
 @Parameter(name = "id",     pattern = "[0-9]+")
 @Parameter(name = "postId", pattern = "[0-9]+")
-public Response show(int id, int postId) {}
+public ResponseContract show(RouteContract route) {}
 ```
 
 ```python
 # Python
-@route_handler(lambda c, args: c.get_singleton(UserControllerClass).show(args[0], args[1]))
+@route_handler(lambda c, route: c.get_singleton(UserControllerClass).show(route))
 @parameter('id', pattern='[0-9]+')
 @parameter('postId', pattern='[0-9]+')
-def show(self, id: int, post_id: int) -> Response:
+def show(self, route: RouteContract) -> ResponseContract:
     pass
 ```
 
@@ -954,15 +954,15 @@ return new \Valkyrja\Http\Routing\Data\HttpRoutingData(
             parameters: [
                 new \Valkyrja\Http\Routing\Data\Parameter('id', '[0-9]+'),
             ],
-            handler: static fn(\Valkyrja\Container\ContainerContract $c, array $args): \App\Http\Response
-                => $c->getSingleton(\App\Http\Controllers\UserController::class)->show($args[0]),
+            handler: static fn(\Valkyrja\Container\Manager\Contract\ContainerContract $c, \Valkyrja\Http\Routing\Data\Contract\RouteContract $route): \Valkyrja\Http\Message\Response\Contract\ResponseContract
+                => $c->getSingleton(\App\Http\Controllers\UserController::class)->show($route),
         ),
         // routes from OrderHttpRouteProvider (explicit getRoutes())
         'order.index' => new \Valkyrja\Http\Routing\Data\HttpRoute(
             path:    '/orders',
             method:  'GET',
-            handler: static fn(\Valkyrja\Container\ContainerContract $c, array $args): \App\Http\Response
-                => $c->getSingleton(\App\Http\Controllers\OrderController::class)->index($args[0]),
+            handler: static fn(\Valkyrja\Container\Manager\Contract\ContainerContract $c, \Valkyrja\Http\Routing\Data\Contract\RouteContract $route): \Valkyrja\Http\Message\Response\Contract\ResponseContract
+                => $c->getSingleton(\App\Http\Controllers\OrderController::class)->index($route),
         ),
         // ... all other routes from all other providers
     ],
@@ -1005,14 +1005,14 @@ public record AppHttpRoutingData(
                 "user.show", new app.http.routing.AuthenticatedRoute(
                     "/users/{id}", "GET",
                     List.of(new Parameter("id", "[0-9]+")),
-                    (ContainerContract c, List<Object> args) ->
-                        c.getSingleton(UserController.class).show((int) args.get(0))
+                    (ContainerContract c, RouteContract route) ->
+                        c.getSingleton(UserController.class).show(route)
                 ),
                 // routes from OrderHttpRouteProvider
                 "order.index", new HttpRoute(
                     "/orders", "GET", List.of(),
-                    (ContainerContract c, List<Object> args) ->
-                        c.getSingleton(OrderController.class).index(args.get(0))
+                    (ContainerContract c, RouteContract route) ->
+                        c.getSingleton(OrderController.class).index(route)
                 )
                 // ... all other routes
             ),

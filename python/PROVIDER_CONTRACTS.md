@@ -340,10 +340,13 @@ class HttpRouteProviderContract(ABC):
 ### UserHttpRouteProvider Implementation
 
 ```python
+from valkyrja.container.manager.contract import ContainerContract
+from valkyrja.http.message.response.contract import ResponseContract
+from valkyrja.http.routing.data.contract import RouteContract
 from valkyrja.http.routing.provider.contract import HttpRouteProviderContract
 from valkyrja.http.routing.data import HttpRoute
 from app.http.controllers import UserController, OrderController
-from app.http.controllers.contract import OrderControllerClass
+from app.http.controllers.contract import OrderControllerClass, UserControllerClass
 
 
 class UserHttpRouteProvider(HttpRouteProviderContract):
@@ -372,13 +375,13 @@ class UserHttpRouteProvider(HttpRouteProviderContract):
         ]
 
     @staticmethod
-    def index_orders(c: ContainerContract, args: dict) -> ResponseContract:
+    def index_orders(c: ContainerContract, route: RouteContract) -> ResponseContract:
         """Handler method lives on the same class — all imports self-contained."""
-        return c.get_singleton(OrderControllerClass).index(args)
+        return c.get_singleton(OrderControllerClass).index(route)
 
     @staticmethod
-    def index_users(c: ContainerContract, args: dict) -> ResponseContract:
-        return c.get_singleton(UserControllerClass).index(args)
+    def index_users(c: ContainerContract, route: RouteContract) -> ResponseContract:
+        return c.get_singleton(UserControllerClass).index(route)
 ```
 
 ### Controller with @route_handler Decorator
@@ -393,6 +396,8 @@ reads when needed, not active registrars.
 ```python
 from valkyrja.http.routing.handler import handler
 from valkyrja.container.manager.contract import ContainerContract
+from valkyrja.http.message.response.contract import ResponseContract
+from valkyrja.http.routing.data.contract import RouteContract
 from app.http.controllers.contract import UserControllerClass
 
 
@@ -413,8 +418,8 @@ def handler(closure):
 
 class UserController:
 
-    @route_handler(lambda c, args: c.get_singleton(UserControllerClass).index(args[0]))
-    def index(self, request) -> Response:
+    @route_handler(lambda c, route: c.get_singleton(UserControllerClass).index(route))
+    def index(self, route: RouteContract) -> ResponseContract:
         """
         Build tool reads _valkyrja_handler metadata from AST
         when scanning this class for route handlers.
@@ -423,8 +428,8 @@ class UserController:
         """
         pass
 
-    @route_handler(lambda c, args: c.get_singleton(UserControllerClass).store(args[0]))
-    def store(self, request) -> Response:
+    @route_handler(lambda c, route: c.get_singleton(UserControllerClass).store(route))
+    def store(self, route: RouteContract) -> ResponseContract:
         pass
 ```
 

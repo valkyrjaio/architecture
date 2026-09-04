@@ -302,9 +302,9 @@ class UserHttpRouteProvider implements HttpRouteProviderContract
     }
 
     /** Handler method lives on the same class — all imports self-contained. */
-    public static function indexOrders(ContainerContract $c, array $args): ResponseContract
+    public static function indexOrders(ContainerContract $c, RouteContract $route): ResponseContract
     {
-        return $c->getSingleton(OrderController::class)->index($args);
+        return $c->getSingleton(OrderController::class)->index($route);
     }
 }
 ```
@@ -326,33 +326,34 @@ use Valkyrja\Http\Message\Response\Contract\ResponseContract;
 use Valkyrja\Http\Routing\Attribute\Handler;
 use Valkyrja\Http\Routing\Attribute\Parameter;
 use Valkyrja\Http\Routing\Attribute\Route;
+use Valkyrja\Http\Routing\Data\Contract\RouteContract;
 
 class UserController
 {
     #[Route(method: 'GET', path: '/users/{id}')]
     #[Parameter(name: 'id', pattern: '[0-9]+')]
     #[Handler(class: UserController::class, method: 'showHandler')]
-    public function show(string $id): ResponseContract
+    public function show(RouteContract $route): ResponseContract
     {
-        return $this->userService->findById($id)->toResponse();
+        // actual implementation
     }
 
     #[Route(method: 'POST', path: '/users')]
     #[Handler(class: UserController::class, method: 'storeHandler')]
-    public function store(array $data): ResponseContract
+    public function store(RouteContract $route): ResponseContract
     {
         // actual implementation
     }
 
     // Sindri resolves Handler → this file, reads this method body using this file's imports
-    public static function showHandler(ContainerContract $c, array $args): ResponseContract
+    public static function showHandler(ContainerContract $c, RouteContract $route): ResponseContract
     {
-        return $c->getSingleton(self::class)->show($args['id']);
+        return $c->getSingleton(self::class)->show($route);
     }
 
-    public static function storeHandler(ContainerContract $c, array $args): ResponseContract
+    public static function storeHandler(ContainerContract $c, RouteContract $route): ResponseContract
     {
-        return $c->getSingleton(self::class)->store($args);
+        return $c->getSingleton(self::class)->store($route);
     }
 }
 ```
@@ -366,15 +367,15 @@ class UserController
     #[Route(method: 'GET', path: '/users/{id}')]
     #[Parameter(name: 'id', pattern: '[0-9]+')]
     #[Handler(class: UserHttpRouteProvider::class, method: 'showUser')]
-    public function show(string $id): ResponseContract { ... }
+    public function show(RouteContract $route): ResponseContract { ... }
 }
 
 class UserHttpRouteProvider implements HttpRouteProviderContract
 {
     // Sindri resolves callable → this file, reads this method using this file's imports
-    public static function showUser(ContainerContract $c, array $args): ResponseContract
+    public static function showUser(ContainerContract $c, RouteContract $route): ResponseContract
     {
-        return $c->getSingleton(UserController::class)->show($args['id']);
+        return $c->getSingleton(UserController::class)->show($route);
     }
 }
 ```
@@ -440,7 +441,7 @@ if ($condition) { return [...]; }
 $routes = []; $routes[] = ...; return $routes;
 
 // ❌ inline closures as route handlers
-return [HttpRoute::get('/users', function (ContainerContract $c, array $args) { ... })];
+return [HttpRoute::get('/users', function (ContainerContract $c, RouteContract $route) { ... })];
 ```
 
 ---

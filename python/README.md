@@ -195,8 +195,8 @@ All provider methods must return simple list/dict literals — no conditional lo
 ```python
 from typing import Callable, Any
 
-HttpHandlerFunc = Callable[[ContainerContract, dict[str, Any]], ResponseContract]
-CliHandlerFunc = Callable[[ContainerContract, dict[str, Any]], OutputContract]
+HttpHandlerFunc = Callable[[ContainerContract, RouteContract], ResponseContract]
+CliHandlerFunc = Callable[[ContainerContract, RouteContract], OutputContract]
 ListenerHandlerFunc = Callable[[ContainerContract, dict[str, Any]], Any]
 ```
 
@@ -214,13 +214,14 @@ class HttpHandlerContract(ABC):
 ### @route_handler decorator on controller methods
 
 ```python
-@route_handler(lambda c, args: c.get_singleton(UserControllerClass).show(args['id']))
+@route_handler(lambda c, route: c.get_singleton(UserControllerClass).show(route))
 @parameter('id', pattern='[0-9]+')
-def show(self, id: int) -> ResponseContract:
+def show(self, route: RouteContract) -> ResponseContract:
     pass
 ```
 
-`ServerRequestContract` and `RouteContract` are not parameters — fetch from container if needed.
+A route handler takes the matched route. A listener takes named arguments. `ServerRequestContract` is not a parameter,
+so fetch the request from the container if needed.
 
 ---
 
