@@ -55,13 +55,16 @@ static function (ContainerContract $c, RouteContract $route): ResponseContract {
 }
 ```
 
-TypeScript narrows against the concrete class, because the contract has no run-time existence:
+TypeScript narrows against the concrete class, because the contract has no run-time existence. The TypeScript contract
+declares `getParameters()` and no `getParameter(name)`, so the TypeScript handler finds the parameter by name:
 
 ```typescript
 (c: ContainerContract, route: RouteContract): ResponseContract => {
     const id = route instanceof DynamicRoute
         ? route.getParameters().find((p) => p.getName() === 'id')?.getValue()
         : undefined
+
+    c.getSingleton<LoggerContract>(LoggerContractClass).info(route.getName(), {id})
 
     return (c.getSingleton(UserControllerClass) as UserController).show(route)
 }
@@ -616,7 +619,7 @@ public ResponseContract index(RouteContract route) {
 
 ```python
 @route_handler(lambda c, route: c.get_singleton(UserController).index(route))
-def index(route: RouteContract) -> ResponseContract:
+def index(self, route: RouteContract) -> ResponseContract:
     # actual implementation
     pass
 ```
@@ -846,7 +849,7 @@ handler closure for cache generation.
 ```python
 # python — decorator-based registration
 @route_handler(lambda c, route: c.get_singleton(UserController).index(route))
-def index(route: RouteContract) -> ResponseContract:
+def index(self, route: RouteContract) -> ResponseContract:
     pass
 ```
 
