@@ -340,6 +340,9 @@ class HttpRouteProviderContract(ABC):
 ### UserHttpRouteProvider Implementation
 
 ```python
+from valkyrja.container.manager.contract import ContainerContract
+from valkyrja.http.message.response.contract import ResponseContract
+from valkyrja.http.routing.data.contract import RouteContract
 from valkyrja.http.routing.provider.contract import HttpRouteProviderContract
 from valkyrja.http.routing.data import HttpRoute
 from app.http.controllers import UserController, OrderController
