@@ -55,6 +55,18 @@ static function (ContainerContract $c, RouteContract $route): ResponseContract {
 }
 ```
 
+TypeScript narrows against the concrete class, because the contract has no run-time existence:
+
+```typescript
+(c: ContainerContract, route: RouteContract): ResponseContract => {
+    const id = route instanceof DynamicRoute
+        ? route.getParameters().find((p) => p.getName() === 'id')?.getValue()
+        : undefined
+
+    return (c.getSingleton(UserControllerClass) as UserController).show(route)
+}
+```
+
 ```php
 // HTTP handler — fetch the request from the container only if needed
 static fn(ContainerContract $c, RouteContract $route): ResponseContract => (
