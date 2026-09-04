@@ -55,14 +55,12 @@ static function (ContainerContract $c, RouteContract $route): ResponseContract {
 }
 ```
 
-TypeScript narrows against the concrete `DynamicRoute` class, because the contract has no run-time existence.
-`DynamicRouteContract` declares `getParameters()`, so the TypeScript handler finds the parameter by name through the
-class it narrowed to:
+TypeScript narrows against the concrete `DynamicRoute` class, and it reads the parameter the same way:
 
 ```typescript
 (c: ContainerContract, route: RouteContract): ResponseContract => {
     const id = route instanceof DynamicRoute
-        ? route.getParameters().find((p) => p.getName() === 'id')?.getValue()
+        ? route.getParameter('id').getValue()
         : undefined
 
     c.getSingleton<LoggerContract>(LoggerContractClass).info(route.getName(), {id})
