@@ -21,9 +21,8 @@ The language enforces the closure signature. Each handler type has its own signa
 | Event listener | `ContainerContract`, `map<string, mixed>` | `any` / `mixed`    |
 
 A route handler takes the matched route, so the handler reads the route's own data. Each concern declares its own
-route contract in its own namespace, so the HTTP `RouteContract` and the CLI `RouteContract` are two distinct types. An
-example below that shows both concerns writes `RouteContract` unqualified for each one. A listener takes a
-`map<string, mixed>`, because an event carries named arguments and no route.
+route contract in its own namespace, so the HTTP `RouteContract` and the CLI `RouteContract` are two distinct types. A
+listener takes a `map<string, mixed>`, because an event carries named arguments and no route.
 
 `ServerRequestContract` is **not** an explicit parameter. The container holds the request, and a handler that needs the
 request resolves the request. Keeping the request out of the signature:
@@ -66,7 +65,7 @@ TypeScript narrows against the concrete `DynamicRoute` class, and it reads the p
 
     c.getSingleton<LoggerContract>(LoggerContractClass).info(route.getName(), {id})
 
-    return (c.getSingleton(UserControllerClass) as UserController).show(route)
+    return c.getSingleton<UserController>(UserControllerClass).show(route)
 }
 ```
 
