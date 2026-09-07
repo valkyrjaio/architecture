@@ -22,9 +22,8 @@ The language enforces the closure signature. Each handler type has its own signa
 
 A route handler takes the matched route, so the handler reads the route's own data. Each concern declares its own
 route contract in its own namespace, so the HTTP `RouteContract` and the CLI `RouteContract` are two distinct types. An
-example below that shows both concerns writes `RouteContract` unqualified for each one, and each port names the two
-apart the way that port names any two same-named types. A listener takes a `map<string, mixed>`, because an event
-carries named arguments and no route.
+example below that shows both concerns writes `RouteContract` unqualified for each one. A listener takes a
+`map<string, mixed>`, because an event carries named arguments and no route.
 
 `ServerRequestContract` is **not** an explicit parameter. The container holds the request, and a handler that needs the
 request resolves the request. Keeping the request out of the signature:
