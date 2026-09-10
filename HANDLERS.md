@@ -42,7 +42,7 @@ Warning: each port spells the narrowing differently, and TypeScript cannot spell
 | Java       | `instanceof`                 |
 | Go         | a type assertion             |
 | Python     | `isinstance` against the ABC |
-| TypeScript | a class, or a type guard     |
+| TypeScript | `instanceof` against a class |
 
 A TypeScript contract has no run-time existence, so a TypeScript handler reads the parameter through the class instead.
 See [`CONTRACTS.md`](CONTRACTS.md), _Type erasure_.
