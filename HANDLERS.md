@@ -34,7 +34,7 @@ A matched dynamic route carries the value of each parameter that the route decla
 and gives the handler a `DynamicRouteContract`. The handler still declares `RouteContract`, because a narrower
 parameter type breaks the handler signature, so the handler narrows the type at run time.
 
-Warning: each port spells the narrowing differently, and TypeScript cannot spell it at all against a contract.
+Warning: a TypeScript handler cannot narrow against a contract.
 
 | Port       | Narrowing construct          |
 | ---------- | ---------------------------- |
