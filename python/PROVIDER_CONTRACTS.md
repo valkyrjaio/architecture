@@ -231,9 +231,6 @@ class ServiceProviderContract(ABC):
                 UserRepositoryClass: UserServiceProvider.publish_user_repository,
             }
 
-        @route_handler(lambda c, args: c.set_singleton(
-            UserRepositoryClass, UserRepository(c.get_singleton(DatabaseClass))
-        ))
         @staticmethod
         def publish_user_repository(container: ContainerContract) -> None:
             container.set_singleton(
@@ -387,30 +384,30 @@ class UserHttpRouteProvider(HttpRouteProviderContract):
 ### Controller with @route_handler Decorator
 
 The `@route_handler` decorator is a **metadata marker only** — it does not self-register routes at import time. It
-attaches the closure as metadata on the method. The framework reads this metadata during bootstrap (no cache) and skips it
-entirely when loading from cache.
+attaches the callable as metadata on the method. The framework reads this metadata during bootstrap (no cache) and skips
+it entirely when loading from cache.
 
 This is intentional and consistent with PHP's `#[RouteHandler]` attribute — both are inert metadata that the framework
 reads when needed, not active registrars.
 
 ```python
-from valkyrja.http.routing.handler import handler
+from valkyrja.http.routing.handler import route_handler
 from valkyrja.container.manager.contract import ContainerContract
 from valkyrja.http.message.response.contract import ResponseContract
 from valkyrja.http.routing.data.contract import RouteContract
 from app.http.controllers.contract import UserControllerClass
 
 
-def handler(closure):
+def route_handler(handler: tuple[type, str]):
     """
-    Metadata marker — attaches closure to method as _valkyrja_handler.
+    Metadata marker — attaches the callable to the method as _valkyrja_handler.
     Does NOT register the route at import time.
     Framework reads _valkyrja_handler during bootstrap (no cache).
     Framework skips entirely when loading from cache.
     """
 
     def decorator(func):
-        func._valkyrja_handler = closure  # metadata only — no registration
+        func._valkyrja_handler = handler  # metadata only — no registration
         return func
 
     return decorator
@@ -418,19 +415,27 @@ def handler(closure):
 
 class UserController:
 
-    @route_handler(lambda c, route: c.get_singleton(UserControllerClass).index(route))
+    @route_handler((UserController, 'index_handler'))
     def index(self, route: RouteContract) -> ResponseContract:
         """
         Build tool reads _valkyrja_handler metadata from AST
         when scanning this class for route handlers.
-        The decorator carries the closure used in cache generation.
+        The decorator carries the callable used in cache generation.
         The method body is the actual runtime implementation.
         """
         pass
 
-    @route_handler(lambda c, route: c.get_singleton(UserControllerClass).store(route))
+    @route_handler((UserController, 'store_handler'))
     def store(self, route: RouteContract) -> ResponseContract:
         pass
+
+    @staticmethod
+    def index_handler(c: ContainerContract, route: RouteContract) -> ResponseContract:
+        return c.get_singleton(UserControllerClass).index(route)
+
+    @staticmethod
+    def store_handler(c: ContainerContract, route: RouteContract) -> ResponseContract:
+        return c.get_singleton(UserControllerClass).store(route)
 ```
 
 ### Why Not Self-Registration
@@ -536,7 +541,7 @@ from typing import Callable, Any
 @dataclass(frozen=True)
 class Parameter:
     name: str
-    pattern: str = '[^/]+'
+    regex: str = '[^/]+'
 
 
 @dataclass(frozen=True)

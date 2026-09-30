@@ -193,15 +193,13 @@ public interface HttpHandlerContract {
 ### @RouteHandler annotation on controller methods
 
 ```java
-@RouteHandler((ContainerContract c, RouteContract route) ->
-        c.
-
-getSingleton(UserController .class).
-
-show(route))
-
-@Parameter(name = "id", pattern = "[0-9]+")
+@RouteHandler(handlerClass = UserController.class, handlerMethod = "showHandler")
+@Parameter(name = "id", regex = "[0-9]+")
 public ResponseContract show(RouteContract route) {
+}
+
+public static ResponseContract showHandler(ContainerContract c, RouteContract route) {
+    return c.getSingleton(UserController.class).show(route);
 }
 ```
 

@@ -276,9 +276,9 @@ Sindri reads:            the handler method body from whichever file the callabl
 class UserController
 {
     // Annotations on the implementation method
-    #[Route('GET', '/users/{id}')]
-    #[Parameter('id', pattern: '[0-9]+')]
-    #[Handler([self::class, 'showHandler'])]  // callable — class + method name
+    #[Route(path: '/users/{id}', name: 'user.show', requestMethods: [RequestMethod::GET])]
+    #[Parameter(name: 'id', regex: '[0-9]+')]
+    #[RouteHandler([self::class, 'showHandler'])]  // callable — class + method name
     public function show(RouteContract $route): ResponseContract
     {
         // actual implementation — not read by Sindri
@@ -297,9 +297,9 @@ class UserController
 ```php
 class UserController
 {
-    #[Route('GET', '/users/{id}')]
-    #[Parameter('id', pattern: '[0-9]+')]
-    #[Handler([UserHttpRouteProvider::class, 'showUser'])]  // points elsewhere
+    #[Route(path: '/users/{id}', name: 'user.show', requestMethods: [RequestMethod::GET])]
+    #[Parameter(name: 'id', regex: '[0-9]+')]
+    #[RouteHandler([UserHttpRouteProvider::class, 'showUser'])]  // points elsewhere
     public function show(RouteContract $route): ResponseContract { /* ... */ }
 }
 
@@ -317,12 +317,12 @@ class UserHttpRouteProvider implements HttpRouteProviderContract
 
 ```java
 public class UserController {
-    @Route(method = "GET", path = "/users/{id}")
-    @Parameter(name = "id", pattern = "[0-9]+")
-    @RouteHandler(clazz = UserController.class, method = "showHandler")
+    @Route(path = "/users/{id}", name = "user.show", requestMethods = RequestMethod.GET)
+    @Parameter(name = "id", regex = "[0-9]+")
+    @RouteHandler(handlerClass = UserController.class, handlerMethod = "showHandler")
     public ResponseContract show(RouteContract route) { /* actual implementation */ }
 
-    // Sindri resolves clazz + method → this file → reads this method
+    // Sindri resolves handlerClass + handlerMethod → this file → reads this method
     public static ResponseContract showHandler(ContainerContract c, RouteContract route) {
         return c.getSingleton(UserController.class).show(route);
     }
@@ -333,8 +333,8 @@ public class UserController {
 
 ```python
 class UserController:
-    @route('GET', '/users/{id}')
-    @parameter('id', pattern='[0-9]+')
+    @route(path='/users/{id}', name='user.show', request_methods=[RequestMethod.GET])
+    @parameter(name='id', regex='[0-9]+')
     @route_handler((UserController, 'show_handler'))  # callable tuple
     def show(self, route: RouteContract) -> ResponseContract:
         pass  # actual implementation — not read by Sindri
@@ -400,9 +400,9 @@ are structural problems in the application that the developer must resolve.
 **For annotated controllers and listeners** (PHP, Java, Python only):
 
 ```
-✅ #[Handler([ClassName::class, 'methodName'])]   — PHP callable on any class
-✅ @RouteHandler(clazz = ClassName.class, method = "m") — Java callable on any class
-✅ @route_handler((ClassName, 'method_name'))            — Python callable on any class
+✅ #[RouteHandler([ClassName::class, 'methodName'])]                      — PHP callable on any class
+✅ @RouteHandler(handlerClass = ClassName.class, handlerMethod = "m")     — Java callable on any class
+✅ @route_handler((ClassName, 'method_name'))                             — Python callable on any class
 
 ✅ Annotation lives on the implementation method (the instance method)
 ✅ Handler method must be static — anywhere in the codebase
@@ -1290,7 +1290,7 @@ explicit_routes     → list of route data objects from getRoutes()
                       each route carries:
                         method      (GET, POST, etc. — from factory method name)
                         path        ('/users/{id}' — string literal)
-                        parameters  (list of Parameter objects — name + pattern string literals)
+                        parameters  (list of Parameter objects — name + regex string literals)
                         handler     (method pointer → [self::class, 'methodName'])
                         handler body (static method on same class → extract and rewrite)
                         middleware  (if present)
@@ -1313,7 +1313,7 @@ annotated_classes   → list of class identifiers from getControllerClasses()
       - Extract handler callable → [self::class, 'methodName'] — written as-is into output
       - Extract Parameter constructor calls if present:
           name    → string literal argument
-          pattern → string literal argument (default '[^/]+' if absent)
+          regex   → string literal argument (default '[^/]+' if absent)
       - Extract middleware, name, and other metadata if present
 4. Find getControllerClasses() method (PHP/Java/Python only):
    a. Extract return list literal
@@ -1353,7 +1353,7 @@ SomeServiceId::class => [SomeProvider::class, 'publishMethod']
 new Route('/path', 'name', [SomeClass::class, 'theHandlerMethod'])
 
 // annotated route — same, callable literal written as-is
-#[Handler([SomeClass::class, 'theHandlerMethod'])]
+#[RouteHandler([SomeClass::class, 'theHandlerMethod'])]
 ```
 
 **What to collect per annotated implementation method:**
@@ -1365,7 +1365,7 @@ imports     → map of simple name → FQN
 per method:
   callable    → (ClassName, methodName) from #[RouteHandler] — written as-is into output
   parameters  → list from #[Parameter] / @Parameter annotations
-                each: name (string literal), pattern (string literal)
+                each: name (string literal), regex (string literal)
   path        → from route annotation — string literal
   method      → HTTP method — from route annotation
   middleware  → from middleware annotation if present
@@ -1384,7 +1384,7 @@ per method:
         - Resolve ClassName via imports → FQN (so output contains FQN, not short name)
      b. Check for @Parameter / #[Parameter] annotations (may be multiple):
         - Extract name string literal
-        - Extract pattern string literal (default '[^/]+' if absent)
+        - Extract regex string literal (default '[^/]+' if absent)
      c. Check for route annotation (HTTP method + path):
         - Extract HTTP method
         - Extract path string literal
@@ -1436,7 +1436,7 @@ For every route collected in Steps 3c, 3d, 4a:
 
 ```
 1. Construct a plain ValkyrjaRoute from extracted data:
-   - path, method, parameters (name + pattern pairs)
+   - path, method, parameters (name + regex pairs)
 2. Pass to ProcessorContract::route() — same processor used at runtime
 3. Read back the compiled regex string
 4. Store alongside route data for Step 6
@@ -1638,7 +1638,7 @@ $route = (new HttpRoute())
     ->setMethod($method)
     ->setPath($path)
     ->setParameters(array_map(
-        fn($p) => new Parameter($p['name'], $p['pattern']),
+        fn($p) => new Parameter($p['name'], $p['regex']),
         $parameters
     ));
 

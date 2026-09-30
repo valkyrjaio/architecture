@@ -489,9 +489,6 @@ class UserServiceProvider implements ServiceProviderContract
         ];
     }
 
-    #[Handler(static fn(ContainerContract $c): void
-        => $c->setSingleton(UserRepositoryContract::class,
-            new UserRepository($c->getSingleton(DatabaseContract::class))))]
     public static function publishUserRepository(ContainerContract $container): void
     {
         $container->setSingleton(
@@ -518,9 +515,6 @@ public class UserServiceProvider implements ServiceProviderContract {
         );
     }
 
-    @RouteHandler((ContainerContract c, List<Object> args) ->
-            c.setSingleton(UserRepositoryContract.class,
-                    new UserRepository(c.getSingleton(DatabaseContract.class))))
     public static void publishUserRepository(ContainerContract container) {
         container.setSingleton(
                 UserRepositoryContract.class,
@@ -572,9 +566,6 @@ class UserServiceProvider(ServiceProviderContract):
             UserRepositoryClass: UserServiceProvider.publish_user_repository,
         }
 
-    @route_handler(lambda c, args: c.set_singleton(
-        UserRepositoryClass, UserRepository(c.get_singleton(DatabaseClass))
-    ))
     @staticmethod
     def publish_user_repository(container: ContainerContract) -> None:
         container.set_singleton(
@@ -786,8 +777,8 @@ Parameter objects appear as inline constructor calls — AST reads them as stati
 ```php
 // PHP
 HttpRoute::get('/users/{id}/posts/{postId}', $handler, [
-    new Parameter('id',     pattern: '[0-9]+'),
-    new Parameter('postId', pattern: '[0-9]+'),
+    new Parameter('id',     regex: '[0-9]+'),
+    new Parameter('postId', regex: '[0-9]+'),
 ])
 ```
 
@@ -810,8 +801,8 @@ parameter.New("postId", "[0-9]+"),
 ```python
 # Python
 HttpRoute.get('/users/{id}/posts/{postId}', handler, [
-    Parameter('id', pattern='[0-9]+'),
-    Parameter('postId', pattern='[0-9]+'),
+    Parameter('id', regex='[0-9]+'),
+    Parameter('postId', regex='[0-9]+'),
 ])
 ```
 
@@ -838,32 +829,30 @@ For annotated controllers (PHP, Java, Python) parameters live on the method alon
 
 ```php
 // PHP
-#[Handler(static fn(ContainerContract $c, RouteContract $route): ResponseContract
-    => $c->getSingleton(UserController::class)->show($route))]
-#[Parameter('id',     pattern: '[0-9]+')]
-#[Parameter('postId', pattern: '[0-9]+')]
+#[RouteHandler([self::class, 'showHandler'])]
+#[Parameter(name: 'id',     regex: '[0-9]+')]
+#[Parameter(name: 'postId', regex: '[0-9]+')]
 public function show(RouteContract $route): ResponseContract {}
 ```
 
 ```java
 // Java
-@RouteHandler((ContainerContract c, RouteContract route) ->
-    c.getSingleton(UserController.class).show(route))
-@Parameter(name = "id",     pattern = "[0-9]+")
-@Parameter(name = "postId", pattern = "[0-9]+")
+@RouteHandler(handlerClass = UserController.class, handlerMethod = "showHandler")
+@Parameter(name = "id",     regex = "[0-9]+")
+@Parameter(name = "postId", regex = "[0-9]+")
 public ResponseContract show(RouteContract route) {}
 ```
 
 ```python
 # Python
-@route_handler(lambda c, route: c.get_singleton(UserControllerClass).show(route))
-@parameter('id', pattern='[0-9]+')
-@parameter('postId', pattern='[0-9]+')
+@route_handler((UserController, 'show_handler'))
+@parameter(name='id', regex='[0-9]+')
+@parameter(name='postId', regex='[0-9]+')
 def show(self, route: RouteContract) -> ResponseContract:
     pass
 ```
 
-Both paths produce identical data — a list of parameter name/pattern pairs readable as literal AST nodes. ✅
+Both paths produce identical data — a list of parameter name/regex pairs readable as literal AST nodes. ✅
 
 ---
 
@@ -1032,12 +1021,12 @@ Parameter definitions follow the same simple literal rule as all other build too
 
 ```
 ✅ new Parameter('id', '[0-9]+')               — inline constructor with literals
-✅ new Parameter('id', pattern: '[0-9]+')      — named argument with literal
-✅ #[Parameter('id', pattern: '[0-9]+')]       — annotation with literals
-✅ @Parameter(name = "id", pattern = "[0-9]+") — annotation with literals
+✅ new Parameter('id', regex: '[0-9]+')        — named argument with literal
+✅ #[Parameter(name: 'id', regex: '[0-9]+')]   — attribute with literals
+✅ @Parameter(name = "id", regex = "[0-9]+")   — annotation with literals
 
-❌ new Parameter($name, $pattern)              — variable references
-❌ new Parameter('id', $this->getPattern())    — method call
+❌ new Parameter($name, $regex)                — variable references
+❌ new Parameter('id', $this->getRegex())      — method call
 ❌ $params = getParams(); route(..., $params)  — variable reference to parameter list
 ```
 

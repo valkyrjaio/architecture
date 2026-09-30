@@ -153,7 +153,7 @@ class ServiceProviderContract(ABC):
     def publishers() -> dict[str, Callable[[ContainerContract], None]]: ...
 ```
 
-Publisher methods carry `@handler` decorator — build tool reads decorator argument from AST:
+No `@route_handler` decorator sits on a publisher method. The build tool reads the method body:
 
 ```python
 @staticmethod
@@ -163,9 +163,6 @@ def publishers() -> dict:
     }
 
 
-@handler(lambda c, args: c.set_singleton(
-    UserRepositoryClass, UserRepository(c.get_singleton(DatabaseClass))
-))
 @staticmethod
 def publish_user_repository(container: ContainerContract) -> None:
     container.set_singleton(UserRepositoryClass, UserRepository(container.get_singleton(DatabaseClass)))
@@ -214,8 +211,8 @@ class HttpHandlerContract(ABC):
 ### @route_handler decorator on controller methods
 
 ```python
-@route_handler(lambda c, route: c.get_singleton(UserControllerClass).show(route))
-@parameter('id', pattern='[0-9]+')
+@route_handler((UserController, 'show_handler'))
+@parameter(name='id', regex='[0-9]+')
 def show(self, route: RouteContract) -> ResponseContract:
     pass
 ```
@@ -437,11 +434,11 @@ def scan_controller_for_handlers(controller_class: type) -> list[dict]:
 The `@parameter` decorator follows the same pattern:
 
 ```python
-def parameter(name: str, pattern: str = '[^/]+'):
+def parameter(name: str, regex: str = '[^/]+'):
     def decorator(func):
         if not hasattr(func, '_valkyrja_parameters'):
             func._valkyrja_parameters = []
-        func._valkyrja_parameters.append({'name': name, 'pattern': pattern})
+        func._valkyrja_parameters.append({'name': name, 'regex': regex})
         return func
 
     return decorator

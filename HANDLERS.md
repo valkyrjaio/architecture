@@ -32,9 +32,8 @@ request resolves the request. Keeping the request out of the signature:
 
 A matched dynamic route carries a value for each parameter the matcher captured. The matcher builds the value from a
 parameter's declared default when it captures none, and a parameter keeps a null value when it captures no value and the
-parameter declares no default. The matcher attaches the values and gives the handler a `DynamicRouteContract`. The
-handler still declares `RouteContract`, because a narrower parameter type breaks the handler signature, so the handler
-narrows the type at run time.
+parameter declares no default. The matcher attaches the values and gives the handler a `DynamicRouteContract`. The handler still declares `RouteContract`, because a narrower parameter type breaks
+the handler signature, so the handler narrows the type at run time.
 
 Warning: a TypeScript handler cannot narrow against a contract.
 
@@ -601,36 +600,42 @@ method rather than manually constructing route objects with handlers:
 **PHP**
 
 ```php
-#[Handler(static fn(ContainerContract $c, RouteContract $route): ResponseContract
-    => $c->getSingleton(UserController::class)->index($route))]
+#[RouteHandler([self::class, 'indexHandler'])]
 public function index(RouteContract $route): ResponseContract
 {
     // actual implementation
+}
+
+public static function indexHandler(ContainerContract $c, RouteContract $route): ResponseContract
+{
+    return $c->getSingleton(UserController::class)->index($route);
 }
 ```
 
 **Java**
 
 ```java
-@RouteHandler((ContainerContract c, RouteContract route) ->
-        c.
-
-getSingleton(UserController .class).
-
-index(route))
-
+@RouteHandler(handlerClass = UserController.class, handlerMethod = "indexHandler")
 public ResponseContract index(RouteContract route) {
     // actual implementation
+}
+
+public static ResponseContract indexHandler(ContainerContract c, RouteContract route) {
+    return c.getSingleton(UserController.class).index(route);
 }
 ```
 
 **Python**
 
 ```python
-@route_handler(lambda c, route: c.get_singleton(UserController).index(route))
+@route_handler((UserController, 'index_handler'))
 def index(self, route: RouteContract) -> ResponseContract:
     # actual implementation
     pass
+
+@staticmethod
+def index_handler(c: ContainerContract, route: RouteContract) -> ResponseContract:
+    return c.get_singleton(UserController).index(route)
 ```
 
 For **Go** and **TypeScript** — where no annotations exist — explicit registration is used:
@@ -857,7 +862,7 @@ handler closure for cache generation.
 
 ```python
 # python — decorator-based registration
-@route_handler(lambda c, route: c.get_singleton(UserController).index(route))
+@route_handler((UserController, 'index_handler'))
 def index(self, route: RouteContract) -> ResponseContract:
     pass
 ```
@@ -920,9 +925,9 @@ class UserController
     // Sindri reads these annotations and constructs a Route object.
     // The callable [SomeClass::class, 'theHandlerMethod'] is written
     // directly into the generated cache as-is — no body extraction.
-    #[Route('GET', '/users/{id}')]
-    #[Parameter('id', pattern: '[0-9]+')]
-    #[Handler([self::class, 'showHandler'])]
+    #[Route(path: '/users/{id}', name: 'user.show', requestMethods: [RequestMethod::GET])]
+    #[Parameter(name: 'id', regex: '[0-9]+')]
+    #[RouteHandler([self::class, 'showHandler'])]
     public function show(RouteContract $route): ResponseContract
     {
         // actual implementation — irrelevant to Sindri
@@ -952,7 +957,7 @@ new \Valkyrja\Http\Routing\Data\HttpRoute(
 
 ```
 1. Find #[Route], #[Parameter], #[RouteHandler] on the implementation method
-2. Extract path, HTTP method, parameter name/pattern, callable — all literals
+2. Extract path, HTTP method, parameter name/regex, callable — all literals
 3. Construct route data from extracted literals
 4. Write into generated AppHttpRoutingData — callable written as-is
 ```
@@ -966,9 +971,9 @@ public class UserController {
 
     // Sindri reads annotations and constructs a Route object.
     // Callable written directly into generated cache — no body extraction.
-    @Route(method = "GET", path = "/users/{id}")
-    @Parameter(name = "id", pattern = "[0-9]+")
-    @RouteHandler(clazz = UserController.class, method = "showHandler")
+    @Route(path = "/users/{id}", name = "user.show", requestMethods = RequestMethod.GET)
+    @Parameter(name = "id", regex = "[0-9]+")
+    @RouteHandler(handlerClass = UserController.class, handlerMethod = "showHandler")
     public ResponseContract show(RouteContract route) {
         // actual implementation — irrelevant to Sindri
     }
@@ -995,7 +1000,7 @@ HandlerRef(UserController .class, "showHandler")  // written as-is
 
 ```
 1. Find @Route, @Parameter, @RouteHandler on the implementation method
-2. Extract path, HTTP method, parameter name/pattern, clazz + method — all literals
+2. Extract path, HTTP method, parameter name/regex, handlerClass + handlerMethod — all literals
 3. Construct route data from extracted literals
 4. Write into generated AppHttpRoutingData — callable written as-is
 ```
@@ -1009,8 +1014,8 @@ class UserController:
 
     # Sindri reads these decorators and constructs a Route object.
     # The callable tuple is written directly into the generated cache — no body extraction.
-    @route('GET', '/users/{id}')
-    @parameter('id', pattern='[0-9]+')
+    @route(path='/users/{id}', name='user.show', request_methods=[RequestMethod.GET])
+    @parameter(name='id', regex='[0-9]+')
     @route_handler((UserController, 'show_handler'))  # callable tuple — written as-is
     def show(self, route: RouteContract) -> ResponseContract:
         pass  # actual implementation — irrelevant to Sindri
@@ -1036,7 +1041,7 @@ HttpRoute(
 
 ```
 1. Find @route, @parameter, @route_handler decorators on the implementation method
-2. Extract path, HTTP method, parameter name/pattern, callable tuple — all literals
+2. Extract path, HTTP method, parameter name/regex, callable tuple — all literals
 3. Construct route data from extracted literals
 4. Write into generated AppHttpRoutingData — callable written as-is
 ```

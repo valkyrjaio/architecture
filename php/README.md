@@ -197,16 +197,15 @@ Routes need `#[RouteHandler]` attribute support on controller/action methods, an
 Each attribute carries the typed closure:
 
 ```php
-#[Handler(static fn(ContainerContract $c, RouteContract $route): ResponseContract
-    => $c->getSingleton(UserController::class)->show($route))]
-#[Parameter('id', pattern: '[0-9]+')]
+#[RouteHandler([self::class, 'showHandler'])]
+#[Parameter(name: 'id', regex: '[0-9]+')]
 public function show(RouteContract $route): ResponseContract {}
 ```
 
 ### Add #[Parameter] attribute
 
 Routes with dynamic segments need `#[Parameter]` attribute support on controller/action methods carrying the parameter
-name and pattern.
+name and regex.
 
 ---
 

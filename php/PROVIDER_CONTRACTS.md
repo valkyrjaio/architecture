@@ -322,30 +322,31 @@ handler may live on the controller, the route provider, or any other class.
 namespace App\Http\Controller;
 
 use Valkyrja\Container\Manager\Contract\ContainerContract;
+use Valkyrja\Http\Message\Enum\RequestMethod;
 use Valkyrja\Http\Message\Response\Contract\ResponseContract;
-use Valkyrja\Http\Routing\Attribute\Handler;
 use Valkyrja\Http\Routing\Attribute\Parameter;
 use Valkyrja\Http\Routing\Attribute\Route;
+use Valkyrja\Http\Routing\Attribute\Route\RouteHandler;
 use Valkyrja\Http\Routing\Data\Contract\RouteContract;
 
 class UserController
 {
-    #[Route(method: 'GET', path: '/users/{id}')]
-    #[Parameter(name: 'id', pattern: '[0-9]+')]
-    #[Handler(class: UserController::class, method: 'showHandler')]
+    #[Route(path: '/users/{id}', name: 'user.show', requestMethods: [RequestMethod::GET])]
+    #[Parameter(name: 'id', regex: '[0-9]+')]
+    #[RouteHandler([UserController::class, 'showHandler'])]
     public function show(RouteContract $route): ResponseContract
     {
         // actual implementation
     }
 
-    #[Route(method: 'POST', path: '/users')]
-    #[Handler(class: UserController::class, method: 'storeHandler')]
+    #[Route(path: '/users', name: 'user.store', requestMethods: [RequestMethod::POST])]
+    #[RouteHandler([UserController::class, 'storeHandler'])]
     public function store(RouteContract $route): ResponseContract
     {
         // actual implementation
     }
 
-    // Sindri resolves Handler → this file, reads this method body using this file's imports
+    // Sindri resolves RouteHandler → this file, reads this method body using this file's imports
     public static function showHandler(ContainerContract $c, RouteContract $route): ResponseContract
     {
         return $c->getSingleton(self::class)->show($route);
@@ -364,9 +365,9 @@ class UserController
 class UserController
 {
     // #[RouteHandler] points to the route provider — Sindri follows the callable
-    #[Route(method: 'GET', path: '/users/{id}')]
-    #[Parameter(name: 'id', pattern: '[0-9]+')]
-    #[Handler(class: UserHttpRouteProvider::class, method: 'showUser')]
+    #[Route(path: '/users/{id}', name: 'user.show', requestMethods: [RequestMethod::GET])]
+    #[Parameter(name: 'id', regex: '[0-9]+')]
+    #[RouteHandler([UserHttpRouteProvider::class, 'showUser'])]
     public function show(RouteContract $route): ResponseContract { ... }
 }
 
