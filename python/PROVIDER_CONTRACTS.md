@@ -7,13 +7,13 @@
 
 Python provider contracts differ from PHP/Java in several ways:
 
-- Decorators are **metadata markers** — they attach closure metadata to methods at import time but do NOT self-register
+- Decorators are **metadata markers** — they attach callable metadata to methods at import time but do NOT self-register
   routes. The framework reads metadata during bootstrap; skips it when loading from cache.
 - `inspect.getfile(ClassName)` resolves class to source file — equivalent of PHP's `ReflectionClass::getFileName()`
 - No `::class` needed — `X()` creates an instance directly; Python classes are first-class callables
 - ABC enforces abstract contracts — `TypeError` raised on direct instantiation
 - Instance methods throughout — providers are instantiated and their methods called directly
-- Publisher methods have a `@handler` decorator carrying the closure — build tool reads the decorator argument from AST
+- Publisher methods carry no handler decorator — build tool reads each publisher method's body from AST
 - `class_` helper available (trailing underscore because `class` is reserved) for FQN string derivation
 
 ---
@@ -216,9 +216,8 @@ class ServiceProviderContract(ABC):
     Each value must be a static method reference on the same class.
 
     The build tool reads the publishers map from AST, resolves each method
-    reference via inspect.getfile(), and reads the _valkyrja_handler metadata
-    on that method for cache generation. The @handler decorator on publisher
-    methods is a metadata marker only — it does not execute at import time.
+    reference via inspect.getfile(), and reads that method's body for cache
+    generation.
 
     Note: 'class_' helper available for FQN derivation since 'class' is reserved:
         def class_(cls) -> str:
@@ -273,9 +272,7 @@ class UserServiceProvider(ServiceProviderContract):
     @staticmethod
     def publish_user_repository(container: ContainerContract) -> None:
         """
-        Build tool reads the @route_handler decorator argument from AST.
-        The decorator carries the closure used for cache generation.
-        The method body is the runtime implementation.
+        Build tool reads this method's body from AST for cache generation.
         """
         container.set_singleton(
             UserRepositoryClass,
@@ -391,7 +388,6 @@ This is intentional and consistent with PHP's `#[RouteHandler]` attribute — bo
 reads when needed, not active registrars.
 
 ```python
-from valkyrja.http.routing.handler import route_handler
 from valkyrja.container.manager.contract import ContainerContract
 from valkyrja.http.message.response.contract import ResponseContract
 from valkyrja.http.routing.data.contract import RouteContract
@@ -415,7 +411,7 @@ def route_handler(handler: tuple[type, str]):
 
 class UserController:
 
-    @route_handler((UserController, 'index_handler'))
+    @route_handler((lambda: UserController, 'index_handler'))
     def index(self, route: RouteContract) -> ResponseContract:
         """
         Build tool reads _valkyrja_handler metadata from AST
@@ -425,7 +421,7 @@ class UserController:
         """
         pass
 
-    @route_handler((UserController, 'store_handler'))
+    @route_handler((lambda: UserController, 'store_handler'))
     def store(self, route: RouteContract) -> ResponseContract:
         pass
 
@@ -609,7 +605,7 @@ no cross-file import aggregation, no conflict detection, no registry needed.
 ✅ Method reference on the same class
 ✅ All type references imported in the same file
 
-❌ Inline closures or lambdas in route/listener definitions
+❌ Inline closures or lambdas as the handler itself — a thunk naming the handler's class is read as a reference
 ❌ References to types not imported in the current file
 ❌ Handler methods on a different class
 ```

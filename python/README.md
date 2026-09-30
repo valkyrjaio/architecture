@@ -211,7 +211,7 @@ class HttpHandlerContract(ABC):
 ### @route_handler decorator on controller methods
 
 ```python
-@route_handler((UserController, 'show_handler'))
+@route_handler((lambda: UserController, 'show_handler'))
 @parameter(name='id', regex='[0-9]+')
 def show(self, route: RouteContract) -> ResponseContract:
     pass
@@ -376,9 +376,9 @@ Python decorators execute at import time — but `@route_handler` must **not** s
 metadata marker only:
 
 ```python
-def handler(closure):
+def route_handler(handler: tuple[type, str]):
     def decorator(func):
-        func._valkyrja_handler = closure  # metadata only — no registration
+        func._valkyrja_handler = handler  # metadata only — no registration
         return func
 
     return decorator
@@ -394,8 +394,10 @@ bootstrap. It reads the metadata and registers routes from it.
 **How it works with cache:** The framework loads cache data files directly and never calls `get_controller_classes()` or
 scans for `_valkyrja_handler`. Decorator metadata is never read.
 
-The `@route_handler` decorator carries the closure for build tool extraction. The build tool reads `_valkyrja_handler`
-metadata from AST via `inspect.getfile()` + `ast.parse()`.
+The `@route_handler` decorator carries the callable for build tool extraction. The build tool reads
+`_valkyrja_handler` metadata from AST via `inspect.getfile()` + `ast.parse()`. A decorator argument runs before the
+class name binds, so a handler on the decorated class's own body takes a thunk — see
+[`DECORATORS.md`](../typescript/DECORATORS.md) for the same problem in TypeScript.
 
 ### Accessing _valkyrja_handler at Runtime
 
@@ -417,14 +419,14 @@ def scan_controller_for_handlers(controller_class: type) -> list[dict]:
         if not hasattr(method, '_valkyrja_handler'):
             continue
 
-        handler_closure = method._valkyrja_handler
+        handler_reference = method._valkyrja_handler
 
         # @parameter decorator attaches parameter list similarly
         parameters = getattr(method, '_valkyrja_parameters', [])
 
         handlers.append({
             'method': name,
-            'handler': handler_closure,
+            'handler': handler_reference,
             'parameters': parameters,
         })
 

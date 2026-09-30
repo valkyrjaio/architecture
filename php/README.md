@@ -194,7 +194,7 @@ Each concern gets its own handler contract extending the base `HandlerContract` 
 ### Add the handler attributes to route/listener data classes
 
 Routes need `#[RouteHandler]` attribute support on controller/action methods, and listeners need `#[ListenerHandler]`.
-Each attribute carries the typed closure:
+Each attribute carries a callable reference:
 
 ```php
 #[RouteHandler([self::class, 'showHandler'])]

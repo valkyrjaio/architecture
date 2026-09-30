@@ -335,7 +335,7 @@ public class UserController {
 class UserController:
     @route(path='/users/{id}', name='user.show', request_methods=[RequestMethod.GET])
     @parameter(name='id', regex='[0-9]+')
-    @route_handler((UserController, 'show_handler'))  # callable tuple
+    @route_handler((lambda: UserController, 'show_handler'))  # thunk — see typescript/DECORATORS.md
     def show(self, route: RouteContract) -> ResponseContract:
         pass  # actual implementation — not read by Sindri
 
@@ -394,7 +394,7 @@ are structural problems in the application that the developer must resolve.
 ✅ Handler method must be on the same class as the provider
 ✅ All type refs in handler body must be imported in the provider file
 
-❌ Inline closures or lambdas in route/listener definitions
+❌ Inline closures or lambdas as the handler itself — a thunk naming the handler's class is read as a reference
 ```
 
 **For annotated controllers and listeners** (PHP, Java, Python only):
@@ -403,6 +403,7 @@ are structural problems in the application that the developer must resolve.
 ✅ #[RouteHandler([ClassName::class, 'methodName'])]                      — PHP callable on any class
 ✅ @RouteHandler(handlerClass = ClassName.class, handlerMethod = "m")     — Java callable on any class
 ✅ @route_handler((ClassName, 'method_name'))                             — Python callable on any class
+✅ @route_handler((lambda: ClassName, 'method_name'))                     — Python thunk for the decorated class itself
 
 ✅ Annotation lives on the implementation method (the instance method)
 ✅ Handler method must be static — anywhere in the codebase

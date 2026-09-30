@@ -845,7 +845,7 @@ public ResponseContract show(RouteContract route) {}
 
 ```python
 # Python
-@route_handler((UserController, 'show_handler'))
+@route_handler((lambda: UserController, 'show_handler'))
 @parameter(name='id', regex='[0-9]+')
 @parameter(name='postId', regex='[0-9]+')
 def show(self, route: RouteContract) -> ResponseContract:
@@ -1068,8 +1068,8 @@ publishers() map literal
         ↓
 resolve each method reference to its source location
         ↓
-PHP / Java: read #[RouteHandler] / @RouteHandler annotation on method → extract closure
-Go / TypeScript / Python: read method body directly → extract function
+PHP / Java / Python: read the callable reference the marker carries → read the method it names
+Go / TypeScript: read method body directly → extract function
         ↓
 resolve all type references to FQN
         ↓
@@ -1339,8 +1339,8 @@ runtime.
 
 The publishers() AST readability question — whether the handler annotation pattern works with the build tool — was
 resolved by recognizing that the build tool reads the publishers map (simple literal, readable) then separately reads
-each referenced method's annotation or body (also readable). The indirection through a method reference is transparent
-to the AST walker.
+each referenced method's body (also readable). The indirection through a method reference is transparent to the AST
+walker.
 
 The single-pass compile for all compiled languages was achieved by establishing that the build tool runs before the
 compile step, not after. Combined with the application config class provider tree walk, this eliminates the two-pass

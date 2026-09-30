@@ -625,7 +625,7 @@ public static ResponseContract indexHandler(ContainerContract c, RouteContract r
 **Python**
 
 ```python
-@route_handler((UserController, 'index_handler'))
+@route_handler((lambda: UserController, 'index_handler'))
 def index(self, route: RouteContract) -> ResponseContract:
     # actual implementation
     pass
@@ -814,8 +814,8 @@ listener collection — same pattern, `ListenerContract` instead of `RouteContra
 
 ### PHP
 
-The closure handler is the only mechanism. The `#[RouteHandler]` attribute drives the runtime call and the cache
-generation. The build tool extracts the closure through AST.
+A handler is a closure at run time. The `#[RouteHandler]` attribute carries a callable reference instead, because an
+attribute argument must be a constant expression. The build tool reads the method that reference names.
 
 ```php
 $httpRoute->setHandler(
@@ -826,8 +826,9 @@ $httpRoute->setHandler(
 
 ### Java
 
-The closure handler is the only mechanism. The annotation processor extracts the `@RouteHandler` lambda through the
-Trees API at compile time, then generates the cache data classes through JavaPoet. The developer writes no
+A handler is a lambda at run time. `@RouteHandler` carries `handlerClass` and `handlerMethod` instead, because an
+annotation member must be a constant. The annotation processor reads that method through the Trees API at compile time,
+then generates the cache data classes through JavaPoet. The developer writes no
 `CacheableHandler`
 string.
 
@@ -854,12 +855,12 @@ return c.GetSingleton(UserControllerClass).(*UserController).Index(route)
 
 ### Python
 
-Decorators self-register at import time. The build tool uses the `ast` module and `inspect.getfile()` to extract the
-handler closure for cache generation.
+A decorator attaches the callable as metadata at import time. The build tool uses the `ast` module and
+`inspect.getfile()` to read the method that callable names.
 
 ```python
 # python — decorator-based registration
-@route_handler((UserController, 'index_handler'))
+@route_handler((lambda: UserController, 'index_handler'))
 def index(self, route: RouteContract) -> ResponseContract:
     pass
 ```
@@ -1013,7 +1014,7 @@ class UserController:
     # The callable tuple is written directly into the generated cache — no body extraction.
     @route(path='/users/{id}', name='user.show', request_methods=[RequestMethod.GET])
     @parameter(name='id', regex='[0-9]+')
-    @route_handler((UserController, 'show_handler'))  # callable tuple — written as-is
+    @route_handler((lambda: UserController, 'show_handler'))  # thunk — the class name binds after the body runs
     def show(self, route: RouteContract) -> ResponseContract:
         pass  # actual implementation — irrelevant to Sindri
 
