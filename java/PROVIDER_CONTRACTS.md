@@ -320,30 +320,31 @@ handler may live on the controller, the route provider, or any other class.
 package app.http.controllers;
 
 import io.valkyrja.container.manager.contract.ContainerContract;
+import io.valkyrja.http.message.enum_.RequestMethod;
 import io.valkyrja.http.message.response.contract.ResponseContract;
+import io.valkyrja.http.routing.attribute.Parameter;
+import io.valkyrja.http.routing.attribute.Route;
+import io.valkyrja.http.routing.attribute.route.RouteHandler;
 import io.valkyrja.http.routing.data.contract.RouteContract;
-import io.valkyrja.http.routing.annotation.Handler;
-import io.valkyrja.http.routing.annotation.Parameter;
-import io.valkyrja.http.routing.annotation.Route;
 
 public class UserController {
 
     // Annotations on the implementation method.
-    // @RouteHandler carries (class, method) — Sindri follows it to wherever the handler lives.
-    @Route(method = "GET", path = "/users/{id}")
-    @Parameter(name = "id", pattern = "[0-9]+")
-    @RouteHandler(clazz = UserController.class, method = "showHandler")
+    // @RouteHandler carries (handlerClass, handlerMethod) — Sindri follows it to wherever the handler lives.
+    @Route(path = "/users/{id}", name = "users.show", requestMethods = RequestMethod.GET)
+    @Parameter(name = "id", regex = "[0-9]+")
+    @RouteHandler(handlerClass = UserController.class, handlerMethod = "showHandler")
     public ResponseContract show(RouteContract route) {
         // actual implementation
     }
 
-    @Route(method = "POST", path = "/users")
-    @RouteHandler(clazz = UserController.class, method = "storeHandler")
+    @Route(path = "/users", name = "users.store", requestMethods = RequestMethod.POST)
+    @RouteHandler(handlerClass = UserController.class, handlerMethod = "storeHandler")
     public ResponseContract store(RouteContract route) {
         // actual implementation
     }
 
-    // Sindri resolves clazz=UserController.class, method="showHandler" → this file
+    // Sindri resolves handlerClass=UserController.class, handlerMethod="showHandler" → this file
     // reads this method body using this file's imports
     public static ResponseContract showHandler(ContainerContract c, RouteContract route) {
         return c.getSingleton(UserController.class).show(route);
@@ -361,9 +362,9 @@ public class UserController {
 public class UserController {
 
     // @RouteHandler points to the route provider — Sindri follows the callable
-    @Route(method = "GET", path = "/users/{id}")
-    @Parameter(name = "id", pattern = "[0-9]+")
-    @RouteHandler(clazz = UserHttpRouteProvider.class, method = "showUser")
+    @Route(path = "/users/{id}", name = "users.show", requestMethods = RequestMethod.GET)
+    @Parameter(name = "id", regex = "[0-9]+")
+    @RouteHandler(handlerClass = UserHttpRouteProvider.class, handlerMethod = "showUser")
     public ResponseContract show(RouteContract route) {
         // actual implementation
     }
