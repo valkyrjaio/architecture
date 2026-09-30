@@ -31,9 +31,9 @@ request resolves the request. Keeping the request out of the signature:
 - Lets the developer decide what to resolve, so a handler pays for nothing it does not use
 
 A matched dynamic route carries a value for each parameter the matcher captured. The matcher builds an uncaptured
-parameter's value from its declared default, or null when it declares none. The matcher attaches the values and gives the
-handler a `DynamicRouteContract`. The handler still declares `RouteContract`, because a narrower parameter type breaks
-the handler signature, so the handler narrows the type at run time.
+parameter's value from its declared default, or null when it declares none. The matcher attaches the values and gives
+the handler a `DynamicRouteContract`. The handler still declares `RouteContract`, because a narrower parameter type
+breaks the handler signature, so the handler narrows the type at run time.
 
 Warning: a TypeScript handler cannot narrow against a contract. See [`CONTRACTS.md`](CONTRACTS.md), _Type erasure_.
 
