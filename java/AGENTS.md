@@ -14,7 +14,7 @@ canonical first: [`../AGENTS.md`](../AGENTS.md). This file only records the Java
   Components map to `io.valkyrja.<component>` (`container`, `http`, `cli`,
   `dispatch`, `event`, `application`, `throwable`, …), with sub-packages by
   concern: `.contract` (interfaces), `.manager`/`.dispatcher`/… (impls),
-  `.provider`, `.data`, `.annotation`.
+  `.provider`, `.data`, `.attribute`.
 - **Source:** `src/main/java/io/valkyrja/<component>/…`. Contracts named
   `*Contract`; the concrete implementation takes the bare name (`Router`,
   `Container`).
@@ -52,7 +52,8 @@ Java nuances:
 - **No traits.** Java has no trait construct, so there is no `trait` segment —
   share behavior via abstract classes or interface `default` methods.
 - **Attributes → annotations.** The attribute marker is a Java annotation
-  (`@interface`); annotation types live in an `annotation` package.
+  (`@interface`), and it lives in an `attribute` package, which mirrors
+  `STRUCTURE.md`'s `Attribute\` segment.
 - Name suffixes are identical to `STRUCTURE.md` (`*Contract`, `*ServiceProvider`,
   `*Exception`, `*Factory`, …).
 
