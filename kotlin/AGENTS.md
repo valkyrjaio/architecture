@@ -61,7 +61,7 @@ Kotlin nuances:
   `STRUCTURE.md` _name_ rules still hold (no `Abstract`/`Enum` in the class
   name).
 - **No traits** — no `trait` segment.
-- **Attributes → annotations** in an `annotation` package.
+- **Attributes → annotations** in an `attribute` package, matching the Java port.
 - Name suffixes match `STRUCTURE.md` (`*Contract`, `*ServiceProvider`,
   `*Exception`, …).
 
