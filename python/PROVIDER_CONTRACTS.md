@@ -388,13 +388,17 @@ This is intentional and consistent with PHP's `#[RouteHandler]` attribute — bo
 reads when needed, not active registrars.
 
 ```python
+from typing import Callable
+
 from valkyrja.container.manager.contract import ContainerContract
 from valkyrja.http.message.response.contract import ResponseContract
 from valkyrja.http.routing.data.contract import RouteContract
 from app.http.controllers.contract import UserControllerClass
 
+HandlerReference = tuple[type | Callable[[], type], str]
 
-def route_handler(handler: tuple[type, str]):
+
+def route_handler(handler: HandlerReference):
     """
     Metadata marker — attaches the callable to the method as _valkyrja_handler.
     Does NOT register the route at import time.
