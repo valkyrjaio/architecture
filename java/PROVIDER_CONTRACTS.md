@@ -331,14 +331,14 @@ public class UserController {
 
     // Annotations on the implementation method.
     // @RouteHandler carries (handlerClass, handlerMethod) — Sindri follows it to wherever the handler lives.
-    @Route(path = "/users/{id}", name = "users.show", requestMethods = RequestMethod.GET)
+    @Route(path = "/users/{id}", name = "user.show", requestMethods = RequestMethod.GET)
     @Parameter(name = "id", regex = "[0-9]+")
     @RouteHandler(handlerClass = UserController.class, handlerMethod = "showHandler")
     public ResponseContract show(RouteContract route) {
         // actual implementation
     }
 
-    @Route(path = "/users", name = "users.store", requestMethods = RequestMethod.POST)
+    @Route(path = "/users", name = "user.store", requestMethods = RequestMethod.POST)
     @RouteHandler(handlerClass = UserController.class, handlerMethod = "storeHandler")
     public ResponseContract store(RouteContract route) {
         // actual implementation
@@ -362,7 +362,7 @@ public class UserController {
 public class UserController {
 
     // @RouteHandler points to the route provider — Sindri follows the callable
-    @Route(path = "/users/{id}", name = "users.show", requestMethods = RequestMethod.GET)
+    @Route(path = "/users/{id}", name = "user.show", requestMethods = RequestMethod.GET)
     @Parameter(name = "id", regex = "[0-9]+")
     @RouteHandler(handlerClass = UserHttpRouteProvider.class, handlerMethod = "showUser")
     public ResponseContract show(RouteContract route) {

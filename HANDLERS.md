@@ -30,12 +30,12 @@ request resolves the request. Keeping the request out of the signature:
 - Avoids passing an HTTP-specific object to a CLI handler, where the object makes no sense
 - Lets the developer decide what to resolve, so a handler pays for nothing it does not use
 
-A matched dynamic route carries a value for each parameter the matcher captured. The matcher builds the value from a
-parameter's declared default when it captures none, and a parameter keeps a null value when it captures no value and the
-parameter declares no default. The matcher attaches the values and gives the handler a `DynamicRouteContract`. The handler still declares `RouteContract`, because a narrower parameter type breaks
+A matched dynamic route carries a value for each parameter the matcher captured. The matcher builds an uncaptured
+parameter's value from its declared default, or null when it declares none. The matcher attaches the values and gives the
+handler a `DynamicRouteContract`. The handler still declares `RouteContract`, because a narrower parameter type breaks
 the handler signature, so the handler narrows the type at run time.
 
-Warning: a TypeScript handler cannot narrow against a contract.
+Warning: a TypeScript handler cannot narrow against a contract. See [`CONTRACTS.md`](CONTRACTS.md), _Type erasure_.
 
 | Port       | Narrowing construct          |
 | ---------- | ---------------------------- |
@@ -44,9 +44,6 @@ Warning: a TypeScript handler cannot narrow against a contract.
 | Go         | a type assertion             |
 | Python     | `isinstance` against the ABC |
 | TypeScript | `instanceof` against a class |
-
-A TypeScript contract has no run-time existence, so a TypeScript handler reads the parameter through the class instead.
-See [`CONTRACTS.md`](CONTRACTS.md), _Type erasure_.
 
 ```php
 static function (ContainerContract $c, RouteContract $route): ResponseContract {
@@ -64,7 +61,7 @@ static function (ContainerContract $c, RouteContract $route): ResponseContract {
 }
 ```
 
-TypeScript narrows against the concrete `DynamicRoute` class, and it reads the parameter the same way:
+The TypeScript twin reads the parameter the same way:
 
 ```typescript
 (c: ContainerContract, route: RouteContract): ResponseContract => {
