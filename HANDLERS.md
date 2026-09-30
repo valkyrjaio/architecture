@@ -663,8 +663,8 @@ router.get('/users',
 The `CacheableHandler` string representation is only needed for CGI and lambda deployments where cache data files are
 required. It is **never used at runtime** — the closure is always used at runtime.
 
-For **PHP, Java, and Python** the build tool (valkyrja-build) extracts the handler closure source text automatically via
-AST and generates the cache data files. The developer never writes a `CacheableHandler` string.
+For **PHP, Java, and Python** the build tool (valkyrja-build) reads the callable reference the marker carries, reads the
+method that reference names, and generates the cache data files. The developer never writes a `CacheableHandler` string.
 
 For **Go and TypeScript** the build tool reads the route provider source files via AST (go/analysis and TypeScript
 compiler API respectively), extracts the handler closure source text, and generates cache data files. The developer also
@@ -828,9 +828,7 @@ $httpRoute->setHandler(
 
 A handler is a lambda at run time. `@RouteHandler` carries `handlerClass` and `handlerMethod` instead, because an
 annotation member must be a constant. The annotation processor reads that method through the Trees API at compile time,
-then generates the cache data classes through JavaPoet. The developer writes no
-`CacheableHandler`
-string.
+then generates the cache data classes through JavaPoet. The developer writes no `CacheableHandler` string.
 
 ```java
 httpRoute.setHandler(

@@ -609,7 +609,7 @@ no cross-file import aggregation, no conflict detection, no registry needed.
 ✅ Method reference on the same class
 ✅ All type references imported in the same file
 
-❌ Inline closures or lambdas as the handler itself — a thunk naming the handler's class is read as a reference
+❌ Inline closures or lambdas in route/listener definitions
 ❌ References to types not imported in the current file
 ❌ Handler methods on a different class
 ```

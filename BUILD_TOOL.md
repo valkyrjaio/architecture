@@ -394,7 +394,7 @@ are structural problems in the application that the developer must resolve.
 ✅ Handler method must be on the same class as the provider
 ✅ All type refs in handler body must be imported in the provider file
 
-❌ Inline closures or lambdas as the handler itself — a thunk naming the handler's class is read as a reference
+❌ Inline closures or lambdas in route/listener definitions
 ```
 
 **For annotated controllers and listeners** (PHP, Java, Python only):
@@ -1574,16 +1574,16 @@ class HandlerAttributeVisitor extends NodeVisitorAbstract
 
         foreach ($node->attrGroups as $attrGroup) {
             foreach ($attrGroup->attrs as $attr) {
-                if ($attr->name->toString() !== 'Handler') continue;
+                if ($attr->name->toString() !== 'RouteHandler') continue;
 
-                // extract closure AST node
-                $closureNode = $attr->args[0]->value;
+                // extract the callable array literal — [ClassName::class, 'methodName']
+                $callableNode = $attr->args[0]->value;
 
-                // pretty print closure back to source string
-                $closureSource = $this->printer->prettyPrint([$closureNode]);
+                // print the callable back to source string
+                $callableSource = $this->printer->prettyPrint([$callableNode]);
 
                 // resolve types to FQN via use statement map
-                $resolved = $this->resolveFQN($closureSource, $this->useStatements);
+                $resolved = $this->resolveFQN($callableSource, $this->useStatements);
 
                 // extract #[Parameter] annotations from same method
                 $parameters = $this->extractParameters($node);
@@ -1679,7 +1679,7 @@ public class ValkyrjaAnnotationProcessor extends AbstractProcessor {
             RoundEnvironment roundEnv
     ) {
         // collect all @RouteHandler annotated methods
-        for (Element element : roundEnv.getElementsAnnotatedWith(Handler.class)) {
+        for (Element element : roundEnv.getElementsAnnotatedWith(RouteHandler.class)) {
             if (element.getKind() != ElementKind.METHOD) continue;
             processHandlerMethod((ExecutableElement) element);
         }
@@ -1688,26 +1688,26 @@ public class ValkyrjaAnnotationProcessor extends AbstractProcessor {
 }
 ```
 
-**Lambda source extraction via Trees API:**
+**Handler reference extraction via Trees API:**
 
 ```java
 private void processHandlerMethod(ExecutableElement method) {
     // get the source tree for this method
     MethodTree methodTree = (MethodTree) trees.getTree(method);
 
-    // find the @RouteHandler annotation and extract lambda source text
+    // find the @RouteHandler annotation and extract the handler reference
     for (AnnotationMirror annotation : method.getAnnotationMirrors()) {
-        if (!annotation.getAnnotationType().toString().equals(Handler.class.getName())) continue;
+        if (!annotation.getAnnotationType().toString().equals(RouteHandler.class.getName())) continue;
 
-        // get the lambda argument from the annotation
+        // get the handlerClass and handlerMethod members from the annotation
         for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry
                 : annotation.getElementValues().entrySet()) {
 
-            // extract source text of the lambda from annotation value
-            String lambdaSource = entry.getValue().toString();
+            // read the member value — a class token or a method name
+            String memberValue = entry.getValue().toString();
 
             // resolve all type references to FQN via element utilities
-            String resolvedSource = resolveFQN(lambdaSource, method);
+            String resolvedSource = resolveFQN(memberValue, method);
 
             // extract @Parameter annotations from same method
             List<ParameterData> parameters = extractParameters(method);
@@ -1995,9 +1995,9 @@ def extract_handlers(controller_class: type) -> list[dict]:
             # find @route_handler(...) decorator
             if not isinstance(decorator, ast.Call): continue
             if not isinstance(decorator.func, ast.Name): continue
-            if decorator.func.id != 'handler': continue
+            if decorator.func.id != 'route_handler': continue
 
-            # extract the lambda/closure argument
+            # extract the callable reference argument
             if not decorator.args: continue
             handler_source = ast.unparse(decorator.args[0])
             handler_fqn = resolve_fqn(handler_source, imports)
