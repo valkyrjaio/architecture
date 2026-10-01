@@ -196,9 +196,9 @@ package app.provider;
 
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
-import app.repositories.UserRepository;
-import app.repositories.contract.UserRepositoryContract;
-import app.services.contract.DatabaseContract;
+import app.repository.UserRepository;
+import app.repository.contract.UserRepositoryContract;
+import app.service.contract.DatabaseContract;
 
 import java.util.Map;
 import java.util.function.Consumer;

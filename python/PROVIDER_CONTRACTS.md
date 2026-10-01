@@ -252,9 +252,9 @@ class ServiceProviderContract(ABC):
 ```python
 from valkyrja.container.provider.contract import ServiceProviderContract
 from valkyrja.container.manager.contract import ContainerContract
-from app.repositories import UserRepository
-from app.repositories.contract import UserRepositoryClass
-from app.services.contract import DatabaseClass
+from app.repository import UserRepository
+from app.repository.contract import UserRepositoryClass
+from app.service.contract import DatabaseClass
 
 
 class UserServiceProvider(ServiceProviderContract):

@@ -248,7 +248,7 @@ The container design does **not** depend on lazy imports for correctness — it 
   {UserRepositoryContract: lambda: ...}  # UserRepositoryContract accessed → loads
 
   # string key — no import triggered
-  {'app.repositories.UserRepositoryContract': lambda: ...}  # string literal — nothing loads
+  {'app.repository.UserRepositoryContract': lambda: ...}  # string literal — nothing loads
   ```
 
 - **Lambda-wrapped values** defer _when the provider method is referenced_ from cache-load time to first resolution.
