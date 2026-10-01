@@ -161,7 +161,7 @@ import ctnContract "github.com/valkyrjaio/valkyrja-go/vN/container/manager/contr
 //   }
 //
 //   func (p *UserServiceProvider) PublishUserRepository(c ctnContract.ContainerContract) {
-//       c.SetSingleton(repoContract.UserRepositoryClass, repositories.NewUserRepository(...))
+//       c.SetSingleton(repoContract.UserRepositoryClass, repository.NewUserRepository(...))
 //   }
 type ServiceProviderContract interface {
 	// Publishers returns a map of binding key to publisher function reference.
@@ -177,9 +177,9 @@ package provider
 
 import (
 	ctnContract "github.com/valkyrjaio/valkyrja-go/vN/container/manager/contract"
-	"app/repositories"
-	repoContract "app/repositories/contract"
-	svcContract "app/services/contract"
+	"app/repository"
+	repoContract "app/repository/contract"
+	svcContract "app/service/contract"
 )
 
 type UserServiceProvider struct{}
@@ -199,7 +199,7 @@ func (p *UserServiceProvider) Publishers() map[string]func(ctnContract.Container
 func (p *UserServiceProvider) PublishUserRepository(c ctnContract.ContainerContract) {
 	c.SetSingleton(
 		repoContract.UserRepositoryClass,
-		repositories.NewUserRepository(
+		repository.NewUserRepository(
 			c.GetSingleton(svcContract.DatabaseClass).(svcContract.DatabaseContract),
 		),
 	)
@@ -210,7 +210,7 @@ func (p *UserServiceProvider) PublishUserRepository(c ctnContract.ContainerContr
 func PublishUserRepository(c ctnContract.ContainerContract) {
 	c.SetSingleton(
 		repoContract.UserRepositoryClass,
-		repositories.NewUserRepository(
+		repository.NewUserRepository(
 			c.GetSingleton(svcContract.DatabaseClass).(svcContract.DatabaseContract),
 		),
 	)

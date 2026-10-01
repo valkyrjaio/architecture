@@ -191,9 +191,9 @@ export interface ServiceProviderContract {
 ```typescript
 import type {ContainerContract} from '@valkyrja/container/manager/contract'
 import type {ServiceProviderContract} from '@valkyrja/container/provider/contract'
-import {UserRepository} from '../repositories/UserRepository'
-import {UserRepositoryClass} from '../repositories/contract/UserRepositoryConstants'
-import {DatabaseClass} from '../services/contract/DatabaseConstants'
+import {UserRepository} from '../repository/UserRepository'
+import {UserRepositoryClass} from '../repository/contract/UserRepositoryConstants'
+import {DatabaseClass} from '../service/contract/DatabaseConstants'
 
 export class UserServiceProvider implements ServiceProviderContract {
 
