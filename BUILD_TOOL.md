@@ -1658,7 +1658,10 @@ external file resolution needed.
 
 ```java
 
-@SupportedAnnotationTypes("io.valkyrja.http.routing.attribute.route.RouteHandler")
+@SupportedAnnotationTypes({
+        "io.valkyrja.http.routing.attribute.route.RouteHandler",
+        "io.valkyrja.event.attribute.ListenerHandler"
+})
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class ValkyrjaAnnotationProcessor extends AbstractProcessor {
 
