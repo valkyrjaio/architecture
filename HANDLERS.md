@@ -75,79 +75,6 @@ The TypeScript twin reads the parameter the same way:
 }
 ```
 
-A controller method does not have to take the route. The handler unpacks the matched values and passes them, which keeps
-the controller free of routing types. The handler is the only place that knows about the route:
-
-```php
-class UserController
-{
-    #[Route(path: '/users/{id}/posts/{postId}', name: 'user.post.show', requestMethods: [RequestMethod::GET])]
-    #[Parameter(name: 'id', regex: '[0-9]+')]
-    #[Parameter(name: 'postId', regex: '[0-9]+')]
-    #[RouteHandler([self::class, 'showHandler'])]
-    public function show(int $id, int $postId): ResponseContract
-    {
-        // actual implementation — no routing types
-    }
-
-    public static function showHandler(ContainerContract $c, RouteContract $route): ResponseContract
-    {
-        if (!$route instanceof DynamicRouteContract) {
-            throw new HttpRoutingInvalidRouteParameterException('The route declares no parameters');
-        }
-
-        return $c->getSingleton(self::class)->show(
-            (int) $route->getParameter('id')->getValue(),
-            (int) $route->getParameter('postId')->getValue(),
-        );
-    }
-}
-```
-
-```java
-public class UserController {
-
-    @Route(path = "/users/{id}/posts/{postId}", name = "user.post.show", requestMethods = RequestMethod.GET)
-    @Parameter(name = "id", regex = "[0-9]+")
-    @Parameter(name = "postId", regex = "[0-9]+")
-    @RouteHandler(handlerClass = UserController.class, handlerMethod = "showHandler")
-    public ResponseContract show(int id, int postId) {
-        // actual implementation — no routing types
-    }
-
-    public static ResponseContract showHandler(ContainerContract c, RouteContract route) {
-        if (!(route instanceof DynamicRouteContract dynamicRoute)) {
-            throw new HttpRoutingInvalidRouteParameterException("The route declares no parameters");
-        }
-
-        return c.getSingleton(UserController.class).show(
-                Integer.parseInt((String) dynamicRoute.getParameter("id").getValue()),
-                Integer.parseInt((String) dynamicRoute.getParameter("postId").getValue()));
-    }
-}
-```
-
-```python
-class UserController:
-
-    @route(path='/users/{id}/posts/{postId}', name='user.post.show', request_methods=[RequestMethod.GET])
-    @parameter(name='id', regex='[0-9]+')
-    @parameter(name='postId', regex='[0-9]+')
-    @route_handler((lambda: UserController, 'show_handler'))
-    def show(self, id: int, post_id: int) -> ResponseContract:
-        ...  # actual implementation — no routing types
-
-    @staticmethod
-    def show_handler(c: ContainerContract, route: RouteContract) -> ResponseContract:
-        if not isinstance(route, DynamicRouteContract):
-            raise HttpRoutingInvalidRouteParameterException('The route declares no parameters')
-
-        return c.get_singleton(UserControllerClass).show(
-            int(route.get_parameter('id').get_value()),
-            int(route.get_parameter('postId').get_value()),
-        )
-```
-
 ```php
 // HTTP handler — fetch the request from the container only if needed
 static fn(ContainerContract $c, RouteContract $route): ResponseContract => (
@@ -1115,6 +1042,83 @@ HttpRoute(
 2. Extract path, HTTP method, parameter name/regex, callable tuple — all literals
 3. Construct route data from extracted literals
 4. Write into generated AppHttpRoutingData — callable written with its class resolved to an FQN
+```
+
+---
+
+### Passing the matched values to the controller
+
+A controller method does not have to take the route. The handler unpacks the matched values and passes them, which keeps
+the controller free of routing types. The handler is the only place that knows about the route:
+
+```php
+class UserPostController
+{
+    #[Route(path: '/users/{id}/posts/{postId}', name: 'user.post.show', requestMethods: [RequestMethod::GET])]
+    #[Parameter(name: 'id', regex: '[0-9]+')]
+    #[Parameter(name: 'postId', regex: '[0-9]+')]
+    #[RouteHandler([self::class, 'showHandler'])]
+    public function show(int $id, int $postId): ResponseContract
+    {
+        // actual implementation — no routing types
+    }
+
+    public static function showHandler(ContainerContract $c, RouteContract $route): ResponseContract
+    {
+        if (!$route instanceof DynamicRouteContract) {
+            throw new HttpRoutingInvalidRouteParameterException('The route declares no parameters');
+        }
+
+        return $c->getSingleton(self::class)->show(
+            (int) $route->getParameter('id')->getValue(),
+            (int) $route->getParameter('postId')->getValue(),
+        );
+    }
+}
+```
+
+```java
+public class UserPostController {
+
+    @Route(path = "/users/{id}/posts/{postId}", name = "user.post.show", requestMethods = RequestMethod.GET)
+    @Parameter(name = "id", regex = "[0-9]+")
+    @Parameter(name = "postId", regex = "[0-9]+")
+    @RouteHandler(handlerClass = UserPostController.class, handlerMethod = "showHandler")
+    public ResponseContract show(int id, int postId) {
+        // actual implementation — no routing types
+    }
+
+    public static ResponseContract showHandler(ContainerContract c, RouteContract route) {
+        if (!(route instanceof DynamicRouteContract dynamicRoute)) {
+            throw new HttpRoutingInvalidRouteParameterException("The route declares no parameters");
+        }
+
+        return c.getSingleton(UserPostController.class).show(
+                Integer.parseInt(String.valueOf(dynamicRoute.getParameter("id").getValue())),
+                Integer.parseInt(String.valueOf(dynamicRoute.getParameter("postId").getValue())));
+    }
+}
+```
+
+```python
+class UserPostController:
+
+    @route(path='/users/{id}/posts/{postId}', name='user.post.show', request_methods=[RequestMethod.GET])
+    @parameter(name='id', regex='[0-9]+')
+    @parameter(name='postId', regex='[0-9]+')
+    @route_handler((lambda: UserPostController, 'show_handler'))
+    def show(self, id: int, post_id: int) -> ResponseContract:
+        ...  # actual implementation — no routing types
+
+    @staticmethod
+    def show_handler(c: ContainerContract, route: RouteContract) -> ResponseContract:
+        if not isinstance(route, DynamicRouteContract):
+            raise HttpRoutingInvalidRouteParameterException('The route declares no parameters')
+
+        return c.get_singleton(UserPostControllerClass).show(
+            int(route.get_parameter('id').get_value()),
+            int(route.get_parameter('postId').get_value()),
+        )
 ```
 
 ---
