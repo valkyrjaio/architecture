@@ -151,14 +151,14 @@ logic at resolution time.
 
 ```python
 # service provider — clean, no lambda
-'app.repositories.UserRepositoryContract': UserServiceProvider.publish_user_repository
+'app.repository.UserRepositoryContract': UserServiceProvider.publish_user_repository
 
 # container wraps on registration from provider
 self._bindings[key] = lambda c=callable_ref: c
 
 # generated AppContainerData — sindri writes as lambda, same format
 APP_CONTAINER_DATA = {
-    'app.repositories.UserRepositoryContract': lambda: UserServiceProvider.publish_user_repository,
+    'app.repository.UserRepositoryContract': lambda: UserServiceProvider.publish_user_repository,
 }
 
 # container resolution — always calls lambda, no check needed
@@ -832,7 +832,7 @@ For annotated controllers (PHP, Java, Python) parameters live on the method alon
 #[RouteHandler([self::class, 'showHandler'])]
 #[Parameter(name: 'id',     regex: '[0-9]+')]
 #[Parameter(name: 'postId', regex: '[0-9]+')]
-public function show(RouteContract $route): ResponseContract {}
+public function show(int $id, int $postId): ResponseContract {}
 ```
 
 ```java
@@ -840,7 +840,7 @@ public function show(RouteContract $route): ResponseContract {}
 @RouteHandler(handlerClass = UserPostController.class, handlerMethod = "showHandler")
 @Parameter(name = "id",     regex = "[0-9]+")
 @Parameter(name = "postId", regex = "[0-9]+")
-public ResponseContract show(RouteContract route) {}
+public ResponseContract show(int id, int postId) {}
 ```
 
 ```python
@@ -848,7 +848,7 @@ public ResponseContract show(RouteContract route) {}
 @route_handler((lambda: UserPostController, 'show_handler'))
 @parameter(name='id', regex='[0-9]+')
 @parameter(name='postId', regex='[0-9]+')
-def show(self, route: RouteContract) -> ResponseContract:
+def show(self, id: int, post_id: int) -> ResponseContract:
     pass
 ```
 
