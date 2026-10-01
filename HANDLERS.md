@@ -827,8 +827,8 @@ $httpRoute->setHandler(
 ### Java
 
 A handler is a lambda at run time. `@RouteHandler` carries `handlerClass` and `handlerMethod` instead, because an
-annotation member must be a constant. The annotation processor reads those members through the Trees API at compile time,
-then writes them into the cache data classes through JavaPoet. The developer writes no `CacheableHandler` string.
+annotation member must be a constant. The annotation processor reads those members through the Trees API at compile
+time, then writes them into the cache data classes through JavaPoet. The developer writes no `CacheableHandler` string.
 
 ```java
 httpRoute.setHandler(
@@ -883,7 +883,7 @@ router.get('/users',
 For annotated controllers, annotations live on the **implementation method**. Sindri reads the annotations and
 constructs a route object — exactly the same shape as a route returned from `getRoutes()`. **No method body
 extraction.** The callable from `#[RouteHandler]` is written directly into the generated cache data class as a literal,
-with its class token resolved to an FQN, because the generated file carries no imports.
+with its class token resolved to the class it names, so the generated file reaches that class on its own.
 
 This is identical to how service bindings work:
 
@@ -986,7 +986,7 @@ Generated output:
 new HttpRoute(
     "/users/{id}", "user.show", "GET",
     List.of(new Parameter("id", "[0-9]+")),
-    app.http.controller.UserController::showHandler  // from the annotation
+    app.http.controllers.UserController::showHandler  // from the annotation
 )
 ```
 
@@ -1048,7 +1048,7 @@ HttpRoute(
 Annotations / decorators carry literals.
 Sindri reads literals.
 Sindri writes literals into the generated cache data class.
-No method body extraction. The callable's class token carries its FQN, because the generated file has no imports.
+No method body extraction. The callable's class token resolves to the class it names.
 
 Same as service bindings:
   SomeServiceId::class => [SomeProvider::class, 'publishMethod']  ← literal, written as-is

@@ -283,7 +283,7 @@ class UserController
         // actual implementation — not read by Sindri
     }
 
-    // Sindri writes [UserController::class, 'showHandler'] into the cache — this method runs at run time
+    // Sindri writes [UserController::class, 'showHandler'] into the cache, resolved to the class it names
     public static function showHandler(ContainerContract $c, RouteContract $route): ResponseContract
     {
         return $c->getSingleton(self::class)->show($route);
@@ -369,8 +369,8 @@ providers import `UserController` from different namespaces, Sindri cannot silen
 
 ```
 Error: Import conflict in generated AppHttpRoutingData.
-  App\Http\Controllers\UserController  (from UserHttpRouteProvider)
-  App\Api\Controllers\UserController   (from ApiHttpRouteProvider)
+  App\Http\Controller\UserController  (from UserHttpRouteProvider)
+  App\Api\Controller\UserController   (from ApiHttpRouteProvider)
 Both resolve to the short name 'UserController'. Use the FQN directly in your handler
 or rename one of the classes to eliminate the conflict.
 ```
@@ -1600,7 +1600,7 @@ class RouteHandlerAttributeVisitor extends NodeVisitorAbstract
 **FQN resolution:**
 
 ```php
-// collect use statements: 'UserController' => 'App\Http\Controllers\UserController'
+// collect use statements: 'UserController' => 'App\Http\Controller\UserController'
 function collectUseStatements(array $ast): array
 {
     $map     = [];
@@ -1687,13 +1687,10 @@ public class ValkyrjaAnnotationProcessor extends AbstractProcessor {
 }
 ```
 
-**Handler reference extraction via Trees API:**
+**Handler reference extraction via the annotation processing API:**
 
 ```java
 private void processHandlerMethod(ExecutableElement method) {
-    // get the source tree for this method
-    MethodTree methodTree = (MethodTree) trees.getTree(method);
-
     // find the @RouteHandler annotation and extract the handler reference
     for (AnnotationMirror annotation : method.getAnnotationMirrors()) {
         if (!annotation.getAnnotationType().toString().equals(RouteHandler.class.getName())) continue;

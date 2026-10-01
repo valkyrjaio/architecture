@@ -943,14 +943,14 @@ return new \Valkyrja\Http\Routing\Data\HttpRoutingData(
             parameters: [
                 new \Valkyrja\Http\Routing\Data\Parameter('id', '[0-9]+'),
             ],
-            handler: [\App\Http\Controllers\UserController::class, 'showHandler'],
+            handler: [\App\Http\Controller\UserController::class, 'showHandler'],
         ),
         // routes from OrderHttpRouteProvider (explicit getRoutes())
         'order.index' => new \Valkyrja\Http\Routing\Data\HttpRoute(
             path:    '/orders',
             method:  'GET',
             handler: static fn(\Valkyrja\Container\Manager\Contract\ContainerContract $c, \Valkyrja\Http\Routing\Data\Contract\RouteContract $route): \Valkyrja\Http\Message\Response\Contract\ResponseContract
-                => $c->getSingleton(\App\Http\Controllers\OrderController::class)->index($route),
+                => $c->getSingleton(\App\Http\Controller\OrderController::class)->index($route),
         ),
         // ... all other routes from all other providers
     ],
