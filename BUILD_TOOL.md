@@ -1210,7 +1210,7 @@ publishers      → map of binding key → publisher method body source text
    a. Extract the key → resolve to canonical FQN string (language-specific, see table below)
    b. Extract the value → method reference (e.g. self::publishRouter)
    c. Resolve method reference → find that method in the same file
-   d. Extract the callable value as a literal → written as-is into generated output
+   d. Extract the callable value as a literal → class resolved to an FQN in generated output
 6. Output: map of { canonical key string → callable literal }
 ```
 
@@ -1416,7 +1416,7 @@ listener provider, or any other class.
      a. Check for @ListenerHandler / #[ListenerHandler] / @listener_handler annotation:
         - Extract callable: (ClassName, methodName)
         - Resolve ClassName via listener file's imports → FQN
-     b. Check for @ListensTo / #[ListensTo] annotation:
+     b. Check for @Listener / #[Listener] annotation:
         - Extract event type class reference → resolve to FQN via imports
         - Extract priority if present
      c. If handler found:
