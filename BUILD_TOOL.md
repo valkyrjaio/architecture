@@ -179,7 +179,8 @@ See: https://valkyrja.io/docs/providers#build-tool-compatibility
 ## Handler Method Pointer Convention
 
 Handlers must be **method pointers** — references to methods on the same class as the provider or controller that
-defines the route, listener, or binding. They must not be inline closures or lambdas.
+defines the route, listener, or binding. A Go publisher may name a package-level function in the same file instead.
+They must not be inline closures or lambdas.
 
 This is the single most important convention for keeping Sindri simple, import-safe, and conflict-free.
 
@@ -197,8 +198,9 @@ consistent end to end.
 
 ### The Pattern
 
-Every handler is a method on the same class that declares it. The route/listener/binding definition points to that
-method by name. Sindri reads the method body from the same file — no cross-file resolution needed.
+Every handler is a method on the same class that declares it, or — for a Go publisher — a package-level function in
+that file. The route/listener/binding definition points to it by name. Sindri reads the body from the same file, so no
+cross-file resolution is needed.
 
 **Service providers** — already correct:
 
@@ -1342,17 +1344,18 @@ Identical to Step 3c with:
 
 Sindri reads annotation literals and constructs route data objects — **no method body extraction**. The callable from
 `#[RouteHandler]` is written directly into the generated output, its class token resolved to an FQN, exactly like a
-callable in an explicit `getRoutes()` route or a service binding:
+callable in a service binding. An explicit `getRoutes()` route is the other path: Sindri reads the named method's body
+and inlines it as a closure.
 
 ```
 // service binding — callable literal, class resolved to an FQN
 SomeServiceId::class => [SomeProvider::class, 'publishMethod']
 
-// explicit route — callable literal, class resolved to an FQN
-new Route('/path', 'name', [SomeClass::class, 'theHandlerMethod'])
-
-// annotated route — same, callable literal, class resolved to an FQN
+// annotated route — callable literal, class resolved to an FQN
 #[RouteHandler([SomeClass::class, 'theHandlerMethod'])]
+
+// explicit route — the named method's body, inlined as a closure
+new Route('/path', 'name', [SomeClass::class, 'theHandlerMethod'])
 ```
 
 **What to collect per annotated implementation method:**

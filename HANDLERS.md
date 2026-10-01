@@ -61,6 +61,21 @@ static function (ContainerContract $c, RouteContract $route): ResponseContract {
 }
 ```
 
+Go narrows with a type assertion, and reads the parameter the same way:
+
+```go
+func (p *UserHttpRouteProvider) ShowUser(c ContainerContract, route RouteContract) ResponseContract {
+var id any
+if dynamicRoute, ok := route.(DynamicRouteContract); ok {
+id = dynamicRoute.GetParameter("id").GetValue()
+}
+
+c.GetSingleton(LoggerContractClass).(LoggerContract).Info(route.GetName(), map[string]any{"id": id})
+
+return c.GetSingleton(UserControllerClass).(*UserController).Show(route)
+}
+```
+
 The TypeScript twin reads the parameter the same way:
 
 ```typescript
