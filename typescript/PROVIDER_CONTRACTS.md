@@ -178,9 +178,9 @@ import type {ContainerContract} from '@valkyrja/container/manager/contract'
  */
 export interface ServiceProviderContract {
     /**
-     * Return a map of string binding key to publisher static method reference.
+     * Return a map of string binding key to publisher method reference.
      * Must return a simple object literal — no conditional logic permitted.
-     * Each value must be a static method reference on the same class.
+     * Each value must be a method reference on the same class.
      */
     publishers(): Readonly<Record<string, (c: ContainerContract) => void>>
 }

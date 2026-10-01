@@ -897,7 +897,7 @@ This is identical to how service bindings work:
 // service binding — callable written as a literal
 SomeServiceId::class => [SomeServiceProvider::class, 'publishSomeClass']
 
-// route — callable written as a literal
+// explicit route — Sindri inlines the named method's body as a closure
 new Route('/users/{id}', 'user.show', [SomeClass::class, 'theHandlerMethod'])
 ```
 
@@ -1139,8 +1139,8 @@ No method body extraction. The callable's class token resolves to an FQN.
 Same as service bindings:
   SomeServiceId::class => [SomeProvider::class, 'publishMethod']  ← literal, class resolved to an FQN
 
-Same as explicit routes:
-  new Route('/path', 'name', [SomeClass::class, 'theHandlerMethod'])  ← literal, class resolved to an FQN
+An explicit route takes the other path:
+  new Route('/path', 'name', [SomeClass::class, 'theHandlerMethod'])  ← the named method's body, inlined
 ```
 
 ## Design Note — Why Routes and Listeners Cannot Use a Publisher-Style Map
