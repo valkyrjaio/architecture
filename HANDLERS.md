@@ -638,7 +638,7 @@ return c.GetSingleton(UserControllerClass).(*UserController).Index(route)
 ```typescript
 router.get('/users',
     handler((c: ContainerContract, route: RouteContract) =>
-        c.getSingleton(UserControllerClass).index(route))
+        c.getSingleton<UserController>(UserControllerClass).index(route))
 )
 ```
 
@@ -859,7 +859,7 @@ route provider source files.
 // typescript — explicit registration
 router.get('/users',
     handler((c: ContainerContract, route: RouteContract) =>
-        c.getSingleton(UserControllerClass).index(route))
+        c.getSingleton<UserController>(UserControllerClass).index(route))
 )
 ```
 

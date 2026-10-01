@@ -341,7 +341,7 @@ Any method or function the build tool reads must return a single flat literal wi
 ```go
 // ✅ simple slice of route objects
 return []dataContract.RouteContract{
-data.Get("/users", func (c ContainerContract, route dataContract.RouteContract) msgContract.ResponseContract { ... }),
+data.Get("/users", func (c ContainerContract, route RouteContract) ResponseContract { ... }),
 }
 
 // ✅ simple map with method reference
