@@ -1115,11 +1115,14 @@ class UserPostController:
         if not isinstance(route, DynamicRouteContract):
             raise HttpRoutingInvalidRouteParameterException('The route declares no parameters')
 
-        return c.get_singleton(UserPostControllerClass).show(
+        return c.get_singleton(UserPostController).show(
             int(route.get_parameter('id').get_value()),
             int(route.get_parameter('postId').get_value()),
         )
 ```
+
+Go and TypeScript hold the same rule. The handler they register explicitly unpacks the matched values, so their
+controller methods take plain ones too.
 
 ---
 
