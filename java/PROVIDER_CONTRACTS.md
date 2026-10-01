@@ -192,7 +192,7 @@ public interface ServiceProviderContract {
 ### UserServiceProvider Implementation
 
 ```java
-package app.providers;
+package app.provider;
 
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;

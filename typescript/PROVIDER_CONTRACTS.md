@@ -257,10 +257,10 @@ import type {RouteContract} from '@valkyrja/http/routing/data/contract'
 import type {HttpRouteProviderContract} from '@valkyrja/http/routing/provider/contract'
 import {HttpRoute} from '@valkyrja/http/routing/data'
 import type {ContainerContract} from '@valkyrja/container/manager/contract'
-import {UserControllerClass} from '../controllers/contract/UserControllerConstants'
-import {OrderControllerClass} from '../controllers/contract/OrderControllerConstants'
-import type {UserController} from '../controllers/UserController'
-import type {OrderController} from '../controllers/OrderController'
+import {UserControllerClass} from '../controller/contract/UserControllerConstants'
+import {OrderControllerClass} from '../controller/contract/OrderControllerConstants'
+import type {UserController} from '../controller/UserController'
+import type {OrderController} from '../controller/OrderController'
 
 export class UserHttpRouteProvider implements HttpRouteProviderContract {
 

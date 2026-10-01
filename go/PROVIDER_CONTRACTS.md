@@ -258,7 +258,7 @@ import (
 	ctnContract "github.com/valkyrjaio/valkyrja-go/vN/container/manager/contract"
 	"github.com/valkyrjaio/valkyrja-go/vN/http/routing/data"
 	dataContract "github.com/valkyrjaio/valkyrja-go/vN/http/routing/data/contract"
-	"app/controllers"
+	"app/controller"
 )
 
 type UserHttpRouteProvider struct{}
@@ -272,13 +272,13 @@ func (p *UserHttpRouteProvider) GetControllerClasses() []string {
 func (p *UserHttpRouteProvider) GetRoutes() []dataContract.RouteContract {
 	return []dataContract.RouteContract{
 		data.Get("/users", func(c ctnContract.ContainerContract, route dataContract.RouteContract) any {
-			return c.GetSingleton(controllers.UserControllerClass).(*controllers.UserController).Index(route)
+			return c.GetSingleton(controller.UserControllerClass).(*controller.UserController).Index(route)
 		}),
 		data.Post("/users", func(c ctnContract.ContainerContract, route dataContract.RouteContract) any {
-			return c.GetSingleton(controllers.UserControllerClass).(*controllers.UserController).Store(route)
+			return c.GetSingleton(controller.UserControllerClass).(*controller.UserController).Store(route)
 		}),
 		data.Get("/orders", func(c ctnContract.ContainerContract, route dataContract.RouteContract) any {
-			return c.GetSingleton(controllers.OrderControllerClass).(*controllers.OrderController).Index(route)
+			return c.GetSingleton(controller.OrderControllerClass).(*controller.OrderController).Index(route)
 		}),
 	}
 }

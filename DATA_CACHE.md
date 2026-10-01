@@ -84,7 +84,7 @@ AppProvider (read from AppConfig.providers)
   └── ContainerComponentProvider
         ├── ContainerBindingsProvider   ← container bindings
         └── ContainerAliasProvider      ← container bindings
-  └── App\Providers\AppContainerProvider    ← application bindings
+  └── App\Provider\AppContainerProvider     ← application bindings
   └── App\Http\Provider\UserRouteProvider  ← application routes
 ```
 
