@@ -828,7 +828,8 @@ $httpRoute->setHandler(
 
 A handler is a lambda at run time. `@RouteHandler` carries `handlerClass` and `handlerMethod` instead, because an
 annotation member must be a constant. The annotation processor reads those members through `javax.lang.model` at
-compile time, then writes them into the cache data classes through JavaPoet. The developer writes no `CacheableHandler` string.
+compile time, then writes them into the cache data classes through JavaPoet. The developer writes no `CacheableHandler`
+string.
 
 ```java
 httpRoute.setHandler(
@@ -986,7 +987,7 @@ Generated output:
 new HttpRoute(
     "/users/{id}", "user.show", "GET",
     List.of(new Parameter("id", "[0-9]+")),
-    app.http.controllers.UserController::showHandler  // from the annotation
+    app.http.controller.UserController::showHandler  // from the annotation
 )
 ```
 
@@ -1022,12 +1023,14 @@ class UserController:
 Generated output:
 
 ```python
+from app.http.controller import UserController
+
 HttpRoute(
     path='/users/{id}',
     name='user.show',
     method='GET',
     parameters=[Parameter('id', '[0-9]+')],
-    handler=(UserController, 'show_handler'),  # thunk unwrapped to the class it names
+    handler=(UserController, 'show_handler'),  # thunk unwrapped, class imported by the generator
 )
 ```
 
