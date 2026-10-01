@@ -989,14 +989,13 @@ public record AppHttpRoutingData(
     public static AppHttpRoutingData create() {
         return new AppHttpRoutingData(
             Map.of(
-                // routes from UserHttpRouteProvider
+                // routes from UserHttpRouteProvider (via UserController annotation)
                 "user.show", new app.http.routing.AuthenticatedRoute(
                     "/users/{id}", "GET",
                     List.of(new Parameter("id", "[0-9]+")),
-                    (ContainerContract c, RouteContract route) ->
-                        c.getSingleton(UserController.class).show(route)
+                    app.http.controllers.UserController::showHandler
                 ),
-                // routes from OrderHttpRouteProvider
+                // routes from OrderHttpRouteProvider (explicit getRoutes())
                 "order.index", new HttpRoute(
                     "/orders", "GET", List.of(),
                     (ContainerContract c, RouteContract route) ->

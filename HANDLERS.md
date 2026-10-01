@@ -881,9 +881,9 @@ router.get('/users',
 ## Annotated Controllers — PHP, Java, Python
 
 For annotated controllers, annotations live on the **implementation method**. Sindri reads the annotations and
-constructs a route object — exactly the same shape as a route returned from `getRoutes()`. **No method body extraction.
-No import resolution of the callable.** The callable from `#[RouteHandler]` is written directly into the generated
-cache data class as a literal, just as it appears in the source.
+constructs a route object — exactly the same shape as a route returned from `getRoutes()`. **No method body
+extraction.** The callable from `#[RouteHandler]` is written directly into the generated cache data class as a literal,
+with its class token resolved to an FQN, because the generated file carries no imports.
 
 This is identical to how service bindings work:
 
@@ -895,7 +895,7 @@ SomeServiceId::class => [SomeServiceProvider::class, 'publishSomeClass']
 new Route('/users/{id}', 'user.show', [SomeClass::class, 'theHandlerMethod'])
 ```
 
-Sindri reads literals, writes literals. No execution, no body extraction, no cross-file resolution.
+Sindri reads literals, writes literals. No execution, and no body extraction.
 
 Go and TypeScript have no annotation support — routes are always registered explicitly via `getRoutes()`.
 
@@ -945,7 +945,7 @@ new \Valkyrja\Http\Routing\Data\HttpRoute(
     name:       'user.show',
     method:     'GET',
     parameters: [new \Valkyrja\Http\Routing\Data\Parameter('id', '[0-9]+')],
-    handler:    [self::class, 'showHandler'],  // written as-is from the annotation
+    handler:    [\App\Http\Controller\UserController::class, 'showHandler'],  // from the annotation
 )
 ```
 
@@ -984,11 +984,9 @@ Generated output:
 
 ```java
 new HttpRoute(
-    "/users/{id}","user.show","GET",
+    "/users/{id}", "user.show", "GET",
     List.of(new Parameter("id", "[0-9]+")),
-        new
-
-HandlerRef(UserController .class, "showHandler")  // written as-is
+    app.http.controller.UserController::showHandler  // from the annotation
 )
 ```
 
@@ -1050,7 +1048,7 @@ HttpRoute(
 Annotations / decorators carry literals.
 Sindri reads literals.
 Sindri writes literals into the generated cache data class.
-No method body extraction. No import resolution of the callable itself.
+No method body extraction. The callable's class token carries its FQN, because the generated file has no imports.
 
 Same as service bindings:
   SomeServiceId::class => [SomeProvider::class, 'publishMethod']  ← literal, written as-is

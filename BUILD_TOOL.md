@@ -260,14 +260,13 @@ public static function onUserCreated(ContainerContract $c, array $args): mixed
 ### Annotated Controllers — PHP, Java, Python
 
 For annotated controllers, `#[RouteHandler]` / `@RouteHandler` / `@route_handler` lives on the **implementation
-method** and carries a *
-_callable reference_* pointing to the static handler method. The handler may live on the same controller class, the
-route provider, or any other class — Sindri follows the callable reference to wherever the handler lives.
+method** and carries a **callable reference** pointing to the static handler method. The handler may live on the same
+controller class, the route provider, or any other class.
 
 ```
-Annotations live on:    the implementation method (show, store, index etc.)
-#[RouteHandler] points to:   a callable (ClassName, methodName) — any class, anywhere
-Sindri reads:            the handler method body from whichever file the callable resolves to
+Annotations live on:       the implementation method (show, store, index etc.)
+#[RouteHandler] points to: a callable (ClassName, methodName) — any class, anywhere
+Sindri writes:             that callable into the cache as a literal, its class token resolved to an FQN
 ```
 
 **PHP — handler on same controller:**
@@ -284,7 +283,7 @@ class UserController
         // actual implementation — not read by Sindri
     }
 
-    // Sindri resolves [self::class, 'showHandler'] → this file → reads this method
+    // Sindri writes [UserController::class, 'showHandler'] into the cache — this method runs at run time
     public static function showHandler(ContainerContract $c, RouteContract $route): ResponseContract
     {
         return $c->getSingleton(self::class)->show($route);
@@ -305,7 +304,7 @@ class UserController
 
 class UserHttpRouteProvider implements HttpRouteProviderContract
 {
-    // Sindri resolves callable → this file → reads this method + this file's imports
+    // Sindri writes the callable into the cache — this method runs at run time
     public static function showUser(ContainerContract $c, RouteContract $route): ResponseContract
     {
         return $c->getSingleton(UserController::class)->show($route);
@@ -322,7 +321,7 @@ public class UserController {
     @RouteHandler(handlerClass = UserController.class, handlerMethod = "showHandler")
     public ResponseContract show(RouteContract route) { /* actual implementation */ }
 
-    // Sindri resolves handlerClass + handlerMethod → this file → reads this method
+    // Sindri writes handlerClass + handlerMethod into the cache — this method runs at run time
     public static ResponseContract showHandler(ContainerContract c, RouteContract route) {
         return c.getSingleton(UserController.class).show(route);
     }
@@ -339,7 +338,7 @@ class UserController:
     def show(self, route: RouteContract) -> ResponseContract:
         pass  # actual implementation — not read by Sindri
 
-    # Sindri resolves callable → this file → reads this method
+    # Sindri writes the callable into the cache — this method runs at run time
     @staticmethod
     def show_handler(c: ContainerContract, route: RouteContract) -> ResponseContract:
         return c.get_singleton(UserController).show(route)
@@ -1342,9 +1341,9 @@ Identical to Step 3c with:
 
 **Input:** file path of a controller class (resolved in Step 3c or 3d).
 
-Sindri reads annotation literals and constructs route data objects — **no method body extraction, no import resolution
-of the callable**. The callable from `#[RouteHandler]` is written directly into the generated output as-is, exactly
-like a callable in an explicit `getRoutes()` route or a service binding:
+Sindri reads annotation literals and constructs route data objects — **no method body extraction**. The callable from
+`#[RouteHandler]` is written directly into the generated output, its class token resolved to an FQN, exactly like a
+callable in an explicit `getRoutes()` route or a service binding:
 
 ```
 // service binding — callable literal written as-is

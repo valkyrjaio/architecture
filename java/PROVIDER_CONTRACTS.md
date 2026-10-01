@@ -330,7 +330,7 @@ import io.valkyrja.http.routing.data.contract.RouteContract;
 public class UserController {
 
     // Annotations on the implementation method.
-    // @RouteHandler carries (handlerClass, handlerMethod) — Sindri follows it to wherever the handler lives.
+    // @RouteHandler carries (handlerClass, handlerMethod) — Sindri writes both into the cache as literals.
     @Route(path = "/users/{id}", name = "user.show", requestMethods = RequestMethod.GET)
     @Parameter(name = "id", regex = "[0-9]+")
     @RouteHandler(handlerClass = UserController.class, handlerMethod = "showHandler")
@@ -344,8 +344,8 @@ public class UserController {
         // actual implementation
     }
 
-    // Sindri resolves handlerClass=UserController.class, handlerMethod="showHandler" → this file
-    // reads this method body using this file's imports
+    // Sindri writes handlerClass=UserController.class, handlerMethod="showHandler" into the cache
+    // as literals — this method runs at run time
     public static ResponseContract showHandler(ContainerContract c, RouteContract route) {
         return c.getSingleton(UserController.class).show(route);
     }
@@ -361,7 +361,7 @@ public class UserController {
 ```java
 public class UserController {
 
-    // @RouteHandler points to the route provider — Sindri follows the callable
+    // @RouteHandler points to the route provider — Sindri writes that reference as a literal
     @Route(path = "/users/{id}", name = "user.show", requestMethods = RequestMethod.GET)
     @Parameter(name = "id", regex = "[0-9]+")
     @RouteHandler(handlerClass = UserHttpRouteProvider.class, handlerMethod = "showUser")
@@ -372,7 +372,7 @@ public class UserController {
 
 public class UserHttpRouteProvider implements HttpRouteProviderContract {
 
-    // Sindri resolves callable → this file, reads this method using this file's imports
+    // The reference names this method — the framework calls it at run time
     public static ResponseContract showUser(ContainerContract c, RouteContract route) {
         return c.getSingleton(UserController.class).show(route);
     }

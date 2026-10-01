@@ -346,7 +346,7 @@ class UserController
         // actual implementation
     }
 
-    // Sindri resolves RouteHandler → this file, reads this method body using this file's imports
+    // Sindri writes the RouteHandler callable into the cache as a literal — this method runs at run time
     public static function showHandler(ContainerContract $c, RouteContract $route): ResponseContract
     {
         return $c->getSingleton(self::class)->show($route);
@@ -364,7 +364,7 @@ class UserController
 ```php
 class UserController
 {
-    // #[RouteHandler] points to the route provider — Sindri follows the callable
+    // #[RouteHandler] points to the route provider — Sindri writes that reference as a literal
     #[Route(path: '/users/{id}', name: 'user.show', requestMethods: [RequestMethod::GET])]
     #[Parameter(name: 'id', regex: '[0-9]+')]
     #[RouteHandler([UserHttpRouteProvider::class, 'showUser'])]
@@ -373,7 +373,7 @@ class UserController
 
 class UserHttpRouteProvider implements HttpRouteProviderContract
 {
-    // Sindri resolves callable → this file, reads this method using this file's imports
+    // The reference names this method — the framework calls it at run time
     public static function showUser(ContainerContract $c, RouteContract $route): ResponseContract
     {
         return $c->getSingleton(UserController::class)->show($route);
