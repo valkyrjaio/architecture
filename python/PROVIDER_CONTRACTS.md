@@ -255,7 +255,7 @@ from typing import Callable
 from valkyrja.container.provider.contract import ServiceProviderContract
 from valkyrja.container.manager.contract import ContainerContract
 from app.repository import UserRepository
-from app.repository.contract import UserRepositoryClass
+from app.repository.contract import ContainerConstants, UserRepositoryClass
 from app.service.contract import DatabaseClass
 
 
@@ -268,7 +268,7 @@ class UserServiceProvider(ServiceProviderContract):
         Values are method references — Sindri wraps them in lambdas in the cache.
         """
         return {
-            UserRepositoryClass: UserServiceProvider.publish_user_repository,
+            ContainerConstants.USER_REPOSITORY: UserServiceProvider.publish_user_repository,
         }
 
     @staticmethod
