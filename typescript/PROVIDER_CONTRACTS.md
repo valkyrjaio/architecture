@@ -377,8 +377,8 @@ return [...this.getBaseRoutes(), ...this.getExtraRoutes()]
 
 ## Handler Method Pointer Convention
 
-On the explicit path, all handler methods must be **methods on the same class** as the provider that defines the route
-or listener. This is the same pattern used by `publishers()` in service providers.
+All handler methods must be **methods on the same class** as the provider that defines the route or listener. This is
+the same pattern used by `publishers()` in service providers.
 
 **Why:** Sindri reads exactly one file per provider or controller. All imports for handler bodies are in that one file —
 no cross-file import aggregation, no conflict detection, no registry needed.
@@ -389,7 +389,7 @@ no cross-file import aggregation, no conflict detection, no registry needed.
 
 ❌ Inline closures or lambdas in route/listener definitions
 ❌ References to types not imported in the current file
-❌ Handler methods on a different class — on the explicit path
+❌ Handler methods on a different class
 ```
 
 ---

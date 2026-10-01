@@ -198,9 +198,10 @@ consistent end to end.
 
 ### The Pattern
 
-Every handler is a method on the same class that declares it, or — for a Go publisher — a package-level function in
-that file. The route/listener/binding definition points to it by name. Sindri reads the body from the same file, so no
-cross-file resolution is needed.
+On the explicit path, every handler is a method on the same class that declares it, or — for a Go publisher — a
+package-level function in that file. The route/listener/binding definition points to it by name, and Sindri reads the
+body from the same file, so no cross-file resolution is needed. An annotated controller's callable may name any class,
+and Sindri writes it as a literal rather than reading a body.
 
 **Service providers** — already correct:
 
