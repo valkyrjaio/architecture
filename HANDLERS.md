@@ -87,7 +87,7 @@ static fn(ContainerContract $c, RouteContract $route): OutputContract => (
 )
 
 // Listener — takes the event's named arguments, returns any
-static fn(ContainerContract $c, array<string, mixed> $args): mixed => (
+static fn(ContainerContract $c, array $args): mixed => (
     $c->getSingleton(UserCreatedListener::class)->handle($args['user_id'])
 )
 ```
@@ -418,7 +418,7 @@ interface ListenerHandlerContract extends HandlerContract
 
 // usage
 $listener->setHandler(
-    static fn(ContainerContract $c, array<string, mixed> $args): mixed
+    static fn(ContainerContract $c, array $args): mixed
         => $c->getSingleton(UserCreatedListener::class)->handle($args['user_id'])
 );
 ```
@@ -643,7 +643,8 @@ The `CacheableHandler` string representation is only needed for CGI and lambda d
 required. It is **never used at runtime** — the closure is always used at runtime.
 
 For **PHP, Java, and Python** the build tool (valkyrja-build) reads the callable reference the marker carries and writes
-it into the cache data files as a literal. The developer never writes a `CacheableHandler` string.
+it into the cache data files as a literal. On the explicit `getRoutes()` path those three ports carry a closure instead,
+and the build tool extracts its source text. The developer never writes a `CacheableHandler` string.
 
 For **Go and TypeScript** the build tool reads the route provider source files via AST (go/analysis and TypeScript
 compiler API respectively), extracts the handler closure source text, and generates cache data files. The developer also

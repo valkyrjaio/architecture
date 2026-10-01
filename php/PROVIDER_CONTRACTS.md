@@ -340,7 +340,7 @@ class UserController
     }
 
     #[Route(path: '/users', name: 'user.store', requestMethods: [RequestMethod::POST])]
-    #[RouteHandler([UserController::class, 'storeHandler'])]
+    #[RouteHandler([self::class, 'storeHandler'])]
     public function store(RouteContract $route): ResponseContract
     {
         // actual implementation
