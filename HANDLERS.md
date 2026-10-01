@@ -1037,7 +1037,7 @@ HttpRoute(
     name='user.show',
     method='GET',
     parameters=[Parameter('id', '[0-9]+')],
-    handler=(app.http.controller.UserController, 'show_handler'),  # thunk unwrapped, class written as an FQN
+    handler=lambda c, route: app.http.controller.UserController.show_handler(c, route),  # thunk unwrapped to an FQN
 )
 ```
 

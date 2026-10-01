@@ -727,17 +727,12 @@ class UserHttpRouteProvider(HttpRouteProviderContract):
 
 ```typescript
 export interface HttpRouteProviderContract {
-    getControllerClasses(): string[]
-
+    // getControllerClasses intentionally absent — TypeScript has no annotation scan
     getRoutes(): RouteContract[]
 }
 
-// implementation — string constants, no ::class equivalent
+// implementation — explicit registration only
 export class UserHttpRouteProvider implements HttpRouteProviderContract {
-
-    getControllerClasses(): string[] {
-        return [UserControllerClass, OrderControllerClass]
-    }
 
     getRoutes(): RouteContract[] {
         return [
