@@ -178,9 +178,9 @@ See: https://valkyrja.io/docs/providers#build-tool-compatibility
 
 ## Handler Method Pointer Convention
 
-Handlers must be **method pointers** — references to methods on the same class as the provider or controller that
-defines the route, listener, or binding. A Go publisher may name a package-level function in the same file instead.
-They must not be inline closures or lambdas.
+On the explicit path, handlers must be **method pointers** — references to methods on the same class as the provider
+that defines the route, listener, or binding. A Go publisher may name a package-level function in the same file instead.
+An annotated controller's callable may name any class. None of them may be an inline closure or lambda.
 
 This is the single most important convention for keeping Sindri simple, import-safe, and conflict-free.
 

@@ -428,7 +428,12 @@ def scan_controller_for_handlers(controller_class: type) -> list[dict]:
         if not hasattr(method, '_valkyrja_handler'):
             continue
 
-        handler_reference = method._valkyrja_handler
+        handler_class, handler_method = method._valkyrja_handler
+        # The decorator may carry a thunk — call it to reach the class.
+        if not isinstance(handler_class, type):
+            handler_class = handler_class()
+
+        handler_reference = (handler_class, handler_method)
 
         # @parameter decorator attaches parameter list similarly
         parameters = getattr(method, '_valkyrja_parameters', [])
