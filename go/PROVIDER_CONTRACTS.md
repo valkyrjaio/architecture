@@ -384,7 +384,8 @@ service providers.
 no cross-file import aggregation, no conflict detection, no registry needed.
 
 ```
-✅ Method reference on the same class, or a package-level function in the same file
+✅ Method reference on the same class
+✅ Package-level function in the same file — publishers only
 ✅ All type references imported in the same file
 
 ❌ Inline closures or lambdas in route/listener definitions

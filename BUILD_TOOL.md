@@ -1417,7 +1417,7 @@ other class.
         - Extract event type class reference → resolve to FQN via imports
         - Extract priority if present
      c. If handler found:
-        - Resolve ClassName → FQN, and write the callable into the output as a literal
+        - Write the callable into the output as a literal
         - Add listener data to output list
 4. Output: list of listener data objects, same shape as explicit_listeners from Step 3b
 ```
