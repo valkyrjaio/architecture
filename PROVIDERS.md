@@ -213,7 +213,7 @@ interface HttpRouteProviderContract {
 }
 ```
 
-**Handler method pointer convention** — route handlers must be static methods on the same provider class (or pointed to
+**Handler method pointer convention** — route handlers must be methods on the same provider class (or pointed to
 via `#[RouteHandler]` callable on annotated controllers). No inline closures or lambdas in route definitions.
 
 **Why handlers live on the route, not in a separate list** — an alternative design would have the provider expose a

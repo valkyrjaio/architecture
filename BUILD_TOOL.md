@@ -178,7 +178,7 @@ See: https://valkyrja.io/docs/providers#build-tool-compatibility
 
 ## Handler Method Pointer Convention
 
-Handlers must be **method pointers** — references to static methods on the same class as the provider or controller that
+Handlers must be **method pointers** — references to methods on the same class as the provider or controller that
 defines the route, listener, or binding. They must not be inline closures or lambdas.
 
 This is the single most important convention for keeping Sindri simple, import-safe, and conflict-free.
@@ -197,8 +197,8 @@ consistent end to end.
 
 ### The Pattern
 
-Every handler is a static method on the same class that declares it. The route/listener/binding definition points to
-that method by name. Sindri reads the method body from the same file — no cross-file resolution needed.
+Every handler is a method on the same class that declares it. The route/listener/binding definition points to that
+method by name. Sindri reads the method body from the same file — no cross-file resolution needed.
 
 **Service providers** — already correct:
 
@@ -389,7 +389,6 @@ are structural problems in the application that the developer must resolve.
 ✅ p.MethodName                           — Go method reference on same struct
 ✅ this.methodName.bind(this)             — TypeScript method reference on same class
 
-✅ Handler method must be static — in Go, a method on the provider struct
 ✅ Handler method must be on the same class as the provider
 ✅ All type refs in handler body must be imported in the provider file
 
@@ -2164,7 +2163,7 @@ function extractProviderList(
 **Handler method body extraction:**
 
 ```typescript
-function extractPublisherMethod(
+function extractHandlerMethod(
     className: string,
     methodName: string,
     program: ts.Program,
