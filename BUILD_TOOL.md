@@ -397,7 +397,8 @@ are structural problems in the application that the developer must resolve.
 ❌ Inline closures or lambdas in route/listener definitions
 ```
 
-**For annotated controllers and listeners** (PHP, Java, Python only):
+**For annotated controllers and listeners** (PHP, Java, Python only) — a listener carries `#[ListenerHandler]` in the
+same shapes:
 
 ```
 ✅ #[RouteHandler([ClassName::class, 'methodName'])]                      — PHP callable on any class
@@ -1185,14 +1186,14 @@ cli_providers       → list of class identifiers (CliRouteProvider classes)
 
 ### Step 3a: Walk ServiceProvider Files (Container Bindings)
 
-**Goal:** Extract all container bindings — the mapping of binding key to publisher method reference.
+**Goal:** Extract all container bindings — the mapping of binding key to publisher function body.
 
 **What to collect:**
 
 ```
 imports         → map of simple name → FQN
 
-publishers      → map of binding key → publisher method reference
+publishers      → map of binding key → publisher method body source text
                   key format is language-specific:
                     PHP/Java             → ::class / .class (class name resolved to FQN via imports)
                     Go/Python/TypeScript → string constant  (constant resolved to its key string)
@@ -1208,9 +1209,9 @@ publishers      → map of binding key → publisher method reference
 5. For each entry:
    a. Extract the key → resolve to canonical FQN string (language-specific, see table below)
    b. Extract the value → method reference (e.g. self::publishRouter)
-   c. Resolve the method's class to an FQN via the import map
-   d. Write the reference wrapped in a lambda, the format the container resolves — see CONTAINER_BINDINGS.md
-6. Output: map of { canonical key string → lambda wrapping the publisher reference }
+   c. Resolve method reference → find that method in the same file
+   d. Extract the callable value as a literal → written as-is into generated output
+6. Output: map of { canonical key string → callable literal }
 ```
 
 **Language-specific key resolution:**
