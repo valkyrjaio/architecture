@@ -309,10 +309,6 @@ import dataContract "github.com/valkyrjaio/valkyrja-go/vN/event/data/contract"
 
 // ListenerProviderContract defines what an event listener provider must implement.
 type ListenerProviderContract interface {
-	// GetListenerClasses returns a list of listener class string constants.
-	// Returns empty slice (Go has no annotations to scan).
-	GetListenerClasses() []string
-
 	// GetListeners returns a list of explicit listener definitions.
 	// Listeners are complete data structures — they carry event type, priority,
 	// and handler together. Cannot be expressed as a key/body map without
