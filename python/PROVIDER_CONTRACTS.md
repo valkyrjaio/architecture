@@ -227,14 +227,14 @@ class ServiceProviderContract(ABC):
         @staticmethod
         def publishers() -> dict:
             return {
-                UserRepositoryClass: UserServiceProvider.publish_user_repository,
+                ContainerConstants.USER_REPOSITORY: UserServiceProvider.publish_user_repository,
             }
 
         @staticmethod
         def publish_user_repository(container: ContainerContract) -> None:
             container.set_singleton(
-                UserRepositoryClass,
-                UserRepository(container.get_singleton(DatabaseClass))
+                ContainerConstants.USER_REPOSITORY,
+                UserRepository(container.get_singleton(ContainerConstants.DATABASE))
             )
     """
 
@@ -577,7 +577,7 @@ Any method the build tool reads must return a single flat literal with no logic:
 return [HttpContainerProvider(), HttpMiddlewareProvider()]
 
 # ✅ simple dict literal with method reference
-return {UserRepositoryClass: UserServiceProvider.publish_user_repository}
+return {ContainerConstants.USER_REPOSITORY: UserServiceProvider.publish_user_repository}
 
 # ✅ simple list of route objects
 return [HttpRoute.get('/users', UserHttpRouteProvider.index_users)]

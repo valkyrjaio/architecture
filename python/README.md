@@ -159,13 +159,16 @@ No `@route_handler` decorator sits on a publisher method. The build tool reads t
 @staticmethod
 def publishers() -> dict:
     return {
-        UserRepositoryClass: UserServiceProvider.publish_user_repository,
+        ContainerConstants.USER_REPOSITORY: UserServiceProvider.publish_user_repository,
     }
 
 
 @staticmethod
 def publish_user_repository(container: ContainerContract) -> None:
-    container.set_singleton(UserRepositoryClass, UserRepository(container.get_singleton(DatabaseClass)))
+    container.set_singleton(
+        ContainerConstants.USER_REPOSITORY,
+        UserRepository(container.get_singleton(ContainerConstants.DATABASE))
+    )
 ```
 
 ### HttpRouteProviderContract
