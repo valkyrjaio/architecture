@@ -679,10 +679,13 @@ return []string{}
 
 func (p *UserHttpRouteProvider) GetRoutes() []RouteContract {
 return []RouteContract{
-data.Get("/orders", func (c ContainerContract, route RouteContract) ResponseContract {
-return c.GetSingleton(OrderControllerClass).(*OrderController).Index(route)
-}),
+data.Get("/orders", p.IndexOrders),
 }
+}
+
+// Build tool reads this method body from AST for cache generation.
+func (p *UserHttpRouteProvider) IndexOrders(c ContainerContract, route RouteContract) ResponseContract {
+return c.GetSingleton(OrderControllerClass).(*OrderController).Index(route)
 }
 ```
 

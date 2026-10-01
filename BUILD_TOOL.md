@@ -1834,13 +1834,19 @@ return routes
 }
 ```
 
-**Handler function body extraction:**
+**Handler method body extraction:**
 
 ```go
-// extract function literal source text from AST node
-func extractFuncLiteral(node ast.Node, fset *token.FileSet) string {
+// find the handler method the route names, and print its body
+func extractHandlerMethod(file *ast.File, methodName string, fset *token.FileSet) string {
 var buf bytes.Buffer
-printer.Fprint(&buf, fset, node)
+for _, decl := range file.Decls {
+fn, ok := decl.(*ast.FuncDecl)
+if !ok || fn.Recv == nil || fn.Name.Name != methodName {
+continue
+}
+printer.Fprint(&buf, fset, fn.Body)
+}
 return buf.String()
 }
 

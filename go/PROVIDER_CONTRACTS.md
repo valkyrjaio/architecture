@@ -272,16 +272,23 @@ func (p *UserHttpRouteProvider) GetControllerClasses() []string {
 
 func (p *UserHttpRouteProvider) GetRoutes() []dataContract.RouteContract {
 	return []dataContract.RouteContract{
-		data.Get("/users", func(c ctnContract.ContainerContract, route dataContract.RouteContract) msgContract.ResponseContract {
-			return c.GetSingleton(controller.UserControllerClass).(*controller.UserController).Index(route)
-		}),
-		data.Post("/users", func(c ctnContract.ContainerContract, route dataContract.RouteContract) msgContract.ResponseContract {
-			return c.GetSingleton(controller.UserControllerClass).(*controller.UserController).Store(route)
-		}),
-		data.Get("/orders", func(c ctnContract.ContainerContract, route dataContract.RouteContract) msgContract.ResponseContract {
-			return c.GetSingleton(controller.OrderControllerClass).(*controller.OrderController).Index(route)
-		}),
+		data.Get("/users", p.IndexUsers),
+		data.Post("/users", p.StoreUser),
+		data.Get("/orders", p.IndexOrders),
 	}
+}
+
+// Handler methods live on the provider — the build tool reads each body from this file.
+func (p *UserHttpRouteProvider) IndexUsers(c ctnContract.ContainerContract, route dataContract.RouteContract) msgContract.ResponseContract {
+	return c.GetSingleton(controller.UserControllerClass).(*controller.UserController).Index(route)
+}
+
+func (p *UserHttpRouteProvider) StoreUser(c ctnContract.ContainerContract, route dataContract.RouteContract) msgContract.ResponseContract {
+	return c.GetSingleton(controller.UserControllerClass).(*controller.UserController).Store(route)
+}
+
+func (p *UserHttpRouteProvider) IndexOrders(c ctnContract.ContainerContract, route dataContract.RouteContract) msgContract.ResponseContract {
+	return c.GetSingleton(controller.OrderControllerClass).(*controller.OrderController).Index(route)
 }
 ```
 
@@ -341,7 +348,7 @@ Any method or function the build tool reads must return a single flat literal wi
 ```go
 // ✅ simple slice of route objects
 return []RouteContract{
-data.Get("/users", func (c ContainerContract, route RouteContract) ResponseContract { ... }),
+data.Get("/users", p.IndexUsers),
 }
 
 // ✅ simple map with method reference
