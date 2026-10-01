@@ -304,7 +304,7 @@ class HttpHandlerContract(HandlerContract, ABC):
 
 # usage
 http_route.set_handler(
-    lambda c, route: c.get_singleton(UserControllerClass).show(route)
+    lambda c, route: c.get_singleton(ContainerConstants.USER_CONTROLLER).show(route)
 )
 ```
 
@@ -393,7 +393,7 @@ class CliHandlerContract(HandlerContract, ABC):
 
 # usage
 cli_command.set_handler(
-    lambda c, route: c.get_singleton(SendEmailCommandClass).run(route)
+    lambda c, route: c.get_singleton(ContainerConstants.SEND_EMAIL_COMMAND).run(route)
 )
 ```
 
@@ -482,7 +482,7 @@ class ListenerHandlerContract(HandlerContract, ABC):
 
 # usage
 listener.set_handler(
-    lambda c, args: c.get_singleton(UserCreatedListenerClass).handle(args['user_id'])
+    lambda c, args: c.get_singleton(ContainerConstants.USER_CREATED_LISTENER).handle(args['user_id'])
 )
 ```
 

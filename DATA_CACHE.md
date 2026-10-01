@@ -710,7 +710,7 @@ class UserHttpRouteProvider(HttpRouteProviderContract):
     def get_routes() -> list:
         return [
             HttpRoute.get('/orders',
-                          lambda c, route: c.get_singleton(OrderControllerClass).index(route))
+                          lambda c, route: c.get_singleton(ContainerConstants.ORDER_CONTROLLER).index(route))
         ]
 ```
 

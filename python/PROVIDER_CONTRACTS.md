@@ -341,7 +341,7 @@ from valkyrja.http.routing.data.contract import RouteContract
 from valkyrja.http.routing.provider.contract import HttpRouteProviderContract
 from valkyrja.http.routing.data import HttpRoute
 from app.http.controller import UserController, OrderController
-from app.http.controller.contract import OrderControllerClass, UserControllerClass
+from app.constants.container_constants import ContainerConstants
 
 
 class UserHttpRouteProvider(HttpRouteProviderContract):
@@ -372,11 +372,11 @@ class UserHttpRouteProvider(HttpRouteProviderContract):
     @staticmethod
     def index_orders(c: ContainerContract, route: RouteContract) -> ResponseContract:
         """Handler method lives on the same class — all imports self-contained."""
-        return c.get_singleton(OrderControllerClass).index(route)
+        return c.get_singleton(ContainerConstants.ORDER_CONTROLLER).index(route)
 
     @staticmethod
     def index_users(c: ContainerContract, route: RouteContract) -> ResponseContract:
-        return c.get_singleton(UserControllerClass).index(route)
+        return c.get_singleton(ContainerConstants.USER_CONTROLLER).index(route)
 ```
 
 ### Controller with @route_handler Decorator
@@ -394,7 +394,7 @@ from typing import Callable
 from valkyrja.container.manager.contract import ContainerContract
 from valkyrja.http.message.response.contract import ResponseContract
 from valkyrja.http.routing.data.contract import RouteContract
-from app.http.controller.contract import UserControllerClass
+from app.constants.container_constants import ContainerConstants
 
 HandlerReference = tuple[type | Callable[[], type], str]
 
@@ -432,11 +432,11 @@ class UserController:
 
     @staticmethod
     def index_handler(c: ContainerContract, route: RouteContract) -> ResponseContract:
-        return c.get_singleton(UserControllerClass).index(route)
+        return c.get_singleton(ContainerConstants.USER_CONTROLLER).index(route)
 
     @staticmethod
     def store_handler(c: ContainerContract, route: RouteContract) -> ResponseContract:
-        return c.get_singleton(UserControllerClass).store(route)
+        return c.get_singleton(ContainerConstants.USER_CONTROLLER).store(route)
 ```
 
 ### Why Not Self-Registration
