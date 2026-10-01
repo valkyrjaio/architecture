@@ -1027,7 +1027,7 @@ class UserController:
         return c.get_singleton(ContainerConstants.USER_CONTROLLER).show(route)
 ```
 
-Generated output:
+Generated output — the callable as a literal, which the route wraps in a closure on load:
 
 ```python
 import app.http.controller
@@ -1037,7 +1037,7 @@ HttpRoute(
     name='user.show',
     method='GET',
     parameters=[Parameter('id', '[0-9]+')],
-    handler=lambda c, route: app.http.controller.UserController.show_handler(c, route),  # thunk unwrapped to an FQN
+    handler=(app.http.controller.UserController, 'show_handler'),  # thunk unwrapped, class written as an FQN
 )
 ```
 
