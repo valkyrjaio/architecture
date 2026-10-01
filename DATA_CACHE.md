@@ -544,7 +544,7 @@ func (p *UserServiceProvider) Publishers() map[string]func(ContainerContract) {
 func (p *UserServiceProvider) PublishUserRepository(c ContainerContract) {
     c.SetSingleton(
         repoContract.UserRepositoryClass,
-        repositories.NewUserRepository(c.GetSingleton(serviceContract.DatabaseClass)),
+        repository.NewUserRepository(c.GetSingleton(serviceContract.DatabaseClass)),
     )
 }
 ```
@@ -563,14 +563,14 @@ class UserServiceProvider(ServiceProviderContract):
     @staticmethod
     def publishers() -> dict:
         return {
-            UserRepositoryClass: UserServiceProvider.publish_user_repository,
+            ContainerConstants.USER_REPOSITORY: UserServiceProvider.publish_user_repository,
         }
 
     @staticmethod
     def publish_user_repository(container: ContainerContract) -> None:
         container.set_singleton(
-            UserRepositoryClass,
-            UserRepository(container.get_singleton(DatabaseClass))
+            ContainerConstants.USER_REPOSITORY,
+            UserRepository(container.get_singleton(ContainerConstants.DATABASE))
         )
 ```
 
