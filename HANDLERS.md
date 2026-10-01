@@ -70,7 +70,7 @@ if dynamicRoute, ok := route.(DynamicRouteContract); ok {
 id = dynamicRoute.GetParameter("id").GetValue()
 }
 
-c.GetSingleton(LoggerContractClass).(LoggerContract).Info(route.GetName(), map[string]any{"id": id})
+c.GetSingleton(LoggerClass).(LoggerContract).Info(route.GetName(), map[string]any{"id": id})
 
 return c.GetSingleton(UserControllerClass).(*UserController).Show(route)
 }
@@ -84,7 +84,7 @@ The TypeScript twin reads the parameter the same way:
         ? route.getParameter('id').getValue()
         : undefined
 
-    c.getSingleton<LoggerContract>(LoggerContractClass).info(route.getName(), {id})
+    c.getSingleton<LoggerContract>(LoggerClass).info(route.getName(), {id})
 
     return c.getSingleton<UserController>(UserControllerClass).show(route)
 }
