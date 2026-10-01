@@ -643,11 +643,11 @@ The `CacheableHandler` string representation is only needed for CGI and lambda d
 required. It is **never used at runtime** — the closure is always used at runtime.
 
 For **PHP, Java, and Python** the build tool (valkyrja-build) reads the callable reference the marker carries and writes
-it into the cache data files as a literal. On the explicit `getRoutes()` path those three ports carry a closure instead,
-and the build tool extracts its source text. The developer never writes a `CacheableHandler` string.
+it into the cache data files as a literal. On the explicit `getRoutes()` path the handler is a method reference, and the
+build tool extracts that method's body. The developer never writes a `CacheableHandler` string.
 
 For **Go and TypeScript** the build tool reads the route provider source files via AST (go/analysis and TypeScript
-compiler API respectively), extracts the handler closure source text, and generates cache data files. The developer also
+compiler API respectively), extracts the referenced method's body, and generates cache data files. The developer also
 never writes a `CacheableHandler` string.
 
 The `CacheableHandler` contract exists as an escape hatch for edge cases where automatic extraction is not possible or
@@ -820,8 +820,8 @@ httpRoute.setHandler(
 
 ### Go
 
-Explicit closure registration is the only mechanism. The build tool uses go/analysis to extract the handler closure from
-the route provider source files.
+Explicit registration is the only mechanism. The build tool uses go/analysis to extract the referenced handler method
+from the route provider source files.
 
 ```go
 // go — always explicit
@@ -846,8 +846,8 @@ def index(self, route: RouteContract) -> ResponseContract:
 
 ### TypeScript
 
-No decorators. Explicit registration only. Build tool uses TypeScript compiler API to extract handler closures from
-route provider source files.
+No decorators. Explicit registration only. Build tool uses the TypeScript compiler API to extract the referenced
+handler methods from route provider source files.
 
 ```typescript
 // typescript — explicit registration

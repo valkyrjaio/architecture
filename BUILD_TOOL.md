@@ -1249,7 +1249,7 @@ explicit_listeners  → list of listener data objects from getListeners()
                       each listener carries:
                         event type  (class reference → FQN via imports)
                         priority    (integer literal, if present)
-                        handler     (closure source text, type refs rewritten to FQN)
+                        handler     (referenced method's body, type refs rewritten to FQN)
 
 annotated_classes   → list of class identifiers from getListenerClasses()
                       (PHP, Java, Python only — Go and TypeScript omit this method)
@@ -1265,7 +1265,7 @@ annotated_classes   → list of class identifiers from getListenerClasses()
    a. Extract return list literal
    b. For each listener constructor call:
       - Extract event type class reference → resolve to FQN via imports
-      - Extract handler closure source text → rewrite type refs to FQN
+      - Extract the referenced handler method's body → rewrite type refs to FQN
       - Extract priority if present
 4. Find getListenerClasses() method (PHP/Java/Python only):
    a. Extract return list literal
