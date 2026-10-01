@@ -1014,7 +1014,7 @@ public record AppHttpRoutingData(
                 "order.index", new HttpRoute(
                     "/orders", "GET", List.of(),
                     (ContainerContract c, RouteContract route) ->
-                        c.getSingleton(OrderController.class).index(route)
+                        c.getSingleton(app.http.controller.OrderController.class).index(route)
                 )
                 // ... all other routes
             ),

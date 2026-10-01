@@ -9,8 +9,8 @@ Go provider contracts differ from PHP/Java in several important ways:
 - Publisher methods can be struct methods OR package-level functions — build tool handles both
 - No abstract classes — interfaces enforce the contract, unexported types enforce instantiation restrictions
 - All methods return simple slice/map literals — no conditional logic
-- `GetControllerClasses()` and `GetListenerClasses()` are **absent** — Go has no annotations, so annotated class
-  scanning is not possible. Including these methods would imply capability that does not exist.
+- `GetControllerClasses()` and `GetListenerClasses()` return an empty slice — Go has no annotations, so there is no
+  annotated class to scan, and the contract keeps the method for parity with the other ports.
 
 ### Go Works Without Cache
 

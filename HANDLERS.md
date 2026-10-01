@@ -887,9 +887,10 @@ indexUsers(c: ContainerContract, route: RouteContract): ResponseContract {
 ## Annotated Controllers — PHP, Java, Python
 
 For annotated controllers, annotations live on the **implementation method**. Sindri reads the annotations and
-constructs a route object — exactly the same shape as a route returned from `getRoutes()`. **No method body
-extraction.** The callable from `#[RouteHandler]` is written directly into the generated cache data class as a literal,
-with its class token resolved to an FQN.
+constructs a route object. **No method body extraction.** The callable from `#[RouteHandler]` is written directly into
+the generated cache data class as a literal, with its class token resolved to an FQN. The route wraps that callable in a
+closure when it loads, because `getHandler()` returns one — the same step the container takes for a publisher reference.
+See [`CONTAINER_BINDINGS.md`](CONTAINER_BINDINGS.md).
 
 This is identical to how service bindings work:
 
@@ -897,9 +898,11 @@ This is identical to how service bindings work:
 // service binding — callable written as a literal
 SomeServiceId::class => [SomeServiceProvider::class, 'publishSomeClass']
 
-// explicit route — Sindri inlines the named method's body as a closure
+// annotated route — callable written as a literal
 new Route('/users/{id}', 'user.show', [SomeClass::class, 'theHandlerMethod'])
 ```
+
+An explicit `getRoutes()` route takes the other path: Sindri inlines the named method's body as a closure.
 
 Sindri reads literals, writes literals. No execution, and no body extraction.
 
@@ -944,7 +947,7 @@ class UserController
 }
 ```
 
-Generated output — identical shape to an explicit `getRoutes()` route:
+Generated output — the callable as a literal, which the route wraps in a closure on load:
 
 ```php
 new \Valkyrja\Http\Routing\Data\HttpRoute(
