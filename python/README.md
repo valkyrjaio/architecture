@@ -376,7 +376,10 @@ Python decorators execute at import time — but `@route_handler` must **not** s
 metadata marker only:
 
 ```python
-def route_handler(handler: tuple[type | Callable[[], type], str]):
+HandlerReference = tuple[type | Callable[[], type], str]
+
+
+def route_handler(handler: HandlerReference):
     def decorator(func):
         func._valkyrja_handler = handler  # metadata only — no registration
         return func
@@ -396,7 +399,8 @@ scans for `_valkyrja_handler`. Decorator metadata is never read.
 
 The `@route_handler` decorator carries the callable for build tool extraction. The build tool reads
 `_valkyrja_handler` metadata from AST via `inspect.getfile()` + `ast.parse()`. A decorator argument runs before the
-class name binds, so a handler on the decorated class's own body takes a thunk — see
+class name binds, so a handler on the decorated class's own body takes a thunk. Sindri unwraps the thunk to the
+identifier, so the generated output matches the non-thunk form. See
 [`DECORATORS.md`](../typescript/DECORATORS.md) for the same problem in TypeScript.
 
 ### Accessing _valkyrja_handler at Runtime

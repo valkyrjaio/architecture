@@ -155,7 +155,10 @@ container.bind(
       NOT self-register
 
 ```python
-def route_handler(handler: tuple[type | Callable[[], type], str]):
+HandlerReference = tuple[type | Callable[[], type], str]
+
+
+def route_handler(handler: HandlerReference):
     def decorator(func):
         func._valkyrja_handler = handler  # metadata only
         return func

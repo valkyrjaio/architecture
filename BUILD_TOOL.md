@@ -1566,7 +1566,7 @@ foreach ($componentProviders as $providerClass) {
 
 ```php
 // find methods with #[RouteHandler] attribute
-class HandlerAttributeVisitor extends NodeVisitorAbstract
+class RouteHandlerAttributeVisitor extends NodeVisitorAbstract
 {
     public function enterNode(Node $node): void
     {
@@ -1980,6 +1980,16 @@ def extract_provider_list(
 **Decorator extraction (`@route_handler` on controller methods):**
 
 ```python
+def unwrap_thunk(node: ast.expr) -> ast.expr:
+    """A thunk names the decorated class itself — read the identifier it returns."""
+    first, method = node.elts if isinstance(node, ast.Tuple) else (node, None)
+
+    if isinstance(first, ast.Lambda):
+        first = first.body
+
+    return ast.Tuple(elts=[first, method]) if method else first
+
+
 def extract_handlers(controller_class: type) -> list[dict]:
     """Extract @route_handler decorated methods from a controller class via AST."""
     filepath = inspect.getfile(controller_class)
@@ -1997,9 +2007,9 @@ def extract_handlers(controller_class: type) -> list[dict]:
             if not isinstance(decorator.func, ast.Name): continue
             if decorator.func.id != 'route_handler': continue
 
-            # extract the callable reference argument
+            # extract the callable reference argument, unwrapping a thunk to the class it names
             if not decorator.args: continue
-            handler_source = ast.unparse(decorator.args[0])
+            handler_source = ast.unparse(unwrap_thunk(decorator.args[0]))
             handler_fqn = resolve_fqn(handler_source, imports)
 
             # extract @parameter decorators from same method
