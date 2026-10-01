@@ -1115,7 +1115,7 @@ class UserPostController:
         if not isinstance(route, DynamicRouteContract):
             raise HttpRoutingInvalidRouteParameterException('The route declares no parameters')
 
-        return c.get_singleton(UserPostController).show(
+        return c.get_singleton(ContainerConstants.USER_POST_CONTROLLER).show(
             int(route.get_parameter('id').get_value()),
             int(route.get_parameter('postId').get_value()),
         )
