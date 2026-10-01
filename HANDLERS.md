@@ -98,7 +98,7 @@ static fn(ContainerContract $c, RouteContract $route): ResponseContract => (
 
 // CLI handler — same signature shape, different concern
 static fn(ContainerContract $c, RouteContract $route): OutputContract => (
-    $c->getSingleton(UserCommand::class)->run($route)
+    $c->getSingleton(SendEmailCommand::class)->run($route)
 )
 
 // Listener — takes the event's named arguments, returns any

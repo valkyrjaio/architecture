@@ -421,7 +421,7 @@ public interface ListenerProviderContract {
 
     /**
      * Get a list of attributed listener classes.
-     * Build tool scans each class for @RouteHandler annotations.
+     * Build tool scans each class for @ListenerHandler annotations.
      * Must be a simple List.of() literal — no conditional logic.
      */
     List<Class<?>> getListenerClasses();

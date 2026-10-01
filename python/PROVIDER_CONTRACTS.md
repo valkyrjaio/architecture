@@ -507,7 +507,7 @@ class ListenerProviderContract(ABC):
         """
         Get a list of attributed listener classes.
         Build tool uses inspect.getfile() to locate each class source file,
-        then scans for @route_handler decorated methods.
+        then scans for @listener_handler decorated methods.
         Must return a simple list literal — no conditional logic permitted.
 
         NOTE: Same as get_controller_classes() — live class objects in the list are

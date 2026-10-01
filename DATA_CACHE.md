@@ -84,8 +84,8 @@ AppProvider (read from AppConfig.providers)
   └── ContainerComponentProvider
         ├── ContainerBindingsProvider   ← container bindings
         └── ContainerAliasProvider      ← container bindings
-  └── App\Provider\AppContainerProvider     ← application bindings
-  └── App\Http\Provider\UserRouteProvider  ← application routes
+  └── App\Provider\AppContainerProvider      ← application bindings
+  └── App\Http\Provider\UserRouteProvider   ← application routes
 ```
 
 Provider list methods must return **simple list literals with no conditional logic**. This is a hard framework
