@@ -890,19 +890,19 @@ For annotated controllers, annotations live on the **implementation method**. Si
 constructs a route object. **No method body extraction.** The callable from `#[RouteHandler]` is written directly into
 the generated cache data class as a literal, with its class token resolved to an FQN.
 
-This is identical to how service bindings work:
+A service binding is written the same way — as a literal, read without execution. Its own step decides how the class
+token reaches the generated file:
 
 ```php
 // service binding — callable written as a literal
 SomeServiceId::class => [SomeServiceProvider::class, 'publishSomeClass']
 
-// annotated route — callable written as a literal
+// annotated route — callable written as a literal, class token resolved to an FQN
 #[RouteHandler([SomeClass::class, 'theHandlerMethod'])]
 ```
 
-An explicit `getRoutes()` route takes the other path: Sindri inlines the named method's body as a closure.
-
-Sindri reads literals, writes literals. No execution, and no body extraction.
+On the annotated path Sindri reads literals and writes literals, with no execution and no body extraction. An explicit
+`getRoutes()` route takes the other path: Sindri inlines the named method's body as a closure.
 
 Go and TypeScript have no annotation support — routes are always registered explicitly via `getRoutes()`.
 

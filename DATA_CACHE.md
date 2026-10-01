@@ -1072,7 +1072,7 @@ publishers() map literal
         ↓
 resolve each method reference to its source location
         ↓
-every port: read the referenced method's body directly → extract function
+read the referenced publisher method → see "Publishers AST Readability" above for what each port writes
         ↓
 resolve all type references to FQN
         ↓
