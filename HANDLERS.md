@@ -619,20 +619,25 @@ For **Go** and **TypeScript** — where no annotations exist — explicit regist
 **Go**
 
 ```go
-router.Get("/users",
-valkyrja.Handler(func(c ContainerContract, route RouteContract) ResponseContract {
+func (p *UserHttpRouteProvider) GetRoutes() []RouteContract {
+return []RouteContract{data.Get("/users", p.IndexUsers)}
+}
+
+func (p *UserHttpRouteProvider) IndexUsers(c ContainerContract, route RouteContract) ResponseContract {
 return c.GetSingleton(UserControllerClass).(*UserController).Index(route)
-}),
-)
+}
 ```
 
 **TypeScript**
 
 ```typescript
-router.get('/users',
-    handler((c: ContainerContract, route: RouteContract) =>
-        c.getSingleton<UserController>(UserControllerClass).index(route))
-)
+getRoutes(): RouteContract[] {
+    return [HttpRoute.get('/users', this.indexUsers)]
+}
+
+indexUsers(c: ContainerContract, route: RouteContract): ResponseContract {
+    return c.getSingleton<UserController>(UserControllerClass).index(route)
+}
 ```
 
 ---
@@ -825,11 +830,13 @@ from the route provider source files.
 
 ```go
 // go — always explicit
-router.Get("/users",
-valkyrja.Handler(func(c ContainerContract, route RouteContract) ResponseContract {
+func (p *UserHttpRouteProvider) GetRoutes() []RouteContract {
+return []RouteContract{data.Get("/users", p.IndexUsers)}
+}
+
+func (p *UserHttpRouteProvider) IndexUsers(c ContainerContract, route RouteContract) ResponseContract {
 return c.GetSingleton(UserControllerClass).(*UserController).Index(route)
-}),
-)
+}
 ```
 
 ### Python
@@ -851,10 +858,13 @@ handler methods from route provider source files.
 
 ```typescript
 // typescript — explicit registration
-router.get('/users',
-    handler((c: ContainerContract, route: RouteContract) =>
-        c.getSingleton<UserController>(UserControllerClass).index(route))
-)
+getRoutes(): RouteContract[] {
+    return [HttpRoute.get('/users', this.indexUsers)]
+}
+
+indexUsers(c: ContainerContract, route: RouteContract): ResponseContract {
+    return c.getSingleton<UserController>(UserControllerClass).index(route)
+}
 ```
 
 ---

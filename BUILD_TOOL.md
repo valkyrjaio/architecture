@@ -389,7 +389,7 @@ are structural problems in the application that the developer must resolve.
 ✅ p.MethodName                           — Go method reference on same struct
 ✅ this.methodName                        — TypeScript method reference on same class
 
-✅ Handler method must be static
+✅ Handler method must be static — in Go, a method on the provider struct
 ✅ Handler method must be on the same class as the provider
 ✅ All type refs in handler body must be imported in the provider file
 
