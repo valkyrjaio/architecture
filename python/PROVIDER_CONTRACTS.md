@@ -250,6 +250,8 @@ class ServiceProviderContract(ABC):
 ### UserServiceProvider Implementation
 
 ```python
+from typing import Callable
+
 from valkyrja.container.provider.contract import ServiceProviderContract
 from valkyrja.container.manager.contract import ContainerContract
 from app.repository import UserRepository
@@ -266,7 +268,7 @@ class UserServiceProvider(ServiceProviderContract):
         Values are method references — Sindri wraps them in lambdas in the cache.
         """
         return {
-            ContainerConstants.USER_REPOSITORY: UserServiceProvider.publish_user_repository,
+            UserRepositoryClass: UserServiceProvider.publish_user_repository,
         }
 
     @staticmethod
