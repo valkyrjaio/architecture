@@ -274,8 +274,8 @@ import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.routing.data.HttpRoute;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
-import app.http.controllers.UserController;
-import app.http.controllers.OrderController;
+import app.http.controller.UserController;
+import app.http.controller.OrderController;
 
 import java.util.List;
 
@@ -317,7 +317,7 @@ handler may live on the controller, the route provider, or any other class.
 **Handler on the same controller:**
 
 ```java
-package app.http.controllers;
+package app.http.controller;
 
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.http.message.enum_.RequestMethod;

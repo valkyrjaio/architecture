@@ -339,8 +339,8 @@ from valkyrja.http.message.response.contract import ResponseContract
 from valkyrja.http.routing.data.contract import RouteContract
 from valkyrja.http.routing.provider.contract import HttpRouteProviderContract
 from valkyrja.http.routing.data import HttpRoute
-from app.http.controllers import UserController, OrderController
-from app.http.controllers.contract import OrderControllerClass, UserControllerClass
+from app.http.controller import UserController, OrderController
+from app.http.controller.contract import OrderControllerClass, UserControllerClass
 
 
 class UserHttpRouteProvider(HttpRouteProviderContract):
@@ -393,7 +393,7 @@ from typing import Callable
 from valkyrja.container.manager.contract import ContainerContract
 from valkyrja.http.message.response.contract import ResponseContract
 from valkyrja.http.routing.data.contract import RouteContract
-from app.http.controllers.contract import UserControllerClass
+from app.http.controller.contract import UserControllerClass
 
 HandlerReference = tuple[type | Callable[[], type], str]
 

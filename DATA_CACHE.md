@@ -993,7 +993,7 @@ public record AppHttpRoutingData(
                 "user.show", new app.http.routing.AuthenticatedRoute(
                     "/users/{id}", "GET",
                     List.of(new Parameter("id", "[0-9]+")),
-                    app.http.controllers.UserController::showHandler
+                    app.http.controller.UserController::showHandler
                 ),
                 // routes from OrderHttpRouteProvider (explicit getRoutes())
                 "order.index", new HttpRoute(
