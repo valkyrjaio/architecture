@@ -14,7 +14,7 @@ The default implementations live in the component's `Data\` segment. The
 contracts live in the component's `Data\Contract\` segment. The component's
 service provider publishes each contract as its own container binding.
 
-## The two rules
+## The three rules
 
 1. **The component config does not hold the adapter configs.** The container
    resolves an adapter config only when something asks for that adapter. An
@@ -24,6 +24,11 @@ service provider publishes each contract as its own container binding.
    application config class can implement several adapter contracts at once.
    Without the prefix, two adapters that both declare a `prefix` property
    collide.
+3. **The property carries the component name as well when more than one
+   component declares a property for the same adapter.** Each component has a
+   log adapter, and each log adapter writes to a logger. With the adapter name
+   alone, one application config class holds one `logLogger` property for every
+   component, so each component's log adapter writes to the same logger.
 
 ```php
 // Wrong — the component config holds every adapter config. An application that
@@ -59,6 +64,22 @@ interface CacheRedisConfigContract
 interface CacheNullConfigContract
 {
     public string $nullPrefix { get; }
+}
+```
+
+```php
+// Right — the log adapter of each component names its own logger property, so
+// one application config class sets a different logger for each component.
+interface CacheLogConfigContract
+{
+    /** @var class-string<LoggerContract> */
+    public string $cacheLogLogger { get; }
+}
+
+interface MailLogConfigContract
+{
+    /** @var class-string<LoggerContract> */
+    public string $mailLogLogger { get; }
 }
 ```
 
