@@ -39,7 +39,8 @@ Python idiom. Authoritative port detail: [`README.md`](README.md),
   `ServiceProviderContract`).
 - **Binding keys:** **string constants** (required — class objects would force
   eager imports and defeat lazy loading). Per-component constants files
-  (`container/container_constants.py` → `ContainerConstants.CONTAINER`, …). The
+  (`container/constant/container_service_id.py` →
+  `ContainerServiceId.CONTAINER`, …). The
   `class_()` helper builds an FQN string from a class (needed because `class` is
   reserved).
 - **Data objects:** `@dataclass(frozen=True)` (the readonly-class equivalent).

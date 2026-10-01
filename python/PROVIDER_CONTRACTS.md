@@ -270,7 +270,7 @@ class UserServiceProvider(ServiceProviderContract):
         Values are method references — Sindri wraps them in lambdas in the cache.
         """
         return {
-            ContainerConstants.USER_REPOSITORY: UserServiceProvider.publish_user_repository,
+            ContainerServiceId.USER_REPOSITORY: UserServiceProvider.publish_user_repository,
         }
 
     @staticmethod

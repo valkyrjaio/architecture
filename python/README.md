@@ -80,8 +80,8 @@ imported at key definition time — the class object cannot exist without its mo
 eager import entirely, independent of any lazy-import language feature (see §5).
 
 ```python
-# container_constants.py — required per component
-class ContainerConstants:
+# container_service_id.py — required per component
+class ContainerServiceId:
     CONTAINER = "valkyrja.container.manager.ContainerContract"
     ROUTER = "valkyrja.http.routing.dispatcher.RouterContract"
     USER_REPOSITORY = "app.repository.UserRepositoryContract"
@@ -91,11 +91,11 @@ class ContainerConstants:
 ```python
 # bind and resolve via string constant
 container.bind(
-    ContainerConstants.USER_REPOSITORY,
-    lambda c: UserRepository(c.get_singleton(ContainerConstants.DATABASE))
+    ContainerServiceId.USER_REPOSITORY,
+    lambda c: UserRepository(c.get_singleton(ContainerServiceId.DATABASE))
 )
 
-repo = container.get(ContainerConstants.USER_REPOSITORY)
+repo = container.get(ContainerServiceId.USER_REPOSITORY)
 # UserRepository is only *used* when the lambda runs; without PEP 810 its top-level import still loads eagerly
 ```
 
@@ -258,10 +258,10 @@ The container design does **not** depend on lazy imports for correctness — it 
 
   ```python
   # NO lambda — UserServiceProvider accessed at module level when the dict is built (loads at cache load)
-  {ContainerConstants.USER_REPOSITORY: UserServiceProvider.publish_user_repository}
+  {ContainerServiceId.USER_REPOSITORY: UserServiceProvider.publish_user_repository}
 
   # WITH lambda — UserServiceProvider inside the lambda body — loads only when the lambda is called
-  {ContainerConstants.USER_REPOSITORY: lambda: UserServiceProvider.publish_user_repository}
+  {ContainerServiceId.USER_REPOSITORY: lambda: UserServiceProvider.publish_user_repository}
   ```
 
   The lambda wrapper is **Python-only**. PHP's `[SomeClass::class, 'method']` uses `::class`, a compile-time string with
@@ -316,14 +316,14 @@ class UserServiceProvider(ServiceProviderContract):
     @staticmethod
     def publishers() -> dict[str, Callable[[ContainerContract], None]]:
         return {
-            ContainerConstants.USER_REPOSITORY: UserServiceProvider.publish_user_repository,
+            ContainerServiceId.USER_REPOSITORY: UserServiceProvider.publish_user_repository,
         }
 
     @staticmethod
     def publish_user_repository(c: ContainerContract) -> None:
         c.set_singleton(
-            ContainerConstants.USER_REPOSITORY,
-            UserRepository(c.get_singleton(ContainerConstants.DATABASE))
+            ContainerServiceId.USER_REPOSITORY,
+            UserRepository(c.get_singleton(ContainerServiceId.DATABASE))
         )
 ```
 
@@ -358,11 +358,11 @@ reference values in lambdas (load only when binding resolved). Cache matches the
 
 ```python
 # generated AppContainerData
-from app.constants.container_constants import ContainerConstants  # loads at boot
+from app.constants.container_constants import ContainerServiceId  # loads at boot
 
 APP_CONTAINER_DATA = {
-    ContainerConstants.USER_REPOSITORY: lambda: UserServiceProvider.publish_user_repository,
-    ContainerConstants.ORDER_REPOSITORY: lambda: OrderServiceProvider.publish_order_repository,
+    ContainerServiceId.USER_REPOSITORY: lambda: UserServiceProvider.publish_user_repository,
+    ContainerServiceId.ORDER_REPOSITORY: lambda: OrderServiceProvider.publish_order_repository,
     # constants load at boot — providers load only when lambda is called
 }
 ```

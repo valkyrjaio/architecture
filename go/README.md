@@ -104,7 +104,7 @@ return nil, err
 Every class, interface, and contract needs a string constant:
 
 ```go
-// container_constants.go
+// container_service_id.go
 package container
 
 const (
