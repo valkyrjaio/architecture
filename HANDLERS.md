@@ -1137,8 +1137,8 @@ Sindri reads literals.
 Sindri writes literals into the generated cache data class.
 No method body extraction. The callable's class token resolves to an FQN.
 
-Same as service bindings:
-  SomeServiceId::class => [SomeProvider::class, 'publishMethod']  ← literal, class resolved to an FQN
+The same literal shape a service binding carries:
+  SomeServiceId::class => [SomeProvider::class, 'publishMethod']  ← callable written as a literal
 
 An explicit route takes the other path:
   new Route('/path', 'name', [SomeClass::class, 'theHandlerMethod'])  ← the named method's body, inlined

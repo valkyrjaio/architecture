@@ -1210,7 +1210,7 @@ publishers      → map of binding key → publisher method body source text
    a. Extract the key → resolve to canonical FQN string (language-specific, see table below)
    b. Extract the value → method reference (e.g. self::publishRouter)
    c. Resolve method reference → find that method in the same file
-   d. Extract the callable value as a literal → class resolved to an FQN in generated output
+   d. Extract the callable value as a literal → written as-is into generated output
 6. Output: map of { canonical key string → callable literal }
 ```
 
@@ -1344,12 +1344,12 @@ Identical to Step 3c with:
 **Input:** file path of a controller class (resolved in Step 3c or 3d).
 
 Sindri reads annotation literals and constructs route data objects — **no method body extraction**. The callable from
-`#[RouteHandler]` is written directly into the generated output, its class token resolved to an FQN, exactly like a
-callable in a service binding. An explicit `getRoutes()` route is the other path: Sindri reads the named method's body
+`#[RouteHandler]` is written directly into the generated output, its class token resolved to an FQN, the same literal
+shape a service binding carries. An explicit `getRoutes()` route is the other path: Sindri reads the named method's body
 and inlines it as a closure.
 
 ```
-// service binding — callable literal, class resolved to an FQN
+// service binding — callable written as a literal
 SomeServiceId::class => [SomeProvider::class, 'publishMethod']
 
 // annotated route — callable literal, class resolved to an FQN
