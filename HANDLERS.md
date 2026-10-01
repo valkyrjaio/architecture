@@ -827,8 +827,8 @@ $httpRoute->setHandler(
 ### Java
 
 A handler is a lambda at run time. `@RouteHandler` carries `handlerClass` and `handlerMethod` instead, because an
-annotation member must be a constant. The annotation processor reads those members through the Trees API at compile
-time, then writes them into the cache data classes through JavaPoet. The developer writes no `CacheableHandler` string.
+annotation member must be a constant. The annotation processor reads those members through `javax.lang.model` at
+compile time, then writes them into the cache data classes through JavaPoet. The developer writes no `CacheableHandler` string.
 
 ```java
 httpRoute.setHandler(
