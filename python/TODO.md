@@ -116,10 +116,10 @@ not ported yet, so build it this way from the start (no rename needed):
 ## Container Bindings
 
 - [ ] Add per-component string constants files (required — same as Go and TypeScript)
-  - [ ] `container/container_constants.py`
-  - [ ] `http/http_constants.py`
-  - [ ] `http/routing/http_routing_constants.py`
-  - [ ] `cli/cli_constants.py`
+  - [ ] `container/constant/container_service_id.py`
+  - [ ] `http/constant/http_service_id.py`
+  - [ ] `http/routing/constant/http_routing_service_id.py`
+  - [ ] `cli/constant/cli_service_id.py`
   - [ ] `event/event_constants.py`
   - [ ] _(remaining components)_
 - [ ] Add `class_()` FQN helper (trailing underscore — `class` is reserved)
@@ -128,8 +128,8 @@ not ported yet, so build it this way from the start (no rename needed):
 ```python
 # correct — string constant as key, no class object import forced
 container.bind(
-    ContainerConstants.USER_REPOSITORY,
-    lambda c: UserRepository(c.get_singleton(ContainerConstants.DATABASE))
+    ContainerServiceId.USER_REPOSITORY,
+    lambda c: UserRepository(c.get_singleton(ContainerServiceId.DATABASE))
 )
 ```
 

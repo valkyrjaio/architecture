@@ -83,7 +83,7 @@ method. Class references must use `::class` / `.class` / class objects directly 
 ✅ HttpComponentProvider.class      — Java .class reference, readable
 ✅ HttpComponentProvider            — Python class object, readable
 
-❌ HttpConstants::HTTP_COMPONENT_PROVIDER  — constant reference, not resolvable
+❌ HttpServiceId::HTTP_COMPONENT_PROVIDER  — constant reference, not resolvable
 ❌ getProvider()                           — method call, not resolvable
 ```
 
@@ -94,7 +94,7 @@ write:
 
 ```php
 // this breaks the build tool — constant reference not resolvable from AST
-new AppConfig(providers: [HttpConstants::HTTP_COMPONENT_PROVIDER])
+new AppConfig(providers: [HttpProviderConstants::HTTP_COMPONENT_PROVIDER])
 ```
 
 Since the build tool cannot follow constant references without executing code, and since `::class` is already the
@@ -938,8 +938,8 @@ the constant:
 **PHP** — constants hold `::class` strings (compile-time FQN strings):
 
 ```php
-// Valkyrja/Container/ContainerConstants.php — shipped with framework
-class ContainerConstants {
+// Valkyrja/Container/ContainerServiceId.php — shipped with framework
+class ContainerServiceId {
     public const CONTAINER  = ContainerContract::class;
     public const ROUTER     = RouterContract::class;
 }
@@ -948,8 +948,8 @@ class ContainerConstants {
 **Java** — constants hold `.class` objects (compile-time type tokens):
 
 ```java
-// io/valkyrja/container/ContainerConstants.java — shipped with framework
-public final class ContainerConstants {
+// io/valkyrja/container/ContainerServiceId.java — shipped with framework
+public final class ContainerServiceId {
     public static final Class<ContainerContract> CONTAINER = ContainerContract.class;
     public static final Class<RouterContract> ROUTER = RouterContract.class;
 }
@@ -958,7 +958,7 @@ public final class ContainerConstants {
 **Go** — constants hold FQN string literals:
 
 ```go
-// container/container_constants.go — shipped with framework
+// container/container_service_id.go — shipped with framework
 const (
 ContainerClass = "valkyrja.container.manager.ContainerContract"
 RouterClass = "valkyrja.http.routing.dispatcher.RouterContract"
@@ -968,8 +968,8 @@ RouterClass = "valkyrja.http.routing.dispatcher.RouterContract"
 **Python** — constants hold FQN string literals:
 
 ```python
-# valkyrja/container/container_constants.py — shipped with framework
-class ContainerConstants:
+# valkyrja/container/constant/container_service_id.py — shipped with framework
+class ContainerServiceId:
     CONTAINER = "valkyrja.container.manager.ContainerContract"
     ROUTER = "valkyrja.http.routing.dispatcher.RouterContract"
 ```
@@ -977,8 +977,8 @@ class ContainerConstants:
 **TypeScript** — constants hold FQN string literals:
 
 ```typescript
-// valkyrja/container/container-constants.ts — shipped with framework
-export const ContainerConstants = {
+// valkyrja/container/container-service-id.ts — shipped with framework
+export const ContainerServiceId = {
     CONTAINER: 'Valkyrja.Container.Manager.ContainerContract',
     ROUTER: 'Valkyrja.Http.Routing.Dispatcher.RouterContract',
 } as const
@@ -1220,7 +1220,7 @@ publishers      → map of binding key → publisher method body source text
 | PHP        | `RouterContract::class`                          | Resolve `RouterContract` via import map → FQN string |
 | Java       | `RouterContract.class`                           | Resolve `RouterContract` via import map → FQN string |
 | Go         | `RouterClass` (constant name)                    | Resolve the constant via import map → key string     |
-| Python     | `ContainerConstants.ROUTER` (constant reference) | Resolve the constant via import map → key string     |
+| Python     | `ContainerServiceId.ROUTER` (constant reference) | Resolve the constant via import map → key string     |
 | TypeScript | `RouterClass` (constant name)                    | Resolve the constant via import map → key string     |
 
 Warning: a bare type name is not a container key in Go, in Python, or in TypeScript. `RouterContract` names the type

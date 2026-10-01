@@ -60,8 +60,8 @@ Every component needs a constants file containing FQN string identifiers for all
 that component:
 
 ```php
-// Http/HttpConstants.php
-final class HttpConstants
+// Http/HttpServiceId.php
+final class HttpServiceId
 {
     public const ROUTER           = RouterContract::class;
     public const REQUEST          = ServerRequestContract::class;
@@ -333,7 +333,7 @@ new AppConfig(
 ### Drop the component provider constants class
 
 A constants class that provides string aliases for component provider class references must not be created. If it
-exists, remove it. It would allow developers to write `HttpConstants::HTTP_COMPONENT_PROVIDER` in the config which the
+exists, remove it. It would allow developers to write `HttpServiceId::HTTP_COMPONENT_PROVIDER` in the config which the
 build tool cannot resolve from AST.
 
 Binding key constants files (for container bindings) are unaffected — they are correct and should remain.

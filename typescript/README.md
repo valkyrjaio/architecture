@@ -95,8 +95,8 @@ function tryMake<T>(abstract: string): Result<T, ContainerException> {
 ### String constants — required, no ::class equivalent
 
 ```typescript
-// container-constants.ts
-export const ContainerConstants = {
+// container-service-id.ts
+export const ContainerServiceId = {
     CONTAINER: 'Valkyrja.Container.Manager.ContainerContract',
     ROUTER: 'Valkyrja.Http.Routing.Dispatcher.RouterContract',
     USER_REPOSITORY: 'App.Repository.UserRepositoryContract',
@@ -107,13 +107,13 @@ export const ContainerConstants = {
 
 ```typescript
 container.bind(
-    ContainerConstants.ROUTER,
-    (c: ContainerContract) => new Router(c.getSingleton(ContainerConstants.DISPATCHER))
+    ContainerServiceId.ROUTER,
+    (c: ContainerContract) => new Router(c.getSingleton(ContainerServiceId.DISPATCHER))
 )
 
 container.bindSingleton(
-    ContainerConstants.ROUTER,
-    (c: ContainerContract) => new Router(c.getSingleton(ContainerConstants.DISPATCHER))
+    ContainerServiceId.ROUTER,
+    (c: ContainerContract) => new Router(c.getSingleton(ContainerServiceId.DISPATCHER))
 )
 ```
 

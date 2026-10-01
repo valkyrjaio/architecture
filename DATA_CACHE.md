@@ -118,7 +118,7 @@ constants class. The build tool cannot follow constant references without execut
 
 ```
 ✅ HttpComponentProvider::class           — readable from AST
-❌ HttpConstants::HTTP_COMPONENT_PROVIDER  — constant reference, not resolvable
+❌ HttpServiceId::HTTP_COMPONENT_PROVIDER  — constant reference, not resolvable
 ```
 
 The component provider constants class is not part of the framework for this reason. Binding key constants files (for

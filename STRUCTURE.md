@@ -22,7 +22,7 @@ lacks).
 | Route provider                                         | implements `Http`/`CliRouteProviderContract` | `*RouteProvider`                   | `Provider\`                    | —         |
 | Listener provider                                      | implements `ListenerProviderContract`        | `*ListenerProvider`                | `Provider\`                    | —         |
 | Factory                                                | —                                            | `*Factory`                         | `Factory\`                     | —         |
-| Constant                                               | —                                            | `*Constant`                        | `Constant\`                    | final     |
+| Constant                                               | —                                            | —                                  | `Constant\`                    | final     |
 | Attribute / annotation                                 | has the attribute marker                     | —                                  | `Attribute\`                   | —         |
 | CLI command                                            | —                                            | `*Command`                         | `Cli\Command\`                 | —         |
 | Security                                               | —                                            | `*Security`                        | `Security\`                    | final     |
@@ -39,9 +39,10 @@ lacks).
 
 Everything in `Contract\` must be an interface _and_ named `*Contract`;
 everything in `Enum\` must be an enum; every final constant lives in
-`Constant\`; and so on. For `Abstract`, `Enum`, and `Trait` the _segment_
-carries the meaning, so the **name must not repeat it** — an abstract `Stream`
-is `Abstract\Stream`, never `AbstractStream`.
+`Constant\`; and so on. For `Abstract`, `Enum`, `Trait`, and `Constant` the
+_segment_ carries the meaning, so the **name must not repeat it** — an abstract
+`Stream` is `Abstract\Stream`, never `AbstractStream`, and a holder of route
+name constants is `Constant\RouteName`, never `Constant\RouteNameConstant`.
 
 ```php
 // Wrong — the class name repeats the segment.

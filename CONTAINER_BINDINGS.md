@@ -164,13 +164,13 @@ container.BindSingleton(
 
 ```python
 container.bind(
-    ContainerConstants.USER_REPOSITORY,
-    lambda c: UserRepository(c.get_singleton(ContainerConstants.DATABASE))
+    ContainerServiceId.USER_REPOSITORY,
+    lambda c: UserRepository(c.get_singleton(ContainerServiceId.DATABASE))
 )
 
 container.bind_singleton(
-    ContainerConstants.ROUTER,
-    lambda c: Router(c.get_singleton(ContainerConstants.DISPATCHER))
+    ContainerServiceId.ROUTER,
+    lambda c: Router(c.get_singleton(ContainerServiceId.DISPATCHER))
 )
 ```
 
@@ -221,8 +221,8 @@ container.bind(UserRepositoryContract, lambda c: UserRepository(c.get_singleton(
 ```python
 # Right — the string constant names the class and imports nothing.
 container.bind(
-    ContainerConstants.USER_REPOSITORY,
-    lambda c: UserRepository(c.get_singleton(ContainerConstants.DATABASE)),
+    ContainerServiceId.USER_REPOSITORY,
+    lambda c: UserRepository(c.get_singleton(ContainerServiceId.DATABASE)),
 )
 ```
 
@@ -292,18 +292,18 @@ Constants files exist for **binding key strings** — the cross-language string 
 They are not for provider class references.
 
 A constants class that aliases component provider class references (e.g.
-`HttpConstants::HTTP_COMPONENT_PROVIDER = HttpComponentProvider::class`) must not be created. It would allow developers
+`HttpProviderConstants::HTTP_COMPONENT_PROVIDER = HttpComponentProvider::class`) must not be created. It would allow developers
 to use constant references in the application config:
 
 ```php
 // this breaks the build tool — constant reference not resolvable from AST
-new AppConfig(providers: [HttpConstants::HTTP_COMPONENT_PROVIDER])
+new AppConfig(providers: [HttpProviderConstants::HTTP_COMPONENT_PROVIDER])
 ```
 
 The build tool reads the application config class via AST to discover providers. It cannot follow constant references
 without executing code. Provider class lists must always use `::class` / `.class` / class objects directly.
 
-Binding key constants files (`ContainerConstants`, `HttpConstants` for binding strings etc.) are correct and should
+Binding key constants files (`ContainerServiceId`, `HttpServiceId` for binding strings etc.) are correct and should
 exist. The provider class reference constants class specifically does not.
 
 ### Structure
@@ -311,20 +311,20 @@ exist. The provider class reference constants class specifically does not.
 ```
 valkyrja/
   container/
-    ContainerConstants.php     ← PHP/Java: optional complement to ::class / .class
-    container_constants.go     ← Go: required string constants
-    container-constants.ts     ← TypeScript: required string constants
-    container_constants.py     ← Python: required string constants
+    ContainerServiceId.php      ← PHP/Java: optional complement to ::class / .class
+    container_service_id.go     ← Go: required string constants
+    container-service-id.ts     ← TypeScript: required string constants
+    container_service_id.py     ← Python: required string constants
     ContainerContract.php
     ContainerException.php
   http/
-    HttpConstants.php
-    http_constants.go
-    http-constants.ts
+    HttpServiceId.php
+    http_service_id.go
+    http-service-id.ts
     routing/
-      HttpRoutingConstants.php
-      http_routing_constants.go
-      http-routing-constants.ts
+      HttpRoutingServiceId.php
+      http_routing_service_id.go
+      http-routing-service-id.ts
 ```
 
 ---
@@ -337,8 +337,8 @@ valkyrja/
 complement:
 
 ```php
-// ContainerConstants.php
-final class ContainerConstants
+// ContainerServiceId.php
+final class ContainerServiceId
 {
     public const CONTAINER         = ContainerContract::class;
     public const USER_REPOSITORY   = UserRepositoryContract::class;
@@ -354,14 +354,14 @@ hierarchy. Useful for config files, serialization, and any context where importi
 `.class` is the primary mechanism — compile-time type token (`Class<T>`). Constants file recommended:
 
 ```java
-// ContainerConstants.java
-public final class ContainerConstants {
+// ContainerServiceId.java
+public final class ContainerServiceId {
     public static final Class<ContainerContract> CONTAINER
             = ContainerContract.class;
     public static final Class<UserRepositoryContract> USER_REPOSITORY
             = UserRepositoryContract.class;
 
-    private ContainerConstants() {
+    private ContainerServiceId() {
     }
 }
 ```
@@ -374,7 +374,7 @@ Note: Java's `IllegalArgumentException` is the language root for `ValkyrjaInvali
 No `::class` equivalent. String constants are the only mechanism. The constants file is required:
 
 ```go
-// container_constants.go
+// container_service_id.go
 package container
 
 const (
@@ -396,8 +396,8 @@ so do not copy a key between the two ports.
 object keys forces module imports which defeats Python 3.14's lazy import mechanism.
 
 ```python
-# container_constants.py — required, same as Go and TypeScript
-class ContainerConstants:
+# container_service_id.py — required, same as Go and TypeScript
+class ContainerServiceId:
     CONTAINER = "valkyrja.container.manager.ContainerContract"
     ROUTER = "valkyrja.http.routing.dispatcher.RouterContract"
     USER_REPOSITORY = "app.repository.UserRepositoryContract"
@@ -492,8 +492,8 @@ TypeScript interfaces and types are erased at runtime — they cannot be used as
 for concrete classes but most Valkyrja bindings are against contracts/interfaces. String constants are required:
 
 ```typescript
-// container-constants.ts
-export const ContainerConstants = {
+// container-service-id.ts
+export const ContainerServiceId = {
     CONTAINER: 'Valkyrja.Container.Manager.ContainerContract',
     USER_REPOSITORY: 'App.Repository.UserRepositoryContract',
     DATABASE: 'App.Service.DatabaseContract',
@@ -503,7 +503,7 @@ export const ContainerConstants = {
 TypeScript's `typeof` and `keyof` derive types from the constants for additional type safety:
 
 ```typescript
-type ContainerKey = typeof ContainerConstants[keyof typeof ContainerConstants]
+type ContainerKey = typeof ContainerServiceId[keyof typeof ContainerServiceId]
 ```
 
 **Why not constructor references?** Constructor references (`new () => T`) work as `Map` keys at runtime for concrete

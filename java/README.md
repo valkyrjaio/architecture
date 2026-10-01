@@ -72,11 +72,11 @@ java.lang.IllegalArgumentException   ← Java has no InvalidArgumentException
 constants files are recommended alongside:
 
 ```java
-// ContainerConstants.java
-public final class ContainerConstants {
+// ContainerServiceId.java
+public final class ContainerServiceId {
     public static final Class<RouterContract> ROUTER = RouterContract.class;
 
-    private ContainerConstants() {
+    private ContainerServiceId() {
     }
 }
 ```
