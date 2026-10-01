@@ -200,9 +200,9 @@ No action at the framework level. Track the following:
 # framework bootstrap — reads metadata from each method
 for name, method in inspect.getmembers(controller_class, predicate=inspect.isfunction):
     if hasattr(method, '_valkyrja_handler'):
-        closure = method._valkyrja_handler
+        handler = method._valkyrja_handler
         parameters = getattr(method, '_valkyrja_parameters', [])
-        # register route from closure + parameters
+        # register route from handler reference + parameters
 ```
 
 - [ ] With cache: framework loads cache data files directly — never calls `get_controller_classes()`, never scans

@@ -354,6 +354,6 @@ provider tree, then walks each provider's source file via Trees API.
 6. Handler contracts per concern
 7. @RouteHandler and @Parameter annotations
 8. Records for data classes
-9. Annotation processor setup + Trees API lambda extraction
+9. Annotation processor setup + Trees API handler reference extraction
 10. JavaPoet cache data class generation
 11. valkyrja-build Java artifact
