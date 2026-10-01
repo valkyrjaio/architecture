@@ -355,9 +355,9 @@ return routes
 
 ## Handler Method Pointer Convention
 
-All handler methods live on the same class as the provider or controller that defines the route or listener. Go has no
-static method, so a Go handler is a method on the provider struct. This is the same pattern used by `publishers()` in
-service providers.
+On the explicit path, all handler methods live on the same class as the provider that defines the route or listener. Go
+has no static method, so a Go handler is a method on the provider struct. This is the same pattern used by
+`publishers()` in service providers.
 
 **Why:** Sindri reads exactly one file per provider or controller. All imports for handler bodies are in that one file —
 no cross-file import aggregation, no conflict detection, no registry needed.
@@ -369,7 +369,7 @@ no cross-file import aggregation, no conflict detection, no registry needed.
 
 ❌ Inline closures or lambdas in route/listener definitions
 ❌ References to types not imported in the current file
-❌ Handler methods on a different class
+❌ Handler methods on a different class — on the explicit path
 ```
 
 ---
