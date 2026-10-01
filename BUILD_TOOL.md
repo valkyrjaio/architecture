@@ -1209,8 +1209,8 @@ publishers      → map of binding key → publisher method body source text
    a. Extract the key → resolve to canonical FQN string (language-specific, see table below)
    b. Extract the value → method reference (e.g. self::publishRouter)
    c. Resolve method reference → find that method in the same file
-   d. Extract the callable value as a literal → class resolved to an FQN in generated output
-6. Output: map of { canonical key string → callable literal }
+   d. Extract that method's body → rewrite type refs to FQN in generated output
+6. Output: map of { canonical key string → publisher body }
 ```
 
 **Language-specific key resolution:**
@@ -1311,7 +1311,7 @@ annotated_classes   → list of class identifiers from getControllerClasses()
    b. For each route constructor call (e.g. HttpRoute::get(...)):
       - Extract HTTP method from the factory method name (get/post/put/delete/patch)
       - Extract path string literal
-      - Extract handler callable → [self::class, 'methodName'] — class resolved to an FQN in output
+      - Extract handler callable → [self::class, 'methodName'] — that method's body inlined in output
       - Extract Parameter constructor calls if present:
           name    → string literal argument
           regex   → string literal argument (default '[^/]+' if absent)
@@ -1391,8 +1391,8 @@ per method:
         - Extract HTTP method
         - Extract path string literal
      d. If handler found → construct route data from literals → add to output list
-4. Output: list of route data objects — same shape as explicit routes from Step 3c
-           callable written as FQN literal into generated cache data class
+4. Output: list of route data objects — the route's own shape, carrying the callable as an FQN literal
+           rather than the inlined body Step 3c writes
 ```
 
 ---
@@ -1422,7 +1422,7 @@ other class.
      c. If handler found:
         - Write the callable into the output as a literal
         - Add listener data to output list
-4. Output: list of listener data objects, same shape as explicit_listeners from Step 3b
+4. Output: list of listener data objects, carrying the callable rather than the body Step 3b writes
 ```
 
 ---
