@@ -1185,14 +1185,14 @@ cli_providers       → list of class identifiers (CliRouteProvider classes)
 
 ### Step 3a: Walk ServiceProvider Files (Container Bindings)
 
-**Goal:** Extract all container bindings — the mapping of binding key to publisher function body.
+**Goal:** Extract all container bindings — the mapping of binding key to publisher method reference.
 
 **What to collect:**
 
 ```
 imports         → map of simple name → FQN
 
-publishers      → map of binding key → publisher method body source text
+publishers      → map of binding key → publisher method reference
                   key format is language-specific:
                     PHP/Java             → ::class / .class (class name resolved to FQN via imports)
                     Go/Python/TypeScript → string constant  (constant resolved to its key string)
@@ -1208,9 +1208,9 @@ publishers      → map of binding key → publisher method body source text
 5. For each entry:
    a. Extract the key → resolve to canonical FQN string (language-specific, see table below)
    b. Extract the value → method reference (e.g. self::publishRouter)
-   c. Resolve method reference → find that method in the same file
-   d. Extract that method's body → rewrite type refs to FQN in generated output
-6. Output: map of { canonical key string → publisher body }
+   c. Resolve the method's class to an FQN via the import map
+   d. Write the reference wrapped in a lambda, the format the container resolves — see CONTAINER_BINDINGS.md
+6. Output: map of { canonical key string → lambda wrapping the publisher reference }
 ```
 
 **Language-specific key resolution:**
@@ -1401,10 +1401,9 @@ per method:
 
 **Goal:** Extract listeners from annotated/decorated methods. PHP, Java, Python only.
 
-`#[RouteHandler]` / `@RouteHandler` / `@route_handler` lives on the **implementation method** and carries a **callable
-reference** — same pattern as annotated controllers. The handler may live on the listener class itself, the listener
-provider, or any
-other class.
+`#[ListenerHandler]` / `@ListenerHandler` / `@listener_handler` lives on the **implementation method** and carries a
+**callable reference** — same pattern as annotated controllers. The handler may live on the listener class itself, the
+listener provider, or any other class.
 
 **Pattern:**
 
@@ -1413,7 +1412,7 @@ other class.
 2. Collect all import statements → import map (for resolving callable class names)
 3. Walk all class methods:
    For each method:
-     a. Check for @RouteHandler / #[RouteHandler] / @route_handler annotation:
+     a. Check for @ListenerHandler / #[ListenerHandler] / @listener_handler annotation:
         - Extract callable: (ClassName, methodName)
         - Resolve ClassName via listener file's imports → FQN
      b. Check for @ListensTo / #[ListensTo] annotation:
