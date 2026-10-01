@@ -679,7 +679,7 @@ return []string{}
 
 func (p *UserHttpRouteProvider) GetRoutes() []RouteContract {
 return []RouteContract{
-data.Get("/orders", func (c ContainerContract, route RouteContract) any {
+data.Get("/orders", func (c ContainerContract, route RouteContract) ResponseContract {
 return c.GetSingleton(OrderControllerClass).(*OrderController).Index(route)
 }),
 }

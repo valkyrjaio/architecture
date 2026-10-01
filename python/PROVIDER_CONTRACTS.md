@@ -254,7 +254,7 @@ from typing import Callable
 
 from valkyrja.container.provider.contract import ServiceProviderContract
 from valkyrja.container.manager.contract import ContainerContract
-from app.constants.container_constants import ContainerConstants
+from app.container.container_constants import ContainerConstants
 from app.repository import UserRepository
 
 
@@ -341,7 +341,7 @@ from valkyrja.http.routing.data.contract import RouteContract
 from valkyrja.http.routing.provider.contract import HttpRouteProviderContract
 from valkyrja.http.routing.data import HttpRoute
 from app.http.controller import UserController, OrderController
-from app.constants.container_constants import ContainerConstants
+from app.container.container_constants import ContainerConstants
 
 
 class UserHttpRouteProvider(HttpRouteProviderContract):
@@ -394,7 +394,7 @@ from typing import Callable
 from valkyrja.container.manager.contract import ContainerContract
 from valkyrja.http.message.response.contract import ResponseContract
 from valkyrja.http.routing.data.contract import RouteContract
-from app.constants.container_constants import ContainerConstants
+from app.container.container_constants import ContainerConstants
 
 HandlerReference = tuple[type | Callable[[], type], str]
 

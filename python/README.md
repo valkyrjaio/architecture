@@ -359,7 +359,7 @@ reference values in lambdas (load only when binding resolved). Cache matches the
 
 ```python
 # generated AppContainerData
-from app.constants.container_constants import ContainerConstants  # loads at boot
+from app.container.container_constants import ContainerConstants  # loads at boot
 
 APP_CONTAINER_DATA = {
     ContainerConstants.USER_REPOSITORY: lambda: UserServiceProvider.publish_user_repository,

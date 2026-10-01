@@ -267,15 +267,8 @@ public interface HttpHandlerContract {
 }
 
 // usage — compiler enforces HttpHandlerFunc
-httpRoute.
-
-setHandler((container, route) ->
-        container.
-
-getSingleton(UserController .class).
-
-show(route)
-        );
+httpRoute.setHandler((container, route) ->
+        container.getSingleton(UserController.class).show(route));
 // wrong return type? compile error
 ```
 
@@ -357,15 +350,8 @@ public interface CliHandlerContract {
 }
 
 // usage
-cliCommand.
-
-setHandler((container, route) ->
-        container.
-
-getSingleton(SendEmailCommand .class).
-
-run(route)
-);
+cliCommand.setHandler((container, route) ->
+        container.getSingleton(SendEmailCommand.class).run(route));
 ```
 
 ```go
@@ -641,7 +627,7 @@ For **Go** and **TypeScript** — where no annotations exist — explicit regist
 
 ```go
 router.Get("/users",
-valkyrja.Handler(func(c ContainerContract, route RouteContract) any {
+valkyrja.Handler(func(c ContainerContract, route RouteContract) ResponseContract {
 return c.GetSingleton(UserControllerClass).(*UserController).Index(route)
 }),
 )
@@ -652,7 +638,7 @@ return c.GetSingleton(UserControllerClass).(*UserController).Index(route)
 ```typescript
 router.get('/users',
     handler((c: ContainerContract, route: RouteContract) =>
-        c.getSingleton(UserController).index(route))
+        c.getSingleton(UserControllerClass).index(route))
 )
 ```
 
@@ -846,7 +832,7 @@ the route provider source files.
 ```go
 // go — always explicit
 router.Get("/users",
-valkyrja.Handler(func(c ContainerContract, route RouteContract) any {
+valkyrja.Handler(func(c ContainerContract, route RouteContract) ResponseContract {
 return c.GetSingleton(UserControllerClass).(*UserController).Index(route)
 }),
 )
@@ -873,7 +859,7 @@ route provider source files.
 // typescript — explicit registration
 router.get('/users',
     handler((c: ContainerContract, route: RouteContract) =>
-        c.getSingleton(UserController).index(route))
+        c.getSingleton(UserControllerClass).index(route))
 )
 ```
 
