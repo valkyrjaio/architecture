@@ -301,10 +301,11 @@ public class ValkyrjaAnnotationProcessor extends AbstractProcessor {
 }
 ```
 
-### Handler reference extraction via Trees API
+### Handler reference extraction via the annotation processing API
 
-The Trees API gives access to the annotation's members from the AST at compile
-time. FQN resolution is automatic via the compilation unit's import list.
+`javax.lang.model` gives access to the annotation's members at compile time, and
+the Trees API resolves the enclosing compilation unit. FQN resolution is
+automatic via that unit's import list.
 
 ### Code generation via JavaPoet
 
@@ -354,6 +355,6 @@ provider tree, then walks each provider's source file via Trees API.
 6. Handler contracts per concern
 7. @RouteHandler and @Parameter annotations
 8. Records for data classes
-9. Annotation processor setup + Trees API handler reference extraction
+9. Annotation processor setup + handler reference extraction
 10. JavaPoet cache data class generation
 11. valkyrja-build Java artifact
