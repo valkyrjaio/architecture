@@ -632,7 +632,7 @@ return c.GetSingleton(UserControllerClass).(*UserController).Index(route)
 
 ```typescript
 getRoutes(): RouteContract[] {
-    return [HttpRoute.get('/users', this.indexUsers)]
+    return [HttpRoute.get('/users', this.indexUsers.bind(this))]
 }
 
 indexUsers(c: ContainerContract, route: RouteContract): ResponseContract {
@@ -859,7 +859,7 @@ handler methods from route provider source files.
 ```typescript
 // typescript — explicit registration
 getRoutes(): RouteContract[] {
-    return [HttpRoute.get('/users', this.indexUsers)]
+    return [HttpRoute.get('/users', this.indexUsers.bind(this))]
 }
 
 indexUsers(c: ContainerContract, route: RouteContract): ResponseContract {

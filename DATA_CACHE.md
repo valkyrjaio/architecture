@@ -630,9 +630,13 @@ class UserHttpRouteProvider implements HttpRouteProviderContract
     public function getRoutes(): array
     {
         return [
-            HttpRoute::get('/orders', static fn(ContainerContract $c, RouteContract $route): ResponseContract
-                => $c->getSingleton(OrderController::class)->index($route)),
+            HttpRoute::get('/orders', [self::class, 'indexOrders']),
         ];
+    }
+
+    public static function indexOrders(ContainerContract $c, RouteContract $route): ResponseContract
+    {
+        return $c->getSingleton(OrderController::class)->index($route);
     }
 }
 ```
@@ -655,9 +659,12 @@ public class UserHttpRouteProvider implements HttpRouteProviderContract {
 
     public List<RouteContract> getRoutes() {
         return List.of(
-                HttpRoute.get("/orders", (ContainerContract c, RouteContract route) ->
-                        c.getSingleton(OrderController.class).index(route))
+                HttpRoute.get("/orders", UserHttpRouteProvider::indexOrders)
         );
+    }
+
+    public static ResponseContract indexOrders(ContainerContract c, RouteContract route) {
+        return c.getSingleton(OrderController.class).index(route);
     }
 }
 ```
@@ -712,9 +719,12 @@ class UserHttpRouteProvider(HttpRouteProviderContract):
     @staticmethod
     def get_routes() -> list:
         return [
-            HttpRoute.get('/orders',
-                          lambda c, route: c.get_singleton(ContainerConstants.ORDER_CONTROLLER).index(route))
+            HttpRoute.get('/orders', UserHttpRouteProvider.index_orders),
         ]
+
+    @staticmethod
+    def index_orders(c: ContainerContract, route: RouteContract) -> ResponseContract:
+        return c.get_singleton(ContainerConstants.ORDER_CONTROLLER).index(route)
 ```
 
 **TypeScript**
@@ -735,10 +745,12 @@ export class UserHttpRouteProvider implements HttpRouteProviderContract {
 
     getRoutes(): RouteContract[] {
         return [
-            HttpRoute.get('/orders',
-                (c: ContainerContract, route: RouteContract) =>
-                    (c.getSingleton(OrderControllerClass) as OrderController).index(route))
+            HttpRoute.get('/orders', this.indexOrders.bind(this)),
         ]
+    }
+
+    indexOrders(c: ContainerContract, route: RouteContract): ResponseContract {
+        return (c.getSingleton(OrderControllerClass) as OrderController).index(route)
     }
 }
 ```
