@@ -663,8 +663,8 @@ router.get('/users',
 The `CacheableHandler` string representation is only needed for CGI and lambda deployments where cache data files are
 required. It is **never used at runtime** — the closure is always used at runtime.
 
-For **PHP, Java, and Python** the build tool (valkyrja-build) reads the callable reference the marker carries, reads the
-method that reference names, and generates the cache data files. The developer never writes a `CacheableHandler` string.
+For **PHP, Java, and Python** the build tool (valkyrja-build) reads the callable reference the marker carries and writes
+it into the cache data files as a literal. The developer never writes a `CacheableHandler` string.
 
 For **Go and TypeScript** the build tool reads the route provider source files via AST (go/analysis and TypeScript
 compiler API respectively), extracts the handler closure source text, and generates cache data files. The developer also
@@ -815,7 +815,7 @@ listener collection — same pattern, `ListenerContract` instead of `RouteContra
 ### PHP
 
 A handler is a closure at run time. The `#[RouteHandler]` attribute carries a callable reference instead, because an
-attribute argument must be a constant expression. The build tool reads the method that reference names.
+attribute argument must be a constant expression. The build tool writes that reference into the cache as a literal.
 
 ```php
 $httpRoute->setHandler(
@@ -827,8 +827,8 @@ $httpRoute->setHandler(
 ### Java
 
 A handler is a lambda at run time. `@RouteHandler` carries `handlerClass` and `handlerMethod` instead, because an
-annotation member must be a constant. The annotation processor reads that method through the Trees API at compile time,
-then generates the cache data classes through JavaPoet. The developer writes no `CacheableHandler` string.
+annotation member must be a constant. The annotation processor reads those members through the Trees API at compile time,
+then writes them into the cache data classes through JavaPoet. The developer writes no `CacheableHandler` string.
 
 ```java
 httpRoute.setHandler(
@@ -854,7 +854,7 @@ return c.GetSingleton(UserControllerClass).(*UserController).Index(route)
 ### Python
 
 A decorator attaches the callable as metadata at import time. The build tool uses the `ast` module and
-`inspect.getfile()` to read the method that callable names.
+`inspect.getfile()` to read that callable, and unwraps a thunk to the class it names.
 
 ```python
 # python — decorator-based registration
@@ -1029,7 +1029,7 @@ HttpRoute(
     name='user.show',
     method='GET',
     parameters=[Parameter('id', '[0-9]+')],
-    handler=(UserController, 'show_handler'),  # written as-is from decorator
+    handler=(UserController, 'show_handler'),  # thunk unwrapped to the class it names
 )
 ```
 
