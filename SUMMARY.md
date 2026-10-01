@@ -177,7 +177,7 @@ Established the complete cache generation architecture:
 
 **Route parameters:**
 
-- `#[Parameter]` / `@Parameter` annotations carry name and pattern
+- `#[Parameter]` / `@Parameter` annotations carry name and regex
 - Build tool extracts parameters from AST
 - Compiled regex pre-built and stored in cache data class
 
