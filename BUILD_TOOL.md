@@ -68,7 +68,7 @@ $app = Application::create(
             new ContainerComponentProvider(),
             new EventComponentProvider(),
             new CliComponentProvider(),
-            App\Providers\AppProvider::class,  // application providers
+            App\Provider\AppProvider::class,  // application providers
         ]
     )
 );
@@ -1208,7 +1208,7 @@ publishers      → map of binding key → publisher method body source text
    a. Extract the key → resolve to canonical FQN string (language-specific, see table below)
    b. Extract the value → method reference (e.g. self::publishRouter)
    c. Resolve method reference → find that method in the same file
-   d. Extract the callable value as a literal → written as-is into generated output
+   d. Extract the callable value as a literal → class resolved to an FQN in generated output
 6. Output: map of { canonical key string → callable literal }
 ```
 
@@ -1309,7 +1309,7 @@ annotated_classes   → list of class identifiers from getControllerClasses()
    b. For each route constructor call (e.g. HttpRoute::get(...)):
       - Extract HTTP method from the factory method name (get/post/put/delete/patch)
       - Extract path string literal
-      - Extract handler callable → [self::class, 'methodName'] — written as-is into output
+      - Extract handler callable → [self::class, 'methodName'] — class resolved to an FQN in output
       - Extract Parameter constructor calls if present:
           name    → string literal argument
           regex   → string literal argument (default '[^/]+' if absent)
@@ -1345,13 +1345,13 @@ Sindri reads annotation literals and constructs route data objects — **no meth
 callable in an explicit `getRoutes()` route or a service binding:
 
 ```
-// service binding — callable literal written as-is
+// service binding — callable literal, class resolved to an FQN
 SomeServiceId::class => [SomeProvider::class, 'publishMethod']
 
-// explicit route — callable literal written as-is
+// explicit route — callable literal, class resolved to an FQN
 new Route('/path', 'name', [SomeClass::class, 'theHandlerMethod'])
 
-// annotated route — same, callable literal written as-is
+// annotated route — same, callable literal, class resolved to an FQN
 #[RouteHandler([SomeClass::class, 'theHandlerMethod'])]
 ```
 
@@ -1362,7 +1362,7 @@ imports     → map of simple name → FQN
               needed only to resolve the callable class name to FQN for the output literal
 
 per method:
-  callable    → (ClassName, methodName) from #[RouteHandler] — written as-is into output
+  callable    → (ClassName, methodName) from #[RouteHandler] — class resolved to an FQN in output
   parameters  → list from #[Parameter] / @Parameter annotations
                 each: name (string literal), regex (string literal)
   path        → from route annotation — string literal

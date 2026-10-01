@@ -884,7 +884,7 @@ router.get('/users',
 For annotated controllers, annotations live on the **implementation method**. Sindri reads the annotations and
 constructs a route object — exactly the same shape as a route returned from `getRoutes()`. **No method body
 extraction.** The callable from `#[RouteHandler]` is written directly into the generated cache data class as a literal,
-with its class token resolved to an FQN, which the generated file reaches through the import it emits.
+with its class token resolved to an FQN.
 
 This is identical to how service bindings work:
 
@@ -910,7 +910,8 @@ Go and TypeScript have no annotation support — routes are always registered ex
 #[RouteHandler]    — callable reference — lives on the implementation method
 ```
 
-The callable in `#[RouteHandler]` is the value written into the generated route object unchanged.
+The callable in `#[RouteHandler]` is the value written into the generated route object, its class token resolved to an
+FQN.
 
 ---
 
@@ -921,7 +922,7 @@ class UserController
 {
     // Sindri reads these annotations and constructs a Route object.
     // The callable [SomeClass::class, 'theHandlerMethod'] is written
-    // directly into the generated cache as-is — no body extraction.
+    // directly into the generated cache, its class resolved to an FQN — no body extraction.
     #[Route(path: '/users/{id}', name: 'user.show', requestMethods: [RequestMethod::GET])]
     #[Parameter(name: 'id', regex: '[0-9]+')]
     #[RouteHandler([self::class, 'showHandler'])]
@@ -956,7 +957,7 @@ new \Valkyrja\Http\Routing\Data\HttpRoute(
 1. Find #[Route], #[Parameter], #[RouteHandler] on the implementation method
 2. Extract path, HTTP method, parameter name/regex, callable — all literals
 3. Construct route data from extracted literals
-4. Write into generated AppHttpRoutingData — callable written as-is
+4. Write into generated AppHttpRoutingData — callable written with its class resolved to an FQN
 ```
 
 ---
@@ -967,7 +968,7 @@ new \Valkyrja\Http\Routing\Data\HttpRoute(
 public class UserController {
 
     // Sindri reads annotations and constructs a Route object.
-    // Callable written directly into generated cache — no body extraction.
+    // Callable written into the generated cache, its class resolved to an FQN — no body extraction.
     @Route(path = "/users/{id}", name = "user.show", requestMethods = RequestMethod.GET)
     @Parameter(name = "id", regex = "[0-9]+")
     @RouteHandler(handlerClass = UserController.class, handlerMethod = "showHandler")
@@ -997,7 +998,7 @@ new HttpRoute(
 1. Find @Route, @Parameter, @RouteHandler on the implementation method
 2. Extract path, HTTP method, parameter name/regex, handlerClass + handlerMethod — all literals
 3. Construct route data from extracted literals
-4. Write into generated AppHttpRoutingData — callable written as-is
+4. Write into generated AppHttpRoutingData — callable written with its class resolved to an FQN
 ```
 
 ---
@@ -1008,7 +1009,7 @@ new HttpRoute(
 class UserController:
 
     # Sindri reads these decorators and constructs a Route object.
-    # The callable tuple is written directly into the generated cache — no body extraction.
+    # The callable tuple is written into the generated cache, its class resolved to an FQN — no body extraction.
     @route(path='/users/{id}', name='user.show', request_methods=[RequestMethod.GET])
     @parameter(name='id', regex='[0-9]+')
     @route_handler((lambda: UserController, 'show_handler'))  # thunk — the class name binds after the body runs
@@ -1040,7 +1041,7 @@ HttpRoute(
 1. Find @route, @parameter, @route_handler decorators on the implementation method
 2. Extract path, HTTP method, parameter name/regex, callable tuple — all literals
 3. Construct route data from extracted literals
-4. Write into generated AppHttpRoutingData — callable written as-is
+4. Write into generated AppHttpRoutingData — callable written with its class resolved to an FQN
 ```
 
 ---
@@ -1054,10 +1055,10 @@ Sindri writes literals into the generated cache data class.
 No method body extraction. The callable's class token resolves to an FQN.
 
 Same as service bindings:
-  SomeServiceId::class => [SomeProvider::class, 'publishMethod']  ← literal, written as-is
+  SomeServiceId::class => [SomeProvider::class, 'publishMethod']  ← literal, class resolved to an FQN
 
 Same as explicit routes:
-  new Route('/path', 'name', [SomeClass::class, 'theHandlerMethod'])  ← literal, written as-is
+  new Route('/path', 'name', [SomeClass::class, 'theHandlerMethod'])  ← literal, class resolved to an FQN
 ```
 
 ## Design Note — Why Routes and Listeners Cannot Use a Publisher-Style Map
