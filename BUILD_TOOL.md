@@ -1249,7 +1249,7 @@ explicit_listeners  → list of listener data objects from getListeners()
                         event type  (class reference → FQN via imports)
                         priority    (integer literal, if present)
                         handler     (method pointer → [self::class, 'methodName'])
-                        handler body (static method on same class → extract and rewrite)
+                        handler body (method on same class → extract and rewrite)
 
 annotated_classes   → list of class identifiers from getListenerClasses()
                       (PHP, Java, Python only — Go and TypeScript omit this method)
@@ -1291,7 +1291,7 @@ explicit_routes     → list of route data objects from getRoutes()
                         path        ('/users/{id}' — string literal)
                         parameters  (list of Parameter objects — name + regex string literals)
                         handler     (method pointer → [self::class, 'methodName'])
-                        handler body (static method on same class → extract and rewrite)
+                        handler body (method on same class → extract and rewrite)
                         middleware  (if present)
                         name        (if present)
 
@@ -1417,10 +1417,7 @@ other class.
         - Extract event type class reference → resolve to FQN via imports
         - Extract priority if present
      c. If handler found:
-        - Resolve callable FQN → file path
-        - Parse handler file → collect its imports
-        - Find methodName static method in handler file
-        - Extract method body → rewrite type refs using handler file's imports
+        - Resolve ClassName → FQN, and write the callable into the output as a literal
         - Add listener data to output list
 4. Output: list of listener data objects, same shape as explicit_listeners from Step 3b
 ```
