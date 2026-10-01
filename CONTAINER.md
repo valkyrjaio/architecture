@@ -194,10 +194,11 @@ concurrent requests.
 ### The Parent/Child Invariant
 
 The parent container is bootstrapped once when the worker process starts and
-then **frozen** — nothing may write to it again. Each incoming request receives
-a fresh child container. The child checks its own maps first; if a service is
-not registered locally it falls back to the parent. When the request ends the
-child is discarded; the parent is unmodified.
+then **frozen** — no registration changes after that point. Each incoming
+request receives a fresh child container. The child checks its own maps first;
+if a service is not registered locally it falls back to the parent. When the
+request ends the child is discarded, and the parent keeps only what a shared
+service resolving through it cached.
 
 ### ContainerData
 
@@ -216,10 +217,13 @@ logical copy of the maps at zero cost until it writes to one.
 For each lookup the child follows this order:
 
 1. **Child's own maps** — anything registered or resolved locally this request
-2. **Parent** — read-only fallback; the parent is never written to through the child
+2. **Parent** — the fallback for anything the child cannot answer
 
-Singletons resolved in the child are cached in the child only. The parent's
-instance map is never modified after `bootstrap()`.
+A singleton the child resolves caches in the child. An id the child cannot
+answer goes to the parent, and the parent answers it as it would for any
+caller: it publishes an id it holds a callback for, and a factory it runs
+caches in the parent every singleton that factory resolves. That is a shared
+service resolving once.
 
 For singleton resolution specifically, the child applies this three-step strategy:
 
@@ -231,14 +235,37 @@ For singleton resolution specifically, the child applies this three-step strateg
 parent has already published a service, the child treats it as published and
 does not re-publish it — preserving the parent's frozen state.
 
+### Where an Alias Resolves
+
+An alias resolves in the container that declares it, so where a developer
+declares an alias selects the resolution scope. A child lookup of an alias that
+only the parent declares goes to the parent, with one exception: when the chain
+reaches a target the parent would resolve for the first time — a singleton it
+never built, or a publisher it has not run — the child resolves that target
+itself, because the child holds the same registration and one request must not
+hold two copies of one id.
+
+The parent reads none of the child's maps on that path. An instance the child
+holds for the target does not answer the alias. Declaring the alias on the child
+is the way to reach the child's copy.
+
+Every entry point that receives an alias rejects a chain that returns to its own
+start, and a child follows each chain through its parent as well. Each check
+covers the maps that exist when it runs.
+
 ### Available Implementations
 
-Both implementations share the same invariant: neither triggers deferred
-resolution in the parent. A lookup on the child will reuse a parent singleton
-only if it is already a resolved instance (`isSingletonInstance`). Services that
-are still in the deferred map — registered but never force-resolved — are
-invisible to child containers. Ensure everything needed at request time is
-eagerly resolved in `bootstrapParentServices()` before the request loop begins.
+A deferred service stays available in a child. The child holds the parent's
+publish callbacks, so it publishes such an id itself, and the instance caches in
+the child. Resolve in `bootstrapParentServices()` only what every request should
+share.
+
+The two differ on the container a parent-bound factory receives. The portable
+implementation hands the call to the parent, so the factory receives the parent
+and cannot see a service that exists only on the child. The native
+implementation reads the factory and applies it with the child. A
+parent-declared alias is the exception, because both hand that call to the
+parent.
 
 **`Valkyrja\Container\Manager\ChildContainer`** — The default. Delegates to the
 parent via `ContainerContract`, meaning it works with any parent that implements
@@ -246,9 +273,9 @@ the contract. This is the portable, cross-language implementation.
 
 **`Valkyrja\Container\Manager\NativeChildContainer`** — PHP-specific. Reads fall
 back to the parent's maps via direct protected-field access rather than method
-calls, eliminating any risk of accidentally triggering deferred publishing or
-writing to parent state. Requires a concrete `Container` parent. Use only when
-profiling confirms a bottleneck at very high child construction rates.
+calls. Requires a concrete `Container` parent. Use it when a parent-bound
+factory must receive the child, or when profiling confirms a bottleneck at very
+high child construction rates.
 
 ### Using a Child Container
 
