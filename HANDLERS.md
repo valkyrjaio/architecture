@@ -64,7 +64,7 @@ static function (ContainerContract $c, RouteContract $route): ResponseContract {
 Go narrows with a type assertion, and reads the parameter the same way:
 
 ```go
-func (p *UserHttpRouteProvider) ShowUser(c ContainerContract, route RouteContract) ResponseContract {
+func(c ContainerContract, route RouteContract) ResponseContract {
 var id any
 if dynamicRoute, ok := route.(DynamicRouteContract); ok {
 id = dynamicRoute.GetParameter("id").GetValue()

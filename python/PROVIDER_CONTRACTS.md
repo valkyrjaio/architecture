@@ -396,6 +396,7 @@ from valkyrja.http.message.response.contract import ResponseContract
 from valkyrja.http.routing.data.contract import RouteContract
 from app.container.container_constants import ContainerConstants
 
+# The decorator accepts a thunk; Sindri unwraps it to the class before writing the cache.
 HandlerReference = tuple[type | Callable[[], type], str]
 
 
