@@ -1068,8 +1068,7 @@ publishers() map literal
         ↓
 resolve each method reference to its source location
         ↓
-PHP / Java / Python: read the callable reference the marker carries → read the method it names
-Go / TypeScript: read method body directly → extract function
+every port: read the referenced method's body directly → extract function
         ↓
 resolve all type references to FQN
         ↓

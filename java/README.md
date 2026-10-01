@@ -288,7 +288,7 @@ The annotation processor runs during `javac` — no separate build step needed.
 
 ```java
 
-@SupportedAnnotationTypes("io.valkyrja.http.routing.Handler")
+@SupportedAnnotationTypes("io.valkyrja.http.routing.attribute.route.RouteHandler")
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class ValkyrjaAnnotationProcessor extends AbstractProcessor {
     private Trees trees;
@@ -301,10 +301,10 @@ public class ValkyrjaAnnotationProcessor extends AbstractProcessor {
 }
 ```
 
-### Lambda extraction via Trees API
+### Handler reference extraction via Trees API
 
-The Trees API gives access to lambda source text from the AST at compile time.
-FQN resolution is automatic via the compilation unit's import list.
+The Trees API gives access to the annotation's members from the AST at compile
+time. FQN resolution is automatic via the compilation unit's import list.
 
 ### Code generation via JavaPoet
 
