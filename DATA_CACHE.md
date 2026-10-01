@@ -1072,7 +1072,7 @@ publishers() map literal
         ↓
 resolve each method reference to its source location
         ↓
-read the referenced publisher method → see "Publishers AST Readability" above for what each port writes
+read the referenced publisher method → see "The Four Generated Data Classes" above for what each port writes
         ↓
 resolve all type references to FQN
         ↓
