@@ -1111,9 +1111,6 @@ class UserPostController:
         )
 ```
 
-Go and TypeScript hold the same rule. The handler they register explicitly unpacks the matched values, so their
-controller methods take plain values too.
-
 ---
 
 ### The Sindri Pattern (All Languages)

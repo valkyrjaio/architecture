@@ -265,9 +265,9 @@ Go has no annotations. There is no `GetControllerClasses()` — routes and
 listeners are always registered explicitly via `GetRoutes()` and
 `GetListeners()`.
 
-The build tool (`go generate` + `go/analysis`) scans `GetRoutes()` and
-`GetListeners()` method bodies for handler function literals and extracts them
-from the AST.
+The build tool (`go generate` + `go/analysis`) reads `GetRoutes()` and
+`GetListeners()` for the handler methods they name, then extracts each method's
+body from the AST.
 
 ---
 
@@ -294,7 +294,7 @@ go/packages.Load() → source files
         ↓
 go/ast → walk GetRoutes() / Publishers() method bodies
         ↓
-Extract handler func literals + parameter data
+Extract the referenced handler methods + parameter data
         ↓
 Resolve imports to fully qualified package paths
         ↓

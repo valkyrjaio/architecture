@@ -385,9 +385,9 @@ are structural problems in the application that the developer must resolve.
 ```
 ✅ [self::class, 'methodName']           — PHP method pointer on same class
 ✅ ClassName::methodName                  — Java static reference
-✅ self.method_name                       — Python method reference on same class
+✅ ProviderClass.method_name              — Python static reference on same class
 ✅ p.MethodName                           — Go method reference on same struct
-✅ this.methodName                        — TypeScript method reference on same class
+✅ this.methodName.bind(this)             — TypeScript method reference on same class
 
 ✅ Handler method must be static — in Go, a method on the provider struct
 ✅ Handler method must be on the same class as the provider
@@ -1233,7 +1233,7 @@ use a string constant. A raw string literal in place of the constant is used as-
 
 **Goal:** Extract explicit listeners and the list of annotated classes to scan.
 
-**Imports are needed for explicit listeners** — handler closures and event type references in listener data objects will
+**Imports are needed for explicit listeners** — handler methods and event type references in listener data objects will
 be written into generated output and must be fully qualified.
 
 **Imports are not needed for the annotated class list** — those class identifiers are used only to locate files to scan
@@ -1243,13 +1243,14 @@ in Step 4b.
 
 ```
 imports             → map of simple name → FQN
-                      needed to rewrite handler closures and event type references
+                      needed to rewrite handler method bodies and event type references
 
 explicit_listeners  → list of listener data objects from getListeners()
                       each listener carries:
                         event type  (class reference → FQN via imports)
                         priority    (integer literal, if present)
-                        handler     (referenced method's body, type refs rewritten to FQN)
+                        handler     (method pointer → [self::class, 'methodName'])
+                        handler body (static method on same class → extract and rewrite)
 
 annotated_classes   → list of class identifiers from getListenerClasses()
                       (PHP, Java, Python only — Go and TypeScript omit this method)
