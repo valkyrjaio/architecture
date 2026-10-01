@@ -327,7 +327,7 @@ new AppConfig(
         new ContainerComponentProvider(),
         new EventComponentProvider(),
         new CliComponentProvider(),
-        App\Providers\AppProvider::class,
+        App\Provider\AppProvider::class,
     ]
 )
 ```

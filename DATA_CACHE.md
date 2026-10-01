@@ -107,7 +107,7 @@ $app = Application::create(
             new ContainerComponentProvider(),
             new EventComponentProvider(),
             new CliComponentProvider(),
-            App\Providers\AppProvider::class,
+            App\Provider\AppProvider::class,
         ]
     )
 );
@@ -837,7 +837,7 @@ public function show(RouteContract $route): ResponseContract {}
 
 ```java
 // Java
-@RouteHandler(handlerClass = UserController.class, handlerMethod = "showHandler")
+@RouteHandler(handlerClass = UserPostController.class, handlerMethod = "showHandler")
 @Parameter(name = "id",     regex = "[0-9]+")
 @Parameter(name = "postId", regex = "[0-9]+")
 public ResponseContract show(RouteContract route) {}
@@ -845,7 +845,7 @@ public ResponseContract show(RouteContract route) {}
 
 ```python
 # Python
-@route_handler((lambda: UserController, 'show_handler'))
+@route_handler((lambda: UserPostController, 'show_handler'))
 @parameter(name='id', regex='[0-9]+')
 @parameter(name='postId', regex='[0-9]+')
 def show(self, route: RouteContract) -> ResponseContract:
