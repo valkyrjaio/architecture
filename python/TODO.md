@@ -155,6 +155,8 @@ container.bind(
       NOT self-register
 
 ```python
+from typing import Callable
+
 HandlerReference = tuple[type | Callable[[], type], str]
 
 
