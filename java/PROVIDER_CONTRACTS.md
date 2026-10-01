@@ -267,7 +267,7 @@ public interface HttpRouteProviderContract {
 ### UserHttpRouteProvider Implementation
 
 ```java
-package app.http.providers;
+package app.http.provider;
 
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.http.message.response.contract.ResponseContract;
