@@ -341,7 +341,7 @@ class UserController:
     # Sindri writes the callable into the cache — this method runs at run time
     @staticmethod
     def show_handler(c: ContainerContract, route: RouteContract) -> ResponseContract:
-        return c.get_singleton(UserController).show(route)
+        return c.get_singleton(ContainerConstants.USER_CONTROLLER).show(route)
 ```
 
 ### Why Not Inline Closures

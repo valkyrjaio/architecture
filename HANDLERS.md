@@ -632,7 +632,7 @@ def index(self, route: RouteContract) -> ResponseContract:
 
 @staticmethod
 def index_handler(c: ContainerContract, route: RouteContract) -> ResponseContract:
-    return c.get_singleton(UserController).index(route)
+    return c.get_singleton(ContainerConstants.USER_CONTROLLER).index(route)
 ```
 
 For **Go** and **TypeScript** — where no annotations exist — explicit registration is used:
@@ -1018,7 +1018,7 @@ class UserController:
 
     @staticmethod
     def show_handler(c: ContainerContract, route: RouteContract) -> ResponseContract:
-        return c.get_singleton(UserController).show(route)
+        return c.get_singleton(ContainerConstants.USER_CONTROLLER).show(route)
 ```
 
 Generated output:
