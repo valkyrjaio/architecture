@@ -333,7 +333,7 @@ class UserController
 {
     #[Route(path: '/users/{id}', name: 'user.show', requestMethods: [RequestMethod::GET])]
     #[Parameter(name: 'id', regex: '[0-9]+')]
-    #[RouteHandler([UserController::class, 'showHandler'])]
+    #[RouteHandler([self::class, 'showHandler'])]
     public function show(RouteContract $route): ResponseContract
     {
         // actual implementation

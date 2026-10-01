@@ -340,7 +340,7 @@ Any method or function the build tool reads must return a single flat literal wi
 
 ```go
 // ✅ simple slice of route objects
-return []dataContract.RouteContract{
+return []RouteContract{
 data.Get("/users", func (c ContainerContract, route RouteContract) ResponseContract { ... }),
 }
 
@@ -356,11 +356,11 @@ UserRepositoryClass: PublishUserRepository,
 
 // ❌ conditional logic
 if condition {
-return []dataContract.RouteContract{...}
+return []RouteContract{...}
 }
 
 // ❌ variable accumulation
-routes := []dataContract.RouteContract{}
+routes := []RouteContract{}
 routes = append(routes, ...)
 return routes
 ```

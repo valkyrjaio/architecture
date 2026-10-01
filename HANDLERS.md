@@ -432,15 +432,8 @@ public interface ListenerHandlerContract {
 }
 
 // usage
-listener.
-
-setHandler((container, arguments) ->
-        container.
-
-getSingleton(UserCreatedListener .class).
-
-handle(arguments.get("user_id"))
-        );
+listener.setHandler((container, arguments) ->
+        container.getSingleton(UserCreatedListener.class).handle(arguments.get("user_id")));
 ```
 
 ```go
@@ -1108,7 +1101,7 @@ class UserPostController:
 ```
 
 Go and TypeScript hold the same rule. The handler they register explicitly unpacks the matched values, so their
-controller methods take plain ones too.
+controller methods take plain values too.
 
 ---
 
