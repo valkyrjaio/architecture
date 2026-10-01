@@ -254,9 +254,8 @@ from typing import Callable
 
 from valkyrja.container.provider.contract import ServiceProviderContract
 from valkyrja.container.manager.contract import ContainerContract
+from app.constants.container_constants import ContainerConstants
 from app.repository import UserRepository
-from app.repository.contract import ContainerConstants, UserRepositoryClass
-from app.service.contract import DatabaseClass
 
 
 class UserServiceProvider(ServiceProviderContract):
@@ -277,8 +276,8 @@ class UserServiceProvider(ServiceProviderContract):
         Build tool reads this method's body from AST for cache generation.
         """
         container.set_singleton(
-            UserRepositoryClass,
-            UserRepository(container.get_singleton(DatabaseClass))
+            ContainerConstants.USER_REPOSITORY,
+            UserRepository(container.get_singleton(ContainerConstants.DATABASE))
         )
 ```
 
