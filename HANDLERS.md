@@ -884,7 +884,7 @@ router.get('/users',
 For annotated controllers, annotations live on the **implementation method**. Sindri reads the annotations and
 constructs a route object — exactly the same shape as a route returned from `getRoutes()`. **No method body
 extraction.** The callable from `#[RouteHandler]` is written directly into the generated cache data class as a literal,
-with its class token resolved to the class it names, so the generated file reaches that class on its own.
+with its class token resolved to an FQN, which the generated file reaches through the import it emits.
 
 This is identical to how service bindings work:
 
@@ -1023,14 +1023,14 @@ class UserController:
 Generated output:
 
 ```python
-from app.http.controller import UserController
+import app.http.controller
 
 HttpRoute(
     path='/users/{id}',
     name='user.show',
     method='GET',
     parameters=[Parameter('id', '[0-9]+')],
-    handler=(UserController, 'show_handler'),  # thunk unwrapped, class imported by the generator
+    handler=(app.http.controller.UserController, 'show_handler'),  # thunk unwrapped, class written as an FQN
 )
 ```
 
@@ -1051,7 +1051,7 @@ HttpRoute(
 Annotations / decorators carry literals.
 Sindri reads literals.
 Sindri writes literals into the generated cache data class.
-No method body extraction. The callable's class token resolves to the class it names.
+No method body extraction. The callable's class token resolves to an FQN.
 
 Same as service bindings:
   SomeServiceId::class => [SomeProvider::class, 'publishMethod']  ← literal, written as-is

@@ -266,7 +266,7 @@ controller class, the route provider, or any other class.
 ```
 Annotations live on:       the implementation method (show, store, index etc.)
 #[RouteHandler] points to: a callable (ClassName, methodName) — any class, anywhere
-Sindri writes:             that callable into the cache as a literal, qualifying the class or importing it
+Sindri writes:             that callable into the cache as a literal, its class token resolved to an FQN
 ```
 
 **PHP — handler on same controller:**
@@ -1341,9 +1341,8 @@ Identical to Step 3c with:
 **Input:** file path of a controller class (resolved in Step 3c or 3d).
 
 Sindri reads annotation literals and constructs route data objects — **no method body extraction**. The callable from
-`#[RouteHandler]` is written directly into the generated output, exactly like a callable in an explicit `getRoutes()`
-route or a service binding. PHP and Java name the class by FQN; Python writes the short name and the generator emits the
-import for it:
+`#[RouteHandler]` is written directly into the generated output, its class token resolved to an FQN, exactly like a
+callable in an explicit `getRoutes()` route or a service binding:
 
 ```
 // service binding — callable literal written as-is
