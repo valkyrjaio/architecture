@@ -888,9 +888,7 @@ indexUsers(c: ContainerContract, route: RouteContract): ResponseContract {
 
 For annotated controllers, annotations live on the **implementation method**. Sindri reads the annotations and
 constructs a route object. **No method body extraction.** The callable from `#[RouteHandler]` is written directly into
-the generated cache data class as a literal, with its class token resolved to an FQN. The route wraps that callable in a
-closure when it loads, because `getHandler()` returns one — the same step the container takes for a publisher reference.
-See [`CONTAINER_BINDINGS.md`](CONTAINER_BINDINGS.md).
+the generated cache data class as a literal, with its class token resolved to an FQN.
 
 This is identical to how service bindings work:
 
@@ -899,7 +897,7 @@ This is identical to how service bindings work:
 SomeServiceId::class => [SomeServiceProvider::class, 'publishSomeClass']
 
 // annotated route — callable written as a literal
-new Route('/users/{id}', 'user.show', [SomeClass::class, 'theHandlerMethod'])
+#[RouteHandler([SomeClass::class, 'theHandlerMethod'])]
 ```
 
 An explicit `getRoutes()` route takes the other path: Sindri inlines the named method's body as a closure.

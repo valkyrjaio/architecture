@@ -673,16 +673,12 @@ public class UserHttpRouteProvider implements HttpRouteProviderContract {
 
 ```go
 type HttpRouteProviderContract interface {
-GetControllerClasses() []string
+// GetControllerClasses intentionally absent — Go has no annotations
 GetRoutes() []RouteContract
 }
 
 // implementation — explicit registration only
 type UserHttpRouteProvider struct{}
-
-func (p *UserHttpRouteProvider) GetControllerClasses() []string {
-return []string{}
-}
 
 func (p *UserHttpRouteProvider) GetRoutes() []RouteContract {
 return []RouteContract{

@@ -9,8 +9,8 @@ Go provider contracts differ from PHP/Java in several important ways:
 - Publisher methods can be struct methods OR package-level functions — build tool handles both
 - No abstract classes — interfaces enforce the contract, unexported types enforce instantiation restrictions
 - All methods return simple slice/map literals — no conditional logic
-- `GetControllerClasses()` and `GetListenerClasses()` return an empty slice — Go has no annotations, so there is no
-  annotated class to scan, and the contract keeps the method for parity with the other ports.
+- `GetControllerClasses()` and `GetListenerClasses()` are **absent** — Go has no annotations, so annotated class
+  scanning is not possible. Including these methods would imply capability that does not exist.
 
 ### Go Works Without Cache
 
@@ -221,9 +221,8 @@ func PublishUserRepository(c ctnContract.ContainerContract) {
 
 ## HttpRouteProviderContract
 
-HTTP route provider. Go has no annotations — explicit route definitions only. `GetControllerClasses()` returns string
-constants (no `::class` equivalent). Routes are complete data structures carrying method, path, constraints, middleware,
-and handler together.
+HTTP route provider. Go has no annotations — explicit route definitions only, and no `GetControllerClasses()`. Routes
+are complete data structures carrying method, path, constraints, middleware, and handler together.
 
 ```go
 // package: github.com/valkyrjaio/valkyrja-go/vN/http/routing/provider/contract
@@ -233,12 +232,6 @@ import dataContract "github.com/valkyrjaio/valkyrja-go/vN/http/routing/data/cont
 
 // HttpRouteProviderContract defines what an HTTP route provider must implement.
 type HttpRouteProviderContract interface {
-	// GetControllerClasses returns a list of controller class string constants.
-	// Go has no ::class equivalent — string constants from the constants file are used.
-	// Returns empty slice if using explicit routes only (most common in Go).
-	// Must be a simple slice literal — no conditional logic permitted.
-	GetControllerClasses() []string
-
 	// GetRoutes returns a list of explicit route definitions.
 	// Routes are complete data structures — they carry HTTP method, path pattern,
 	// dynamic segment constraints, middleware chain, and handler together.
@@ -263,12 +256,6 @@ import (
 )
 
 type UserHttpRouteProvider struct{}
-
-// GetControllerClasses returns string constants — Go has no ::class equivalent.
-// Returns empty slice since Go has no annotations to scan.
-func (p *UserHttpRouteProvider) GetControllerClasses() []string {
-	return []string{}
-}
 
 func (p *UserHttpRouteProvider) GetRoutes() []dataContract.RouteContract {
 	return []dataContract.RouteContract{
@@ -304,10 +291,6 @@ import dataContract "github.com/valkyrjaio/valkyrja-go/vN/cli/routing/data/contr
 
 // CliRouteProviderContract defines what a CLI route provider must implement.
 type CliRouteProviderContract interface {
-	// GetControllerClasses returns a list of controller class string constants.
-	// Returns empty slice (Go has no annotations to scan).
-	GetControllerClasses() []string
-
 	// GetRoutes returns a list of explicit CLI route definitions.
 	// Must be a simple slice literal — no conditional logic permitted.
 	GetRoutes() []dataContract.RouteContract
