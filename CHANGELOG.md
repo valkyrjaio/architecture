@@ -1,6 +1,11 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.23...26.x)
+## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.24...26.x)
+
+## [v26.0.24](https://github.com/valkyrjaio/architecture/compare/v26.0.23...v26.0.24) - 2026-10-01
+
+* [Config] docs: Record the component name prefix for a shared adapter property by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/227
+* [Container] docs(#225): State where a parent-declared alias resolves, and when the parent writes by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/226
 
 ## [v26.0.23](https://github.com/valkyrjaio/architecture/compare/v26.0.22...v26.0.23) - 2026-09-05
 
