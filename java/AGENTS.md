@@ -139,10 +139,10 @@ SpotBugs → `junit` (JaCoCo 100%). Use `./gradlew spotlessApply` to auto-format
 
 - **Framework source shipping:** Java must publish a `-sources.jar` as a required
   build dependency (the cache-optional runtime needs source available).
-- **`sindri` (build tool)** reads `@RouteHandler`/`@ListenerHandler`/`@Provides`
-  through `javax.lang.model` and generates the four cache data classes through
-  JavaPoet, resolving each source file through the Trees API. Dev-only; the
-  framework has zero AST/build deps.
+- **`sindri` (build tool)** reads `@RouteHandler` and `@ListenerHandler` through
+  `javax.lang.model`, reads `@Provides` from the provider AST, and generates the
+  four cache data classes through JavaPoet, resolving each source file through the
+  Trees API. Dev-only; the framework has zero AST/build deps.
 - **Runtime entry adapters.** The worker entries for the servlet / embedded
   runtimes live in `io.valkyrja.application.entry.<runtime>` (`jetty`, `netty`,
   `tomcat`, plus the built-in JDK `exchange`), each a thin `WorkerHttp` /

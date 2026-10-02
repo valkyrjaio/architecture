@@ -1660,8 +1660,7 @@ external file resolution needed.
 
 @SupportedAnnotationTypes({
         "io.valkyrja.http.routing.attribute.route.RouteHandler",
-        "io.valkyrja.event.attribute.ListenerHandler",
-        "io.valkyrja.container.attribute.Provides"
+        "io.valkyrja.event.attribute.ListenerHandler"
 })
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class ValkyrjaAnnotationProcessor extends AbstractProcessor {
@@ -1718,7 +1717,12 @@ private void processHandlerMethod(ExecutableElement method) {
             // extract @Parameter annotations from same method
             List<ParameterData> parameters = extractParameters(method);
 
-            handlers.add(new HandlerData(resolvedSource, parameters));
+            // a route marker feeds Step 4a's output, a listener marker feeds Step 4b's
+            if (type.equals(RouteHandler.class.getName())) {
+                routeHandlers.add(new RouteHandlerData(resolvedSource, parameters));
+            } else {
+                listenerHandlers.add(new ListenerHandlerData(resolvedSource));
+            }
         }
     }
 }
