@@ -1693,16 +1693,16 @@ private void processHandlerMethod(ExecutableElement method) {
     for (AnnotationMirror annotation : method.getAnnotationMirrors()) {
         if (!annotation.getAnnotationType().toString().equals(RouteHandler.class.getName())) continue;
 
-        // read both members of this annotation — the class token and the method name
-        Map<String, String> members = new HashMap<>();
+        // read both members of this annotation — getValue() yields the value, not the source form
+        Map<String, Object> members = new HashMap<>();
         for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry
                 : annotation.getElementValues().entrySet()) {
-            members.put(entry.getKey().getSimpleName().toString(), entry.getValue().toString());
+            members.put(entry.getKey().getSimpleName().toString(), entry.getValue().getValue());
         }
 
-        // resolve the class token to its FQN via element utilities
-        String handlerClass = resolveFQN(members.get("handlerClass"), method);
-        String handlerMethod = members.get("handlerMethod");
+        // a Class member arrives as a TypeMirror, already fully qualified
+        String handlerClass = members.get("handlerClass").toString();
+        String handlerMethod = (String) members.get("handlerMethod");
 
         // extract @Parameter annotations from same method
         List<ParameterData> parameters = extractParameters(method);
@@ -1713,7 +1713,7 @@ private void processHandlerMethod(ExecutableElement method) {
 }
 ```
 
-**FQN resolution via type utilities:**
+**FQN resolution via type utilities** — the explicit path needs it when it inlines a method body:
 
 ```java
 private String resolveFQN(String source, ExecutableElement method) {
