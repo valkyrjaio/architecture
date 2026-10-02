@@ -13,7 +13,7 @@
 - **`@staticmethod @abstractmethod`** throughout — providers are stateless
 - **`inspect.getfile()`** for class-to-file resolution (equivalent of PHP's `ReflectionClass::getFileName()`)
 - **`ast` module** for build tool AST parsing
-- **Decorators are runtime-executable** — `@route_handler` self-registers at import time
+- **Decorators are runtime-executable** — `@route_handler` attaches metadata at import time, and registers nothing
 - **`class_()` helper** for FQN derivation (`class` is reserved in Python)
 - **ASGI (Uvicorn/Hypercorn)** as the worker mode deployment model
 - **CGI mode** supported — Python is interpreted, cache optional in dev

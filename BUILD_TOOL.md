@@ -1683,6 +1683,12 @@ public class ValkyrjaAnnotationProcessor extends AbstractProcessor {
             if (element.getKind() != ElementKind.METHOD) continue;
             processHandlerMethod((ExecutableElement) element);
         }
+
+        // and every @ListenerHandler annotated method
+        for (Element element : roundEnv.getElementsAnnotatedWith(ListenerHandler.class)) {
+            if (element.getKind() != ElementKind.METHOD) continue;
+            processHandlerMethod((ExecutableElement) element);
+        }
         return true;
     }
 }

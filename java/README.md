@@ -356,7 +356,7 @@ provider tree, then walks each provider's source file via Trees API.
 5. Handler functional interfaces — HttpHandlerFunc, CliHandlerFunc,
    ListenerHandlerFunc
 6. Handler contracts per concern
-7. @RouteHandler and @Parameter annotations
+7. @RouteHandler, @ListenerHandler, and @Parameter annotations
 8. Records for data classes
 9. Annotation processor setup + handler reference extraction
 10. JavaPoet cache data class generation
