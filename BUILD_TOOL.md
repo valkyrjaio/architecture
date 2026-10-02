@@ -1658,10 +1658,7 @@ external file resolution needed.
 
 ```java
 
-@SupportedAnnotationTypes({
-        "io.valkyrja.http.routing.attribute.route.RouteHandler",
-        "io.valkyrja.event.attribute.ListenerHandler"
-})
+@SupportedAnnotationTypes("io.valkyrja.http.routing.attribute.route.RouteHandler")
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class ValkyrjaAnnotationProcessor extends AbstractProcessor {
 
@@ -1683,12 +1680,6 @@ public class ValkyrjaAnnotationProcessor extends AbstractProcessor {
             if (element.getKind() != ElementKind.METHOD) continue;
             processHandlerMethod((ExecutableElement) element);
         }
-
-        // and every @ListenerHandler annotated method
-        for (Element element : roundEnv.getElementsAnnotatedWith(ListenerHandler.class)) {
-            if (element.getKind() != ElementKind.METHOD) continue;
-            processHandlerMethod((ExecutableElement) element);
-        }
         return true;
     }
 }
@@ -1698,11 +1689,9 @@ public class ValkyrjaAnnotationProcessor extends AbstractProcessor {
 
 ```java
 private void processHandlerMethod(ExecutableElement method) {
-    // find the handler marker and extract the handler reference
+    // find the @RouteHandler annotation and extract the handler reference
     for (AnnotationMirror annotation : method.getAnnotationMirrors()) {
-        String type = annotation.getAnnotationType().toString();
-        if (!type.equals(RouteHandler.class.getName())
-                && !type.equals(ListenerHandler.class.getName())) continue;
+        if (!annotation.getAnnotationType().toString().equals(RouteHandler.class.getName())) continue;
 
         // get the handlerClass and handlerMethod members from the annotation
         for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry
@@ -1717,12 +1706,7 @@ private void processHandlerMethod(ExecutableElement method) {
             // extract @Parameter annotations from same method
             List<ParameterData> parameters = extractParameters(method);
 
-            // a route marker feeds Step 4a's output, a listener marker feeds Step 4b's
-            if (type.equals(RouteHandler.class.getName())) {
-                routeHandlers.add(new RouteHandlerData(resolvedSource, parameters));
-            } else {
-                listenerHandlers.add(new ListenerHandlerData(resolvedSource));
-            }
+            handlers.add(new HandlerData(resolvedSource, parameters));
         }
     }
 }

@@ -288,10 +288,7 @@ The annotation processor runs during `javac` — no separate build step needed.
 
 ```java
 
-@SupportedAnnotationTypes({
-        "io.valkyrja.http.routing.attribute.route.RouteHandler",
-        "io.valkyrja.event.attribute.ListenerHandler"
-})
+@SupportedAnnotationTypes("io.valkyrja.http.routing.attribute.route.RouteHandler")
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class ValkyrjaAnnotationProcessor extends AbstractProcessor {
     private Trees trees;
