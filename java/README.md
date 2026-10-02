@@ -303,9 +303,11 @@ public class ValkyrjaAnnotationProcessor extends AbstractProcessor {
 
 ### Handler reference extraction via the annotation processing API
 
-`javax.lang.model` gives access to the annotation's members at compile time, and
-the Trees API resolves the enclosing compilation unit. FQN resolution is
-automatic via that unit's import list.
+`javax.lang.model` gives access to the annotation's members at compile time. A
+`Class` member arrives as a `TypeMirror`, already fully qualified, so the
+annotated path needs no FQN rewriting. The Trees API resolves the enclosing
+compilation unit, whose import list the explicit path uses when it inlines a
+method body.
 
 ### Code generation via JavaPoet
 
