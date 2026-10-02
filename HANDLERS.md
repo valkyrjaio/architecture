@@ -16,36 +16,93 @@ The language enforces the closure signature. Each handler type has its own signa
 
 | Handler type   | Parameters                                | Return type        |
 | -------------- | ----------------------------------------- | ------------------ |
-| HTTP route     | `ContainerContract`, `map<string, mixed>` | `ResponseContract` |
-| CLI route      | `ContainerContract`, `map<string, mixed>` | `OutputContract`   |
+| HTTP route     | `ContainerContract`, `RouteContract`      | `ResponseContract` |
+| CLI route      | `ContainerContract`, `RouteContract`      | `OutputContract`   |
 | Event listener | `ContainerContract`, `map<string, mixed>` | `any` / `mixed`    |
 
-The second parameter is `map<string, mixed>` in all three cases — named arguments from the matched route, command, or
-event. The return type differs per concern.
+A route handler takes the matched route, so the handler reads the route's own data. Each concern declares its own
+route contract in its own namespace, so the HTTP `RouteContract` and the CLI `RouteContract` are two distinct types. A
+listener takes a `map<string, mixed>`, because an event carries named arguments and no route.
 
-`ServerRequestContract` and `RouteContract` are **not** explicit parameters. They are always available via the container
-when needed. Keeping them out of the signature:
+`ServerRequestContract` is **not** an explicit parameter. The container holds the request, and a handler that needs the
+request resolves the request. Keeping the request out of the signature:
 
-- Makes the signature uniform and minimal across all handler types
-- Avoids passing HTTP-specific objects to CLI handlers where they make no sense
-- Lets the developer decide what to resolve — no unnecessary overhead for handlers that don't need them
+- Avoids passing an HTTP-specific object to a CLI handler, where the object makes no sense
+- Lets the developer decide what to resolve, so a handler pays for nothing it does not use
+
+A matched dynamic route carries a value for each parameter the matcher captured. The matcher builds an uncaptured
+parameter's value from its declared default, or null when it declares none. The matcher attaches the values and gives
+the handler a `DynamicRouteContract`. The handler still declares `RouteContract`, because a narrower parameter type
+breaks the handler signature, so the handler narrows the type at run time.
+
+Warning: a TypeScript handler cannot narrow against a contract. See [`CONTRACTS.md`](CONTRACTS.md), _Type erasure_.
+
+| Port       | Narrowing construct          |
+| ---------- | ---------------------------- |
+| PHP        | `instanceof`                 |
+| Java       | `instanceof`                 |
+| Go         | a type assertion             |
+| Python     | `isinstance` against the ABC |
+| TypeScript | `instanceof` against a class |
 
 ```php
-// HTTP handler — fetch request from container only if needed
-static fn(ContainerContract $c, array<string, mixed> $args): ResponseContract => (
-    $c->getSingleton(UserController::class)->show(
-        $c->getSingleton(ServerRequestContract::class), // available if needed
-        $args['id']
-    )
+static function (ContainerContract $c, RouteContract $route): ResponseContract {
+    // The route is a parameter, so the handler reads the route's own data directly.
+    $id = $route instanceof DynamicRouteContract
+        ? $route->getParameter('id')->getValue()
+        : null;
+
+    // The request is not a parameter, so the handler resolves the request it needs.
+    $path = $c->getSingleton(ServerRequestContract::class)->getUri()->getPath();
+
+    $c->getSingleton(LoggerContract::class)->info($route->getName(), ['id' => $id, 'path' => $path]);
+
+    return $c->getSingleton(UserController::class)->show($route);
+}
+```
+
+Go narrows with a type assertion, and reads the parameter the same way:
+
+```go
+func(c ContainerContract, route RouteContract) ResponseContract {
+var id any
+if dynamicRoute, ok := route.(DynamicRouteContract); ok {
+id = dynamicRoute.GetParameter("id").GetValue()
+}
+
+c.GetSingleton(LoggerClass).(LoggerContract).Info(route.GetName(), map[string]any{"id": id})
+
+return c.GetSingleton(UserControllerClass).(*UserController).Show(route)
+}
+```
+
+The TypeScript twin reads the parameter the same way:
+
+```typescript
+(c: ContainerContract, route: RouteContract): ResponseContract => {
+    const id = route instanceof DynamicRoute
+        ? route.getParameter('id').getValue()
+        : undefined
+
+    c.getSingleton<LoggerContract>(LoggerClass).info(route.getName(), {id})
+
+    return c.getSingleton<UserController>(UserControllerClass).show(route)
+}
+```
+
+```php
+// HTTP handler — fetch the request from the container only if needed
+static fn(ContainerContract $c, RouteContract $route): ResponseContract => (
+    $c->getSingleton(UserController::class)->show($route)
 )
 
 // CLI handler — same signature shape, different concern
-static fn(ContainerContract $c, array<string, mixed> $args): OutputContract => (
-    $c->getSingleton(UserCommand::class)->run($args)
+static fn(ContainerContract $c, RouteContract $route): OutputContract => (
+    $c->getSingleton(SendEmailCommand::class)->run($route)
 )
 
-// Listener — same shape, returns any
-static fn(ContainerContract $c, array<string, mixed> $args): mixed => (
+// Listener — takes the event's named arguments, returns any
+static fn(ContainerContract $c, array $args): mixed => (
     $c->getSingleton(UserCreatedListener::class)->handle($args['user_id'])
 )
 ```
@@ -62,10 +119,10 @@ Each concern gets its own named handler type. All five languages define three ty
 
 ```php
 // HTTP
-/** Closure(ContainerContract, array<string, mixed>): ResponseContract */
+/** Closure(ContainerContract, RouteContract): ResponseContract */
 
 // CLI
-/** Closure(ContainerContract, array<string, mixed>): OutputContract */
+/** Closure(ContainerContract, RouteContract): OutputContract */
 
 // Event listener
 /** Closure(ContainerContract, array<string, mixed>): mixed */
@@ -77,13 +134,13 @@ Each concern gets its own named handler type. All five languages define three ty
 // HTTP
 @FunctionalInterface
 public interface HttpHandlerFunc {
-    ResponseContract handle(ContainerContract container, Map<String, Object> arguments);
+    ResponseContract handle(ContainerContract container, RouteContract route);
 }
 
 // CLI
 @FunctionalInterface
 public interface CliHandlerFunc {
-    OutputContract handle(ContainerContract container, Map<String, Object> arguments);
+    OutputContract handle(ContainerContract container, RouteContract route);
 }
 
 // Event listener
@@ -97,10 +154,10 @@ public interface ListenerHandlerFunc {
 
 ```go
 // HTTP
-type HttpHandlerFunc func (container ContainerContract, arguments map[string]any) ResponseContract
+type HttpHandlerFunc func (container ContainerContract, route RouteContract) ResponseContract
 
 // CLI
-type CliHandlerFunc func (container ContainerContract, arguments map[string]any) OutputContract
+type CliHandlerFunc func (container ContainerContract, route RouteContract) OutputContract
 
 // Event listener
 type ListenerHandlerFunc func (container ContainerContract, arguments map[string]any) any
@@ -111,8 +168,8 @@ type ListenerHandlerFunc func (container ContainerContract, arguments map[string
 ```python
 from typing import Callable, Any
 
-HttpHandlerFunc = Callable[[ContainerContract, dict[str, Any]], ResponseContract]
-CliHandlerFunc = Callable[[ContainerContract, dict[str, Any]], OutputContract]
+HttpHandlerFunc = Callable[[ContainerContract, RouteContract], ResponseContract]
+CliHandlerFunc = Callable[[ContainerContract, RouteContract], OutputContract]
 ListenerHandlerFunc = Callable[[ContainerContract, dict[str, Any]], Any]
 ```
 
@@ -122,13 +179,13 @@ ListenerHandlerFunc = Callable[[ContainerContract, dict[str, Any]], Any]
 // HTTP
 type HttpHandlerFunc = (
     container: ContainerContract,
-    arguments: Record<string, unknown>
+    route: RouteContract
 ) => ResponseContract
 
 // CLI
 type CliHandlerFunc = (
     container: ContainerContract,
-    arguments: Record<string, unknown>
+    route: RouteContract
 ) => OutputContract
 
 // Event listener
@@ -199,20 +256,20 @@ interface HandlerContract {
 interface HttpHandlerContract extends HandlerContract
 {
     /**
-     * @return Closure(ContainerContract, array<string, mixed>): ResponseContract
+     * @return Closure(ContainerContract, RouteContract): ResponseContract
      */
     public function getHandler(): Closure;
 
     /**
-     * @param Closure(ContainerContract, array<string, mixed>): ResponseContract $handler
+     * @param Closure(ContainerContract, RouteContract): ResponseContract $handler
      */
     public function setHandler(Closure $handler): static;
 }
 
 // usage — PHPStan enforces signature
-$route->setHandler(
-    static fn(ContainerContract $c, array<string, mixed> $args): ResponseContract
-        => $c->getSingleton(UserController::class)->show($args['id'])
+$httpRoute->setHandler(
+    static fn(ContainerContract $c, RouteContract $route): ResponseContract
+        => $c->getSingleton(UserController::class)->show($route)
 );
 ```
 
@@ -225,15 +282,8 @@ public interface HttpHandlerContract {
 }
 
 // usage — compiler enforces HttpHandlerFunc
-route.
-
-setHandler((container, arguments) ->
-        container.
-
-getSingleton(UserController .class).
-
-show(arguments.get("id"))
-        );
+httpRoute.setHandler((container, route) ->
+        container.getSingleton(UserController.class).show(route));
 // wrong return type? compile error
 ```
 
@@ -245,8 +295,8 @@ SetHandler(HttpHandlerFunc) HttpHandlerContract
 }
 
 // usage — compiler enforces HttpHandlerFunc
-route.SetHandler(func (c ContainerContract, args map[string]any) ResponseContract {
-return c.GetSingleton(UserControllerClass).(*UserController).Show(args["id"])
+httpRoute.SetHandler(func (c ContainerContract, route RouteContract) ResponseContract {
+return c.GetSingleton(UserControllerClass).(*UserController).Show(route)
 })
 ```
 
@@ -261,8 +311,8 @@ class HttpHandlerContract(HandlerContract, ABC):
 
 
 # usage
-route.set_handler(
-    lambda c, args: c.get_singleton(UserControllerClass).show(args['id'])
+http_route.set_handler(
+    lambda c, route: c.get_singleton(ContainerConstants.USER_CONTROLLER).show(route)
 )
 ```
 
@@ -275,8 +325,8 @@ interface HttpHandlerContract extends HandlerContract {
 }
 
 // usage — tsc enforces HttpHandlerFunc
-route.setHandler((container, args) =>
-    container.getSingleton<UserController>(UserControllerClass).show(args['id'] as string)
+httpRoute.setHandler((container, route) =>
+    container.getSingleton<UserController>(UserControllerClass).show(route)
 )
 ```
 
@@ -289,20 +339,20 @@ route.setHandler((container, args) =>
 interface CliHandlerContract extends HandlerContract
 {
     /**
-     * @return Closure(ContainerContract, array<string, mixed>): OutputContract
+     * @return Closure(ContainerContract, RouteContract): OutputContract
      */
     public function getHandler(): Closure;
 
     /**
-     * @param Closure(ContainerContract, array<string, mixed>): OutputContract $handler
+     * @param Closure(ContainerContract, RouteContract): OutputContract $handler
      */
     public function setHandler(Closure $handler): static;
 }
 
 // usage
-$command->setHandler(
-    static fn(ContainerContract $c, array<string, mixed> $args): OutputContract
-        => $c->getSingleton(SendEmailCommand::class)->run($args)
+$cliCommand->setHandler(
+    static fn(ContainerContract $c, RouteContract $route): OutputContract
+        => $c->getSingleton(SendEmailCommand::class)->run($route)
 );
 ```
 
@@ -315,15 +365,8 @@ public interface CliHandlerContract {
 }
 
 // usage
-command.
-
-setHandler((container, arguments) ->
-        container.
-
-getSingleton(SendEmailCommand .class).
-
-run(arguments)
-);
+cliCommand.setHandler((container, route) ->
+        container.getSingleton(SendEmailCommand.class).run(route));
 ```
 
 ```go
@@ -334,8 +377,8 @@ SetHandler(CliHandlerFunc) CliHandlerContract
 }
 
 // usage
-command.SetHandler(func (c ContainerContract, args map[string]any) OutputContract {
-return c.GetSingleton(SendEmailCommandClass).(*SendEmailCommand).Run(args)
+cliCommand.SetHandler(func (c ContainerContract, route RouteContract) OutputContract {
+return c.GetSingleton(SendEmailCommandClass).(*SendEmailCommand).Run(route)
 })
 ```
 
@@ -350,8 +393,8 @@ class CliHandlerContract(HandlerContract, ABC):
 
 
 # usage
-command.set_handler(
-    lambda c, args: c.get_singleton(SendEmailCommandClass).run(args)
+cli_command.set_handler(
+    lambda c, route: c.get_singleton(ContainerConstants.SEND_EMAIL_COMMAND).run(route)
 )
 ```
 
@@ -364,8 +407,8 @@ interface CliHandlerContract extends HandlerContract {
 }
 
 // usage
-command.setHandler((container, args) =>
-    container.getSingleton<SendEmailCommand>(SendEmailCommandClass).run(args)
+cliCommand.setHandler((container, route) =>
+    container.getSingleton<SendEmailCommand>(SendEmailCommandClass).run(route)
 )
 ```
 
@@ -390,7 +433,7 @@ interface ListenerHandlerContract extends HandlerContract
 
 // usage
 $listener->setHandler(
-    static fn(ContainerContract $c, array<string, mixed> $args): mixed
+    static fn(ContainerContract $c, array $args): mixed
         => $c->getSingleton(UserCreatedListener::class)->handle($args['user_id'])
 );
 ```
@@ -404,15 +447,8 @@ public interface ListenerHandlerContract {
 }
 
 // usage
-listener.
-
-setHandler((container, arguments) ->
-        container.
-
-getSingleton(UserCreatedListener .class).
-
-handle(arguments.get("user_id"))
-        );
+listener.setHandler((container, arguments) ->
+        container.getSingleton(UserCreatedListener.class).handle(arguments.get("user_id")));
 ```
 
 ```go
@@ -440,7 +476,7 @@ class ListenerHandlerContract(HandlerContract, ABC):
 
 # usage
 listener.set_handler(
-    lambda c, args: c.get_singleton(UserCreatedListenerClass).handle(args['user_id'])
+    lambda c, args: c.get_singleton(ContainerConstants.USER_CREATED_LISTENER).handle(args['user_id'])
 )
 ```
 
@@ -468,9 +504,9 @@ The handler is a method pointer on the route provider. The handler and the route
 ```php
 HttpRoute::get('/users/{id}', [self::class, 'showUser'])
 
-public static function showUser(ContainerContract $c, array<string, mixed> $args): ResponseContract
+public static function showUser(ContainerContract $c, RouteContract $route): ResponseContract
 {
-    return $c->getSingleton(UserController::class)->show($args['id']);
+    return $c->getSingleton(UserController::class)->show($route);
 }
 // wrong return type?           PHPStan catches it at CI time
 // missing parameter?           PHPStan catches it at CI time
@@ -555,38 +591,42 @@ method rather than manually constructing route objects with handlers:
 **PHP**
 
 ```php
-#[Handler(static fn(ContainerContract $c, array $args): Response
-    => $c->getSingleton(UserController::class)->index($args[0]))]
-public function index(Request $request): Response
+#[RouteHandler([self::class, 'indexHandler'])]
+public function index(RouteContract $route): ResponseContract
 {
     // actual implementation
+}
+
+public static function indexHandler(ContainerContract $c, RouteContract $route): ResponseContract
+{
+    return $c->getSingleton(UserController::class)->index($route);
 }
 ```
 
 **Java**
 
 ```java
-@RouteHandler((ContainerContract c, List < Object > args) ->
-        c.
-
-getSingleton(UserController .class).
-
-index((Request) args.
-
-get(0)))
-
-public Response index(Request request) {
+@RouteHandler(handlerClass = UserController.class, handlerMethod = "indexHandler")
+public ResponseContract index(RouteContract route) {
     // actual implementation
+}
+
+public static ResponseContract indexHandler(ContainerContract c, RouteContract route) {
+    return c.getSingleton(UserController.class).index(route);
 }
 ```
 
 **Python**
 
 ```python
-@route_handler(lambda c, args: c.get_singleton(UserController).index(args[0]))
-def index(request: Request) -> Response:
+@route_handler((lambda: UserController, 'index_handler'))
+def index(self, route: RouteContract) -> ResponseContract:
     # actual implementation
     pass
+
+@staticmethod
+def index_handler(c: ContainerContract, route: RouteContract) -> ResponseContract:
+    return c.get_singleton(ContainerConstants.USER_CONTROLLER).index(route)
 ```
 
 For **Go** and **TypeScript** — where no annotations exist — explicit registration is used:
@@ -594,20 +634,25 @@ For **Go** and **TypeScript** — where no annotations exist — explicit regist
 **Go**
 
 ```go
-router.Get("/users",
-valkyrja.Handler(func(c ContainerContract, args []any) any {
-return c.GetSingleton(UserControllerClass).(*UserController).Index(args[0])
-}),
-)
+func (p *UserHttpRouteProvider) GetRoutes() []RouteContract {
+return []RouteContract{data.Get("/users", p.IndexUsers)}
+}
+
+func (p *UserHttpRouteProvider) IndexUsers(c ContainerContract, route RouteContract) ResponseContract {
+return c.GetSingleton(UserControllerClass).(*UserController).Index(route)
+}
 ```
 
 **TypeScript**
 
 ```typescript
-router.get('/users',
-    handler((c: ContainerContract, args: any[]) =>
-        c.getSingleton(UserController).index(args[0]))
-)
+getRoutes(): RouteContract[] {
+    return [HttpRoute.get('/users', this.indexUsers.bind(this))]
+}
+
+indexUsers(c: ContainerContract, route: RouteContract): ResponseContract {
+    return c.getSingleton<UserController>(UserControllerClass).index(route)
+}
 ```
 
 ---
@@ -617,11 +662,12 @@ router.get('/users',
 The `CacheableHandler` string representation is only needed for CGI and lambda deployments where cache data files are
 required. It is **never used at runtime** — the closure is always used at runtime.
 
-For **PHP, Java, and Python** the build tool (valkyrja-build) extracts the handler closure source text automatically via
-AST and generates the cache data files. The developer never writes a `CacheableHandler` string.
+For **PHP, Java, and Python** the build tool (valkyrja-build) reads the callable reference the marker carries and writes
+it into the cache data files as a literal. On the explicit `getRoutes()` path the handler is a method reference, and the
+build tool extracts that method's body. The developer never writes a `CacheableHandler` string.
 
 For **Go and TypeScript** the build tool reads the route provider source files via AST (go/analysis and TypeScript
-compiler API respectively), extracts the handler closure source text, and generates cache data files. The developer also
+compiler API respectively), extracts the referenced method's body, and generates cache data files. The developer also
 never writes a `CacheableHandler` string.
 
 The `CacheableHandler` contract exists as an escape hatch for edge cases where automatic extraction is not possible or
@@ -768,67 +814,72 @@ listener collection — same pattern, `ListenerContract` instead of `RouteContra
 
 ### PHP
 
-The closure handler is the only mechanism. The `#[RouteHandler]` attribute drives the runtime call and the cache
-generation. The build tool extracts the closure through AST.
+A handler is a closure at run time. The `#[RouteHandler]` attribute carries a callable reference instead, because an
+attribute argument must be a constant expression. The build tool writes that reference into the cache as a literal.
 
 ```php
-$route->setHandler(
-    static fn(ContainerContract $c, array $args): Response
-        => $c->getSingleton(UserController::class)->index($args[0])
+$httpRoute->setHandler(
+    static fn(ContainerContract $c, RouteContract $route): ResponseContract
+        => $c->getSingleton(UserController::class)->index($route)
 );
 ```
 
 ### Java
 
-The closure handler is the only mechanism. The annotation processor extracts the `@RouteHandler` lambda through the
-Trees API at compile time, then generates the cache data classes through JavaPoet. The developer writes no
-`CacheableHandler`
+A handler is a lambda at run time. `@RouteHandler` carries `handlerClass` and `handlerMethod` instead, because an
+annotation member must be a constant. The annotation processor reads those members through `javax.lang.model` at
+compile time, then writes them into the cache data classes through JavaPoet. The developer writes no `CacheableHandler`
 string.
 
 ```java
-route.setHandler(
-    (ContainerContract c, List<Object> args) ->
-        c.getSingleton(UserController.class).index((Request) args.get(0))
+httpRoute.setHandler(
+    (ContainerContract c, RouteContract route) ->
+        c.getSingleton(UserController.class).index(route)
 );
 ```
 
 ### Go
 
-Explicit closure registration is the only mechanism. The build tool uses go/analysis to extract the handler closure from
-the route provider source files.
+Explicit registration is the only mechanism. The build tool uses go/analysis to extract the referenced handler method
+from the route provider source files.
 
 ```go
 // go — always explicit
-router.Get("/users",
-valkyrja.Handler(func(c ContainerContract, args []any) any {
-return c.GetSingleton(UserControllerClass).(*UserController).Index(args[0])
-}),
-)
+func (p *UserHttpRouteProvider) GetRoutes() []RouteContract {
+return []RouteContract{data.Get("/users", p.IndexUsers)}
+}
+
+func (p *UserHttpRouteProvider) IndexUsers(c ContainerContract, route RouteContract) ResponseContract {
+return c.GetSingleton(UserControllerClass).(*UserController).Index(route)
+}
 ```
 
 ### Python
 
-Decorators self-register at import time. The build tool uses the `ast` module and `inspect.getfile()` to extract the
-handler closure for cache generation.
+A decorator attaches the callable as metadata at import time. The build tool uses the `ast` module and
+`inspect.getfile()` to read that callable, and unwraps a thunk to the class it names.
 
 ```python
 # python — decorator-based registration
-@route_handler(lambda c, args: c.get_singleton(UserController).index(args[0]))
-def index(request: Request) -> Response:
+@route_handler((lambda: UserController, 'index_handler'))
+def index(self, route: RouteContract) -> ResponseContract:
     pass
 ```
 
 ### TypeScript
 
-No decorators. Explicit registration only. Build tool uses TypeScript compiler API to extract handler closures from
-route provider source files.
+No decorators. Explicit registration only. Build tool uses the TypeScript compiler API to extract the referenced
+handler methods from route provider source files.
 
 ```typescript
 // typescript — explicit registration
-router.get('/users',
-    handler((c: ContainerContract, args: any[]) =>
-        c.getSingleton(UserController).index(args[0]))
-)
+getRoutes(): RouteContract[] {
+    return [HttpRoute.get('/users', this.indexUsers.bind(this))]
+}
+
+indexUsers(c: ContainerContract, route: RouteContract): ResponseContract {
+    return c.getSingleton<UserController>(UserControllerClass).index(route)
+}
 ```
 
 ---
@@ -836,21 +887,22 @@ router.get('/users',
 ## Annotated Controllers — PHP, Java, Python
 
 For annotated controllers, annotations live on the **implementation method**. Sindri reads the annotations and
-constructs a route object — exactly the same shape as a route returned from `getRoutes()`. **No method body extraction.
-No import resolution of the callable.** The callable from `#[RouteHandler]` is written directly into the generated
-cache data class as a literal, just as it appears in the source.
+constructs a route object. **No method body extraction.** The callable from `#[RouteHandler]` is written directly into
+the generated cache data class as a literal, with its class token resolved to an FQN.
 
-This is identical to how service bindings work:
+A service binding is written the same way — as a literal, read without execution. Its own step decides how the class
+token reaches the generated file:
 
 ```php
 // service binding — callable written as a literal
 SomeServiceId::class => [SomeServiceProvider::class, 'publishSomeClass']
 
-// route — callable written as a literal
-new Route('/users/{id}', 'user.show', [SomeClass::class, 'theHandlerMethod'])
+// annotated route — callable written as a literal, class token resolved to an FQN
+#[RouteHandler([SomeClass::class, 'theHandlerMethod'])]
 ```
 
-Sindri reads literals, writes literals. No execution, no body extraction, no cross-file resolution.
+On the annotated path Sindri reads literals and writes literals, with no execution and no body extraction. An explicit
+`getRoutes()` route takes the other path: Sindri inlines the named method's body as a closure.
 
 Go and TypeScript have no annotation support — routes are always registered explicitly via `getRoutes()`.
 
@@ -864,7 +916,8 @@ Go and TypeScript have no annotation support — routes are always registered ex
 #[RouteHandler]    — callable reference — lives on the implementation method
 ```
 
-The callable in `#[RouteHandler]` is the value written into the generated route object unchanged.
+The callable in `#[RouteHandler]` is the value written into the generated route object, its class token resolved to an
+FQN.
 
 ---
 
@@ -875,24 +928,24 @@ class UserController
 {
     // Sindri reads these annotations and constructs a Route object.
     // The callable [SomeClass::class, 'theHandlerMethod'] is written
-    // directly into the generated cache as-is — no body extraction.
-    #[Route('GET', '/users/{id}')]
-    #[Parameter('id', pattern: '[0-9]+')]
-    #[Handler([self::class, 'showHandler'])]
-    public function show(string $id): ResponseContract
+    // directly into the generated cache, its class resolved to an FQN — no body extraction.
+    #[Route(path: '/users/{id}', name: 'user.show', requestMethods: [RequestMethod::GET])]
+    #[Parameter(name: 'id', regex: '[0-9]+')]
+    #[RouteHandler([self::class, 'showHandler'])]
+    public function show(RouteContract $route): ResponseContract
     {
         // actual implementation — irrelevant to Sindri
     }
 
     // The handler — may be on this class or any other class
-    public static function showHandler(ContainerContract $c, array $args): ResponseContract
+    public static function showHandler(ContainerContract $c, RouteContract $route): ResponseContract
     {
-        return $c->getSingleton(self::class)->show($args['id']);
+        return $c->getSingleton(self::class)->show($route);
     }
 }
 ```
 
-Generated output — identical shape to an explicit `getRoutes()` route:
+Generated output — the callable as a literal, which the route wraps in a closure on load:
 
 ```php
 new \Valkyrja\Http\Routing\Data\HttpRoute(
@@ -900,7 +953,7 @@ new \Valkyrja\Http\Routing\Data\HttpRoute(
     name:       'user.show',
     method:     'GET',
     parameters: [new \Valkyrja\Http\Routing\Data\Parameter('id', '[0-9]+')],
-    handler:    [self::class, 'showHandler'],  // written as-is from the annotation
+    handler:    [\App\Http\Controller\UserController::class, 'showHandler'],  // from the annotation
 )
 ```
 
@@ -908,9 +961,9 @@ new \Valkyrja\Http\Routing\Data\HttpRoute(
 
 ```
 1. Find #[Route], #[Parameter], #[RouteHandler] on the implementation method
-2. Extract path, HTTP method, parameter name/pattern, callable — all literals
+2. Extract path, HTTP method, parameter name/regex, callable — all literals
 3. Construct route data from extracted literals
-4. Write into generated AppHttpRoutingData — callable written as-is
+4. Write into generated AppHttpRoutingData — callable written with its class resolved to an FQN
 ```
 
 ---
@@ -921,16 +974,16 @@ new \Valkyrja\Http\Routing\Data\HttpRoute(
 public class UserController {
 
     // Sindri reads annotations and constructs a Route object.
-    // Callable written directly into generated cache — no body extraction.
-    @Route(method = "GET", path = "/users/{id}")
-    @Parameter(name = "id", pattern = "[0-9]+")
-    @RouteHandler(clazz = UserController.class, method = "showHandler")
-    public ResponseContract show(String id) {
+    // Callable written into the generated cache, its class resolved to an FQN — no body extraction.
+    @Route(path = "/users/{id}", name = "user.show", requestMethods = RequestMethod.GET)
+    @Parameter(name = "id", regex = "[0-9]+")
+    @RouteHandler(handlerClass = UserController.class, handlerMethod = "showHandler")
+    public ResponseContract show(RouteContract route) {
         // actual implementation — irrelevant to Sindri
     }
 
-    public static ResponseContract showHandler(ContainerContract c, Map<String, Object> args) {
-        return c.getSingleton(UserController.class).show((String) args.get("id"));
+    public static ResponseContract showHandler(ContainerContract c, RouteContract route) {
+        return c.getSingleton(UserController.class).show(route);
     }
 }
 ```
@@ -939,11 +992,9 @@ Generated output:
 
 ```java
 new HttpRoute(
-    "/users/{id}","user.show","GET",
+    "/users/{id}", "user.show", "GET",
     List.of(new Parameter("id", "[0-9]+")),
-        new
-
-HandlerRef(UserController .class, "showHandler")  // written as-is
+    app.http.controller.UserController::showHandler  // from the annotation
 )
 ```
 
@@ -951,9 +1002,9 @@ HandlerRef(UserController .class, "showHandler")  // written as-is
 
 ```
 1. Find @Route, @Parameter, @RouteHandler on the implementation method
-2. Extract path, HTTP method, parameter name/pattern, clazz + method — all literals
+2. Extract path, HTTP method, parameter name/regex, handlerClass + handlerMethod — all literals
 3. Construct route data from extracted literals
-4. Write into generated AppHttpRoutingData — callable written as-is
+4. Write into generated AppHttpRoutingData — callable written with its class resolved to an FQN
 ```
 
 ---
@@ -964,27 +1015,29 @@ HandlerRef(UserController .class, "showHandler")  // written as-is
 class UserController:
 
     # Sindri reads these decorators and constructs a Route object.
-    # The callable tuple is written directly into the generated cache — no body extraction.
-    @route('GET', '/users/{id}')
-    @parameter('id', pattern='[0-9]+')
-    @route_handler((UserController, 'show_handler'))  # callable tuple — written as-is
-    def show(self, id: str) -> ResponseContract:
+    # The callable tuple is written into the generated cache, its class resolved to an FQN — no body extraction.
+    @route(path='/users/{id}', name='user.show', request_methods=[RequestMethod.GET])
+    @parameter(name='id', regex='[0-9]+')
+    @route_handler((lambda: UserController, 'show_handler'))  # thunk — the class name binds after the body runs
+    def show(self, route: RouteContract) -> ResponseContract:
         pass  # actual implementation — irrelevant to Sindri
 
     @staticmethod
-    def show_handler(c: ContainerContract, args: dict) -> ResponseContract:
-        return c.get_singleton(UserController).show(args['id'])
+    def show_handler(c: ContainerContract, route: RouteContract) -> ResponseContract:
+        return c.get_singleton(ContainerConstants.USER_CONTROLLER).show(route)
 ```
 
-Generated output:
+Generated output — the callable as a literal, which the route wraps in a closure on load:
 
 ```python
+import app.http.controller
+
 HttpRoute(
     path='/users/{id}',
     name='user.show',
     method='GET',
     parameters=[Parameter('id', '[0-9]+')],
-    handler=(UserController, 'show_handler'),  # written as-is from decorator
+    handler=(app.http.controller.UserController, 'show_handler'),  # thunk unwrapped, class written as an FQN
 )
 ```
 
@@ -992,9 +1045,86 @@ HttpRoute(
 
 ```
 1. Find @route, @parameter, @route_handler decorators on the implementation method
-2. Extract path, HTTP method, parameter name/pattern, callable tuple — all literals
+2. Extract path, HTTP method, parameter name/regex, callable tuple — all literals
 3. Construct route data from extracted literals
-4. Write into generated AppHttpRoutingData — callable written as-is
+4. Write into generated AppHttpRoutingData — callable written with its class resolved to an FQN
+```
+
+---
+
+### Passing the matched values to the controller
+
+A controller method does not have to take the route. The handler unpacks the matched values and passes them, which keeps
+the controller free of routing types. The handler is the only place that knows about the route:
+
+```php
+class UserPostController
+{
+    #[Route(path: '/users/{id}/posts/{postId}', name: 'user.post.show', requestMethods: [RequestMethod::GET])]
+    #[Parameter(name: 'id', regex: '[0-9]+')]
+    #[Parameter(name: 'postId', regex: '[0-9]+')]
+    #[RouteHandler([self::class, 'showHandler'])]
+    public function show(int $id, int $postId): ResponseContract
+    {
+        // actual implementation — no routing types
+    }
+
+    public static function showHandler(ContainerContract $c, RouteContract $route): ResponseContract
+    {
+        if (!$route instanceof DynamicRouteContract) {
+            throw new HttpRoutingInvalidRouteParameterException('The route declares no parameters');
+        }
+
+        return $c->getSingleton(self::class)->show(
+            (int) $route->getParameter('id')->getValue(),
+            (int) $route->getParameter('postId')->getValue(),
+        );
+    }
+}
+```
+
+```java
+public class UserPostController {
+
+    @Route(path = "/users/{id}/posts/{postId}", name = "user.post.show", requestMethods = RequestMethod.GET)
+    @Parameter(name = "id", regex = "[0-9]+")
+    @Parameter(name = "postId", regex = "[0-9]+")
+    @RouteHandler(handlerClass = UserPostController.class, handlerMethod = "showHandler")
+    public ResponseContract show(int id, int postId) {
+        // actual implementation — no routing types
+    }
+
+    public static ResponseContract showHandler(ContainerContract c, RouteContract route) {
+        if (!(route instanceof DynamicRouteContract dynamicRoute)) {
+            throw new HttpRoutingInvalidRouteParameterException("The route declares no parameters");
+        }
+
+        return c.getSingleton(UserPostController.class).show(
+                Integer.parseInt(String.valueOf(dynamicRoute.getParameter("id").getValue())),
+                Integer.parseInt(String.valueOf(dynamicRoute.getParameter("postId").getValue())));
+    }
+}
+```
+
+```python
+class UserPostController:
+
+    @route(path='/users/{id}/posts/{postId}', name='user.post.show', request_methods=[RequestMethod.GET])
+    @parameter(name='id', regex='[0-9]+')
+    @parameter(name='postId', regex='[0-9]+')
+    @route_handler((lambda: UserPostController, 'show_handler'))
+    def show(self, id: int, post_id: int) -> ResponseContract:
+        ...  # actual implementation — no routing types
+
+    @staticmethod
+    def show_handler(c: ContainerContract, route: RouteContract) -> ResponseContract:
+        if not isinstance(route, DynamicRouteContract):
+            raise HttpRoutingInvalidRouteParameterException('The route declares no parameters')
+
+        return c.get_singleton(ContainerConstants.USER_POST_CONTROLLER).show(
+            int(route.get_parameter('id').get_value()),
+            int(route.get_parameter('postId').get_value()),
+        )
 ```
 
 ---
@@ -1005,13 +1135,13 @@ HttpRoute(
 Annotations / decorators carry literals.
 Sindri reads literals.
 Sindri writes literals into the generated cache data class.
-No method body extraction. No import resolution of the callable itself.
+No method body extraction. The callable's class token resolves to an FQN.
 
-Same as service bindings:
-  SomeServiceId::class => [SomeProvider::class, 'publishMethod']  ← literal, written as-is
+The same literal shape a service binding carries:
+  SomeServiceId::class => [SomeProvider::class, 'publishMethod']  ← callable written as a literal
 
-Same as explicit routes:
-  new Route('/path', 'name', [SomeClass::class, 'theHandlerMethod'])  ← literal, written as-is
+An explicit route takes the other path:
+  new Route('/path', 'name', [SomeClass::class, 'theHandlerMethod'])  ← the named method's body, inlined
 ```
 
 ## Design Note — Why Routes and Listeners Cannot Use a Publisher-Style Map

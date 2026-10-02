@@ -7,13 +7,13 @@
 
 Python provider contracts differ from PHP/Java in several ways:
 
-- Decorators are **metadata markers** — they attach closure metadata to methods at import time but do NOT self-register
+- Decorators are **metadata markers** — they attach callable metadata to methods at import time but do NOT self-register
   routes. The framework reads metadata during bootstrap; skips it when loading from cache.
 - `inspect.getfile(ClassName)` resolves class to source file — equivalent of PHP's `ReflectionClass::getFileName()`
 - No `::class` needed — `X()` creates an instance directly; Python classes are first-class callables
 - ABC enforces abstract contracts — `TypeError` raised on direct instantiation
 - Instance methods throughout — providers are instantiated and their methods called directly
-- Publisher methods have a `@handler` decorator carrying the closure — build tool reads the decorator argument from AST
+- Publisher methods carry no handler decorator — build tool reads each publisher method's body from AST
 - `class_` helper available (trailing underscore because `class` is reserved) for FQN string derivation
 
 ---
@@ -195,8 +195,7 @@ class HttpComponentProvider(ComponentProviderContract):
 
 Container bindings provider. `publishers()` returns a map of binding key to publisher method reference. The build tool
 reads the map from AST, resolves each method reference via `inspect.getfile()`, and reads that method body. Publisher
-methods carry a `@route_handler` decorator — the build tool reads the decorator argument from AST for cache
-generation.
+methods carry no handler decorator.
 
 ```python
 # package: valkyrja.container.provider.contract
@@ -216,9 +215,8 @@ class ServiceProviderContract(ABC):
     Each value must be a static method reference on the same class.
 
     The build tool reads the publishers map from AST, resolves each method
-    reference via inspect.getfile(), and reads the _valkyrja_handler metadata
-    on that method for cache generation. The @handler decorator on publisher
-    methods is a metadata marker only — it does not execute at import time.
+    reference via inspect.getfile(), and reads that method's body for cache
+    generation.
 
     Note: 'class_' helper available for FQN derivation since 'class' is reserved:
         def class_(cls) -> str:
@@ -228,17 +226,14 @@ class ServiceProviderContract(ABC):
         @staticmethod
         def publishers() -> dict:
             return {
-                UserRepositoryClass: UserServiceProvider.publish_user_repository,
+                ContainerConstants.USER_REPOSITORY: UserServiceProvider.publish_user_repository,
             }
 
-        @route_handler(lambda c, args: c.set_singleton(
-            UserRepositoryClass, UserRepository(c.get_singleton(DatabaseClass))
-        ))
         @staticmethod
         def publish_user_repository(container: ContainerContract) -> None:
             container.set_singleton(
-                UserRepositoryClass,
-                UserRepository(container.get_singleton(DatabaseClass))
+                ContainerConstants.USER_REPOSITORY,
+                UserRepository(container.get_singleton(ContainerConstants.DATABASE))
             )
     """
 
@@ -254,11 +249,12 @@ class ServiceProviderContract(ABC):
 ### UserServiceProvider Implementation
 
 ```python
+from typing import Callable
+
 from valkyrja.container.provider.contract import ServiceProviderContract
 from valkyrja.container.manager.contract import ContainerContract
-from app.repositories import UserRepository
-from app.repositories.contract import UserRepositoryClass
-from app.services.contract import DatabaseClass
+from app.container.container_constants import ContainerConstants
+from app.repository import UserRepository
 
 
 class UserServiceProvider(ServiceProviderContract):
@@ -276,13 +272,11 @@ class UserServiceProvider(ServiceProviderContract):
     @staticmethod
     def publish_user_repository(container: ContainerContract) -> None:
         """
-        Build tool reads the @route_handler decorator argument from AST.
-        The decorator carries the closure used for cache generation.
-        The method body is the runtime implementation.
+        Build tool reads this method's body from AST for cache generation.
         """
         container.set_singleton(
-            UserRepositoryClass,
-            UserRepository(container.get_singleton(DatabaseClass))
+            ContainerConstants.USER_REPOSITORY,
+            UserRepository(container.get_singleton(ContainerConstants.DATABASE))
         )
 ```
 
@@ -340,10 +334,13 @@ class HttpRouteProviderContract(ABC):
 ### UserHttpRouteProvider Implementation
 
 ```python
+from valkyrja.container.manager.contract import ContainerContract
+from valkyrja.http.message.response.contract import ResponseContract
+from valkyrja.http.routing.data.contract import RouteContract
 from valkyrja.http.routing.provider.contract import HttpRouteProviderContract
 from valkyrja.http.routing.data import HttpRoute
-from app.http.controllers import UserController, OrderController
-from app.http.controllers.contract import OrderControllerClass
+from app.http.controller import UserController, OrderController
+from app.container.container_constants import ContainerConstants
 
 
 class UserHttpRouteProvider(HttpRouteProviderContract):
@@ -372,40 +369,46 @@ class UserHttpRouteProvider(HttpRouteProviderContract):
         ]
 
     @staticmethod
-    def index_orders(c: ContainerContract, args: dict) -> ResponseContract:
+    def index_orders(c: ContainerContract, route: RouteContract) -> ResponseContract:
         """Handler method lives on the same class — all imports self-contained."""
-        return c.get_singleton(OrderControllerClass).index(args)
+        return c.get_singleton(ContainerConstants.ORDER_CONTROLLER).index(route)
 
     @staticmethod
-    def index_users(c: ContainerContract, args: dict) -> ResponseContract:
-        return c.get_singleton(UserControllerClass).index(args)
+    def index_users(c: ContainerContract, route: RouteContract) -> ResponseContract:
+        return c.get_singleton(ContainerConstants.USER_CONTROLLER).index(route)
 ```
 
 ### Controller with @route_handler Decorator
 
 The `@route_handler` decorator is a **metadata marker only** — it does not self-register routes at import time. It
-attaches the closure as metadata on the method. The framework reads this metadata during bootstrap (no cache) and skips it
-entirely when loading from cache.
+attaches the callable as metadata on the method. The framework reads this metadata during bootstrap (no cache) and skips
+it entirely when loading from cache.
 
 This is intentional and consistent with PHP's `#[RouteHandler]` attribute — both are inert metadata that the framework
 reads when needed, not active registrars.
 
 ```python
-from valkyrja.http.routing.handler import handler
+from typing import Callable
+
 from valkyrja.container.manager.contract import ContainerContract
-from app.http.controllers.contract import UserControllerClass
+from valkyrja.http.message.response.contract import ResponseContract
+from valkyrja.http.routing.data.contract import RouteContract
+from app.container.container_constants import ContainerConstants
+
+# The decorator accepts a thunk; Sindri unwraps it to the class before writing the cache.
+HandlerReference = tuple[type | Callable[[], type], str]
 
 
-def handler(closure):
+def route_handler(handler: HandlerReference):
     """
-    Metadata marker — attaches closure to method as _valkyrja_handler.
+    Metadata marker — attaches the callable to the method as _valkyrja_handler.
     Does NOT register the route at import time.
     Framework reads _valkyrja_handler during bootstrap (no cache).
     Framework skips entirely when loading from cache.
     """
 
     def decorator(func):
-        func._valkyrja_handler = closure  # metadata only — no registration
+        func._valkyrja_handler = handler  # metadata only — no registration
         return func
 
     return decorator
@@ -413,19 +416,27 @@ def handler(closure):
 
 class UserController:
 
-    @route_handler(lambda c, args: c.get_singleton(UserControllerClass).index(args[0]))
-    def index(self, request) -> Response:
+    @route_handler((lambda: UserController, 'index_handler'))
+    def index(self, route: RouteContract) -> ResponseContract:
         """
         Build tool reads _valkyrja_handler metadata from AST
         when scanning this class for route handlers.
-        The decorator carries the closure used in cache generation.
+        The decorator carries the callable used in cache generation.
         The method body is the actual runtime implementation.
         """
         pass
 
-    @route_handler(lambda c, args: c.get_singleton(UserControllerClass).store(args[0]))
-    def store(self, request) -> Response:
+    @route_handler((lambda: UserController, 'store_handler'))
+    def store(self, route: RouteContract) -> ResponseContract:
         pass
+
+    @staticmethod
+    def index_handler(c: ContainerContract, route: RouteContract) -> ResponseContract:
+        return c.get_singleton(ContainerConstants.USER_CONTROLLER).index(route)
+
+    @staticmethod
+    def store_handler(c: ContainerContract, route: RouteContract) -> ResponseContract:
+        return c.get_singleton(ContainerConstants.USER_CONTROLLER).store(route)
 ```
 
 ### Why Not Self-Registration
@@ -495,7 +506,7 @@ class ListenerProviderContract(ABC):
         """
         Get a list of attributed listener classes.
         Build tool uses inspect.getfile() to locate each class source file,
-        then scans for @route_handler decorated methods.
+        then scans for @listener_handler decorated methods.
         Must return a simple list literal — no conditional logic permitted.
 
         NOTE: Same as get_controller_classes() — live class objects in the list are
@@ -531,7 +542,7 @@ from typing import Callable, Any
 @dataclass(frozen=True)
 class Parameter:
     name: str
-    pattern: str = '[^/]+'
+    regex: str = '[^/]+'
 
 
 @dataclass(frozen=True)
@@ -566,7 +577,7 @@ Any method the build tool reads must return a single flat literal with no logic:
 return [HttpContainerProvider(), HttpMiddlewareProvider()]
 
 # ✅ simple dict literal with method reference
-return {UserRepositoryClass: UserServiceProvider.publish_user_repository}
+return {ContainerConstants.USER_REPOSITORY: UserServiceProvider.publish_user_repository}
 
 # ✅ simple list of route objects
 return [HttpRoute.get('/users', UserHttpRouteProvider.index_users)]
@@ -589,8 +600,9 @@ return get_extra_routes()
 
 ## Handler Method Pointer Convention
 
-All handler methods must be **static methods on the same class** as the provider or controller that defines the route or
-listener. This is the same pattern used by `publishers()` in service providers.
+On the explicit path, all handler methods must be **static methods on the same class** as the provider that defines the
+route or listener. This is the same pattern used by `publishers()` in service providers. An annotated controller's
+callable may name any class — see [`BUILD_TOOL.md`](../BUILD_TOOL.md).
 
 **Why:** Sindri reads exactly one file per provider or controller. All imports for handler bodies are in that one file —
 no cross-file import aggregation, no conflict detection, no registry needed.
@@ -601,7 +613,7 @@ no cross-file import aggregation, no conflict detection, no registry needed.
 
 ❌ Inline closures or lambdas in route/listener definitions
 ❌ References to types not imported in the current file
-❌ Handler methods on a different class
+❌ Handler methods on a different class — on the explicit path
 ```
 
 ---

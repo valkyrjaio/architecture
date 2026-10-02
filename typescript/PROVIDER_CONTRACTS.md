@@ -178,9 +178,9 @@ import type {ContainerContract} from '@valkyrja/container/manager/contract'
  */
 export interface ServiceProviderContract {
     /**
-     * Return a map of string binding key to publisher static method reference.
+     * Return a map of string binding key to publisher method reference.
      * Must return a simple object literal — no conditional logic permitted.
-     * Each value must be a static method reference on the same class.
+     * Each value must be a method reference on the same class.
      */
     publishers(): Readonly<Record<string, (c: ContainerContract) => void>>
 }
@@ -191,9 +191,10 @@ export interface ServiceProviderContract {
 ```typescript
 import type {ContainerContract} from '@valkyrja/container/manager/contract'
 import type {ServiceProviderContract} from '@valkyrja/container/provider/contract'
-import {UserRepository} from '../repositories/UserRepository'
-import {UserRepositoryClass} from '../repositories/contract/UserRepositoryConstants'
-import {DatabaseClass} from '../services/contract/DatabaseConstants'
+import type {DatabaseContract} from '../service/contract/DatabaseContract'
+import {UserRepository} from '../repository/UserRepository'
+import {UserRepositoryClass} from '../repository/contract/UserRepositoryConstants'
+import {DatabaseClass} from '../service/contract/DatabaseConstants'
 
 export class UserServiceProvider implements ServiceProviderContract {
 
@@ -252,14 +253,15 @@ export interface HttpRouteProviderContract {
 ### UserHttpRouteProvider Implementation
 
 ```typescript
+import type {ResponseContract} from '@valkyrja/http/message/response/contract'
 import type {RouteContract} from '@valkyrja/http/routing/data/contract'
 import type {HttpRouteProviderContract} from '@valkyrja/http/routing/provider/contract'
 import {HttpRoute} from '@valkyrja/http/routing/data'
 import type {ContainerContract} from '@valkyrja/container/manager/contract'
-import {UserControllerClass} from '../controllers/contract/UserControllerConstants'
-import {OrderControllerClass} from '../controllers/contract/OrderControllerConstants'
-import type {UserController} from '../controllers/UserController'
-import type {OrderController} from '../controllers/OrderController'
+import {UserControllerClass} from '../controller/contract/UserControllerConstants'
+import {OrderControllerClass} from '../controller/contract/OrderControllerConstants'
+import type {UserController} from '../controller/UserController'
+import type {OrderController} from '../controller/OrderController'
 
 export class UserHttpRouteProvider implements HttpRouteProviderContract {
 
@@ -276,16 +278,16 @@ export class UserHttpRouteProvider implements HttpRouteProviderContract {
     }
 
     /** Handler methods live on the same class — all imports self-contained. */
-    indexUsers(c: ContainerContract, args: Record<string, unknown>): ResponseContract {
-        return (c.getSingleton(UserControllerClass) as UserController).index(args)
+    indexUsers(c: ContainerContract, route: RouteContract): ResponseContract {
+        return (c.getSingleton(UserControllerClass) as UserController).index(route)
     }
 
-    storeUser(c: ContainerContract, args: Record<string, unknown>): ResponseContract {
-        return (c.getSingleton(UserControllerClass) as UserController).store(args)
+    storeUser(c: ContainerContract, route: RouteContract): ResponseContract {
+        return (c.getSingleton(UserControllerClass) as UserController).store(route)
     }
 
-    indexOrders(c: ContainerContract, args: Record<string, unknown>): ResponseContract {
-        return (c.getSingleton(OrderControllerClass) as OrderController).index(args)
+    indexOrders(c: ContainerContract, route: RouteContract): ResponseContract {
+        return (c.getSingleton(OrderControllerClass) as OrderController).index(route)
     }
 }
 ```
@@ -375,8 +377,8 @@ return [...this.getBaseRoutes(), ...this.getExtraRoutes()]
 
 ## Handler Method Pointer Convention
 
-All handler methods must be **methods on the same class** as the provider or controller that defines the route or
-listener. This is the same pattern used by `publishers()` in service providers.
+All handler methods must be **methods on the same class** as the provider that defines the route or listener. This is
+the same pattern used by `publishers()` in service providers.
 
 **Why:** Sindri reads exactly one file per provider or controller. All imports for handler bodies are in that one file —
 no cross-file import aggregation, no conflict detection, no registry needed.

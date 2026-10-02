@@ -13,7 +13,7 @@
 - **`@staticmethod @abstractmethod`** throughout — providers are stateless
 - **`inspect.getfile()`** for class-to-file resolution (equivalent of PHP's `ReflectionClass::getFileName()`)
 - **`ast` module** for build tool AST parsing
-- **Decorators are runtime-executable** — `@route_handler` self-registers at import time
+- **Decorators are runtime-executable** — `@route_handler` attaches metadata at import time, and registers nothing
 - **`class_()` helper** for FQN derivation (`class` is reserved in Python)
 - **ASGI (Uvicorn/Hypercorn)** as the worker mode deployment model
 - **CGI mode** supported — Python is interpreted, cache optional in dev
@@ -153,22 +153,22 @@ class ServiceProviderContract(ABC):
     def publishers() -> dict[str, Callable[[ContainerContract], None]]: ...
 ```
 
-Publisher methods carry `@handler` decorator — build tool reads decorator argument from AST:
+No `@route_handler` decorator sits on a publisher method. The build tool reads the method body:
 
 ```python
 @staticmethod
 def publishers() -> dict:
     return {
-        UserRepositoryClass: UserServiceProvider.publish_user_repository,
+        ContainerConstants.USER_REPOSITORY: UserServiceProvider.publish_user_repository,
     }
 
 
-@handler(lambda c, args: c.set_singleton(
-    UserRepositoryClass, UserRepository(c.get_singleton(DatabaseClass))
-))
 @staticmethod
 def publish_user_repository(container: ContainerContract) -> None:
-    container.set_singleton(UserRepositoryClass, UserRepository(container.get_singleton(DatabaseClass)))
+    container.set_singleton(
+        ContainerConstants.USER_REPOSITORY,
+        UserRepository(container.get_singleton(ContainerConstants.DATABASE))
+    )
 ```
 
 ### HttpRouteProviderContract
@@ -195,8 +195,8 @@ All provider methods must return simple list/dict literals — no conditional lo
 ```python
 from typing import Callable, Any
 
-HttpHandlerFunc = Callable[[ContainerContract, dict[str, Any]], ResponseContract]
-CliHandlerFunc = Callable[[ContainerContract, dict[str, Any]], OutputContract]
+HttpHandlerFunc = Callable[[ContainerContract, RouteContract], ResponseContract]
+CliHandlerFunc = Callable[[ContainerContract, RouteContract], OutputContract]
 ListenerHandlerFunc = Callable[[ContainerContract, dict[str, Any]], Any]
 ```
 
@@ -214,13 +214,14 @@ class HttpHandlerContract(ABC):
 ### @route_handler decorator on controller methods
 
 ```python
-@route_handler(lambda c, args: c.get_singleton(UserControllerClass).show(args['id']))
-@parameter('id', pattern='[0-9]+')
-def show(self, id: int) -> ResponseContract:
+@route_handler((lambda: UserController, 'show_handler'))
+@parameter(name='id', regex='[0-9]+')
+def show(self, route: RouteContract) -> ResponseContract:
     pass
 ```
 
-`ServerRequestContract` and `RouteContract` are not parameters — fetch from container if needed.
+A route handler takes the matched route. A listener takes named arguments. `ServerRequestContract` is not a parameter,
+so fetch the request from the container if needed.
 
 ---
 
@@ -250,7 +251,7 @@ The container design does **not** depend on lazy imports for correctness — it 
   {UserRepositoryContract: lambda: ...}  # UserRepositoryContract accessed → loads
 
   # string key — no import triggered
-  {'app.repositories.UserRepositoryContract': lambda: ...}  # string literal — nothing loads
+  {'app.repository.UserRepositoryContract': lambda: ...}  # string literal — nothing loads
   ```
 
 - **Lambda-wrapped values** defer _when the provider method is referenced_ from cache-load time to first resolution.
@@ -358,7 +359,7 @@ reference values in lambdas (load only when binding resolved). Cache matches the
 
 ```python
 # generated AppContainerData
-from app.constants.container_constants import ContainerConstants  # loads at boot
+from app.container.container_constants import ContainerConstants  # loads at boot
 
 APP_CONTAINER_DATA = {
     ContainerConstants.USER_REPOSITORY: lambda: UserServiceProvider.publish_user_repository,
@@ -378,9 +379,14 @@ Python decorators execute at import time — but `@route_handler` must **not** s
 metadata marker only:
 
 ```python
-def handler(closure):
+from typing import Callable
+
+HandlerReference = tuple[type | Callable[[], type], str]
+
+
+def route_handler(handler: HandlerReference):
     def decorator(func):
-        func._valkyrja_handler = closure  # metadata only — no registration
+        func._valkyrja_handler = handler  # metadata only — no registration
         return func
 
     return decorator
@@ -396,8 +402,11 @@ bootstrap. It reads the metadata and registers routes from it.
 **How it works with cache:** The framework loads cache data files directly and never calls `get_controller_classes()` or
 scans for `_valkyrja_handler`. Decorator metadata is never read.
 
-The `@route_handler` decorator carries the closure for build tool extraction. The build tool reads `_valkyrja_handler`
-metadata from AST via `inspect.getfile()` + `ast.parse()`.
+The `@route_handler` decorator carries the callable for build tool extraction. The build tool reads
+`_valkyrja_handler` metadata from AST via `inspect.getfile()` + `ast.parse()`. A decorator argument runs before the
+class name binds, so a handler on the decorated class's own body takes a thunk. Sindri unwraps the thunk to the
+identifier, so the generated output matches the non-thunk form. See
+[`DECORATORS.md`](../typescript/DECORATORS.md) for the same problem in TypeScript.
 
 ### Accessing _valkyrja_handler at Runtime
 
@@ -419,14 +428,19 @@ def scan_controller_for_handlers(controller_class: type) -> list[dict]:
         if not hasattr(method, '_valkyrja_handler'):
             continue
 
-        handler_closure = method._valkyrja_handler
+        handler_class, handler_method = method._valkyrja_handler
+        # The decorator may carry a thunk — call it to reach the class.
+        if not isinstance(handler_class, type):
+            handler_class = handler_class()
+
+        handler_reference = (handler_class, handler_method)
 
         # @parameter decorator attaches parameter list similarly
         parameters = getattr(method, '_valkyrja_parameters', [])
 
         handlers.append({
             'method': name,
-            'handler': handler_closure,
+            'handler': handler_reference,
             'parameters': parameters,
         })
 
@@ -436,11 +450,11 @@ def scan_controller_for_handlers(controller_class: type) -> list[dict]:
 The `@parameter` decorator follows the same pattern:
 
 ```python
-def parameter(name: str, pattern: str = '[^/]+'):
+def parameter(name: str, regex: str = '[^/]+'):
     def decorator(func):
         if not hasattr(func, '_valkyrja_parameters'):
             func._valkyrja_parameters = []
-        func._valkyrja_parameters.append({'name': name, 'pattern': pattern})
+        func._valkyrja_parameters.append({'name': name, 'regex': regex})
         return func
 
     return decorator

@@ -68,7 +68,7 @@ $app = Application::create(
             new ContainerComponentProvider(),
             new EventComponentProvider(),
             new CliComponentProvider(),
-            App\Providers\AppProvider::class,  // application providers
+            App\Provider\AppProvider::class,  // application providers
         ]
     )
 );
@@ -178,8 +178,9 @@ See: https://valkyrja.io/docs/providers#build-tool-compatibility
 
 ## Handler Method Pointer Convention
 
-Handlers must be **method pointers** — references to static methods on the same class as the provider or controller that
-defines the route, listener, or binding. They must not be inline closures or lambdas.
+On the explicit path, handlers must be **method pointers** — references to methods on the same class as the provider
+that defines the route, listener, or binding. A Go publisher may name a package-level function in the same file instead.
+An annotated controller's callable may name any class. None of them may be an inline closure or lambda.
 
 This is the single most important convention for keeping Sindri simple, import-safe, and conflict-free.
 
@@ -197,8 +198,8 @@ consistent end to end.
 
 ### The Pattern
 
-Every handler is a static method on the same class that declares it. The route/listener/binding definition points to
-that method by name. Sindri reads the method body from the same file — no cross-file resolution needed.
+Sindri reads the explicit path's handler body from the same file, so no cross-file resolution is needed. An annotated
+controller's callable may name any class, and Sindri writes it as a literal rather than reading a body.
 
 **Service providers** — already correct:
 
@@ -229,14 +230,14 @@ public function getRoutes(): array
     ];
 }
 
-public static function showUser(ContainerContract $c, array $args): ResponseContract
+public static function showUser(ContainerContract $c, RouteContract $route): ResponseContract
 {
-    return $c->getSingleton(UserController::class)->show($args['id']);
+    return $c->getSingleton(UserController::class)->show($route);
 }
 
-public static function createUser(ContainerContract $c, array $args): ResponseContract
+public static function createUser(ContainerContract $c, RouteContract $route): ResponseContract
 {
-    return $c->getSingleton(UserController::class)->create($args);
+    return $c->getSingleton(UserController::class)->create($route);
 }
 ```
 
@@ -260,14 +261,13 @@ public static function onUserCreated(ContainerContract $c, array $args): mixed
 ### Annotated Controllers — PHP, Java, Python
 
 For annotated controllers, `#[RouteHandler]` / `@RouteHandler` / `@route_handler` lives on the **implementation
-method** and carries a *
-_callable reference_* pointing to the static handler method. The handler may live on the same controller class, the
-route provider, or any other class — Sindri follows the callable reference to wherever the handler lives.
+method** and carries a **callable reference** pointing to the static handler method. The handler may live on the same
+controller class, the route provider, or any other class.
 
 ```
-Annotations live on:    the implementation method (show, store, index etc.)
-#[RouteHandler] points to:   a callable (ClassName, methodName) — any class, anywhere
-Sindri reads:            the handler method body from whichever file the callable resolves to
+Annotations live on:       the implementation method (show, store, index etc.)
+#[RouteHandler] points to: a callable (ClassName, methodName) — any class, anywhere
+Sindri writes:             that callable into the cache as a literal, its class token resolved to an FQN
 ```
 
 **PHP — handler on same controller:**
@@ -276,18 +276,18 @@ Sindri reads:            the handler method body from whichever file the callabl
 class UserController
 {
     // Annotations on the implementation method
-    #[Route('GET', '/users/{id}')]
-    #[Parameter('id', pattern: '[0-9]+')]
-    #[Handler([self::class, 'showHandler'])]  // callable — class + method name
-    public function show(string $id): ResponseContract
+    #[Route(path: '/users/{id}', name: 'user.show', requestMethods: [RequestMethod::GET])]
+    #[Parameter(name: 'id', regex: '[0-9]+')]
+    #[RouteHandler([self::class, 'showHandler'])]  // callable — class + method name
+    public function show(RouteContract $route): ResponseContract
     {
         // actual implementation — not read by Sindri
     }
 
-    // Sindri resolves [self::class, 'showHandler'] → this file → reads this method
-    public static function showHandler(ContainerContract $c, array $args): ResponseContract
+    // Sindri writes [UserController::class, 'showHandler'] into the cache, resolved to the class it names
+    public static function showHandler(ContainerContract $c, RouteContract $route): ResponseContract
     {
-        return $c->getSingleton(self::class)->show($args['id']);
+        return $c->getSingleton(self::class)->show($route);
     }
 }
 ```
@@ -297,18 +297,18 @@ class UserController
 ```php
 class UserController
 {
-    #[Route('GET', '/users/{id}')]
-    #[Parameter('id', pattern: '[0-9]+')]
-    #[Handler([UserHttpRouteProvider::class, 'showUser'])]  // points elsewhere
-    public function show(string $id): ResponseContract { /* ... */ }
+    #[Route(path: '/users/{id}', name: 'user.show', requestMethods: [RequestMethod::GET])]
+    #[Parameter(name: 'id', regex: '[0-9]+')]
+    #[RouteHandler([UserHttpRouteProvider::class, 'showUser'])]  // points elsewhere
+    public function show(RouteContract $route): ResponseContract { /* ... */ }
 }
 
 class UserHttpRouteProvider implements HttpRouteProviderContract
 {
-    // Sindri resolves callable → this file → reads this method + this file's imports
-    public static function showUser(ContainerContract $c, array $args): ResponseContract
+    // Sindri writes the callable into the cache — this method runs at run time
+    public static function showUser(ContainerContract $c, RouteContract $route): ResponseContract
     {
-        return $c->getSingleton(UserController::class)->show($args['id']);
+        return $c->getSingleton(UserController::class)->show($route);
     }
 }
 ```
@@ -317,14 +317,14 @@ class UserHttpRouteProvider implements HttpRouteProviderContract
 
 ```java
 public class UserController {
-    @Route(method = "GET", path = "/users/{id}")
-    @Parameter(name = "id", pattern = "[0-9]+")
-    @RouteHandler(clazz = UserController.class, method = "showHandler")
-    public ResponseContract show(String id) { /* actual implementation */ }
+    @Route(path = "/users/{id}", name = "user.show", requestMethods = RequestMethod.GET)
+    @Parameter(name = "id", regex = "[0-9]+")
+    @RouteHandler(handlerClass = UserController.class, handlerMethod = "showHandler")
+    public ResponseContract show(RouteContract route) { /* actual implementation */ }
 
-    // Sindri resolves clazz + method → this file → reads this method
-    public static ResponseContract showHandler(ContainerContract c, Map<String, Object> args) {
-        return c.getSingleton(UserController.class).show((String) args.get("id"));
+    // Sindri writes handlerClass + handlerMethod into the cache — this method runs at run time
+    public static ResponseContract showHandler(ContainerContract c, RouteContract route) {
+        return c.getSingleton(UserController.class).show(route);
     }
 }
 ```
@@ -333,16 +333,16 @@ public class UserController {
 
 ```python
 class UserController:
-    @route('GET', '/users/{id}')
-    @parameter('id', pattern='[0-9]+')
-    @route_handler((UserController, 'show_handler'))  # callable tuple
-    def show(self, id: str) -> ResponseContract:
+    @route(path='/users/{id}', name='user.show', request_methods=[RequestMethod.GET])
+    @parameter(name='id', regex='[0-9]+')
+    @route_handler((lambda: UserController, 'show_handler'))  # thunk — see typescript/DECORATORS.md
+    def show(self, route: RouteContract) -> ResponseContract:
         pass  # actual implementation — not read by Sindri
 
-    # Sindri resolves callable → this file → reads this method
+    # Sindri writes the callable into the cache — this method runs at run time
     @staticmethod
-    def show_handler(c: ContainerContract, args: dict) -> ResponseContract:
-        return c.get_singleton(UserController).show(args['id'])
+    def show_handler(c: ContainerContract, route: RouteContract) -> ResponseContract:
+        return c.get_singleton(ContainerConstants.USER_CONTROLLER).show(route)
 ```
 
 ### Why Not Inline Closures
@@ -354,8 +354,8 @@ in the application:
 // ❌ inline closure — Sindri must resolve ContainerContract, UserController
 //    from the imports of this specific file AND know if they conflict
 //    with imports from other route providers
-HttpRoute::get('/users/{id}', static fn($c, $args) =>
-    $c->getSingleton(UserController::class)->show($args['id'])
+HttpRoute::get('/users/{id}', static fn($c, $route) =>
+    $c->getSingleton(UserController::class)->show($route)
 )
 
 // ✅ method pointer — Sindri reads the method body from this same file
@@ -370,8 +370,8 @@ providers import `UserController` from different namespaces, Sindri cannot silen
 
 ```
 Error: Import conflict in generated AppHttpRoutingData.
-  App\Http\Controllers\UserController  (from UserHttpRouteProvider)
-  App\Api\Controllers\UserController   (from ApiHttpRouteProvider)
+  App\Http\Controller\UserController  (from UserHttpRouteProvider)
+  App\Api\Controller\UserController   (from ApiHttpRouteProvider)
 Both resolve to the short name 'UserController'. Use the FQN directly in your handler
 or rename one of the classes to eliminate the conflict.
 ```
@@ -386,27 +386,27 @@ are structural problems in the application that the developer must resolve.
 ```
 ✅ [self::class, 'methodName']           — PHP method pointer on same class
 ✅ ClassName::methodName                  — Java static reference
-✅ self.method_name                       — Python method reference on same class
+✅ ProviderClass.method_name              — Python static reference on same class
 ✅ p.MethodName                           — Go method reference on same struct
-✅ this.methodName                        — TypeScript method reference on same class
+✅ this.methodName.bind(this)             — TypeScript method reference on same class
 
-✅ Handler method must be static
 ✅ Handler method must be on the same class as the provider
 ✅ All type refs in handler body must be imported in the provider file
 
 ❌ Inline closures or lambdas in route/listener definitions
 ```
 
-**For annotated controllers and listeners** (PHP, Java, Python only):
+**For annotated controllers and listeners** (PHP, Java, Python only) — a listener carries `#[ListenerHandler]` in the
+same shapes:
 
 ```
-✅ #[Handler([ClassName::class, 'methodName'])]   — PHP callable on any class
-✅ @RouteHandler(clazz = ClassName.class, method = "m") — Java callable on any class
-✅ @route_handler((ClassName, 'method_name'))            — Python callable on any class
+✅ #[RouteHandler([ClassName::class, 'methodName'])]                      — PHP callable on any class
+✅ @RouteHandler(handlerClass = ClassName.class, handlerMethod = "m")     — Java callable on any class
+✅ @route_handler((ClassName, 'method_name'))                             — Python callable on any class
+✅ @route_handler((lambda: ClassName, 'method_name'))                     — Python thunk for the decorated class itself
 
 ✅ Annotation lives on the implementation method (the instance method)
 ✅ Handler method must be static — anywhere in the codebase
-✅ All type refs in handler body must be imported in the handler's own file
 
 ❌ Annotation on the static handler method itself
 ❌ Handler method that is not static
@@ -1234,7 +1234,7 @@ use a string constant. A raw string literal in place of the constant is used as-
 
 **Goal:** Extract explicit listeners and the list of annotated classes to scan.
 
-**Imports are needed for explicit listeners** — handler closures and event type references in listener data objects will
+**Imports are needed for explicit listeners** — handler methods and event type references in listener data objects will
 be written into generated output and must be fully qualified.
 
 **Imports are not needed for the annotated class list** — those class identifiers are used only to locate files to scan
@@ -1244,13 +1244,14 @@ in Step 4b.
 
 ```
 imports             → map of simple name → FQN
-                      needed to rewrite handler closures and event type references
+                      needed to rewrite handler method bodies and event type references
 
 explicit_listeners  → list of listener data objects from getListeners()
                       each listener carries:
                         event type  (class reference → FQN via imports)
                         priority    (integer literal, if present)
-                        handler     (closure source text, type refs rewritten to FQN)
+                        handler     (method pointer → [self::class, 'methodName'])
+                        handler body (method on same class → extract and rewrite)
 
 annotated_classes   → list of class identifiers from getListenerClasses()
                       (PHP, Java, Python only — Go and TypeScript omit this method)
@@ -1266,7 +1267,7 @@ annotated_classes   → list of class identifiers from getListenerClasses()
    a. Extract return list literal
    b. For each listener constructor call:
       - Extract event type class reference → resolve to FQN via imports
-      - Extract handler closure source text → rewrite type refs to FQN
+      - Extract the referenced handler method's body → rewrite type refs to FQN
       - Extract priority if present
 4. Find getListenerClasses() method (PHP/Java/Python only):
    a. Extract return list literal
@@ -1290,9 +1291,9 @@ explicit_routes     → list of route data objects from getRoutes()
                       each route carries:
                         method      (GET, POST, etc. — from factory method name)
                         path        ('/users/{id}' — string literal)
-                        parameters  (list of Parameter objects — name + pattern string literals)
+                        parameters  (list of Parameter objects — name + regex string literals)
                         handler     (method pointer → [self::class, 'methodName'])
-                        handler body (static method on same class → extract and rewrite)
+                        handler body (method on same class → extract and rewrite)
                         middleware  (if present)
                         name        (if present)
 
@@ -1310,10 +1311,10 @@ annotated_classes   → list of class identifiers from getControllerClasses()
    b. For each route constructor call (e.g. HttpRoute::get(...)):
       - Extract HTTP method from the factory method name (get/post/put/delete/patch)
       - Extract path string literal
-      - Extract handler callable → [self::class, 'methodName'] — written as-is into output
+      - Extract handler callable → [self::class, 'methodName'] — that method's body inlined in output
       - Extract Parameter constructor calls if present:
           name    → string literal argument
-          pattern → string literal argument (default '[^/]+' if absent)
+          regex   → string literal argument (default '[^/]+' if absent)
       - Extract middleware, name, and other metadata if present
 4. Find getControllerClasses() method (PHP/Java/Python only):
    a. Extract return list literal
@@ -1341,19 +1342,20 @@ Identical to Step 3c with:
 
 **Input:** file path of a controller class (resolved in Step 3c or 3d).
 
-Sindri reads annotation literals and constructs route data objects — **no method body extraction, no import resolution
-of the callable**. The callable from `#[RouteHandler]` is written directly into the generated output as-is, exactly
-like a callable in an explicit `getRoutes()` route or a service binding:
+Sindri reads annotation literals and constructs route data objects — **no method body extraction**. The callable from
+`#[RouteHandler]` is written directly into the generated output, its class token resolved to an FQN, the same literal
+shape a service binding carries. An explicit `getRoutes()` route is the other path: Sindri reads the named method's body
+and inlines it as a closure.
 
 ```
-// service binding — callable literal written as-is
+// service binding — callable written as a literal
 SomeServiceId::class => [SomeProvider::class, 'publishMethod']
 
-// explicit route — callable literal written as-is
-new Route('/path', 'name', [SomeClass::class, 'theHandlerMethod'])
+// annotated route — callable literal, class resolved to an FQN
+#[RouteHandler([SomeClass::class, 'theHandlerMethod'])]
 
-// annotated route — same, callable literal written as-is
-#[Handler([SomeClass::class, 'theHandlerMethod'])]
+// explicit route — the named method's body, inlined as a closure
+new Route('/path', 'name', [SomeClass::class, 'theHandlerMethod'])
 ```
 
 **What to collect per annotated implementation method:**
@@ -1363,9 +1365,9 @@ imports     → map of simple name → FQN
               needed only to resolve the callable class name to FQN for the output literal
 
 per method:
-  callable    → (ClassName, methodName) from #[RouteHandler] — written as-is into output
+  callable    → (ClassName, methodName) from #[RouteHandler] — class resolved to an FQN in output
   parameters  → list from #[Parameter] / @Parameter annotations
-                each: name (string literal), pattern (string literal)
+                each: name (string literal), regex (string literal)
   path        → from route annotation — string literal
   method      → HTTP method — from route annotation
   middleware  → from middleware annotation if present
@@ -1384,13 +1386,13 @@ per method:
         - Resolve ClassName via imports → FQN (so output contains FQN, not short name)
      b. Check for @Parameter / #[Parameter] annotations (may be multiple):
         - Extract name string literal
-        - Extract pattern string literal (default '[^/]+' if absent)
+        - Extract regex string literal (default '[^/]+' if absent)
      c. Check for route annotation (HTTP method + path):
         - Extract HTTP method
         - Extract path string literal
      d. If handler found → construct route data from literals → add to output list
-4. Output: list of route data objects — same shape as explicit routes from Step 3c
-           callable written as FQN literal into generated cache data class
+4. Output: list of route data objects — the route's own shape, carrying the callable as an FQN literal
+           rather than the inlined body Step 3c writes
 ```
 
 ---
@@ -1399,10 +1401,9 @@ per method:
 
 **Goal:** Extract listeners from annotated/decorated methods. PHP, Java, Python only.
 
-`#[RouteHandler]` / `@RouteHandler` / `@route_handler` lives on the **implementation method** and carries a **callable
-reference** — same pattern as annotated controllers. The handler may live on the listener class itself, the listener
-provider, or any
-other class.
+`#[ListenerHandler]` / `@ListenerHandler` / `@listener_handler` lives on the **implementation method** and carries a
+**callable reference** — same pattern as annotated controllers. The handler may live on the listener class itself, the
+listener provider, or any other class.
 
 **Pattern:**
 
@@ -1411,19 +1412,16 @@ other class.
 2. Collect all import statements → import map (for resolving callable class names)
 3. Walk all class methods:
    For each method:
-     a. Check for @RouteHandler / #[RouteHandler] / @route_handler annotation:
+     a. Check for @ListenerHandler / #[ListenerHandler] / @listener_handler annotation:
         - Extract callable: (ClassName, methodName)
         - Resolve ClassName via listener file's imports → FQN
-     b. Check for @ListensTo / #[ListensTo] annotation:
+     b. Check for @Listener / #[Listener] annotation:
         - Extract event type class reference → resolve to FQN via imports
         - Extract priority if present
      c. If handler found:
-        - Resolve callable FQN → file path
-        - Parse handler file → collect its imports
-        - Find methodName static method in handler file
-        - Extract method body → rewrite type refs using handler file's imports
+        - Write the callable into the output as a literal
         - Add listener data to output list
-4. Output: list of listener data objects, same shape as explicit_listeners from Step 3b
+4. Output: list of listener data objects, carrying the callable rather than the body Step 3b writes
 ```
 
 ---
@@ -1436,7 +1434,7 @@ For every route collected in Steps 3c, 3d, 4a:
 
 ```
 1. Construct a plain ValkyrjaRoute from extracted data:
-   - path, method, parameters (name + pattern pairs)
+   - path, method, parameters (name + regex pairs)
 2. Pass to ProcessorContract::route() — same processor used at runtime
 3. Read back the compiled regex string
 4. Store alongside route data for Step 6
@@ -1565,7 +1563,7 @@ foreach ($componentProviders as $providerClass) {
 
 ```php
 // find methods with #[RouteHandler] attribute
-class HandlerAttributeVisitor extends NodeVisitorAbstract
+class RouteHandlerAttributeVisitor extends NodeVisitorAbstract
 {
     public function enterNode(Node $node): void
     {
@@ -1573,16 +1571,16 @@ class HandlerAttributeVisitor extends NodeVisitorAbstract
 
         foreach ($node->attrGroups as $attrGroup) {
             foreach ($attrGroup->attrs as $attr) {
-                if ($attr->name->toString() !== 'Handler') continue;
+                if ($attr->name->toString() !== 'RouteHandler') continue;
 
-                // extract closure AST node
-                $closureNode = $attr->args[0]->value;
+                // extract the callable array literal — [ClassName::class, 'methodName']
+                $callableNode = $attr->args[0]->value;
 
-                // pretty print closure back to source string
-                $closureSource = $this->printer->prettyPrint([$closureNode]);
+                // print the callable back to source string
+                $callableSource = $this->printer->prettyPrint([$callableNode]);
 
                 // resolve types to FQN via use statement map
-                $resolved = $this->resolveFQN($closureSource, $this->useStatements);
+                $resolved = $this->resolveFQN($callableSource, $this->useStatements);
 
                 // extract #[Parameter] annotations from same method
                 $parameters = $this->extractParameters($node);
@@ -1600,7 +1598,7 @@ class HandlerAttributeVisitor extends NodeVisitorAbstract
 **FQN resolution:**
 
 ```php
-// collect use statements: 'UserController' => 'App\Http\Controllers\UserController'
+// collect use statements: 'UserController' => 'App\Http\Controller\UserController'
 function collectUseStatements(array $ast): array
 {
     $map     = [];
@@ -1638,7 +1636,7 @@ $route = (new HttpRoute())
     ->setMethod($method)
     ->setPath($path)
     ->setParameters(array_map(
-        fn($p) => new Parameter($p['name'], $p['pattern']),
+        fn($p) => new Parameter($p['name'], $p['regex']),
         $parameters
     ));
 
@@ -1660,7 +1658,7 @@ external file resolution needed.
 
 ```java
 
-@SupportedAnnotationTypes("io.valkyrja.http.routing.Handler")
+@SupportedAnnotationTypes("io.valkyrja.http.routing.attribute.route.RouteHandler")
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class ValkyrjaAnnotationProcessor extends AbstractProcessor {
 
@@ -1678,7 +1676,7 @@ public class ValkyrjaAnnotationProcessor extends AbstractProcessor {
             RoundEnvironment roundEnv
     ) {
         // collect all @RouteHandler annotated methods
-        for (Element element : roundEnv.getElementsAnnotatedWith(Handler.class)) {
+        for (Element element : roundEnv.getElementsAnnotatedWith(RouteHandler.class)) {
             if (element.getKind() != ElementKind.METHOD) continue;
             processHandlerMethod((ExecutableElement) element);
         }
@@ -1687,37 +1685,35 @@ public class ValkyrjaAnnotationProcessor extends AbstractProcessor {
 }
 ```
 
-**Lambda source extraction via Trees API:**
+**Handler reference extraction via the annotation processing API:**
 
 ```java
 private void processHandlerMethod(ExecutableElement method) {
-    // get the source tree for this method
-    MethodTree methodTree = (MethodTree) trees.getTree(method);
-
-    // find the @RouteHandler annotation and extract lambda source text
+    // find the @RouteHandler annotation and extract the handler reference
     for (AnnotationMirror annotation : method.getAnnotationMirrors()) {
-        if (!annotation.getAnnotationType().toString().equals(Handler.class.getName())) continue;
+        if (!annotation.getAnnotationType().toString().equals(RouteHandler.class.getName())) continue;
 
-        // get the lambda argument from the annotation
+        // read both members of this annotation — getValue() yields the value, not the source form
+        Map<String, Object> members = new HashMap<>();
         for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry
                 : annotation.getElementValues().entrySet()) {
-
-            // extract source text of the lambda from annotation value
-            String lambdaSource = entry.getValue().toString();
-
-            // resolve all type references to FQN via element utilities
-            String resolvedSource = resolveFQN(lambdaSource, method);
-
-            // extract @Parameter annotations from same method
-            List<ParameterData> parameters = extractParameters(method);
-
-            handlers.add(new HandlerData(resolvedSource, parameters));
+            members.put(entry.getKey().getSimpleName().toString(), entry.getValue().getValue());
         }
+
+        // a Class member arrives as a TypeMirror, already fully qualified
+        String handlerClass = members.get("handlerClass").toString();
+        String handlerMethod = (String) members.get("handlerMethod");
+
+        // extract @Parameter annotations from same method
+        List<ParameterData> parameters = extractParameters(method);
+
+        // one callable per annotation — (ClassName, methodName), as Step 4a specifies
+        handlers.add(new HandlerData(handlerClass, handlerMethod, parameters));
     }
 }
 ```
 
-**FQN resolution via type utilities:**
+**FQN resolution via type utilities** — the explicit path needs it when it inlines a method body:
 
 ```java
 private String resolveFQN(String source, ExecutableElement method) {
@@ -1838,13 +1834,19 @@ return routes
 }
 ```
 
-**Handler function body extraction:**
+**Handler method body extraction:**
 
 ```go
-// extract function literal source text from AST node
-func extractFuncLiteral(node ast.Node, fset *token.FileSet) string {
+// find the handler method the route names, and print its body
+func extractHandlerMethod(file *ast.File, methodName string, fset *token.FileSet) string {
 var buf bytes.Buffer
-printer.Fprint(&buf, fset, node)
+for _, decl := range file.Decls {
+fn, ok := decl.(*ast.FuncDecl)
+if !ok || fn.Recv == nil || fn.Name.Name != methodName {
+continue
+}
+printer.Fprint(&buf, fset, fn.Body)
+}
 return buf.String()
 }
 
@@ -1979,6 +1981,16 @@ def extract_provider_list(
 **Decorator extraction (`@route_handler` on controller methods):**
 
 ```python
+def unwrap_thunk(node: ast.expr) -> ast.expr:
+    """A thunk names the decorated class itself — read the identifier it returns."""
+    first, method = node.elts if isinstance(node, ast.Tuple) else (node, None)
+
+    if isinstance(first, ast.Lambda):
+        first = first.body
+
+    return ast.Tuple(elts=[first, method]) if method else first
+
+
 def extract_handlers(controller_class: type) -> list[dict]:
     """Extract @route_handler decorated methods from a controller class via AST."""
     filepath = inspect.getfile(controller_class)
@@ -1994,11 +2006,11 @@ def extract_handlers(controller_class: type) -> list[dict]:
             # find @route_handler(...) decorator
             if not isinstance(decorator, ast.Call): continue
             if not isinstance(decorator.func, ast.Name): continue
-            if decorator.func.id != 'handler': continue
+            if decorator.func.id != 'route_handler': continue
 
-            # extract the lambda/closure argument
+            # extract the callable reference argument, unwrapping a thunk to the class it names
             if not decorator.args: continue
-            handler_source = ast.unparse(decorator.args[0])
+            handler_source = ast.unparse(unwrap_thunk(decorator.args[0]))
             handler_fqn = resolve_fqn(handler_source, imports)
 
             # extract @parameter decorators from same method
@@ -2151,7 +2163,7 @@ function extractProviderList(
 **Handler method body extraction:**
 
 ```typescript
-function extractPublisherMethod(
+function extractHandlerMethod(
     className: string,
     methodName: string,
     program: ts.Program,

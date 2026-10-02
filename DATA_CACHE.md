@@ -84,8 +84,8 @@ AppProvider (read from AppConfig.providers)
   └── ContainerComponentProvider
         ├── ContainerBindingsProvider   ← container bindings
         └── ContainerAliasProvider      ← container bindings
-  └── App\Providers\AppContainerProvider    ← application bindings
-  └── App\Http\Providers\UserRouteProvider  ← application routes
+  └── App\Provider\AppContainerProvider      ← application bindings
+  └── App\Http\Provider\UserRouteProvider    ← application routes
 ```
 
 Provider list methods must return **simple list literals with no conditional logic**. This is a hard framework
@@ -107,7 +107,7 @@ $app = Application::create(
             new ContainerComponentProvider(),
             new EventComponentProvider(),
             new CliComponentProvider(),
-            App\Providers\AppProvider::class,
+            App\Provider\AppProvider::class,
         ]
     )
 );
@@ -151,14 +151,14 @@ logic at resolution time.
 
 ```python
 # service provider — clean, no lambda
-'app.repositories.UserRepositoryContract': UserServiceProvider.publish_user_repository
+'app.repository.UserRepositoryContract': UserServiceProvider.publish_user_repository
 
 # container wraps on registration from provider
 self._bindings[key] = lambda c=callable_ref: c
 
 # generated AppContainerData — sindri writes as lambda, same format
 APP_CONTAINER_DATA = {
-    'app.repositories.UserRepositoryContract': lambda: UserServiceProvider.publish_user_repository,
+    'app.repository.UserRepositoryContract': lambda: UserServiceProvider.publish_user_repository,
 }
 
 # container resolution — always calls lambda, no check needed
@@ -489,9 +489,6 @@ class UserServiceProvider implements ServiceProviderContract
         ];
     }
 
-    #[Handler(static fn(ContainerContract $c): void
-        => $c->setSingleton(UserRepositoryContract::class,
-            new UserRepository($c->getSingleton(DatabaseContract::class))))]
     public static function publishUserRepository(ContainerContract $container): void
     {
         $container->setSingleton(
@@ -518,9 +515,6 @@ public class UserServiceProvider implements ServiceProviderContract {
         );
     }
 
-    @RouteHandler((ContainerContract c, List<Object> args) ->
-            c.setSingleton(UserRepositoryContract.class,
-                    new UserRepository(c.getSingleton(DatabaseContract.class))))
     public static void publishUserRepository(ContainerContract container) {
         container.setSingleton(
                 UserRepositoryContract.class,
@@ -550,7 +544,7 @@ func (p *UserServiceProvider) Publishers() map[string]func(ContainerContract) {
 func (p *UserServiceProvider) PublishUserRepository(c ContainerContract) {
     c.SetSingleton(
         repoContract.UserRepositoryClass,
-        repositories.NewUserRepository(c.GetSingleton(serviceContract.DatabaseClass)),
+        repository.NewUserRepository(c.GetSingleton(serviceContract.DatabaseClass)),
     )
 }
 ```
@@ -569,17 +563,14 @@ class UserServiceProvider(ServiceProviderContract):
     @staticmethod
     def publishers() -> dict:
         return {
-            UserRepositoryClass: UserServiceProvider.publish_user_repository,
+            ContainerConstants.USER_REPOSITORY: UserServiceProvider.publish_user_repository,
         }
 
-    @route_handler(lambda c, args: c.set_singleton(
-        UserRepositoryClass, UserRepository(c.get_singleton(DatabaseClass))
-    ))
     @staticmethod
     def publish_user_repository(container: ContainerContract) -> None:
         container.set_singleton(
-            UserRepositoryClass,
-            UserRepository(container.get_singleton(DatabaseClass))
+            ContainerConstants.USER_REPOSITORY,
+            UserRepository(container.get_singleton(ContainerConstants.DATABASE))
         )
 ```
 
@@ -639,9 +630,13 @@ class UserHttpRouteProvider implements HttpRouteProviderContract
     public function getRoutes(): array
     {
         return [
-            HttpRoute::get('/orders', static fn(ContainerContract $c, array $args): Response
-                => $c->getSingleton(OrderController::class)->index($args[0])),
+            HttpRoute::get('/orders', [self::class, 'indexOrders']),
         ];
+    }
+
+    public static function indexOrders(ContainerContract $c, RouteContract $route): ResponseContract
+    {
+        return $c->getSingleton(OrderController::class)->index($route);
     }
 }
 ```
@@ -664,9 +659,12 @@ public class UserHttpRouteProvider implements HttpRouteProviderContract {
 
     public List<RouteContract> getRoutes() {
         return List.of(
-                HttpRoute.get("/orders", (ContainerContract c, List<Object> args) ->
-                        c.getSingleton(OrderController.class).index((Request) args.get(0)))
+                HttpRoute.get("/orders", UserHttpRouteProvider::indexOrders)
         );
+    }
+
+    public static ResponseContract indexOrders(ContainerContract c, RouteContract route) {
+        return c.getSingleton(OrderController.class).index(route);
     }
 }
 ```
@@ -675,23 +673,22 @@ public class UserHttpRouteProvider implements HttpRouteProviderContract {
 
 ```go
 type HttpRouteProviderContract interface {
-GetControllerClasses() []string
+// GetControllerClasses intentionally absent — Go has no annotations
 GetRoutes() []RouteContract
 }
 
 // implementation — explicit registration only
 type UserHttpRouteProvider struct{}
 
-func (p *UserHttpRouteProvider) GetControllerClasses() []string {
-return []string{}
-}
-
 func (p *UserHttpRouteProvider) GetRoutes() []RouteContract {
 return []RouteContract{
-data.Get("/orders", func (c ContainerContract, args []any) any {
-return c.GetSingleton(OrderControllerClass).(*OrderController).Index(args[0])
-}),
+data.Get("/orders", p.IndexOrders),
 }
+}
+
+// Build tool reads this method body from AST for cache generation.
+func (p *UserHttpRouteProvider) IndexOrders(c ContainerContract, route RouteContract) ResponseContract {
+return c.GetSingleton(OrderControllerClass).(*OrderController).Index(route)
 }
 ```
 
@@ -718,33 +715,33 @@ class UserHttpRouteProvider(HttpRouteProviderContract):
     @staticmethod
     def get_routes() -> list:
         return [
-            HttpRoute.get('/orders',
-                          lambda c, args: c.get_singleton(OrderControllerClass).index(args[0]))
+            HttpRoute.get('/orders', UserHttpRouteProvider.index_orders),
         ]
+
+    @staticmethod
+    def index_orders(c: ContainerContract, route: RouteContract) -> ResponseContract:
+        return c.get_singleton(ContainerConstants.ORDER_CONTROLLER).index(route)
 ```
 
 **TypeScript**
 
 ```typescript
 export interface HttpRouteProviderContract {
-    getControllerClasses(): string[]
-
+    // getControllerClasses intentionally absent — TypeScript has no annotation scan
     getRoutes(): RouteContract[]
 }
 
-// implementation — string constants, no ::class equivalent
+// implementation — explicit registration only
 export class UserHttpRouteProvider implements HttpRouteProviderContract {
-
-    getControllerClasses(): string[] {
-        return [UserControllerClass, OrderControllerClass]
-    }
 
     getRoutes(): RouteContract[] {
         return [
-            HttpRoute.get('/orders',
-                (c: ContainerContract, args: any[]) =>
-                    (c.getSingleton(OrderControllerClass) as OrderController).index(args[0]))
+            HttpRoute.get('/orders', this.indexOrders.bind(this)),
         ]
+    }
+
+    indexOrders(c: ContainerContract, route: RouteContract): ResponseContract {
+        return (c.getSingleton(OrderControllerClass) as OrderController).index(route)
     }
 }
 ```
@@ -786,8 +783,8 @@ Parameter objects appear as inline constructor calls — AST reads them as stati
 ```php
 // PHP
 HttpRoute::get('/users/{id}/posts/{postId}', $handler, [
-    new Parameter('id',     pattern: '[0-9]+'),
-    new Parameter('postId', pattern: '[0-9]+'),
+    new Parameter('id',     regex: '[0-9]+'),
+    new Parameter('postId', regex: '[0-9]+'),
 ])
 ```
 
@@ -810,8 +807,8 @@ parameter.New("postId", "[0-9]+"),
 ```python
 # Python
 HttpRoute.get('/users/{id}/posts/{postId}', handler, [
-    Parameter('id', pattern='[0-9]+'),
-    Parameter('postId', pattern='[0-9]+'),
+    Parameter('id', regex='[0-9]+'),
+    Parameter('postId', regex='[0-9]+'),
 ])
 ```
 
@@ -838,32 +835,30 @@ For annotated controllers (PHP, Java, Python) parameters live on the method alon
 
 ```php
 // PHP
-#[Handler(static fn(ContainerContract $c, array $args): Response
-    => $c->getSingleton(UserController::class)->show($args[0], $args[1]))]
-#[Parameter('id',     pattern: '[0-9]+')]
-#[Parameter('postId', pattern: '[0-9]+')]
-public function show(int $id, int $postId): Response {}
+#[RouteHandler([self::class, 'showHandler'])]
+#[Parameter(name: 'id',     regex: '[0-9]+')]
+#[Parameter(name: 'postId', regex: '[0-9]+')]
+public function show(int $id, int $postId): ResponseContract {}
 ```
 
 ```java
 // Java
-@RouteHandler((ContainerContract c, List<Object> args) ->
-    c.getSingleton(UserController.class).show((int) args.get(0), (int) args.get(1)))
-@Parameter(name = "id",     pattern = "[0-9]+")
-@Parameter(name = "postId", pattern = "[0-9]+")
-public Response show(int id, int postId) {}
+@RouteHandler(handlerClass = UserPostController.class, handlerMethod = "showHandler")
+@Parameter(name = "id",     regex = "[0-9]+")
+@Parameter(name = "postId", regex = "[0-9]+")
+public ResponseContract show(int id, int postId) {}
 ```
 
 ```python
 # Python
-@route_handler(lambda c, args: c.get_singleton(UserControllerClass).show(args[0], args[1]))
-@parameter('id', pattern='[0-9]+')
-@parameter('postId', pattern='[0-9]+')
-def show(self, id: int, post_id: int) -> Response:
+@route_handler((lambda: UserPostController, 'show_handler'))
+@parameter(name='id', regex='[0-9]+')
+@parameter(name='postId', regex='[0-9]+')
+def show(self, id: int, post_id: int) -> ResponseContract:
     pass
 ```
 
-Both paths produce identical data — a list of parameter name/pattern pairs readable as literal AST nodes. ✅
+Both paths produce identical data — a list of parameter name/regex pairs readable as literal AST nodes. ✅
 
 ---
 
@@ -954,15 +949,14 @@ return new \Valkyrja\Http\Routing\Data\HttpRoutingData(
             parameters: [
                 new \Valkyrja\Http\Routing\Data\Parameter('id', '[0-9]+'),
             ],
-            handler: static fn(\Valkyrja\Container\ContainerContract $c, array $args): \App\Http\Response
-                => $c->getSingleton(\App\Http\Controllers\UserController::class)->show($args[0]),
+            handler: [\App\Http\Controller\UserController::class, 'showHandler'],
         ),
         // routes from OrderHttpRouteProvider (explicit getRoutes())
         'order.index' => new \Valkyrja\Http\Routing\Data\HttpRoute(
             path:    '/orders',
             method:  'GET',
-            handler: static fn(\Valkyrja\Container\ContainerContract $c, array $args): \App\Http\Response
-                => $c->getSingleton(\App\Http\Controllers\OrderController::class)->index($args[0]),
+            handler: static fn(\Valkyrja\Container\Manager\Contract\ContainerContract $c, \Valkyrja\Http\Routing\Data\Contract\RouteContract $route): \Valkyrja\Http\Message\Response\Contract\ResponseContract
+                => $c->getSingleton(\App\Http\Controller\OrderController::class)->index($route),
         ),
         // ... all other routes from all other providers
     ],
@@ -1001,18 +995,17 @@ public record AppHttpRoutingData(
     public static AppHttpRoutingData create() {
         return new AppHttpRoutingData(
             Map.of(
-                // routes from UserHttpRouteProvider
+                // routes from UserHttpRouteProvider (via UserController annotation)
                 "user.show", new app.http.routing.AuthenticatedRoute(
                     "/users/{id}", "GET",
                     List.of(new Parameter("id", "[0-9]+")),
-                    (ContainerContract c, List<Object> args) ->
-                        c.getSingleton(UserController.class).show((int) args.get(0))
+                    app.http.controller.UserController::showHandler
                 ),
-                // routes from OrderHttpRouteProvider
+                // routes from OrderHttpRouteProvider (explicit getRoutes())
                 "order.index", new HttpRoute(
                     "/orders", "GET", List.of(),
-                    (ContainerContract c, List<Object> args) ->
-                        c.getSingleton(OrderController.class).index(args.get(0))
+                    (ContainerContract c, RouteContract route) ->
+                        c.getSingleton(app.http.controller.OrderController.class).index(route)
                 )
                 // ... all other routes
             ),
@@ -1032,12 +1025,12 @@ Parameter definitions follow the same simple literal rule as all other build too
 
 ```
 ✅ new Parameter('id', '[0-9]+')               — inline constructor with literals
-✅ new Parameter('id', pattern: '[0-9]+')      — named argument with literal
-✅ #[Parameter('id', pattern: '[0-9]+')]       — annotation with literals
-✅ @Parameter(name = "id", pattern = "[0-9]+") — annotation with literals
+✅ new Parameter('id', regex: '[0-9]+')        — named argument with literal
+✅ #[Parameter(name: 'id', regex: '[0-9]+')]   — attribute with literals
+✅ @Parameter(name = "id", regex = "[0-9]+")   — annotation with literals
 
-❌ new Parameter($name, $pattern)              — variable references
-❌ new Parameter('id', $this->getPattern())    — method call
+❌ new Parameter($name, $regex)                — variable references
+❌ new Parameter('id', $this->getRegex())      — method call
 ❌ $params = getParams(); route(..., $params)  — variable reference to parameter list
 ```
 
@@ -1079,8 +1072,7 @@ publishers() map literal
         ↓
 resolve each method reference to its source location
         ↓
-PHP / Java: read #[RouteHandler] / @RouteHandler annotation on method → extract closure
-Go / TypeScript / Python: read method body directly → extract function
+read the referenced publisher method → see "The Four Generated Data Classes" above for what each port writes
         ↓
 resolve all type references to FQN
         ↓
@@ -1350,8 +1342,8 @@ runtime.
 
 The publishers() AST readability question — whether the handler annotation pattern works with the build tool — was
 resolved by recognizing that the build tool reads the publishers map (simple literal, readable) then separately reads
-each referenced method's annotation or body (also readable). The indirection through a method reference is transparent
-to the AST walker.
+each referenced method's body (also readable). The indirection through a method reference is transparent to the AST
+walker.
 
 The single-pass compile for all compiled languages was achieved by establishing that the build tool runs before the
 compile step, not after. Combined with the application config class provider tree walk, this eliminates the two-pass

@@ -14,7 +14,7 @@ canonical first: [`../AGENTS.md`](../AGENTS.md). This file only records the Java
   Components map to `io.valkyrja.<component>` (`container`, `http`, `cli`,
   `dispatch`, `event`, `application`, `throwable`, …), with sub-packages by
   concern: `.contract` (interfaces), `.manager`/`.dispatcher`/… (impls),
-  `.provider`, `.data`, `.annotation`.
+  `.provider`, `.data`, `.attribute`.
 - **Source:** `src/main/java/io/valkyrja/<component>/…`. Contracts named
   `*Contract`; the concrete implementation takes the bare name (`Router`,
   `Container`).
@@ -52,7 +52,8 @@ Java nuances:
 - **No traits.** Java has no trait construct, so there is no `trait` segment —
   share behavior via abstract classes or interface `default` methods.
 - **Attributes → annotations.** The attribute marker is a Java annotation
-  (`@interface`); annotation types live in an `annotation` package.
+  (`@interface`), and it lives in an `attribute` package, which mirrors
+  `STRUCTURE.md`'s `Attribute\` segment.
 - Name suffixes are identical to `STRUCTURE.md` (`*Contract`, `*ServiceProvider`,
   `*Exception`, `*Factory`, …).
 
@@ -138,9 +139,10 @@ SpotBugs → `junit` (JaCoCo 100%). Use `./gradlew spotlessApply` to auto-format
 
 - **Framework source shipping:** Java must publish a `-sources.jar` as a required
   build dependency (the cache-optional runtime needs source available).
-- **`sindri` (build tool)** uses the Trees API + JavaPoet as an annotation
-  processor to read `@RouteHandler`/`@Provides` and generate the four cache data
-  classes. Dev-only; the framework has zero AST/build deps.
+- **`sindri` (build tool)** reads `@RouteHandler`/`@Provides` through
+  `javax.lang.model` and generates the four cache data classes through JavaPoet,
+  resolving each source file through the Trees API. Dev-only; the framework has
+  zero AST/build deps.
 - **Runtime entry adapters.** The worker entries for the servlet / embedded
   runtimes live in `io.valkyrja.application.entry.<runtime>` (`jetty`, `netty`,
   `tomcat`, plus the built-in JDK `exchange`), each a thin `WorkerHttp` /

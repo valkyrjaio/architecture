@@ -155,9 +155,14 @@ container.bind(
       NOT self-register
 
 ```python
-def handler(closure):
+from typing import Callable
+
+HandlerReference = tuple[type | Callable[[], type], str]
+
+
+def route_handler(handler: HandlerReference):
     def decorator(func):
-        func._valkyrja_handler = closure  # metadata only
+        func._valkyrja_handler = handler  # metadata only
         return func
 
     return decorator
@@ -165,8 +170,8 @@ def handler(closure):
 
 - [ ] Implement `@parameter` decorator — attaches `_valkyrja_parameters` list to method
 - [ ] Define type aliases:
-  - [ ] `HttpHandlerFunc = Callable[[ContainerContract, dict[str, Any]], ResponseContract]`
-  - [ ] `CliHandlerFunc = Callable[[ContainerContract, dict[str, Any]], OutputContract]`
+  - [ ] `HttpHandlerFunc = Callable[[ContainerContract, RouteContract], ResponseContract]`
+  - [ ] `CliHandlerFunc = Callable[[ContainerContract, RouteContract], OutputContract]`
   - [ ] `ListenerHandlerFunc = Callable[[ContainerContract, dict[str, Any]], Any]`
 - [ ] Implement `HttpHandlerContract(ABC)` with `get_handler() -> HttpHandlerFunc`
 - [ ] Implement `CliHandlerContract(ABC)` with `get_handler() -> CliHandlerFunc`
@@ -197,9 +202,13 @@ No action at the framework level. Track the following:
 # framework bootstrap — reads metadata from each method
 for name, method in inspect.getmembers(controller_class, predicate=inspect.isfunction):
     if hasattr(method, '_valkyrja_handler'):
-        closure = method._valkyrja_handler
+        handler_class, handler_method = method._valkyrja_handler
+        if not isinstance(handler_class, type):
+            handler_class = handler_class()  # the decorator may carry a thunk
+
+        handler = (handler_class, handler_method)
         parameters = getattr(method, '_valkyrja_parameters', [])
-        # register route from closure + parameters
+        # register route from handler reference + parameters
 ```
 
 - [ ] With cache: framework loads cache data files directly — never calls `get_controller_classes()`, never scans

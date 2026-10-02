@@ -192,13 +192,13 @@ public interface ServiceProviderContract {
 ### UserServiceProvider Implementation
 
 ```java
-package app.providers;
+package app.provider;
 
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
-import app.repositories.UserRepository;
-import app.repositories.contract.UserRepositoryContract;
-import app.services.contract.DatabaseContract;
+import app.repository.UserRepository;
+import app.repository.contract.UserRepositoryContract;
+import app.service.contract.DatabaseContract;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -267,17 +267,17 @@ public interface HttpRouteProviderContract {
 ### UserHttpRouteProvider Implementation
 
 ```java
-package app.http.providers;
+package app.http.provider;
 
 import io.valkyrja.container.manager.contract.ContainerContract;
+import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.routing.data.HttpRoute;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
-import app.http.controllers.UserController;
-import app.http.controllers.OrderController;
+import app.http.controller.UserController;
+import app.http.controller.OrderController;
 
 import java.util.List;
-import java.util.Map;
 
 public class UserHttpRouteProvider implements HttpRouteProviderContract {
 
@@ -301,8 +301,8 @@ public class UserHttpRouteProvider implements HttpRouteProviderContract {
     }
 
     /** Handler method lives on the same class — all imports self-contained. */
-    public static ResponseContract indexOrders(ContainerContract c, Map<String, Object> args) {
-        return c.getSingleton(OrderController.class).index(args);
+    public static ResponseContract indexOrders(ContainerContract c, RouteContract route) {
+        return c.getSingleton(OrderController.class).index(route);
     }
 }
 ```
@@ -317,41 +317,41 @@ handler may live on the controller, the route provider, or any other class.
 **Handler on the same controller:**
 
 ```java
-package app.http.controllers;
+package app.http.controller;
 
 import io.valkyrja.container.manager.contract.ContainerContract;
-import io.valkyrja.http.routing.data.contract.ResponseContract;
-import io.valkyrja.http.routing.annotation.Handler;
-import io.valkyrja.http.routing.annotation.Parameter;
-import io.valkyrja.http.routing.annotation.Route;
-
-import java.util.Map;
+import io.valkyrja.http.message.enum_.RequestMethod;
+import io.valkyrja.http.message.response.contract.ResponseContract;
+import io.valkyrja.http.routing.attribute.Parameter;
+import io.valkyrja.http.routing.attribute.Route;
+import io.valkyrja.http.routing.attribute.route.RouteHandler;
+import io.valkyrja.http.routing.data.contract.RouteContract;
 
 public class UserController {
 
     // Annotations on the implementation method.
-    // @RouteHandler carries (class, method) — Sindri follows it to wherever the handler lives.
-    @Route(method = "GET", path = "/users/{id}")
-    @Parameter(name = "id", pattern = "[0-9]+")
-    @RouteHandler(clazz = UserController.class, method = "showHandler")
-    public ResponseContract show(String id) {
-        return userService.findById(id).toResponse();
-    }
-
-    @Route(method = "POST", path = "/users")
-    @RouteHandler(clazz = UserController.class, method = "storeHandler")
-    public ResponseContract store(Map<String, Object> data) {
+    // @RouteHandler carries (handlerClass, handlerMethod) — Sindri writes both into the cache as literals.
+    @Route(path = "/users/{id}", name = "user.show", requestMethods = RequestMethod.GET)
+    @Parameter(name = "id", regex = "[0-9]+")
+    @RouteHandler(handlerClass = UserController.class, handlerMethod = "showHandler")
+    public ResponseContract show(RouteContract route) {
         // actual implementation
     }
 
-    // Sindri resolves clazz=UserController.class, method="showHandler" → this file
-    // reads this method body using this file's imports
-    public static ResponseContract showHandler(ContainerContract c, Map<String, Object> args) {
-        return c.getSingleton(UserController.class).show((String) args.get("id"));
+    @Route(path = "/users", name = "user.store", requestMethods = RequestMethod.POST)
+    @RouteHandler(handlerClass = UserController.class, handlerMethod = "storeHandler")
+    public ResponseContract store(RouteContract route) {
+        // actual implementation
     }
 
-    public static ResponseContract storeHandler(ContainerContract c, Map<String, Object> args) {
-        return c.getSingleton(UserController.class).store(args);
+    // Sindri writes handlerClass=UserController.class, handlerMethod="showHandler" into the cache
+    // as literals — this method runs at run time
+    public static ResponseContract showHandler(ContainerContract c, RouteContract route) {
+        return c.getSingleton(UserController.class).show(route);
+    }
+
+    public static ResponseContract storeHandler(ContainerContract c, RouteContract route) {
+        return c.getSingleton(UserController.class).store(route);
     }
 }
 ```
@@ -361,20 +361,20 @@ public class UserController {
 ```java
 public class UserController {
 
-    // @RouteHandler points to the route provider — Sindri follows the callable
-    @Route(method = "GET", path = "/users/{id}")
-    @Parameter(name = "id", pattern = "[0-9]+")
-    @RouteHandler(clazz = UserHttpRouteProvider.class, method = "showUser")
-    public ResponseContract show(String id) {
+    // @RouteHandler points to the route provider — Sindri writes that reference as a literal
+    @Route(path = "/users/{id}", name = "user.show", requestMethods = RequestMethod.GET)
+    @Parameter(name = "id", regex = "[0-9]+")
+    @RouteHandler(handlerClass = UserHttpRouteProvider.class, handlerMethod = "showUser")
+    public ResponseContract show(RouteContract route) {
         // actual implementation
     }
 }
 
 public class UserHttpRouteProvider implements HttpRouteProviderContract {
 
-    // Sindri resolves callable → this file, reads this method using this file's imports
-    public static ResponseContract showUser(ContainerContract c, Map<String, Object> args) {
-        return c.getSingleton(UserController.class).show((String) args.get("id"));
+    // The reference names this method — the framework calls it at run time
+    public static ResponseContract showUser(ContainerContract c, RouteContract route) {
+        return c.getSingleton(UserController.class).show(route);
     }
 }
 ```
@@ -421,7 +421,7 @@ public interface ListenerProviderContract {
 
     /**
      * Get a list of attributed listener classes.
-     * Build tool scans each class for @RouteHandler annotations.
+     * Build tool scans each class for @ListenerHandler annotations.
      * Must be a simple List.of() literal — no conditional logic.
      */
     List<Class<?>> getListenerClasses();
@@ -456,8 +456,9 @@ Any method the build tool reads must return a single flat literal with no logic:
 
 ## Handler Method Pointer Convention
 
-All handler methods must be **static methods on the same class** as the provider or controller that defines the route or
-listener. This is the same pattern used by `publishers()` in service providers.
+On the explicit path, all handler methods must be **static methods on the same class** as the provider that defines the
+route or listener. This is the same pattern used by `publishers()` in service providers. An annotated controller's
+callable may name any class — see [`BUILD_TOOL.md`](../BUILD_TOOL.md).
 
 **Why:** Sindri reads exactly one file per provider or controller. All imports for handler bodies are in that one file —
 no cross-file import aggregation, no conflict detection, no registry needed.
@@ -468,7 +469,7 @@ no cross-file import aggregation, no conflict detection, no registry needed.
 
 ❌ Inline closures or lambdas in route/listener definitions
 ❌ References to types not imported in the current file
-❌ Handler methods on a different class
+❌ Handler methods on a different class — on the explicit path
 ```
 
 ---

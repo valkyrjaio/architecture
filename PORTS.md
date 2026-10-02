@@ -74,7 +74,7 @@ Every port shares the same architectural identity:
 - `IllegalArgumentException` replaces `InvalidArgumentException` as the language root — Valkyrja names
   `ValkyrjaInvalidArgumentException` for cross-port parity, extending `IllegalArgumentException` under the hood
 - All Valkyrja exceptions extend `RuntimeException` (unchecked) — no `throws` declarations needed
-- Trees API in annotation processor can extract lambda source text from AST at compile time
+- Annotation processor reads an annotation's members through `javax.lang.model` at compile time
 - Spotless flags same-named exceptions across packages — `ComponentName*` prefix resolves this
 - Kotlin maps 1:1 — identical roots, all exceptions unchecked by default
 

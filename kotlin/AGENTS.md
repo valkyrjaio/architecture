@@ -61,7 +61,7 @@ Kotlin nuances:
   `STRUCTURE.md` _name_ rules still hold (no `Abstract`/`Enum` in the class
   name).
 - **No traits** — no `trait` segment.
-- **Attributes → annotations** in an `annotation` package.
+- **Attributes → annotations** in an `attribute` package, matching the Java port.
 - Name suffixes match `STRUCTURE.md` (`*Contract`, `*ServiceProvider`,
   `*Exception`, …).
 
@@ -94,8 +94,8 @@ Build system is **Gradle (Kotlin DSL)** on the JVM (Java 21). Each tool runs fro
 | Testing + coverage       | JUnit 5 + Kover       | 100% line and branch   |
 
 - **Build tool (`sindri-kotlin`):** KSP (Kotlin Symbol Processing) — or the shared
-  Java annotation processor — reads `@RouteHandler`/`@Provides` and generates the four
-  cache data classes. Dev-only; the framework has zero AST/build deps.
+  Java annotation processor — reads `@RouteHandler`/`@Provides` and generates the
+  four cache data classes. Dev-only; the framework has zero AST/build deps.
 
 ### CI gate (run before done)
 

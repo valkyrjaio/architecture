@@ -164,13 +164,13 @@ conditional logic.
 // HTTP
 @FunctionalInterface
 public interface HttpHandlerFunc {
-    ResponseContract handle(ContainerContract container, Map<String, Object> arguments);
+    ResponseContract handle(ContainerContract container, RouteContract route);
 }
 
 // CLI
 @FunctionalInterface
 public interface CliHandlerFunc {
-    OutputContract handle(ContainerContract container, Map<String, Object> arguments);
+    OutputContract handle(ContainerContract container, RouteContract route);
 }
 
 // Event listener
@@ -193,19 +193,18 @@ public interface HttpHandlerContract {
 ### @RouteHandler annotation on controller methods
 
 ```java
-@RouteHandler((ContainerContract c, Map < String, Object > args) ->
-        c.
+@RouteHandler(handlerClass = UserController.class, handlerMethod = "showHandler")
+@Parameter(name = "id", regex = "[0-9]+")
+public ResponseContract show(RouteContract route) {
+}
 
-getSingleton(UserController .class).
-
-show(args.get("id")))
-
-@Parameter(name = "id", pattern = "[0-9]+")
-public ResponseContract show(String id) {
+public static ResponseContract showHandler(ContainerContract c, RouteContract route) {
+    return c.getSingleton(UserController.class).show(route);
 }
 ```
 
-`ServerRequestContract` and `RouteContract` are not parameters — fetch from
+A route handler takes the matched route. A listener takes named arguments.
+`ServerRequestContract` is not a parameter, so fetch the request from the
 container if needed.
 
 ---
@@ -289,7 +288,7 @@ The annotation processor runs during `javac` — no separate build step needed.
 
 ```java
 
-@SupportedAnnotationTypes("io.valkyrja.http.routing.Handler")
+@SupportedAnnotationTypes("io.valkyrja.http.routing.attribute.route.RouteHandler")
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class ValkyrjaAnnotationProcessor extends AbstractProcessor {
     private Trees trees;
@@ -302,10 +301,13 @@ public class ValkyrjaAnnotationProcessor extends AbstractProcessor {
 }
 ```
 
-### Lambda extraction via Trees API
+### Handler reference extraction via the annotation processing API
 
-The Trees API gives access to lambda source text from the AST at compile time.
-FQN resolution is automatic via the compilation unit's import list.
+`javax.lang.model` gives access to the annotation's members at compile time. A
+`Class` member arrives as a `TypeMirror`, already fully qualified, so the
+annotated path needs no FQN rewriting. The Trees API resolves the enclosing
+compilation unit, whose import list the explicit path uses when it inlines a
+method body.
 
 ### Code generation via JavaPoet
 
@@ -353,8 +355,8 @@ provider tree, then walks each provider's source file via Trees API.
 5. Handler functional interfaces — HttpHandlerFunc, CliHandlerFunc,
    ListenerHandlerFunc
 6. Handler contracts per concern
-7. @RouteHandler and @Parameter annotations
+7. @RouteHandler, @ListenerHandler, and @Parameter annotations
 8. Records for data classes
-9. Annotation processor setup + Trees API lambda extraction
+9. Annotation processor setup + handler reference extraction
 10. JavaPoet cache data class generation
 11. valkyrja-build Java artifact

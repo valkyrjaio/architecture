@@ -162,9 +162,9 @@ Key Decisions At a Glance
 
 - Three typed handler signatures: HTTP → `ResponseContract`, CLI →
   `OutputContract`, Listener → `any`
-- Parameters: `(ContainerContract, map<string, mixed>)` — `ServerRequestContract`
-  and `RouteContract` available via container when needed, not explicit
-  parameters
+- Parameters: a route handler takes `(ContainerContract, RouteContract)`, a
+  listener takes `(ContainerContract, map<string, mixed>)`, and
+  `ServerRequestContract` comes from the container rather than the signature
 - `#[RouteHandler]` / `@RouteHandler` / `@route_handler` — metadata marker in all languages,
   never active registrar
 - See [`HANDLERS.md`](HANDLERS.md)

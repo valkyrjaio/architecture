@@ -161,7 +161,7 @@ import ctnContract "github.com/valkyrjaio/valkyrja-go/vN/container/manager/contr
 //   }
 //
 //   func (p *UserServiceProvider) PublishUserRepository(c ctnContract.ContainerContract) {
-//       c.SetSingleton(repoContract.UserRepositoryClass, repositories.NewUserRepository(...))
+//       c.SetSingleton(repoContract.UserRepositoryClass, repository.NewUserRepository(...))
 //   }
 type ServiceProviderContract interface {
 	// Publishers returns a map of binding key to publisher function reference.
@@ -177,9 +177,9 @@ package provider
 
 import (
 	ctnContract "github.com/valkyrjaio/valkyrja-go/vN/container/manager/contract"
-	"app/repositories"
-	repoContract "app/repositories/contract"
-	svcContract "app/services/contract"
+	"app/repository"
+	repoContract "app/repository/contract"
+	svcContract "app/service/contract"
 )
 
 type UserServiceProvider struct{}
@@ -199,7 +199,7 @@ func (p *UserServiceProvider) Publishers() map[string]func(ctnContract.Container
 func (p *UserServiceProvider) PublishUserRepository(c ctnContract.ContainerContract) {
 	c.SetSingleton(
 		repoContract.UserRepositoryClass,
-		repositories.NewUserRepository(
+		repository.NewUserRepository(
 			c.GetSingleton(svcContract.DatabaseClass).(svcContract.DatabaseContract),
 		),
 	)
@@ -210,7 +210,7 @@ func (p *UserServiceProvider) PublishUserRepository(c ctnContract.ContainerContr
 func PublishUserRepository(c ctnContract.ContainerContract) {
 	c.SetSingleton(
 		repoContract.UserRepositoryClass,
-		repositories.NewUserRepository(
+		repository.NewUserRepository(
 			c.GetSingleton(svcContract.DatabaseClass).(svcContract.DatabaseContract),
 		),
 	)
@@ -221,9 +221,8 @@ func PublishUserRepository(c ctnContract.ContainerContract) {
 
 ## HttpRouteProviderContract
 
-HTTP route provider. Go has no annotations — explicit route definitions only. `GetControllerClasses()` returns string
-constants (no `::class` equivalent). Routes are complete data structures carrying method, path, constraints, middleware,
-and handler together.
+HTTP route provider. Go has no annotations — explicit route definitions only, and no `GetControllerClasses()`. Routes
+are complete data structures carrying method, path, constraints, middleware, and handler together.
 
 ```go
 // package: github.com/valkyrjaio/valkyrja-go/vN/http/routing/provider/contract
@@ -233,12 +232,6 @@ import dataContract "github.com/valkyrjaio/valkyrja-go/vN/http/routing/data/cont
 
 // HttpRouteProviderContract defines what an HTTP route provider must implement.
 type HttpRouteProviderContract interface {
-	// GetControllerClasses returns a list of controller class string constants.
-	// Go has no ::class equivalent — string constants from the constants file are used.
-	// Returns empty slice if using explicit routes only (most common in Go).
-	// Must be a simple slice literal — no conditional logic permitted.
-	GetControllerClasses() []string
-
 	// GetRoutes returns a list of explicit route definitions.
 	// Routes are complete data structures — they carry HTTP method, path pattern,
 	// dynamic segment constraints, middleware chain, and handler together.
@@ -256,31 +249,33 @@ package provider
 
 import (
 	ctnContract "github.com/valkyrjaio/valkyrja-go/vN/container/manager/contract"
+	msgContract "github.com/valkyrjaio/valkyrja-go/vN/http/message/response/contract"
 	"github.com/valkyrjaio/valkyrja-go/vN/http/routing/data"
 	dataContract "github.com/valkyrjaio/valkyrja-go/vN/http/routing/data/contract"
-	"app/controllers"
+	"app/controller"
 )
 
 type UserHttpRouteProvider struct{}
 
-// GetControllerClasses returns string constants — Go has no ::class equivalent.
-// Returns empty slice since Go has no annotations to scan.
-func (p *UserHttpRouteProvider) GetControllerClasses() []string {
-	return []string{}
-}
-
 func (p *UserHttpRouteProvider) GetRoutes() []dataContract.RouteContract {
 	return []dataContract.RouteContract{
-		data.Get("/users", func(c ctnContract.ContainerContract, args []any) any {
-			return c.GetSingleton(controllers.UserControllerClass).(*controllers.UserController).Index(args[0])
-		}),
-		data.Post("/users", func(c ctnContract.ContainerContract, args []any) any {
-			return c.GetSingleton(controllers.UserControllerClass).(*controllers.UserController).Store(args[0])
-		}),
-		data.Get("/orders", func(c ctnContract.ContainerContract, args []any) any {
-			return c.GetSingleton(controllers.OrderControllerClass).(*controllers.OrderController).Index(args[0])
-		}),
+		data.Get("/users", p.IndexUsers),
+		data.Post("/users", p.StoreUser),
+		data.Get("/orders", p.IndexOrders),
 	}
+}
+
+// Handler methods live on the provider — the build tool reads each body from this file.
+func (p *UserHttpRouteProvider) IndexUsers(c ctnContract.ContainerContract, route dataContract.RouteContract) msgContract.ResponseContract {
+	return c.GetSingleton(controller.UserControllerClass).(*controller.UserController).Index(route)
+}
+
+func (p *UserHttpRouteProvider) StoreUser(c ctnContract.ContainerContract, route dataContract.RouteContract) msgContract.ResponseContract {
+	return c.GetSingleton(controller.UserControllerClass).(*controller.UserController).Store(route)
+}
+
+func (p *UserHttpRouteProvider) IndexOrders(c ctnContract.ContainerContract, route dataContract.RouteContract) msgContract.ResponseContract {
+	return c.GetSingleton(controller.OrderControllerClass).(*controller.OrderController).Index(route)
 }
 ```
 
@@ -296,10 +291,6 @@ import dataContract "github.com/valkyrjaio/valkyrja-go/vN/cli/routing/data/contr
 
 // CliRouteProviderContract defines what a CLI route provider must implement.
 type CliRouteProviderContract interface {
-	// GetControllerClasses returns a list of controller class string constants.
-	// Returns empty slice (Go has no annotations to scan).
-	GetControllerClasses() []string
-
 	// GetRoutes returns a list of explicit CLI route definitions.
 	// Must be a simple slice literal — no conditional logic permitted.
 	GetRoutes() []dataContract.RouteContract
@@ -318,10 +309,6 @@ import dataContract "github.com/valkyrjaio/valkyrja-go/vN/event/data/contract"
 
 // ListenerProviderContract defines what an event listener provider must implement.
 type ListenerProviderContract interface {
-	// GetListenerClasses returns a list of listener class string constants.
-	// Returns empty slice (Go has no annotations to scan).
-	GetListenerClasses() []string
-
 	// GetListeners returns a list of explicit listener definitions.
 	// Listeners are complete data structures — they carry event type, priority,
 	// and handler together. Cannot be expressed as a key/body map without
@@ -339,8 +326,8 @@ Any method or function the build tool reads must return a single flat literal wi
 
 ```go
 // ✅ simple slice of route objects
-return []dataContract.RouteContract{
-data.Get("/users", func (c ContainerContract, args []any) any { ... }),
+return []RouteContract{
+data.Get("/users", p.IndexUsers),
 }
 
 // ✅ simple map with method reference
@@ -355,11 +342,11 @@ UserRepositoryClass: PublishUserRepository,
 
 // ❌ conditional logic
 if condition {
-return []dataContract.RouteContract{...}
+return []RouteContract{...}
 }
 
 // ❌ variable accumulation
-routes := []dataContract.RouteContract{}
+routes := []RouteContract{}
 routes = append(routes, ...)
 return routes
 ```
@@ -368,14 +355,16 @@ return routes
 
 ## Handler Method Pointer Convention
 
-All handler methods must be **static methods on the same class** as the provider or controller that defines the route or
-listener. This is the same pattern used by `publishers()` in service providers.
+All handler methods live on the same class as the provider that defines the route or listener. Go has no static method,
+so a Go handler is a method on the provider struct. This is the same pattern used by `publishers()` in service
+providers.
 
 **Why:** Sindri reads exactly one file per provider or controller. All imports for handler bodies are in that one file —
 no cross-file import aggregation, no conflict detection, no registry needed.
 
 ```
 ✅ Method reference on the same class
+✅ Package-level function in the same file — publishers only
 ✅ All type references imported in the same file
 
 ❌ Inline closures or lambdas in route/listener definitions
