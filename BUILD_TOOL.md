@@ -1693,21 +1693,22 @@ private void processHandlerMethod(ExecutableElement method) {
     for (AnnotationMirror annotation : method.getAnnotationMirrors()) {
         if (!annotation.getAnnotationType().toString().equals(RouteHandler.class.getName())) continue;
 
-        // get the handlerClass and handlerMethod members from the annotation
+        // read both members of this annotation — the class token and the method name
+        Map<String, String> members = new HashMap<>();
         for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry
                 : annotation.getElementValues().entrySet()) {
-
-            // read the member value — a class token or a method name
-            String memberValue = entry.getValue().toString();
-
-            // resolve all type references to FQN via element utilities
-            String resolvedSource = resolveFQN(memberValue, method);
-
-            // extract @Parameter annotations from same method
-            List<ParameterData> parameters = extractParameters(method);
-
-            handlers.add(new HandlerData(resolvedSource, parameters));
+            members.put(entry.getKey().getSimpleName().toString(), entry.getValue().toString());
         }
+
+        // resolve the class token to its FQN via element utilities
+        String handlerClass = resolveFQN(members.get("handlerClass"), method);
+        String handlerMethod = members.get("handlerMethod");
+
+        // extract @Parameter annotations from same method
+        List<ParameterData> parameters = extractParameters(method);
+
+        // one callable per annotation — (ClassName, methodName), as Step 4a specifies
+        handlers.add(new HandlerData(handlerClass, handlerMethod, parameters));
     }
 }
 ```
