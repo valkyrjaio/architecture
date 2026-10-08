@@ -6,15 +6,39 @@ are shown; each Layer-2 guide gives the per-language spelling.
 
 A component gets one `ComponentNameConfigContract` for the settings that apply
 to the whole component. The default adapter is the most common such setting.
-Each adapter then gets its own `ComponentName<Adapter>ConfigContract`. Every
-contract has a default implementation that drops the `Contract` suffix
-(`CacheConfig`, `CacheRedisConfig`).
+Each adapter then gets its own `ComponentName<Adapter>ConfigContract`. A
+contract whose settings have a usable default gets a default implementation
+that drops the `Contract` suffix (`CacheConfig`, `CacheRedisConfig`). A
+contract whose settings have no usable default gets none, and the service
+provider throws instead of binding one.
 
-The default implementations live in the component's `Data\` segment. The
-contracts live in the component's `Data\Contract\` segment. The component's
+A component whose subcomponents configure separately gets one contract for each
+of them, named `ComponentName<SubComponent>ConfigContract`. An adapter of that
+subcomponent carries an adapter name as well, so the extra name is what tells
+the two apart.
+
+Queue's client subcomponent holds one contract of each kind.
+`Valkyrja\Queue\Client\Data\Contract\QueueClientConfigContract` configures
+the subcomponent, and
+`Valkyrja\Queue\Client\Data\Contract\QueueRedisClientConfigContract`
+configures one adapter of it. An application names its default client through
+the subcomponent contract, and
+`Valkyrja\Application\Data\Contract\QueueConfigContract` is a separate
+thing: it configures a queue application rather than naming a client.
+
+These rules govern a component's own config and its adapter configs. They do
+not reach an application config, which
+[`ADDING_A_MODULE.md`](ADDING_A_MODULE.md) covers: `HttpConfigContract`,
+`CliConfigContract` and `QueueConfigContract` live in `Application\Data\`
+rather than in a component, and `App` binds each one separately.
+
+A contract lives in the `Data\Contract\` segment of whatever it configures, and
+a default implementation lives in the `Data\` segment beside it. A component's
+contracts therefore sit in the component, and a subcomponent's sit in the
+subcomponent, that subcomponent's adapter contracts included. The component's
 service provider publishes each contract as its own container binding.
 
-## The three rules
+## The rules
 
 1. **The component config does not hold the adapter configs.** The container
    resolves an adapter config only when something asks for that adapter. An
@@ -24,11 +48,44 @@ service provider publishes each contract as its own container binding.
    application config class can implement several adapter contracts at once.
    Without the prefix, two adapters that both declare a `prefix` property
    collide.
-3. **The property carries the component name as well when more than one
-   component declares a property for the same adapter.** Each component has a
-   log adapter, and each log adapter writes to a logger. With the adapter name
-   alone, one application config class holds one `logLogger` property for every
-   component, so each component's log adapter writes to the same logger.
+3. **When two components would declare the same property for the same
+   adapter, the component whose domain the adapter belongs to keeps the bare
+   name.** Every other one carries its own component name. Compare the two
+   names with every component name removed, because the rule has to fire
+   before either one carries it. Redis is a cache, so
+   `CacheRedisConfigContract` keeps `$redisHost` and a queue that reaches the
+   same store carries its own name. No component owns the log adapter, so
+   every component that logs through it carries its own name:
+   `$cacheLogLogger`, `$mailLogLogger`.
+
+   A contract that carries its component name carries it in every property.
+   `CacheLogConfigContract` holds `$cacheLogPrefix` beside `$cacheLogLogger`,
+   although no other component declares a prefix for the log adapter.
+
+   Two cases never reach this rule. An adapter that one component configures
+   alone cannot collide with anything, which is why `MailMailgunConfigContract`
+   holds `$mailgunDomain` and `LogPsrConfigContract` holds `$psrName`. Two
+   components can also configure one adapter and name nothing alike, as
+   `ViewPhpConfigContract`'s `$phpPath` and `SessionPhpConfigContract`'s
+   `$phpCookiePath` do, and the rule does not fire for them either.
+
+4. **A subcomponent name counts as the adapter name for rule 3.** `Client`
+   names a subcomponent of Http and of Queue alike, so an application config
+   holding `HttpClientConfigContract` and `QueueClientConfigContract` reaches
+   rule 3 and each property carries its component name. An adapter of a
+   subcomponent carries both names, in the order its own contract spells
+   them, as `HttpClientLogConfigContract`'s `$httpClientLogLogger` carries
+   `Http`, `Client` and `Log`.
+
+```php
+// Right — `HttpClientLog` names a component, a subcomponent and an adapter,
+// and the property carries all three in that order.
+interface HttpClientLogConfigContract
+{
+    /** @var class-string<LoggerContract> */
+    public string $httpClientLogLogger { get; }
+}
+```
 
 ```php
 // Wrong — the component config holds every adapter config. An application that
@@ -106,7 +163,8 @@ final class AppConfig extends Config implements CacheConfigContract, CacheRedisC
 
 The service provider binds the application config when the application config
 implements the contract. When the application config does not implement the
-contract, the service provider binds the default implementation:
+contract, the service provider binds the default implementation, or throws when
+the contract has none:
 
 ```php
 public static function publishRedisConfig(ContainerContract $container): void

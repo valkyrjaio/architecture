@@ -84,11 +84,12 @@ These hold in **every** language. Do not violate them in a port.
   `@route_handler` is a **metadata marker only**, never an active registrar.
 - **`AppConfig` is the build tool entry point.** No `valkyrja.yaml`. The app
   config class already lists the component providers; `sindri` reads it via AST.
-- **A component config holds only component-wide settings.** Each adapter gets
-  its own config contract and its own default implementation. The component's
-  service provider publishes each contract as a separate container binding. A
-  component config that holds every adapter config forces an application to
-  construct configuration for adapters that the application never uses. An adapter
+- **A component config holds only component-wide settings.** Each adapter
+  gets its own config contract, and a default implementation when its
+  settings have a usable default. The component's service provider publishes
+  each contract as a separate container binding. A component config that
+  holds every adapter config forces an application to construct
+  configuration for adapters that the application never uses. An adapter
   contract prefixes every property with the adapter name, so one application
   config class can implement several adapter contracts. See §4.
 - **No provider-reference constants class.** Provider references use
@@ -329,19 +330,32 @@ type. The full rules, the examples, and the replacement for static metadata:
 
 ### Component config
 
-A component gets one `ComponentNameConfigContract` for the settings that apply
-to the whole component, and each adapter gets its own
-`ComponentName<Adapter>ConfigContract`. The component config does not hold the
-adapter configs, and an adapter contract prefixes every property with the
-adapter name. The property carries the component name as well when more than one
-component declares a property for the same adapter, as each component's log
-adapter does. Every contract has a default implementation that drops the
-`Contract` suffix.
+A component gets one `ComponentNameConfigContract` for the settings that
+apply to the whole component, and each adapter gets its own
+`ComponentName<Adapter>ConfigContract`. The component config does not hold
+the adapter configs, and an adapter contract prefixes every property with
+the adapter name. When two components would declare the same property for
+the same adapter, the component whose domain the adapter belongs to keeps
+the bare name and every other one carries its own component name, in every
+property of that contract. Compare the names with every component name
+removed. An adapter only one component configures never reaches the rule,
+and neither do two components that name nothing alike, which is why
+`MailMailgunConfigContract` holds `$mailgunDomain` and
+`ViewPhpConfigContract` holds `$phpPath`. A subcomponent name counts as the
+adapter name, because `Client` names a subcomponent of Http and of Queue
+alike, so each of those carries its own component name too. These rules do
+not reach an application config. A contract whose settings have a usable
+default has a default implementation that drops the `Contract` suffix.
 
-The default implementations live in the component's `Data\` segment. The
-contracts live in the component's `Data\Contract\` segment. The service
-provider publishes each contract as its own container binding. The full rules
-and examples: [`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md).
+A component whose subcomponents configure separately gets one contract for
+each of them, and an adapter of that subcomponent carries an adapter name as
+well, so the extra name tells the two apart. A contract lives in the
+`Data\Contract\` segment of whatever it configures, and a default
+implementation lives in the `Data\` segment beside it. A contract with no
+usable default gets none, and the service provider throws instead of binding
+one. The service provider publishes each contract as its own container
+binding. The full rules and examples:
+[`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md).
 
 ### Method naming
 
