@@ -1,6 +1,11 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.24...26.x)
+## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.25...26.x)
+
+## [v26.0.25](https://github.com/valkyrjaio/architecture/compare/v26.0.24...v26.0.25) - 2026-10-08
+
+* [Cache] docs: State one data class per major component instead of four by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/230
+* [Config] docs: Settle the config property name for a shared adapter by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/231
 
 ## [v26.0.24](https://github.com/valkyrjaio/architecture/compare/v26.0.23...v26.0.24) - 2026-10-01
 
