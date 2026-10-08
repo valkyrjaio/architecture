@@ -148,10 +148,13 @@ A reviewer reports a finding on the description in these cases:
 - The description holds a line that a guide forbids, such as a link to a sibling
   pull request.
 
-A reviewer does not report a finding because the description is short, and
-does not report a preference for other words. The other rules in this document
-and [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md) bind the author of a
-description, but a reviewer does not report a break of them in a description.
+A reviewer reports only the cases above. A reviewer does not report a
+description because the description is short. A reviewer does not report a
+preference for other words.
+
+The author follows every rule in this document and in
+[`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md). A reviewer does not report
+the break of a rule that the cases above do not name.
 
 ## The template
 
