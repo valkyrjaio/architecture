@@ -227,10 +227,10 @@ under [Core Contracts](#core-contracts)) — not a raw map a handler pokes at.
 ```
 Queue/
   Client       // produce side — push(Job) + every publish adapter (Sync, Deferred, InMemory, Guzzle, SQS, …)
-  Message      // Job, JobResult, Attributes
+  Message      // Job, JobResult, Attributes, Payload, JobFactory
   Middleware   // the pipeline stage handlers
   Routing      // Route, Router, RouteCollection, the @Route attribute + collector
-  Server       // JobHandler, the ThrowableCaught middleware, providers, throwables
+  Server       // JobHandler + the ThrowableCaught middleware it ships
 ```
 
 `Message` is the analog of `Http/Message` and `gRPC/message` — the category housing the message and its parts, with`Job`
@@ -276,8 +276,8 @@ The language-agnostic surface mirrors Http/Cli/gRPC, with queue vocabulary.
 
 ### `JobHandler`
 
-The kernel entry point, analogous to `ServiceHandler` (gRPC) / `RequestHandler` (HTTP). A worker entry hands jobs to its
-`run`, or to `JobHandler.handle()`.
+The kernel entry point, analogous to `ServiceHandler` (gRPC) / `RequestHandler` (HTTP). A worker entry hands each job to
+`JobHandler.run()`, or to `JobHandler.handle()` when it has to act before settlement.
 
 Responsibilities:
 
@@ -421,13 +421,13 @@ overridable per route):
 
 ## Worker Entries
 
-The entry of a processor is the queue protocol's **transport layer** — the direct analog of the entry classes in the
-other protocols: Http's server + `RequestHandler`, Cli's console + `InputHandler`, gRPC's `ServiceAdapter` +
-`ServiceHandler`. It owns both ends of a delivery and nothing in between: the **receipt** (accept a native delivery from
-the processor and normalize it into a `Job`) and the **response** (take the `JobResult` the kernel returns and settle it
-back with the processor). Routing, middleware, and the handler are all processor-agnostic; only the entry knows what a
-Cloud Tasks POST or an SQS receipt looks like. "Processor" is the umbrella term here — a message broker (SQS, AMQP,
-Redis) or a managed platform (Cloud Tasks, Lambda, Pub/Sub push).
+The entry of a processor is the queue protocol's direct analog of the entry classes in the other protocols: Http's
+server + `RequestHandler`, Cli's console + `InputHandler`, gRPC's `ServiceAdapter` + `ServiceHandler`. It owns both ends
+of a delivery and nothing in between: the **receipt** (accept a native delivery from the processor and normalize it into
+a `Job`) and the **response** (take the `JobResult` the kernel returns and settle it back with the processor). Routing,
+middleware, and the handler are all processor-agnostic; only the entry knows what a Cloud Tasks POST or an SQS receipt
+looks like. "Processor" is the umbrella term here — a message broker (SQS, AMQP, Redis) or a managed platform (Cloud
+Tasks, Lambda, Pub/Sub push).
 
 Receipt and response stay **clean** — plain `Job` in, `JobResult` out — up to the point where they must be mapped onto
 a specific processor's runtime (e.g. OpenSwoole in PHP); that translation is the entry's only real work, and it is the
@@ -437,7 +437,7 @@ An entry bridges an external processor to `JobHandler`. Responsibilities:
 
 1. Poll/subscribe for messages from the broker (long-poll, blocking pop, push subscription, …).
 2. Decode the message; build a `Job` (name, payload, attributes, id, attempts).
-3. Run the job through `JobHandler` (`run` on the worker base, or `handle` and `settlingResult` apart).
+3. Run the job through `JobHandler` (`JobHandler.run()`, or `handle` and `settlingResult` apart).
 4. **Settle** with the processor based on the `JobResult` outcome (see [The outcome is an enum](#the-outcome-is-an-enum)
    and [Redelivery](#redelivery-who-performs-a-retry)). It slots between `settlingResult` and `resultSettled`.
 
@@ -472,8 +472,8 @@ Who actually performs a `RETRY` depends on the processor, and the entry of that 
   header/receive-count, which the entry normalizes into `Job.getAttempts()`; the envelope is not rewritten, so
   `modified_at` is not authored on this path.
 
-Either way the handler and middleware are unchanged — a normalized `Job` in, a `JobResult`
-out, blind to which redelivery model the entry chose.
+Either way the handler and middleware are unchanged — a normalized `Job` in, a `JobResult` out, blind to which
+redelivery model the entry chose.
 
 ### The pull entry's interface
 
@@ -481,7 +481,7 @@ A pull entry extends `PullQueue` and implements the four steps marked below. `Pu
 
 ```
 PullQueue
-  run(QueueConfigContract, maxJobs, maxSeconds): void  // inherited: boot, then loop
+  run(QueueConfig, maxJobs, maxSeconds): void          // inherited: boot, then loop
   loop(Application, maxJobs, maxSeconds): void         // inherited: the loop itself
   connect(Application): void                           // implement: open the connection
   receive(): Job|null                                  // implement: one delivery, or nothing
