@@ -11,8 +11,8 @@ reviewer today, and for the reader years later.
 
 Warning: a long description buries the sentence the reader needs. Say what
 changed and why. When the pull request has a Changes list, the list can name the
-files, and the prose does not have to. The diff carries the how. The rules below
-keep the what and the why, and drop what the diff shows.
+files, and the prose does not have to. The rules below keep the what and the
+why, and drop what the diff shows.
 
 ## The description holds the what and the why
 
@@ -109,10 +109,10 @@ follow the method-naming conventions".
 
 ## Name the file, not the place inside it
 
-Name the file and what changed in it. Do not name where inside the file the
-change went — after which section, below which table, next to which method.
-The diff shows the position. This rule governs the Description prose and the
-Changes list alike.
+When the description names a file, name the file and what changed in it. Do not
+name where inside the file the change went — after which section, below which
+table, next to which method. The diff shows the position. This rule governs the
+Description prose and the Changes list alike.
 
 > Wrong — the bullet names a position the diff already shows:
 >
@@ -137,22 +137,21 @@ explanation in the description instead.
 State the explanation in a sentence or two. The description takes the
 explanation, not the essay around it.
 
-## When a review reports a finding on the description
+## When a reviewer reports a finding on the description
 
 A reviewer reports a finding on the description in these cases:
 
 - The description misstates the change.
 - The description does not say what changed.
 - The description does not say why the change is right.
-- The description lacks a line that this document requires, such as
-  `Closes #123`.
-- The description breaks another rule in this document, such as a restated edit
-  or a named position.
+- The description lacks a line that a guide requires, such as `Closes #123`.
+- The description holds a line that a guide forbids, such as a link to a sibling
+  pull request.
 
-The list holds every case. A reviewer does not report a finding because the
-description is short, and does not report a preference for other words.
-[`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md) binds the author of a
-description, but a review does not report a style break in one.
+A reviewer does not report a finding because the description is short, and
+does not report a preference for other words. The other rules in this document
+and [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md) bind the author of a
+description, but a reviewer does not report a break of them in a description.
 
 ## The template
 
