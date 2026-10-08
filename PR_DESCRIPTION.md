@@ -9,10 +9,10 @@ as the commit body ([`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md)). The
 description is what `git log` shows for the change, forever. Write it for the
 reviewer today, and for the reader years later.
 
-Warning: too little and too much fail the same way — the reader cannot tell
-what the pull request is about. A short description names nothing. A long
-description buries the sentence the reader needs. The rules below remove both
-failures.
+Warning: a long description buries the sentence the reader needs, and each
+concrete claim in it is one more thing a reviewer can dispute. A short
+description that names what was done in each area is enough, because the diff
+carries the detail. The rules below keep the description short and true.
 
 ## The description holds the what and the why
 
@@ -137,6 +137,14 @@ explanation in the description instead.
 
 State the explanation in a sentence or two. The description takes the
 explanation, not the essay around it.
+
+## A review raises a description only when it is wrong
+
+A reviewer raises the description when it misstates the change: it claims
+something the change does not do, or it names the wrong file. A reviewer does
+not raise a description because it is short, because it is general, or because
+other words would say the same thing better. A review round is worth most on
+the code, less on a wrong document, and least on the description.
 
 ## The template
 
