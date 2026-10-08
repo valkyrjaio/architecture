@@ -230,7 +230,7 @@ Queue/
   Message      // Job, JobResult, Attributes, Payload, JobFactory
   Middleware   // the pipeline stage handlers
   Routing      // Route, Router, RouteCollection, the @Route attribute + collector
-  Server       // JobHandler + the ThrowableCaught middleware it ships
+  Server       // JobHandler + the ThrowableCaught middleware the module ships
 ```
 
 `Message` is the analog of `Http/Message` and `gRPC/message` — the category housing the message and its parts, with`Job`
@@ -277,7 +277,7 @@ The language-agnostic surface mirrors Http/Cli/gRPC, with queue vocabulary.
 ### `JobHandler`
 
 The kernel entry point, analogous to `ServiceHandler` (gRPC) / `RequestHandler` (HTTP). A worker entry hands each job to
-`JobHandler.run()`, or to `JobHandler.handle()` when it has to act before settlement.
+`JobHandler.run()`, or to `handle` and `settlingResult` apart when it has to act on the outcome between the two.
 
 Responsibilities:
 
@@ -437,7 +437,7 @@ An entry bridges an external processor to `JobHandler`. Responsibilities:
 
 1. Poll/subscribe for messages from the broker (long-poll, blocking pop, push subscription, …).
 2. Decode the message; build a `Job` (name, payload, attributes, id, attempts).
-3. Run the job through `JobHandler` (`JobHandler.run()`, or `handle` and `settlingResult` apart).
+3. Run the job through `JobHandler` (`run`, or `handle` and `settlingResult` apart).
 4. **Settle** with the processor based on the `JobResult` outcome (see [The outcome is an enum](#the-outcome-is-an-enum)
    and [Redelivery](#redelivery-who-performs-a-retry)). It slots between `settlingResult` and `resultSettled`.
 
