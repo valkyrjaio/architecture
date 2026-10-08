@@ -157,7 +157,7 @@ framework? If no, prepend the immediate parent name and ask again.
 
 Established the complete cache generation architecture:
 
-**Four output classes per application:**
+**One output class per major component:**
 
 - `AppContainerData` — all bindings
 - `AppEventData` — all listeners
@@ -277,8 +277,8 @@ everything at runtime with no cache. Cache is a performance optimization, not a 
 compiled in — class names from AST are written as text and the compiler resolves them later. This is how every
 pre-compilation code generation step works in every language.
 
-**Four data classes for the entire application.** The build tool aggregates everything across all providers into exactly
-four classes — one per concern. The framework loads four objects at boot. No merging, no iteration.
+**One data class per major component.** The build tool aggregates everything across all providers into one class for
+each major component. The framework loads one object per component at boot. No merging, no iteration.
 
 **Typed handler signatures move errors to before production.** Explicit closure handlers with typed signatures catch
 wrong return types and wrong parameters at compile time (Java, Go, TypeScript) or CI time (PHP, Python).

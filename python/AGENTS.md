@@ -113,7 +113,7 @@ Python nuances:
 
 - **Build tool (`sindri-python`):** stdlib `ast` + `inspect` only (no external AST
   lib); reads `@route_handler`/`@parameter` metadata and the provider tree, generates
-  the four cache data files. Dev-only; the framework has zero AST deps.
+  the cache data file of each major component. Dev-only; the framework has zero AST deps.
 - **CI:** `import-linter` (module boundaries) · **Ruff** (lint + format) ·
   **mypy** (`strict`) · **Bandit** (security) · **pytest** (+ coverage).
 - **Isolation & how to run:** each tool lives under its own `.github/ci/<tool>/`
@@ -145,7 +145,7 @@ full gate: `ruff format` + `ruff check` → `mypy` → `import-linter` → `band
   `valkyrja.cgi.run(app)` (CGI). The GIL limits true thread parallelism — async
   ASGI is the idiomatic concurrency model.
 - **`sindri` (build tool)** resolves classes to source with `inspect.getfile()`,
-  parses via stdlib `ast`, and emits the four cache data classes through
+  parses via stdlib `ast`, and emits the cache data class of each major component through
   `string.Template`. Dev-only; the framework has zero AST/build deps.
 - **Dynamic route regexes: `(?P<name>…)`, anchored, no delimiters, matched with
   `fullmatch`.** Decided ahead of the port so it is built right the first time.
