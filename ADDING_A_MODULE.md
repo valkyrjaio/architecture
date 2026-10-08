@@ -111,11 +111,12 @@ Each language uses its idiomatic discovery mechanism to populate `Map<key, Route
 
 ### Config
 
-Add a `Config` value + contract carrying the module's port/options and its per-stage middleware lists,
-with sensible defaults. The module's service provider publishes the contract as a container singleton
+Add a `Config` value + contract carrying the module's port/options and its per-stage middleware lists.
+The module's service provider publishes the contract as a container singleton
 ([`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md)). The provider binds the application config when that
 config implements the contract. When the application config does not implement the contract, the
-provider binds the module's default implementation.
+provider binds the module's default implementation, or throws when the settings have no usable default
+and so the contract has no default implementation.
 
 ### Providers
 

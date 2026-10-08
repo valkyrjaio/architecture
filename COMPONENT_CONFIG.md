@@ -6,15 +6,42 @@ are shown; each Layer-2 guide gives the per-language spelling.
 
 A component gets one `ComponentNameConfigContract` for the settings that apply
 to the whole component. The default adapter is the most common such setting.
-Each adapter then gets its own `ComponentName<Adapter>ConfigContract`. Every
-contract has a default implementation that drops the `Contract` suffix
-(`CacheConfig`, `CacheRedisConfig`).
+Each adapter then gets its own `ComponentName<Adapter>ConfigContract`. A
+contract whose settings have a usable default gets a default implementation
+that drops the `Contract` suffix (`CacheConfig`, `CacheRedisConfig`). A
+contract whose settings have no usable default gets none, and the service
+provider throws instead of binding one.
 
-The default implementations live in the component's `Data\` segment. The
-contracts live in the component's `Data\Contract\` segment. The component's
+A component whose subcomponents configure separately gets one contract for each
+of them, named `ComponentName<SubComponent>ConfigContract`. An adapter of that
+subcomponent carries an adapter name as well, so the extra name is what tells
+the two apart.
+
+Queue is the case.
+`Valkyrja\Queue\Client\Data\Contract\QueueClientConfigContract` holds
+`$defaultQueueClient`, and
+`Valkyrja\Queue\Client\Data\Contract\QueueRedisClientConfigContract` holds
+the settings of the Redis client. A host application holds the first to name
+its default client. A host never holds
+`Valkyrja\Application\Data\Contract\QueueConfigContract`, which configures a
+queue application instead.
+
+```php
+// Right — the name says what it configures. `QueueClientConfig` names the
+// component and the subcomponent, so it configures the subcomponent.
+// `QueueRedisClientConfig` names an adapter too, so it configures one adapter
+// of that subcomponent.
+use Valkyrja\Queue\Client\Data\Contract\QueueClientConfigContract;
+use Valkyrja\Queue\Client\Data\Contract\QueueRedisClientConfigContract;
+```
+
+A contract lives in the `Data\Contract\` segment of whatever it configures, and
+a default implementation lives in the `Data\` segment beside it. A component's
+contracts therefore sit in the component, and a subcomponent's sit in the
+subcomponent, that subcomponent's adapter contracts included. The component's
 service provider publishes each contract as its own container binding.
 
-## The three rules
+## The rules
 
 1. **The component config does not hold the adapter configs.** The container
    resolves an adapter config only when something asks for that adapter. An
@@ -24,11 +51,25 @@ service provider publishes each contract as its own container binding.
    application config class can implement several adapter contracts at once.
    Without the prefix, two adapters that both declare a `prefix` property
    collide.
-3. **The property carries the component name as well when more than one
-   component declares a property for the same adapter.** Each component has a
-   log adapter, and each log adapter writes to a logger. With the adapter name
-   alone, one application config class holds one `logLogger` property for every
-   component, so each component's log adapter writes to the same logger.
+3. **A component that configures an adapter outside that adapter's own
+   domain carries its component name in every property.** The component
+   whose domain the adapter belongs to keeps the bare adapter prefix. A PSR
+   logger is a logging thing, so `LogPsrConfigContract` holds `$psrName`,
+   and every other component logs through the log adapter under
+   `$cacheLogLogger` or `$mailLogLogger`. Redis is a cache, so
+   `CacheRedisConfigContract` holds `$redisHost`, and the Queue client that
+   runs jobs through Redis holds `$queueRedisClientHost`. An adapter that one
+   component configures alone needs no component name, because nothing can
+   collide with it: `$mailgunDomain` exists only in Mail.
+4. **A subcomponent contract carries the subcomponent name in every property.**
+   `QueueClientConfigContract` holds `$defaultQueueClient`, where the `default`
+   property names the component as well, as a component config's own
+   `$defaultCache` does. This governs the subcomponent's own contract. An
+   adapter of that subcomponent carries the subcomponent name as well, in the
+   order its own contract name spells it: `QueueRedisClientConfigContract`
+   holds `$queueRedisClientHost`, and `HttpClientLogConfigContract` holds
+   `$httpClientLogLogger`. The property prefix is the contract name without
+   its `ConfigContract` suffix, which satisfies rules 2 and 3 at once.
 
 ```php
 // Wrong — the component config holds every adapter config. An application that
@@ -106,7 +147,8 @@ final class AppConfig extends Config implements CacheConfigContract, CacheRedisC
 
 The service provider binds the application config when the application config
 implements the contract. When the application config does not implement the
-contract, the service provider binds the default implementation:
+contract, the service provider binds the default implementation, or throws when
+the contract has none:
 
 ```php
 public static function publishRedisConfig(ContainerContract $container): void

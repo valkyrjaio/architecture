@@ -329,19 +329,27 @@ type. The full rules, the examples, and the replacement for static metadata:
 
 ### Component config
 
-A component gets one `ComponentNameConfigContract` for the settings that apply
-to the whole component, and each adapter gets its own
-`ComponentName<Adapter>ConfigContract`. The component config does not hold the
-adapter configs, and an adapter contract prefixes every property with the
-adapter name. The property carries the component name as well when more than one
-component declares a property for the same adapter, as each component's log
-adapter does. Every contract has a default implementation that drops the
-`Contract` suffix.
+A component gets one `ComponentNameConfigContract` for the settings that
+apply to the whole component, and each adapter gets its own
+`ComponentName<Adapter>ConfigContract`. The component config does not hold
+the adapter configs, and an adapter contract prefixes every property with
+the adapter name. A component that configures an adapter outside that
+adapter's own domain carries its component name as well, and the component
+whose domain the adapter belongs to keeps the bare prefix: Redis is a cache,
+so Cache holds `$redisHost` and the Queue client holds
+`$queueRedisClientHost`. A contract whose settings have a usable default has
+a default implementation that drops the `Contract` suffix.
 
-The default implementations live in the component's `Data\` segment. The
-contracts live in the component's `Data\Contract\` segment. The service
-provider publishes each contract as its own container binding. The full rules
-and examples: [`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md).
+A component whose subcomponents configure separately gets one contract for
+each of them, and that contract carries the subcomponent name in every
+property (`$defaultQueueClient`). An adapter of a subcomponent carries an
+adapter name as well, so the extra name tells the two apart. A contract
+lives in the `Data\Contract\` segment of whatever it configures, and a
+default implementation lives in the `Data\` segment beside it. A contract
+with no usable default gets none, and the service provider throws instead of
+binding one. The service provider publishes each contract as its own
+container binding. The full rules and examples:
+[`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md).
 
 ### Method naming
 
