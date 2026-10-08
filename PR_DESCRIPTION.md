@@ -77,9 +77,10 @@ outside this shape.
 
 A promotion pull request's description never becomes a commit, because the
 promotion lands by fast-forward. A promotion pull request whose cherry-pick
-conflicts is the exception to the rules in this document, except the cases that
-a reviewer reports. [`BRANCH_PROMOTION.md`](BRANCH_PROMOTION.md) states what its
-description carries.
+conflicts is the exception to the rules in this document.
+[`BRANCH_PROMOTION.md`](BRANCH_PROMOTION.md) states what its description
+carries. A reviewer still reports a false statement, a missing required line, a
+sibling link, or British spelling in it.
 
 There is no sentence count, because a count sets a target and an author writes
 to a target. Cut a sentence that fails the test above. Cut a word that adds
