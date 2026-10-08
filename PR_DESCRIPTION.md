@@ -106,7 +106,10 @@ nothing to the sentence around it.
 Warning: a restated signature buries the answer in detail. Keep the signature in
 the diff. A description can name a class or a contract method, because those
 names survive every revision. Write "Rename `checkRoute` to `isValidRoute` to
-follow the method-naming conventions".
+follow the method-naming conventions". This rule governs the Description prose.
+The section
+[A bullet says what changed, and stops](#a-bullet-says-what-changed-and-stops)
+governs a Changes bullet.
 
 ## Never name the place inside a file
 
@@ -128,6 +131,33 @@ why it matters:
 
 > - **`ci.yml`** — runs the lint job before the build jobs, because every
 >   build job reuses the lint cache.
+
+## A bullet says what changed, and stops
+
+Warning: the diff already carries a file's detail, and a reviewer checks every
+concrete claim. A wrong claim costs a review round, and that round does not
+reach the code.
+
+A Changes bullet says what changed in a few words. The bullet never lists the
+members that a file declares, such as the methods, the properties, or the enum
+cases. One exception holds. A member name belongs in the bullet when a change
+to that member is the whole change, such as a rename. A member name stays out
+when the member is one detail of a larger change.
+
+The bullet does not label the addition as new. The bullet does not say the file
+lacked the addition. A verb such as "adds" says both already.
+
+> Wrong — the bullet calls the surface new, and it lists the contract's
+> methods:
+>
+> - **`src/Valkyrja/Container/Manager/Contract/ContainerContract.php`** — adds
+>   the new binding and lookup surface, with `bind`, `bindAlias`,
+>   `bindSingleton`, and `get`.
+
+> Right — the bullet names the file and what changed:
+>
+> - **`src/Valkyrja/Container/Manager/Contract/ContainerContract.php`** — adds
+>   the binding and lookup surface.
 
 ## A temporary explanation lands in the description, not in a comment
 
@@ -169,9 +199,12 @@ which has three sections:
 - **Description** — the prose that the rules above govern.
 - **Types of changes** — check every box that applies.
 - **Changes** — one bullet per file or per logical change: the bold file or
-  component name, an em dash, and what changed — never the place inside the
-  file. The list is optional for a small pull request whose Description
-  already covers everything.
+  component name, an em dash, and what changed. Two rules govern the bullet:
+  - [Never name the place inside a file](#never-name-the-place-inside-a-file)
+  - [A bullet says what changed, and stops](#a-bullet-says-what-changed-and-stops)
+
+  The list is optional for a small pull request whose Description already
+  covers everything.
 
 When an issue tracks the work, put `Closes #123` in the Description. The
 description becomes the squash commit body, so that line is what closes the
