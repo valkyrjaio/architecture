@@ -141,7 +141,8 @@ explanation, not the essay around it.
 
 A reviewer reports a finding on the description in these cases:
 
-- The description misstates the change.
+- The description states something false, about the change or about anything
+  else.
 - The description does not say what changed.
 - The description does not say why the change is right.
 - The description lacks a line that a guide requires, such as `Closes #123`.
@@ -155,7 +156,7 @@ report a preference for other words.
 
 The author follows every rule in this document and in
 [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md). The rules that the cases
-above do not name, such as a restated edit or a sentence that fails the test,
+above do not name, such as a named position or a sentence that fails the test,
 bind the author only.
 
 ## The template
