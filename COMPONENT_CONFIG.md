@@ -17,23 +17,14 @@ of them, named `ComponentName<SubComponent>ConfigContract`. An adapter of that
 subcomponent carries an adapter name as well, so the extra name is what tells
 the two apart.
 
-Queue is the case.
-`Valkyrja\Queue\Client\Data\Contract\QueueClientConfigContract` holds
-`$defaultQueueClient`, and
-`Valkyrja\Queue\Client\Data\Contract\QueueRedisClientConfigContract` holds
-the settings of the Redis client. A host application holds the first to name
-its default client. A host never holds
-`Valkyrja\Application\Data\Contract\QueueConfigContract`, which configures a
-queue application instead.
-
-```php
-// Right — the name says what it configures. `QueueClientConfig` names the
-// component and the subcomponent, so it configures the subcomponent.
-// `QueueRedisClientConfig` names an adapter too, so it configures one adapter
-// of that subcomponent.
-use Valkyrja\Queue\Client\Data\Contract\QueueClientConfigContract;
-use Valkyrja\Queue\Client\Data\Contract\QueueRedisClientConfigContract;
-```
+Queue's client subcomponent shows both shapes.
+`Valkyrja\Queue\Client\Data\Contract\QueueClientConfigContract` configures
+the subcomponent, and
+`Valkyrja\Queue\Client\Data\Contract\QueueRedisClientConfigContract`
+configures one adapter of it. An application names its default client through
+the subcomponent contract, and
+`Valkyrja\Application\Data\Contract\QueueConfigContract` is a separate
+thing: it configures a queue application rather than naming a client.
 
 A contract lives in the `Data\Contract\` segment of whatever it configures, and
 a default implementation lives in the `Data\` segment beside it. A component's
@@ -51,25 +42,27 @@ service provider publishes each contract as its own container binding.
    application config class can implement several adapter contracts at once.
    Without the prefix, two adapters that both declare a `prefix` property
    collide.
-3. **A component that configures an adapter outside that adapter's own
-   domain carries its component name in every property.** The component
-   whose domain the adapter belongs to keeps the bare adapter prefix. A PSR
-   logger is a logging thing, so `LogPsrConfigContract` holds `$psrName`,
-   and every other component logs through the log adapter under
-   `$cacheLogLogger` or `$mailLogLogger`. Redis is a cache, so
-   `CacheRedisConfigContract` holds `$redisHost`, and the Queue client that
-   runs jobs through Redis holds `$queueRedisClientHost`. An adapter that one
-   component configures alone needs no component name, because nothing can
-   collide with it: `$mailgunDomain` exists only in Mail.
-4. **A subcomponent contract carries the subcomponent name in every property.**
-   `QueueClientConfigContract` holds `$defaultQueueClient`, where the `default`
-   property names the component as well, as a component config's own
-   `$defaultCache` does. This governs the subcomponent's own contract. An
-   adapter of that subcomponent carries the subcomponent name as well, in the
-   order its own contract name spells it: `QueueRedisClientConfigContract`
-   holds `$queueRedisClientHost`, and `HttpClientLogConfigContract` holds
-   `$httpClientLogLogger`. The property prefix is the contract name without
-   its `ConfigContract` suffix, which satisfies rules 2 and 3 at once.
+3. **When two components would declare the same property for the same
+   adapter, the component whose domain the adapter belongs to keeps the bare
+   name.** Every other one carries its own component name. A PSR logger is a
+   logging thing, so `LogPsrConfigContract` holds `$psrName`. Every component
+   that logs borrows the log adapter instead, and no component owns it, so
+   each one carries its own name: `$cacheLogLogger`, `$mailLogLogger`. Redis
+   is a cache, so `CacheRedisConfigContract` keeps `$redisHost` and a queue
+   that runs jobs through redis carries its own name.
+
+   An adapter that one component configures alone never reaches this rule,
+   because nothing can collide with it: `$mailgunDomain` exists only in Mail,
+   and `$amqpHost` only in Queue. Two components can also configure one
+   adapter and still collide on nothing, as `ViewPhpConfigContract`'s
+   `$phpPath` and `SessionPhpConfigContract`'s `$phpCookiePath` do.
+
+4. **A subcomponent name counts as the adapter name for rule 3.** `Client` is
+   a subcomponent of Http and of Queue alike, so an application config that
+   holds both reaches rule 3 and each property carries its component name.
+   An adapter of a subcomponent carries both names, in the order its own
+   contract spells them: `HttpClientLogConfigContract` holds
+   `$httpClientLogLogger`.
 
 ```php
 // Wrong — the component config holds every adapter config. An application that

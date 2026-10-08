@@ -85,7 +85,8 @@ These hold in **every** language. Do not violate them in a port.
 - **`AppConfig` is the build tool entry point.** No `valkyrja.yaml`. The app
   config class already lists the component providers; `sindri` reads it via AST.
 - **A component config holds only component-wide settings.** Each adapter gets
-  its own config contract and its own default implementation. The component's
+  its own config contract, and a default implementation when its settings have
+  a usable default. The component's
   service provider publishes each contract as a separate container binding. A
   component config that holds every adapter config forces an application to
   construct configuration for adapters that the application never uses. An adapter
@@ -333,17 +334,18 @@ A component gets one `ComponentNameConfigContract` for the settings that
 apply to the whole component, and each adapter gets its own
 `ComponentName<Adapter>ConfigContract`. The component config does not hold
 the adapter configs, and an adapter contract prefixes every property with
-the adapter name. A component that configures an adapter outside that
-adapter's own domain carries its component name as well, and the component
-whose domain the adapter belongs to keeps the bare prefix: Redis is a cache,
-so Cache holds `$redisHost` and the Queue client holds
-`$queueRedisClientHost`. A contract whose settings have a usable default has
+the adapter name. When two components would declare the same property for
+the same adapter, the component whose domain the adapter belongs to keeps the
+bare name and every other one carries its own component name. An adapter only
+one component configures never reaches that rule, which is why
+`MailMailgunConfigContract` holds `$mailgunDomain`. A subcomponent name
+counts as the adapter name for it, because `Client` names a subcomponent of
+Http and of Queue alike. A contract whose settings have a usable default has
 a default implementation that drops the `Contract` suffix.
 
 A component whose subcomponents configure separately gets one contract for
-each of them, and that contract carries the subcomponent name in every
-property (`$defaultQueueClient`). An adapter of a subcomponent carries an
-adapter name as well, so the extra name tells the two apart. A contract
+each of them, and an adapter of that subcomponent carries an adapter name as
+well, so the extra name tells the two apart. A contract
 lives in the `Data\Contract\` segment of whatever it configures, and a
 default implementation lives in the `Data\` segment beside it. A contract
 with no usable default gets none, and the service provider throws instead of
