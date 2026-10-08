@@ -20,14 +20,12 @@ The 100% rule is **per file, not an aggregate**, and it binds both directions:
 - **Every file you touch stays at 100%.** Adding a branch to an existing file
   means adding the test for it in the same change.
 
-**A green gate is not proof of coverage.** Every repo _runs_ coverage and
-publishes a report, but no language's gate currently **fails** on it — a build
-at 55% passes exactly like one at 100%. That is the deliberate state for now,
-and gating may be added later; either way the 100% requirement does not depend
-on a tool enforcing it. So **read the coverage report yourself** before calling
-a change done, and check the per-file numbers for the files you added or
-changed, not just the summary line. If gating does arrive, treat it as a
-backstop for what you missed — never as the thing that defines the rule.
+**A green gate is not proof of coverage.** A gate's metric and threshold are
+configured per language and per repo, so a green gate can prove line coverage
+and leave branch coverage per file unmeasured. Every repo runs coverage and
+publishes a report. **Read the report yourself** before calling a change
+done. Check the per-file numbers for the files you added or changed. A gate is
+a backstop for what you missed, and the gate never defines the rule.
 
 The only exception is an **explicitly documented** one: code that genuinely
 cannot be covered (a process-exiting call, a blocking server loop) is excluded
