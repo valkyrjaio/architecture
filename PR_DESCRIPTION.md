@@ -9,10 +9,10 @@ as the commit body ([`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md)). The
 description is what `git log` shows for the change, forever. Write it for the
 reviewer today, and for the reader years later.
 
-Warning: a long description buries the sentence the reader needs, and each
-concrete claim in it is one more thing a reviewer can dispute. A short
-description that names what was done in each area is enough, because the diff
-carries the detail. The rules below keep the description short and true.
+Warning: a long description buries the sentence the reader needs. A short
+description is enough when the description names what changed in each file or
+logical change. The diff carries the how. The rules below keep the description
+short and true.
 
 ## The description holds the what and the why
 
@@ -102,11 +102,10 @@ nothing to the sentence around it.
 
 ## A stable name sets the level of detail
 
-"Update a method for naming consistency" names no method, and a restated
-signature buries the answer in detail. A class name and a contract method name
-survive every revision, so the description names them. Write "Rename
-`checkRoute` to `isValidRoute` to follow the method-naming conventions". The
-signature stays in the diff.
+A description can name a class or a contract method, because those names
+survive every revision. Write "Rename `checkRoute` to `isValidRoute` to follow
+the method-naming conventions". A restated signature buries the answer in
+detail, so the signature stays in the diff.
 
 ## Name the file, not the place inside it
 
@@ -138,13 +137,19 @@ explanation in the description instead.
 State the explanation in a sentence or two. The description takes the
 explanation, not the essay around it.
 
-## A review raises a description only when it is wrong
+## A reviewer raises a description only when the description breaks a rule
 
-A reviewer raises the description when it misstates the change: it claims
-something the change does not do, or it names the wrong file. A reviewer does
-not raise a description because it is short, because it is general, or because
-other words would say the same thing better. A review round is worth most on
-the code, less on a wrong document, and least on the description.
+A reviewer raises the description in these cases:
+
+- The description misstates the change.
+- The description lacks a line that this document requires, such as
+  `Closes #123`.
+- The description breaks a rule above, such as a restated edit or a named
+  position.
+
+A reviewer does not raise a description because the description is short or
+general. A reviewer does not raise a description because other words would say
+the same thing better.
 
 ## The template
 
