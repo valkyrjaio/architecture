@@ -17,7 +17,7 @@ of them, named `ComponentName<SubComponent>ConfigContract`. An adapter of that
 subcomponent carries an adapter name as well, so the extra name is what tells
 the two apart.
 
-Queue's client subcomponent shows both shapes.
+Queue's client subcomponent holds one contract of each kind.
 `Valkyrja\Queue\Client\Data\Contract\QueueClientConfigContract` configures
 the subcomponent, and
 `Valkyrja\Queue\Client\Data\Contract\QueueRedisClientConfigContract`
@@ -25,6 +25,12 @@ configures one adapter of it. An application names its default client through
 the subcomponent contract, and
 `Valkyrja\Application\Data\Contract\QueueConfigContract` is a separate
 thing: it configures a queue application rather than naming a client.
+
+These rules govern a component's own config and its adapter configs. They do
+not reach an application config, which
+[`ADDING_A_MODULE.md`](ADDING_A_MODULE.md) covers: `HttpConfigContract`,
+`CliConfigContract` and `QueueConfigContract` live in `Application\Data\`
+rather than in a component, and `App` binds each one separately.
 
 A contract lives in the `Data\Contract\` segment of whatever it configures, and
 a default implementation lives in the `Data\` segment beside it. A component's
@@ -44,25 +50,46 @@ service provider publishes each contract as its own container binding.
    collide.
 3. **When two components would declare the same property for the same
    adapter, the component whose domain the adapter belongs to keeps the bare
-   name.** Every other one carries its own component name. A PSR logger is a
-   logging thing, so `LogPsrConfigContract` holds `$psrName`. Every component
-   that logs borrows the log adapter instead, and no component owns it, so
-   each one carries its own name: `$cacheLogLogger`, `$mailLogLogger`. Redis
-   is a cache, so `CacheRedisConfigContract` keeps `$redisHost` and a queue
-   that runs jobs through redis carries its own name.
+   name.** Every other one carries its own component name. Compare the two
+   names with every component name removed, because the rule has to fire
+   before either one carries it. Redis is a cache, so
+   `CacheRedisConfigContract` keeps `$redisHost` and a queue that reaches the
+   same store carries its own name. No component owns the log adapter, so
+   every component that logs through it carries its own name:
+   `$cacheLogLogger`, `$mailLogLogger`.
 
-   An adapter that one component configures alone never reaches this rule,
-   because nothing can collide with it: `$mailgunDomain` exists only in Mail,
-   and `$amqpHost` only in Queue. Two components can also configure one
-   adapter and still collide on nothing, as `ViewPhpConfigContract`'s
-   `$phpPath` and `SessionPhpConfigContract`'s `$phpCookiePath` do.
+   A contract that carries its component name carries it in every property.
+   `CacheLogConfigContract` holds `$cacheLogPrefix` beside `$cacheLogLogger`,
+   although no other component declares a prefix for the log adapter.
 
-4. **A subcomponent name counts as the adapter name for rule 3.** `Client` is
-   a subcomponent of Http and of Queue alike, so an application config that
-   holds both reaches rule 3 and each property carries its component name.
-   An adapter of a subcomponent carries both names, in the order its own
-   contract spells them: `HttpClientLogConfigContract` holds
-   `$httpClientLogLogger`.
+   Two cases never reach this rule. An adapter that one component configures
+   alone cannot collide with anything, which is why `MailMailgunConfigContract`
+   holds `$mailgunDomain` and `LogPsrConfigContract` holds `$psrName`. Two
+   components can also configure one adapter and name nothing alike, as
+   `ViewPhpConfigContract`'s `$phpPath` and `SessionPhpConfigContract`'s
+   `$phpCookiePath` do, and the rule does not fire for them either.
+
+4. **A subcomponent name counts as the adapter name for rule 3.** `Client`
+   names a subcomponent of Http and of Queue alike, so an application config
+   holding `HttpClientConfigContract` and `QueueClientConfigContract` reaches
+   rule 3 and each property carries its component name. An adapter of a
+   subcomponent carries both names, in the order its own contract spells
+   them, as `HttpClientLogConfigContract`'s `$httpClientLogLogger` carries
+   `Http`, `Client` and `Log`.
+
+```php
+// Right — the log adapter belongs to no component, so each borrower carries
+// its own name. The second adds a subcomponent, because `Client` is one.
+interface CacheLogConfigContract
+{
+    public string $cacheLogLogger { get; }
+}
+
+interface HttpClientLogConfigContract
+{
+    public string $httpClientLogLogger { get; }
+}
+```
 
 ```php
 // Wrong — the component config holds every adapter config. An application that
