@@ -62,7 +62,7 @@ Two properties shape everything:
 - **The "response" is a decision, not a payload.** There is no client awaiting bytes. The pipeline's outbound value is
   the ack/retry/fail decision plus observability metadata.
 
-The adapter handles broker-specific framing (deletion, visibility extension, backoff, dead-letter routing). The
+The entry handles broker-specific framing (deletion, visibility extension, backoff, dead-letter routing). The
 framework works with decoded envelopes, attributes as structured maps, and the outcome as a value type. Broker specifics
 never cross into framework territory.
 
@@ -169,8 +169,8 @@ outcome enum), not another message. So the whole pipeline is **`Job` in → `Job
 
 A producer can therefore ship **only the fields above** — the data envelope, nothing else. There is no settable
 "response" with headers, a URL, or a status the way HTTP lets you _build_ a `Response`: **all transport is the
-entry/adapter's** (delivery, settlement, redelivery, dead-lettering). The envelope is data; the outcome is an enum;
-everything in between belongs to the adapter. And because `attributes` is the headers equivalent, it gets a first-class
+entry's** (delivery, settlement, redelivery, dead-lettering). The envelope is data; the outcome is an enum;
+everything in between belongs to the entry. And because `attributes` is the headers equivalent, it gets a first-class
 data class exactly as HTTP headers do (see `Attributes`
 under [Core Contracts](#core-contracts)) — not a raw map a handler pokes at.
 
@@ -184,9 +184,9 @@ under [Core Contracts](#core-contracts)) — not a raw map a handler pokes at.
   version-like field could give — _who produced this_ — is served by `producer`.
 - **`payload_type` / any class-string** — a PHP class name is meaningless to a Go consumer. `name` resolves the handler;
   `payload` carries the data. There is no decode hint anywhere — the payload is self-describing JSON.
-- **Broker delivery metadata** — the native message id / receive handle and the **visibility-timeout deadline** are
-  supplied by the adapter into the `Job` at receipt, not carried on the wire. A consumed
-  `Job` = **deserialized envelope + broker delivery metadata**.
+- **Broker delivery metadata** — the native message id, receive handle and **visibility-timeout deadline** never cross
+  the wire and never reach the `Job`. The entry holds them for the one delivery it is settling, so a consumed `Job` is
+  the deserialized envelope and nothing more.
 
 ### Rejected alternatives (decision log)
 
@@ -211,7 +211,7 @@ under [Core Contracts](#core-contracts)) — not a raw map a handler pokes at.
   first-class on `Job`.** Splitting them out would make the envelope shape _conditional on the processor_, the exact
   thing the cross-processor contract exists to prevent — and framework-requeue processors need them in the body anyway
   (the client rewrites the whole `Job`). Instead the shape stays uniform and only the **sourcing** varies: the
-  entry/adapter reads the value from the wire body (framework-requeue) or from the processor's native counter/headers
+  entry reads the value from the wire body (framework-requeue) or from the processor's native counter/headers
   (processor-owned) and normalizes it into `Job.getAttempts()`. Same field everywhere; sourced correctly per redelivery
   model.
 - **Re-applying `delay_ms` on every retry → applied on first publish only.** `delay_ms` is producer-authored intent; the
@@ -230,7 +230,7 @@ Queue/
   Message      // Job, JobResult, Attributes
   Middleware   // the pipeline stage handlers
   Routing      // Route, Router, RouteCollection, the @Route attribute + collector
-  Server       // JobHandler + the QueueAdapter (consume) contract
+  Server       // JobHandler, its stage handlers, and the consume-side throwables
 ```
 
 `Message` is the analog of `Http/Message` and `gRPC/message` — the category housing the message and its parts, with`Job`
@@ -276,7 +276,7 @@ The language-agnostic surface mirrors Http/Cli/gRPC, with queue vocabulary.
 
 ### `JobHandler`
 
-The kernel entry point, analogous to `ServiceHandler` (gRPC) / `RequestHandler` (HTTP). Worker adapters hand messages to
+The kernel entry point, analogous to `ServiceHandler` (gRPC) / `RequestHandler` (HTTP). A worker entry hands jobs to
 `JobHandler.handle()`.
 
 Responsibilities:
@@ -287,7 +287,7 @@ Responsibilities:
 
 As in Http/Cli/gRPC, split the kernel so the **broker settlement** (ack/nack/extend) can happen between the
 `SettlingResult` stage and `ResultSettled`: `handle` (through `ThrowableCaught`) → `settlingResult` (always-run) →
-[adapter settles with the broker] → `resultSettled` (always-run). A `run` convenience bundles
+[the entry settles with the broker] → `resultSettled` (always-run). A `run` convenience bundles
 `handle`+`settlingResult`. Each middleware method matches its stage type name (`settlingResult`, `resultSettled`, …) so
 a single class can implement multiple middleware stages without method collisions.
 
@@ -332,7 +332,7 @@ Job   // immutable — every with* returns a new Job, like Http Request / Cli In
 
 ### `JobResult` (enum)
 
-The "response" — the settlement decision and nothing else. Like Cli's `ExitCode`: a closed set the adapter reads and
+The "response" — the settlement decision and nothing else. Like Cli's `ExitCode`: a closed set the entry reads and
 acts on, carrying no payload. Not every processor can pass detail back (a push processor answers with an HTTP status),
 so a result never carries any.
 
@@ -379,7 +379,7 @@ Route
 
 The **headers data class**: a first-class, immutable, case-insensitive multi-map, housed and passed exactly as HTTP
 houses request/response headers (not a raw map a handler pokes at). It is the envelope's `attributes` field. (Any
-visibility-timeout / message-ownership window is a **broker concern the adapter manages** — it is not a framework
+visibility-timeout / message-ownership window is a **broker concern the entry manages** — it is not a framework
 contract on the `Job`.)
 
 ## Middleware Pipeline
@@ -404,9 +404,9 @@ contract on the `Job`.)
 
 `JobReceived`, `SettlingResult`, and `ResultSettled` are unconditional — they run on every job that produces an outcome,
 including error paths. Debug is the one exception: a throwable then leaves `handle` instead of becoming an outcome, so
-neither settlement stage runs. The remaining stages are conditional, running whenever their case applies:
-`RouteMatched`/`RouteDispatched` when the job resolves, `RouteNotMatched` when it doesn't, and `ThrowableCaught` when an
-earlier stage throws.
+no stage after it runs, `ThrowableCaught` and both settlement stages included. The remaining stages are conditional,
+running whenever their case applies: `RouteMatched`/`RouteDispatched` when the job resolves, `RouteNotMatched` when it
+doesn't, and `ThrowableCaught` when an earlier stage throws.
 
 ### Exception → outcome mapping
 
@@ -419,38 +419,37 @@ overridable per route):
 - A worker shutdown → `RETRY` with no penalty (the message returns for another worker), since the work was not
   completed.
 
-## Worker Adapters
+## Worker Entries
 
-The adapter is the queue protocol's **entry module** — the direct analog of the entry classes in the other protocols:
-Http's server + `RequestHandler`, Cli's console + `InputHandler`, gRPC's
-`ServiceAdapter` + `ServiceHandler`. It owns both ends of a delivery and nothing in between: the **entry** (accept a
-native delivery from the processor and normalize it into a `Job`) and the **response** (take the `JobResult` the kernel
-returns and settle it back with the processor). Routing, middleware, and the handler are all processor-agnostic; only
-the adapter knows what a Cloud Tasks POST or an SQS receipt looks like. "Processor" is the umbrella term here — a
-message broker (SQS, AMQP, Redis) or a managed platform (Cloud Tasks, Lambda, Pub/Sub push).
+The entry of a processor is the queue protocol's **entry module** — the direct analog of the entry classes in the
+other protocols: Http's server + `RequestHandler`, Cli's console + `InputHandler`, gRPC's `ServiceAdapter` +
+`ServiceHandler`. It owns both ends of a delivery and nothing in between: the **receipt** (accept a native delivery
+from the processor and normalize it into a `Job`) and the **response** (take the `JobResult` the kernel returns and
+settle it back with the processor). Routing, middleware, and the handler are all processor-agnostic; only the entry
+knows what a Cloud Tasks POST or an SQS receipt looks like. "Processor" is the umbrella term here — a message broker
+(SQS, AMQP, Redis) or a managed platform (Cloud Tasks, Lambda, Pub/Sub push).
 
-The entry and exit stay **clean** — plain `Job` in, `JobResult` out — up to the point where they must be mapped onto a
-specific processor's runtime (e.g. OpenSwoole in PHP); that translation is the adapter's only real work, and it is the
+Receipt and response stay **clean** — plain `Job` in, `JobResult` out — up to the point where they must be mapped onto
+a specific processor's runtime (e.g. OpenSwoole in PHP); that translation is the entry's only real work, and it is the
 same idea on both sides of a delivery.
 
-Adapters bridge an external processor to `JobHandler`. Responsibilities:
+An entry bridges an external processor to `JobHandler`. Responsibilities:
 
 1. Poll/subscribe for messages from the broker (long-poll, blocking pop, push subscription, …).
 2. Decode the message; build a `Job` (name, payload, attributes, id, attempts).
-3. Invoke `JobHandler.handle(job)` (via the worker base's own `handle`).
+3. Run the job through `JobHandler` (`run` on the worker base, or `handle` and `settlingResult` apart).
 4. **Settle** with the processor based on the `JobResult` outcome (see [The outcome is an enum](#the-outcome-is-an-enum)
-   and [Redelivery](#redelivery-who-performs-a-retry)). It slots between `settlingResult` and `resultSettled` via
-   the worker base's settlement callback.
+   and [Redelivery](#redelivery-who-performs-a-retry)). It slots between `settlingResult` and `resultSettled`.
 
-Adapters may consume in **batches** and dispatch each message independently (each in its own child container), settling
+An entry may consume in **batches** and dispatch each message independently (each in its own child container), settling
 per message.
 
 ### The outcome is an enum
 
 What the kernel hands back for settlement is a small, closed set — a `JobResult`: `ACK | RETRY | FAIL | DEAD_LETTER`,
-exactly like Cli's `ExitCode`. The adapter reads the enum and acts, nothing more. That closed outcome is what lets one
+exactly like Cli's `ExitCode`. The entry reads the enum and acts, nothing more. That closed outcome is what lets one
 processor-agnostic kernel drive every processor — turning `ACK`/`RETRY`/`FAIL` into processor-specific action is the
-adapter's whole job on the response side.
+entry's whole job on the response side.
 
 ### Redelivery: who performs a retry
 
@@ -467,21 +466,27 @@ Who actually performs a `RETRY` depends on the processor, and the entry of that 
   read from the dispatched `Job` and not from the incremented copy. The producer's original `delay_ms` is not
   re-applied. `ACK` deletes; `FAIL` and `DEAD_LETTER` (the latter when `attempts >= max_attempts`) route to the
   dead-letter destination. Here `attempts` and `modified_at` are envelope-authoritative.
-- **Processor-owned adapters** — the processor redelivers, owning the loop (SQS, AMQP, Beanstalkd, Pub/Sub, Cloud Tasks,
-  …). The entry translates the outcome into the processor's native signal (nack/redeliver, return a failure status,
-  extend visibility, …) and the processor owns the retry, its backoff, and its counter. `attempts` comes back through
-  the processor's header/receive-count, which the entry normalizes into `Job.getAttempts()`; the envelope is not
+- **Processor-owned redelivery** — the processor redelivers, owning the loop (SQS, AMQP, Beanstalkd, Pub/Sub, Cloud
+  Tasks, …). The entry translates the outcome into the processor's native signal (nack/redeliver, return a failure
+  status, extend visibility, …) and the processor owns the retry, its backoff, and its counter. `attempts` comes back
+  through the processor's header/receive-count, which the entry normalizes into `Job.getAttempts()`; the envelope is not
   rewritten, so `modified_at` is not authored on this path.
 
 Either way the handler and middleware are unchanged — a normalized `Job` in, a `JobResult`
 out, blind to which redelivery model the entry chose.
 
-### Adapter interface
+### The pull entry's interface
+
+A pull entry extends `PullQueue` and implements four steps. `PullQueue` owns the
+loop that calls them, and `run` bounds it by a job count and a deadline.
 
 ```
-QueueAdapter
-  start(JobHandler): void   // begin consuming (connect, subscribe, poll loop)
-  stop(): void                  // graceful shutdown (stop polling, drain in-flight)
+PullQueue
+  run(QueueConfig, maxJobs, maxSeconds): void  // boot once, then loop
+  connect(Application): void                   // open the connection
+  receive(): Job|null                          // one delivery, or nothing
+  settle(Job, JobResult, Client): void         // inherited from WorkerQueue
+  disconnect(): void                           // graceful shutdown
 ```
 
 ### Push vs. pull — who initiates
@@ -576,11 +581,11 @@ InternalClient — an abstract base, not a contract (Sync and Deferred extend it
 
 The entry calls `settle` on a client that is an `InternalClient`, and on no other, so `Sync` and `Deferred` each see
 every `ACK`, `FAIL` and `DEAD_LETTER` as well as every `RETRY`. `InMemory` extends `Client` and records pushes only.
-Only `Sync` acts on a terminal outcome, by recording the first failed one and throwing it at the call site. `Deferred`
-runs after the response, so it has no call site left to throw at and records nothing. That one call is the whole
-settlement: `settle` routes a `RETRY` to its own `requeue`, so the entry never calls `requeue` itself for an internal
-client. The `requeue` seam below is what the entry of a re-queue processor calls instead, because such a processor has
-no client-side settlement of its own.
+Only `Sync` acts on a failed outcome, by recording the first `FAIL` or `DEAD_LETTER` and throwing it at the call site.
+`Deferred` runs after the response, so it has no call site left to throw at and records nothing. That one call is the
+whole settlement: `settle` routes a `RETRY` to its own `requeue`, so the entry never calls `requeue` itself for an
+internal client. The `requeue` seam below is what the entry of a re-queue processor calls instead, because such a
+processor has no client-side settlement of its own.
 
 `requeue(Job)` is the settlement seam — the entry of a processor with no native redelivery hands it the `Job` **as
 dispatched**, and it bumps `attempts` and derives the hold from the ramp of the attempt that just failed. `retry` is the
@@ -598,19 +603,20 @@ A processor that redelivers on its own never calls either one: its entry hands t
   meaningful; it succeeds once the processor acknowledges the item was enqueued, and throws on an enqueue error. The two
   sides are asymmetric by design: the `Client` publishes (void / enqueue-ack), the entry + `Router` consume (`Job` →
   `JobResult`).
-- **The framework stamps the rest.** At `push` the framework sets `id` (VLID V1), `producer`
-  (`AppName lang/version`), `enqueued_at`, `modified_at` (= `enqueued_at`), and ensures `attempts` (`1`); the producer
-  supplies only the authorable fields (`name`, `payload`, `attributes`, `priority`, `delay_ms`, `max_attempts`,
-  `retry_delay_ms`, `retry_delay_multiply_by_attempt`, target queue/connection — all already on `Job`, so no options
-  object).
+- **The framework stamps the rest.** At `push` the framework sets `id` (VLID V1), `producer` (`AppName lang/version`),
+  `enqueued_at`, `modified_at` (= `enqueued_at`), and ensures `attempts` (`1`); the producer supplies only the
+  authorable fields (`name`, `payload`, `attributes`, `priority`, `delay_ms`, `max_attempts`, `retry_delay_ms`,
+  `retry_delay_multiply_by_attempt` — all already on `Job`, so no options object). The target queue and connection are
+  not among them, because addressing is config rather than envelope, as the envelope section says.
 - **`getPushed()` records every push, lifecycle-scoped.** The `Client` keeps the (stamped) `Job`s handed to it during
   this unit of work, returned as `Job[]`. One primitive, two payoffs: the test surface (a test asserts over it directly,
   with no fake), and per-request observability. `Sync`, `Deferred` and `InMemory` each hold a buffer of their own, which
   `getPushed` does not read. **The record ends with the unit of work, not with the process.** A client is a container
   singleton, and a long-running host's client outlives every job it runs, so `clearPushed` is what bounds the record.
-  `PullQueue.loop` calls it before each job, which leaves the last job's record readable once the loop exits. A host
-  that drains a `Deferred` client ends its own unit of work the same way. Without that call a long-running server would
-  accumulate every push it ever made.
+  `PullQueue.loop` is its only caller in the framework, and it calls it before each job, which leaves the last job's
+  record readable once the loop exits. Every other host calls it itself, at the end of whatever it treats as the unit of
+  work — the drain of a `Deferred` client, or the request a `Sync` client pushed from. Nothing else bounds the record,
+  so a long-running host that never calls it accumulates every push it ever made.
 - **No middleware on produce.** Producing is a thin service straight over the adapter's publish; the entire middleware
   pipeline runs on **consume**. Cross-cutting `attributes` (trace id, tenant) are stamped as producer-service defaults,
   not via a produce-side middleware stage.
@@ -625,16 +631,16 @@ application, the same as a worker that a broker delivers to. The entry drives th
 as every other job, so no client calls `JobHandler` directly. `InMemory` holds its jobs until a test hands each job to
 an entry.
 
-| Adapter    | `push` does (besides record)       | when it runs              |
-| ---------- | ---------------------------------- | ------------------------- |
-| `Sync`     | appends, and the first push drains | **now**, blocking         |
-| `Deferred` | buffers it                         | on host **terminate**     |
-| `InMemory` | buffers it                         | when a test **drains** it |
+| Adapter    | `push` does (besides record)      | when it runs              |
+| ---------- | --------------------------------- | ------------------------- |
+| `Sync`     | appends, and an outer push drains | **now**, blocking         |
+| `Deferred` | buffers it                        | on host **terminate**     |
+| `InMemory` | buffers it                        | when a test **drains** it |
 
 - **`Sync`** runs the full pipeline inline and blocks, and it runs the whole retry chain. A push appends the job to a
-  buffer, and the first push drains that buffer to completion, so a job that pushes another job still runs it before the
-  outer push returns. On `RETRY` it appends the `attempts++` `Job` and the same drain runs it again at once, because no
-  durable place holds `retry_delay_ms`. The chain ends when the job acknowledges or reaches `max_attempts`. Only the
+  buffer, and an outermost push drains that buffer to completion, so a job that pushes another job still runs it before
+  the outer push returns. On `RETRY` it appends the `attempts++` `Job` and the same drain runs it again at once, because
+  no durable place holds `retry_delay_ms`. The chain ends when the job acknowledges or reaches `max_attempts`. Only the
   timing differs from production, and the retry count is identical.
 - **`Deferred`** buffers each job, and a per-host terminate bridge middleware drains the buffer after the response. The
   bridge runs at the Http terminate stage, the Cli after-run stage, or the gRPC `Terminated` stage. To use `Deferred`,
@@ -656,7 +662,7 @@ never binds it in the queue container. Job code therefore cannot reach the clien
 
 A pull worker takes the other route. `PullQueue.loop` resolves the client from the container of the queue application it
 booted, because a worker has no caller to hand one in. The providers of a queue application bring the client services,
-and a worker's config implements the client config contract as well as `QueueConfigContract`, so the container can
+and a worker's config implements `QueueClientConfigContract` as well as `QueueConfigContract`, so the container can
 resolve the client the worker settles a `RETRY` through.
 
 **How the outcome comes back.** The entry returns nothing, the same as `Http.run` and `Cli.run`. A `RETRY` reaches the
@@ -693,7 +699,7 @@ added complexity, not a v1 goal). Noted so the option isn't lost.
 
 Same discovery → map pattern as the other modules:
 
-- An attribute/annotation/decorator (e.g. `@Route(name, handler)`) on handler classes/methods, plus a
+- An attribute/annotation/decorator (e.g. `@Route(name, description, handler)`) on handler classes/methods, plus a
   repeatable middleware attribute dispatched to its stage. The attribute carries no retry or attempts policy, because
   the producer decides those and the envelope carries them.
 - A collector reflects (or generates) these into `Route`s keyed by job name.
@@ -704,9 +710,10 @@ Same discovery → map pattern as the other modules:
 Queue wiring mirrors Http, Cli, and gRPC. Each queue application is a separate application, and a host application
 reaches it only through a client.
 
-- **`QueueConfig` is the config of a queue application.** It holds the default middleware for each stage, and it carries
-  its own providers, as every Valkyrja config does. The providers bring the whole queue wiring, which includes the
-  routes, the middleware, and the data-cache classes. A host application never holds the config of a queue application.
+- **`QueueConfigContract` is the config of a queue application.** It holds the default middleware for each stage, and it
+  carries its own providers, as every Valkyrja config does. The providers bring the whole queue wiring, which includes
+  the routes, the middleware, and the data-cache classes. A host application never holds the config of a queue
+  application.
 - **Every job runs through a queue entry, in an isolated queue application.** The queue application has its own
   container, and it never shares the container of the host. The entry drives `JobHandler` → `Router` for a job from a
   broker and for a job from an internal client alike. The same routes, middleware, and config therefore apply to every
@@ -750,7 +757,7 @@ reaches it only through a client.
 ## Scope of What Is Not Portable
 
 Per-broker and per-language: connection/pool setup, visibility/prefetch/dead-letter configuration, serialization of the
-payload, and the poll/subscribe loop. Everything above the adapter — job map, middleware composition, container
+payload, and the poll/subscribe loop. Everything above the entry — job map, middleware composition, container
 resolution, outcome mapping, observability — is standardized across all ports.
 
 ## Implementation Sequence
