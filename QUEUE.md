@@ -249,10 +249,12 @@ Producing and consuming are organized asymmetrically, for the same reason Http i
   loop that a per-processor entry extends, and **`PushQueue`** (CGI, on the language's built-in HTTP handler) answers a
   pushing processor. All of them ship out of the box, in three places. `Queue` and `PushQueue` are concrete, and sit
   directly in `Application/Entry`. `WorkerQueue`, `InternalQueue` and `PullQueue` are abstract bases, and sit in
-  `Application/Entry/Abstract`. A per-processor pull entry such as `Redis/RedisQueue` sits in a segment of its own.
-  Only **`PushWorkerQueue`** is per-web-server-runtime and lives in that server's repo, exactly as the Http and gRPC
-  worker entries do. It stays **thin**: it _composes_ the reusable, per-processor **mapper** and **response mapping**
-  (which live in the Queue module) rather than reimplementing them (see [Push vs. pull](#push-vs-pull--who-initiates)).
+  `Application/Entry/Abstract`. A per-processor pull entry such as `Redis/RedisQueue` sits in a segment of its own. An
+  application extends `InternalQueue` itself and implements its one abstract member, `getConfig()`, which returns the
+  config of the queue application that entry boots. A sync or deferred client config names that subclass. Only
+  **`PushWorkerQueue`** is per-web-server-runtime and lives in that server's repo, exactly as the Http and gRPC worker
+  entries do. It stays **thin**: it _composes_ the reusable, per-processor **mapper** and **response mapping** (which
+  live in the Queue module) rather than reimplementing them (see [Push vs. pull](#push-vs-pull--who-initiates)).
 
 **Running a consumer is the dev's to wire — the framework ships entries, not a server.** It never ships an HTTP server
 or a `queue:work` command; it ships the entries and you point a runtime at the bootstrap, exactly as Http ships CGI +
@@ -311,7 +313,7 @@ The **single message class for both directions** — no separate request/respons
 the consumer receives the same `Job`. It is **immutable**, exactly like Http `Request` / Cli `Input`: a `Job` is known
 at ingest and never mutated in place — the framework only ever produces a _new_ one via `with*` (attempts incremented,
 etc.) until, at the very end, an entry decides whether to re-queue it based on the processor. On **produce** the
-framework stamps `id`, `producer`, `enqueued_at` (and `attempts` = 1); on **consume** the adapter normalizes `attempts`
+framework stamps `id`, `producer`, `enqueued_at` (and `attempts` = 1); on **consume** the entry normalizes `attempts`
 from the processor. It is the in-memory form of the [Wire Envelope](#wire-envelope).
 
 ```
@@ -466,13 +468,13 @@ Who actually performs a `RETRY` depends on the processor, and the entry of that 
   re-applied. `ACK` deletes; `FAIL` and `DEAD_LETTER` (the latter when `attempts >= max_attempts`) route to the
   dead-letter destination. Here `attempts` and `modified_at` are envelope-authoritative.
 - **Processor-owned adapters** — the processor redelivers, owning the loop (SQS, AMQP, Beanstalkd, Pub/Sub, Cloud Tasks,
-  …). The adapter translates the outcome into the processor's native signal (nack/redeliver, return a failure status,
+  …). The entry translates the outcome into the processor's native signal (nack/redeliver, return a failure status,
   extend visibility, …) and the processor owns the retry, its backoff, and its counter. `attempts` comes back through
-  the processor's header/receive-count, which the adapter normalizes into `Job.getAttempts()`; the envelope is not
+  the processor's header/receive-count, which the entry normalizes into `Job.getAttempts()`; the envelope is not
   rewritten, so `modified_at` is not authored on this path.
 
 Either way the handler and middleware are unchanged — a normalized `Job` in, a `JobResult`
-out, blind to which redelivery model the adapter chose.
+out, blind to which redelivery model the entry chose.
 
 ### Adapter interface
 
@@ -574,9 +576,11 @@ InternalClient — an abstract base, not a contract (Sync and Deferred extend it
 
 The entry calls `settle` on a client that is an `InternalClient`, and on no other, so `Sync` and `Deferred` each see
 every `ACK`, `FAIL` and `DEAD_LETTER` as well as every `RETRY`. `InMemory` extends `Client` and records pushes only.
-That one call is the whole settlement: `settle` routes a `RETRY` to its own `requeue`, so the entry never calls
-`requeue` itself for an internal client. The `requeue` seam below is what the entry of a re-queue processor calls
-instead, because such a processor has no client-side settlement of its own.
+Only `Sync` acts on a terminal outcome, by recording the first failed one and throwing it at the call site. `Deferred`
+runs after the response, so it has no call site left to throw at and records nothing. That one call is the whole
+settlement: `settle` routes a `RETRY` to its own `requeue`, so the entry never calls `requeue` itself for an internal
+client. The `requeue` seam below is what the entry of a re-queue processor calls instead, because such a processor has
+no client-side settlement of its own.
 
 `requeue(Job)` is the settlement seam — the entry of a processor with no native redelivery hands it the `Job` **as
 dispatched**, and it bumps `attempts` and derives the hold from the ramp of the attempt that just failed. `retry` is the
@@ -601,11 +605,12 @@ A processor that redelivers on its own never calls either one: its entry hands t
   object).
 - **`getPushed()` records every push, lifecycle-scoped.** The `Client` keeps the (stamped) `Job`s handed to it during
   this unit of work, returned as `Job[]`. One primitive, two payoffs: the test surface (a test asserts over it directly,
-  with no fake), and per-request observability. The `Deferred` and `InMemory` adapters each hold a separate buffer,
-  which `getPushed` does not read. **The record ends with the unit of work, not with the process.** A client is a
-  container singleton, and a worker's client outlives every job it runs, so `clearPushed` is what bounds the record.
-  `PullQueue.loop` calls it before each job, which leaves the last job's record readable once the loop exits. Without
-  that call a long-running server would accumulate every push it ever made.
+  with no fake), and per-request observability. `Sync`, `Deferred` and `InMemory` each hold a buffer of their own, which
+  `getPushed` does not read. **The record ends with the unit of work, not with the process.** A client is a container
+  singleton, and a long-running host's client outlives every job it runs, so `clearPushed` is what bounds the record.
+  `PullQueue.loop` calls it before each job, which leaves the last job's record readable once the loop exits. A host
+  that drains a `Deferred` client ends its own unit of work the same way. Without that call a long-running server would
+  accumulate every push it ever made.
 - **No middleware on produce.** Producing is a thin service straight over the adapter's publish; the entire middleware
   pipeline runs on **consume**. Cross-cutting `attributes` (trace id, tenant) are stamped as producer-service defaults,
   not via a produce-side middleware stage.
@@ -649,9 +654,9 @@ in a fresh child container, the same way a worker runs each job that a broker de
 that the two applications share, and that signature is how it crosses: the entry passes it to the settlement step and
 never binds it in the queue container. Job code therefore cannot reach the client that pushed the job.
 
-A pull worker takes the other route. `PullQueue.loop` resolves the client from the container of the queue application
-it booted, because a worker has no caller to hand one in. The providers of a queue application bring the client
-services, and a worker's config implements the client config contract as well as `QueueConfig`, so the container can
+A pull worker takes the other route. `PullQueue.loop` resolves the client from the container of the queue application it
+booted, because a worker has no caller to hand one in. The providers of a queue application bring the client services,
+and a worker's config implements the client config contract as well as `QueueConfigContract`, so the container can
 resolve the client the worker settles a `RETRY` through.
 
 **How the outcome comes back.** The entry returns nothing, the same as `Http.run` and `Cli.run`. A `RETRY` reaches the
