@@ -77,9 +77,9 @@ outside this shape.
 
 A promotion pull request's description never becomes a commit, because the
 promotion lands by fast-forward. A promotion pull request whose cherry-pick
-conflicts is the exception to the rules in this document, and
-[`BRANCH_PROMOTION.md`](BRANCH_PROMOTION.md) states what its description
-carries.
+conflicts is the exception to the rules in this document, except the cases that
+a reviewer reports. [`BRANCH_PROMOTION.md`](BRANCH_PROMOTION.md) states what its
+description carries.
 
 There is no sentence count, because a count sets a target and an author writes
 to a target. Cut a sentence that fails the test above. Cut a word that adds
@@ -107,7 +107,7 @@ the diff. A description can name a class or a contract method, because those
 names survive every revision. Write "Rename `checkRoute` to `isValidRoute` to
 follow the method-naming conventions".
 
-## Name the file, not the place inside it
+## Never name the place inside a file
 
 When the description names a file, say what changed in it. Do not name where
 inside the file the change went — after which section, below which table, next
