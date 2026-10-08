@@ -10,8 +10,9 @@ description is what `git log` shows for the change, forever. Write it for the
 reviewer today, and for the reader years later.
 
 Warning: a long description buries the sentence the reader needs. Say what
-changed and why, and let the Changes list name each file. The diff carries the
-how. The rules below keep the description short and true.
+changed and why. When the pull request has a Changes list, let the list name
+each file. The diff carries the how. The rules below keep the what and the why,
+and drop what the diff shows.
 
 ## The description holds the what and the why
 
@@ -99,7 +100,7 @@ nothing to the sentence around it.
 > Set the exit code in `Exiter::exit()` instead of ending the process, because
 > a process that ends at once drops a write a stream has buffered.
 
-## A description can name a class, never a signature
+## A description can name a class or a method, never a signature
 
 Warning: a restated signature buries the answer in detail. Keep the signature in
 the diff. A description can name a class or a contract method, because those
@@ -142,13 +143,15 @@ A reviewer reports a finding on the description in these cases:
 
 - The description misstates the change.
 - The description does not say what changed.
+- The description does not say why the change is right.
 - The description lacks a line that this document requires, such as
   `Closes #123`.
 - The description breaks another rule in this document, such as a restated edit
   or a named position.
 
 A reviewer does not report a finding because the description is short. A
-reviewer does not report wording, voice, or sentence length in a description.
+reviewer does not report a preference for other words in a description that
+follows the rules in this document.
 
 ## The template
 
