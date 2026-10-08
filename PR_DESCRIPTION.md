@@ -109,10 +109,10 @@ follow the method-naming conventions".
 
 ## Name the file, not the place inside it
 
-When the description names a file, name the file and what changed in it. Do not
-name where inside the file the change went — after which section, below which
-table, next to which method. The diff shows the position. This rule governs the
-Description prose and the Changes list alike.
+When the description names a file, say what changed in it. Do not name where
+inside the file the change went — after which section, below which table, next
+to which method. The diff shows the position. This rule governs the Description
+prose and the Changes list alike.
 
 > Wrong — the bullet names a position the diff already shows:
 >
@@ -154,8 +154,8 @@ A reviewer reports only the cases above. A reviewer does not report a
 description because the description is short or long. A reviewer does not
 report a preference for other words.
 
-The author follows every rule in this document and in
-[`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md). The rules that the cases
+The author follows every rule in this document, in [`AGENTS.md`](AGENTS.md), and
+in [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md). The rules that the cases
 above do not name, such as a named position or a sentence that fails the test,
 bind the author only.
 
