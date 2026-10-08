@@ -286,7 +286,7 @@ Without cache — every boot:
   ✗ Register all container bindings
 
 With cache — every boot:
-  ✓ Load four pre-built data classes
+  ✓ Load one pre-built data class per major component
   ✓ Skip provider-tree traversal, annotation scanning, and route-index construction
 ```
 

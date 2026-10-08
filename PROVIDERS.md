@@ -332,8 +332,8 @@ names until the name is unique.
 
 ### The Forcing Function
 
-The generated `AppContainerData`, `AppEventData`, `AppHttpRoutingData`, and `AppCliRoutingData` files each reference
-providers from multiple components in a single generated file. Identical class names across components produce namespace
+The generated data class of each major component references providers from multiple components in a single generated
+file. Identical class names across components produce namespace
 collisions that prevent compilation. Unique names are a hard requirement, not a style preference.
 
 **Why this wasn't a problem in PHP:** PHP callables in the cache used fully qualified class names —
@@ -496,5 +496,5 @@ UserHttpRoutesProvider.getControllerClasses()   // PHP, Java, Python only
 ```
 
 At runtime (no cache) — the framework traverses this tree on every boot.
-With cache — Sindri traverses this tree once at build time and writes the four data classes. The framework loads the
+With cache — Sindri traverses this tree once at build time and writes the data classes. The framework loads the
 data classes directly, skipping the tree entirely.

@@ -88,7 +88,7 @@ Go nuances:
 ## Build & CI tools
 
 - **Build tool (`sindri-go`):** uses `go/packages` + `go/ast` + `go/analysis` to
-  walk the provider tree and generate the four cache data structs; triggered via
+  walk the provider tree and generate the cache data struct of each major component; triggered via
   `go generate`. Dev-only; the framework has zero AST deps.
 - **CI (`golangci-lint` — one meta-linter for everything except tests):** bundles
   staticcheck, `go vet`, errcheck, gosec (security), revive, go-cleanarch

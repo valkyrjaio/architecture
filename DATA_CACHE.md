@@ -7,8 +7,8 @@ and container binding data. They allow the framework to skip the bootstrap proce
 loading providers, scanning annotations, building dispatchers, and resolving handlers, the application loads pre-built
 data classes directly.
 
-The build tool generates exactly **four data classes** for the entire application — one per concern — each aggregating
-everything across all providers of that type:
+The build tool generates **one data class for each major component** of the application, each aggregating everything
+across all providers of that type:
 
 | Class                | Contains                                                             |
 | -------------------- | -------------------------------------------------------------------- |
@@ -17,8 +17,8 @@ everything across all providers of that type:
 | `AppHttpRoutingData` | All HTTP routes from every `HttpRouteProvider` across all components |
 | `AppCliRoutingData`  | All CLI routes from every `CliRouteProvider` across all components   |
 
-This means the framework loads exactly four data classes at boot. No merging, no iteration, no construction — the
-structures are immediately ready to use.
+This means the framework loads one data class per major component at boot. No merging, no iteration, no construction —
+the structures are immediately ready to use.
 
 Cache data files are **required for production CGI and lambda deployments** across all languages. They are **optional
 for worker mode deployments** and **not needed in development**.
@@ -60,7 +60,7 @@ The build tool:
 5. Resolves all type references to fully-qualified names
 6. For routes: constructs plain ValkyrjaRoute objects, runs ProcessorContract::route() to compile regexes, pre-builds
    all dispatcher indexes
-7. Writes exactly **four** aggregated data classes — one per concern for the entire application
+7. Writes one aggregated data class for each major component of the application
 8. Generated files are compiled/included in the final deployment artifact
 
 The build tool is a **source code generator** — it writes strings that are valid source code. It does not need to
@@ -129,10 +129,10 @@ vendor directory — no explicit listing needed.
 
 ---
 
-## The Four Generated Data Classes
+## The Generated Data Classes
 
-The build tool aggregates everything across all providers of each type into exactly four classes per layer (framework,
-third-party packages, application):
+The build tool aggregates everything across all providers of each type into one class per major component per layer
+(framework, third-party packages, application):
 
 **AppContainerData** — all bindings from every `ServiceProvider` across all components and the application.
 
@@ -191,7 +191,7 @@ equivalent structure to HTTP routing data.
 
 ## Cache Load Order
 
-The application ships two sets of four data classes — framework pre-generated and application generated. Framework data
+The application ships two sets of data classes — framework pre-generated and application generated. Framework data
 loads first, application data merges on top. Application wins on any key conflict:
 
 ```

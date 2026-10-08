@@ -73,9 +73,9 @@ These hold in **every** language. Do not violate them in a port.
   requirement.
 - **The framework has zero AST dependencies.** All source extraction and code
   generation lives in `sindri` (the build tool), never in the framework.
-- **Four data classes for the whole app.** `sindri` aggregates every provider
-  into exactly four generated classes — `AppContainerData`, `AppEventData`,
-  `AppHttpRoutingData`, `AppCliRoutingData`. The framework loads four objects at
+- **One data class per major component.** `sindri` aggregates every provider
+  into one generated class for each major component — container, event, HTTP,
+  CLI, Queue and gRPC today. The framework loads one object per component at
   boot.
 - **Handler signatures are typed.** Handlers are explicit
   typed closures — HTTP → `ResponseContract`, CLI → `OutputContract`, Listener →

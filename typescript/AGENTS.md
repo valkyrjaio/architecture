@@ -180,7 +180,7 @@ so a failed run still reports a signed statement.
   same source through the compiler API; publishing `.js` alongside it would split
   those into two module graphs, so the runtime could load a different copy of a
   class than the generated data cache references.
-- **`sindri` (build tool)** uses the TypeScript compiler API to generate the four
+- **`sindri` (build tool)** uses the TypeScript compiler API to generate the
   cache data classes. Dev-only; the framework has zero AST/build deps.
 - **Architecture-enforcement & security are known toolchain gaps** in TS
   (no strong ArchUnit/PHPArkitect equivalent, no dedicated taint scanner) —

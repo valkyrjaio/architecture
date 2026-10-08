@@ -120,10 +120,10 @@ tree if they don't.
 code. It never needs application classes compiled in — class names from AST are
 written as text, the compiler resolves them later.
 
-**Four data classes for the entire application.** The build tool aggregates
-everything across all providers into exactly four classes — `AppContainerData`,
-`AppEventData`, `AppHttpRoutingData`, `AppCliRoutingData`. The framework loads
-four objects at boot.
+**One data class per major component.** The build tool aggregates everything
+across all providers into one class for each major component — container, event,
+HTTP, CLI, Queue and gRPC today. The framework loads one object per component at
+boot.
 
 **Typed handler signatures move errors before production.** Explicit closure
 handlers with typed signatures catch wrong return types at compile time (Java,
@@ -172,7 +172,7 @@ Key Decisions At a Glance
 ### Cache Generation
 
 - Build tool reads `AppConfig` class, walks provider tree via AST, generates
-  four data classes
+  one data class per major component
 - Routes: `Parameter` objects carry segment constraints, `ProcessorContract`
   compiles regex, stored pre-compiled
 - Python `@route_handler` is metadata only — `_valkyrja_handler` on the function,
