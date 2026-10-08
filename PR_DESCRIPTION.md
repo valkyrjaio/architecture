@@ -145,8 +145,9 @@ A reviewer reports a finding on the description in these cases:
 - The description does not say what changed.
 - The description does not say why the change is right.
 - The description lacks a line that a guide requires, such as `Closes #123`.
-- The description holds a line that a guide forbids, such as a link to a sibling
-  pull request.
+- The description links a sibling pull request, which
+  [`AGENTS.md`](AGENTS.md) forbids.
+- The description uses British spelling instead of American English.
 
 A reviewer reports only the cases above. A reviewer does not report a
 description because the description is short or long. A reviewer does not
