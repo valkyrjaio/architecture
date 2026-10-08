@@ -9,10 +9,10 @@ as the commit body ([`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md)). The
 description is what `git log` shows for the change, forever. Write it for the
 reviewer today, and for the reader years later.
 
-Warning: too little and too much fail the same way — the reader cannot tell
-what the pull request is about. A short description names nothing. A long
-description buries the sentence the reader needs. The rules below remove both
-failures.
+Warning: a long description buries the sentence the reader needs. Say what
+changed and why. When the pull request has a Changes list, the list can name the
+files, and the prose does not have to. The rules below keep the what and the
+why, and drop what the diff shows.
 
 ## The description holds the what and the why
 
@@ -77,9 +77,10 @@ outside this shape.
 
 A promotion pull request's description never becomes a commit, because the
 promotion lands by fast-forward. A promotion pull request whose cherry-pick
-conflicts is the exception to the rules in this document, and
+conflicts is the exception to the rules in this document.
 [`BRANCH_PROMOTION.md`](BRANCH_PROMOTION.md) states what its description
-carries.
+carries. A reviewer still reports a false statement, a missing required line, a
+sibling link, or British spelling in it.
 
 There is no sentence count, because a count sets a target and an author writes
 to a target. Cut a sentence that fails the test above. Cut a word that adds
@@ -100,20 +101,19 @@ nothing to the sentence around it.
 > Set the exit code in `Exiter::exit()` instead of ending the process, because
 > a process that ends at once drops a write a stream has buffered.
 
-## A stable name sets the level of detail
+## A description can name a class or a contract method, never a signature
 
-"Update a method for naming consistency" names no method, and a restated
-signature buries the answer in detail. A class name and a contract method name
-survive every revision, so the description names them. Write "Rename
-`checkRoute` to `isValidRoute` to follow the method-naming conventions". The
-signature stays in the diff.
+Warning: a restated signature buries the answer in detail. Keep the signature in
+the diff. A description can name a class or a contract method, because those
+names survive every revision. Write "Rename `checkRoute` to `isValidRoute` to
+follow the method-naming conventions".
 
-## Name the file, not the place inside it
+## Never name the place inside a file
 
-Name the file and what changed in it. Do not name where inside the file the
-change went — after which section, below which table, next to which method.
-The diff shows the position. This rule governs the Description prose and the
-Changes list alike.
+When the description names a file, say what changed in it. Do not name where
+inside the file the change went — after which section, below which table, next
+to which method. The diff shows the position. This rule governs the Description
+prose and the Changes list alike.
 
 > Wrong — the bullet names a position the diff already shows:
 >
@@ -137,6 +137,28 @@ explanation in the description instead.
 
 State the explanation in a sentence or two. The description takes the
 explanation, not the essay around it.
+
+## When a reviewer reports a finding on the description
+
+A reviewer reports a finding on the description in these cases:
+
+- The description states something false, about the change or about anything
+  else.
+- The description does not say what changed.
+- The description does not say why the change is right.
+- The description lacks a line that a guide requires, such as `Closes #123`.
+- The description links a sibling pull request, which
+  [`AGENTS.md`](AGENTS.md) forbids.
+- The description uses British spelling instead of American English.
+
+A reviewer reports only the cases above. A reviewer does not report a
+description because the description is short or long. A reviewer does not
+report a preference for other words.
+
+The author follows every rule in this document, in [`AGENTS.md`](AGENTS.md), and
+in [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md). The rules that the cases
+above do not name, such as a named position or a sentence that fails the test,
+bind the author only.
 
 ## The template
 
