@@ -78,15 +78,11 @@ service provider publishes each contract as its own container binding.
    `Http`, `Client` and `Log`.
 
 ```php
-// Right — the log adapter belongs to no component, so each borrower carries
-// its own name. The second adds a subcomponent, because `Client` is one.
-interface CacheLogConfigContract
-{
-    public string $cacheLogLogger { get; }
-}
-
+// Right — `HttpClientLog` names a component, a subcomponent and an adapter,
+// and the property carries all three in that order.
 interface HttpClientLogConfigContract
 {
+    /** @var class-string<LoggerContract> */
     public string $httpClientLogLogger { get; }
 }
 ```
