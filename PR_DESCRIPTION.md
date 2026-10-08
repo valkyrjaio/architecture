@@ -149,12 +149,13 @@ A reviewer reports a finding on the description in these cases:
   pull request.
 
 A reviewer reports only the cases above. A reviewer does not report a
-description because the description is short. A reviewer does not report a
-preference for other words.
+description because the description is short or long. A reviewer does not
+report a preference for other words.
 
 The author follows every rule in this document and in
-[`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md). A reviewer does not report
-the break of a rule that the cases above do not name.
+[`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md). The rules that the cases
+above do not name, such as a restated edit or a sentence that fails the test,
+bind the author only.
 
 ## The template
 
