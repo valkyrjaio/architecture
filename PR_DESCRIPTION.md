@@ -10,9 +10,9 @@ description is what `git log` shows for the change, forever. Write it for the
 reviewer today, and for the reader years later.
 
 Warning: a long description buries the sentence the reader needs. Say what
-changed and why. When the pull request has a Changes list, the list can name
-the files, and the prose does not have to. The diff carries the how. The rules below keep the what and the why,
-and drop what the diff shows.
+changed and why. When the pull request has a Changes list, the list can name the
+files, and the prose does not have to. The diff carries the how. The rules below
+keep the what and the why, and drop what the diff shows.
 
 ## The description holds the what and the why
 
