@@ -581,7 +581,7 @@ routes = []
 routes.append(...)
 return routes
 
-# ❌ method calls other than constructors/static factories
+# ❌ method calls other than constructors — a static factory is not readable either
 return get_extra_routes()
 ```
 

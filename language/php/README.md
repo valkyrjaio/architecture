@@ -55,7 +55,7 @@ No throwing abstract base exceptions.
 
 ---
 
-## 2. Container Bindings — Constants and Closures
+## 2. Container Bindings
 
 **Reference:** `CONTAINER_BINDINGS.md`
 
@@ -73,10 +73,17 @@ A provider's `publishers()` map holds a reference to a named method, because the
 binding registered directly takes any callable. Either way, remove dynamic reflection-based instantiation:
 
 ```php
-// Wrong — the container instantiates the class through reflection.
-$container->bind(RouterContract::class);
+// Right — in a provider's publishers() map, a reference to a named method.
+// The build tool reads this map, so the value has to be a value it can carry.
+public function publishers(): array
+{
+    return [RouterContract::class => [self::class, 'publishRouter']];
+}
+```
 
-// Right — an explicit closure factory names every dependency.
+```php
+// Right — registered directly, where nothing reads the declaration statically.
+// Any callable is fine here, an inline closure included.
 $container->bind(
     RouterContract::class,
     static fn(ContainerContract $c): RouterContract => new Router(
@@ -84,6 +91,8 @@ $container->bind(
     )
 );
 ```
+
+A binding made outside a provider cannot reach the generated cache, whichever form it takes.
 
 ---
 
@@ -160,11 +169,11 @@ Publisher callbacks have access to the full container binding API:
 
 All `getComponentProviders()`, `getContainerProviders()`, `getEventProviders()`, `getCliProviders()`,
 `getHttpProviders()`, `getControllerClasses()`, `getRoutes()`, `getListeners()` methods must return simple array
-literals with no conditional logic, variables, or method calls other than constructors and static factories.
+literals with no conditional logic, variables, or method calls other than constructors.
 
 ---
 
-## 4. Handler Contracts — Typed Closures
+## 4. Handler Signatures
 
 **Reference:** `HANDLERS.md`
 
@@ -332,7 +341,7 @@ A constants class that provides string aliases for component provider class refe
 exists, remove it. It would allow developers to write `HttpConstants::HTTP_COMPONENT_PROVIDER` in the config which the
 build tool cannot resolve from AST.
 
-Binding key constants files (for container bindings) are unaffected — they are correct and should remain.
+A binding-key constants file that a port genuinely needs is a different thing, and is unaffected. PHP needs none.
 
 ### Ensure all provider list methods return constructed providers
 
@@ -351,5 +360,5 @@ method reference.
 4. **Handler contracts and #[RouteHandler] attribute**
 5. **#[Parameter] attribute**
 6. **File generation and `make:*` commands to sindri**
-7. **Container constants files** — additive, can happen incrementally per component
+7. **Retired** — per-component container constants files are not built; see §2
 8. **Explicit binding factories** — additive, can happen incrementally per component

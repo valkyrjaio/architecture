@@ -460,6 +460,7 @@ All provider list methods must satisfy the build tool contract — simple litera
 ❌ Variable references
 ❌ Loops or variable accumulation
 ❌ Inline closures or lambdas as route handlers
+❌ A static factory call (the tool resolves a class reference or a constructor call, nothing else)
 ```
 
 If any provider method violates this contract Sindri skips the entry silently, so the binding is simply absent from the generated class. The application still
