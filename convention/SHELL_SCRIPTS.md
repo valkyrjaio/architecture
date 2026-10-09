@@ -6,7 +6,7 @@ repository, and to every contributor, human or agent.
 A repository in every language holds shell. A CI helper, a pre-commit hook, and
 a script under `.github/ci/scripts/` are all shell. Every script runs under
 `bash`, and its first line is `#!/usr/bin/env bash`. The license header
-([`AGENTS.md`](AGENTS.md) §5) follows the shebang. The rules below use bash
+([`AGENTS.md`](../AGENTS.md) §5) follows the shebang. The rules below use bash
 constructs that plain `sh` does not have.
 
 SonarCloud reads a `.sh` file in each repository, and `shellcheck` reads one

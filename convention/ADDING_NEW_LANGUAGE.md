@@ -47,7 +47,7 @@ completeness before you write a line.
 ## 1. Phase 0 — Study and decide (before writing any code)
 
 Read these in the architecture repo, in order: `README.md`,
-[`AGENTS.md`](AGENTS.md) (cross-language canon), [`PORTS.md`](PORTS.md),
+[`AGENTS.md`](../AGENTS.md) (cross-language canon), [`PORTS.md`](PORTS.md),
 [`THROWABLES.md`](THROWABLES.md), [`CONTAINER_BINDINGS.md`](CONTAINER_BINDINGS.md),
 [`HANDLERS.md`](HANDLERS.md), [`DATA_CACHE.md`](DATA_CACHE.md),
 [`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md),
@@ -117,7 +117,7 @@ canon. Create the folder with:
 - **`TODO.md`** — the port checklist.
 
 Then **update the shared docs** so the language is discoverable: add the language
-row + doc links to the top-level `README.md` and [`AGENTS.md`](AGENTS.md) tables,
+row + doc links to the top-level `README.md` and [`AGENTS.md`](../AGENTS.md) tables,
 and add its characteristics to [`PORTS.md`](PORTS.md).
 
 > **Keep the docs internally consistent.** Names drift over time and per-language
@@ -300,7 +300,7 @@ framework, and the `application` (Phase 6) depends on the _published_ framework 
 build tool. So the natural order is **framework → build tool → application**. During
 development, don't wait on releases: wire the downstream repo to the local upstream with
 a composite/workspace build (the same pattern the adapters use — see
-[`GRPC_IMPLEMENTATION.md`](GRPC_IMPLEMENTATION.md) §Adapters), verify it compiles/greens,
+[`GRPC_IMPLEMENTATION.md`](../component/GRPC_IMPLEMENTATION.md) §Adapters), verify it compiles/greens,
 then release upstream and bump the pin.
 
 ### Framework repo (`valkyrja-<lang>`)

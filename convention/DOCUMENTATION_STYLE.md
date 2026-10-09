@@ -32,7 +32,7 @@ It does not govern:
 - Code, identifiers, file paths, commands, and program output.
 - Quoted material from another source. **Never edit a quote to make it
   compliant.**
-- Fixed third-party text, such as the license header ([`AGENTS.md`](AGENTS.md)
+- Fixed third-party text, such as the license header ([`AGENTS.md`](../AGENTS.md)
   §5).
 
 ## The rules
@@ -207,7 +207,7 @@ abstract class Logger implements LoggerContract {}
 states what the code does.**
 
 A copy of the source does neither. The copy drifts when the source moves, and
-the next reader trusts the copy. Rule 10 in [`AGENTS.md`](AGENTS.md) §3
+the next reader trusts the copy. Rule 10 in [`AGENTS.md`](../AGENTS.md) §3
 describes the same failure for a comment.
 
 This rule holds in every document. A convention document, a design document, and
@@ -268,7 +268,7 @@ is false.
 - Invent a name only for the caller's own code, such as an application class or
   an application contract.
 - Reuse the invented names that this project established already.
-  [`CONTAINER.md`](CONTAINER.md) holds `NotifierContract`, `SlackNotifier`, and
+  [`CONTAINER.md`](../component/CONTAINER.md) holds `NotifierContract`, `SlackNotifier`, and
   `TeamsNotifier`. A second document uses those names, and it does not redefine
   them.
 - Never write `Foo` or `Bar`.

@@ -9,10 +9,10 @@ This is **Layer 1** of a three-layer guide:
 1. **This file** — cross-language rules that apply everywhere.
 2. **`<language>/AGENTS.md`** (in this repo, next to this file) — the per-language
    deltas: exact CI commands, package roots, tool lists, test mapping, and the
-   per-language spelling of the structure taxonomy ([`STRUCTURE.md`](STRUCTURE.md)).
-   → [`php`](php/AGENTS.md) · [`java`](java/AGENTS.md) · [`go`](go/AGENTS.md) ·
-   [`python`](python/AGENTS.md) · [`typescript`](typescript/AGENTS.md) ·
-   [`kotlin`](kotlin/AGENTS.md)
+   per-language spelling of the structure taxonomy ([`STRUCTURE.md`](convention/STRUCTURE.md)).
+   → [`php`](language/php/AGENTS.md) · [`java`](language/java/AGENTS.md) · [`go`](language/go/AGENTS.md) ·
+   [`python`](language/python/AGENTS.md) · [`typescript`](language/typescript/AGENTS.md) ·
+   [`kotlin`](language/kotlin/AGENTS.md)
 3. **A thin `AGENTS.md` in each framework repo** — says what that repo is and
    links back here.
 
@@ -22,8 +22,8 @@ This is **Layer 1** of a three-layer guide:
 > guide.
 
 > Write a rule that governs a human as well as an agent in its topic document. A
-> release rule goes in [`VERSIONING.md`](VERSIONING.md), and a commit rule goes in
-> [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md). Point at the rule from this
+> release rule goes in [`VERSIONING.md`](convention/VERSIONING.md), and a commit rule goes in
+> [`COMMIT_CONVENTION.md`](convention/COMMIT_CONVENTION.md). Point at the rule from this
 > guide. This guide holds in full only the rules for how an agent works.
 
 > **Before contributing, also read
@@ -130,7 +130,7 @@ every file you add is at 100% on its own, and every file you touch stays at
 100%. A green gate is not proof, so read the coverage report yourself, per
 file, before you call a change done. Code that genuinely cannot be covered is
 excluded narrowly, in the coverage tool's own config, with a comment saying
-why. The full rules: [`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md).
+why. The full rules: [`TESTING_METHODOLOGY.md`](convention/TESTING_METHODOLOGY.md).
 
 Then:
 
@@ -145,7 +145,7 @@ Then:
 5. **Target the right branch** (see §7) — improvements/bug fixes go to the lowest
    affected `??.x`, new features/deprecations go to `master`. Warning: an
    exception suspends part of this rule today. See
-   [`VERSIONING.md`](VERSIONING.md).
+   [`VERSIONING.md`](convention/VERSIONING.md).
 6. **Run the full CI gate** for the language you touched before considering the
    work done — exact commands are in your language's Layer-2 guide.
 7. **One branch and one PR per change.** Create a new branch off the correct
@@ -165,10 +165,10 @@ Then:
     true indefinitely, so a temporary condition never goes in a comment.
     Automation rewrites values, not the prose around them, so the comment
     becomes an assertion that is now false. Put the explanation in the PR
-    description instead ([`PR_DESCRIPTION.md`](PR_DESCRIPTION.md)). The squash
+    description instead ([`PR_DESCRIPTION.md`](convention/PR_DESCRIPTION.md)). The squash
     merge writes the description into git history as the commit body, so
     nothing is lost. Full rules, the decision-or-condition test, and examples:
-    [`COMMENTS.md`](COMMENTS.md).
+    [`COMMENTS.md`](convention/COMMENTS.md).
 11. **Update the documentation in the same pull request.** A change to behavior,
     to configuration, or to a public API also updates every document that
     describes it. The component's `README.md` is the usual one, because each
@@ -192,7 +192,7 @@ Then:
     two lines: the constraint, the invariant, or the reason the obvious
     approach fails. Density is itself a defect. Comment the one line in ten
     that needs a comment. Full rules and examples:
-    [`COMMENTS.md`](COMMENTS.md).
+    [`COMMENTS.md`](convention/COMMENTS.md).
 14. **A doc comment stays true for every override.** A doc comment describes the
     method, not one implementation of the method, because every override
     inherits the comment. Keep the inherited block as it is when you override a
@@ -200,14 +200,14 @@ Then:
     clear code takes no comment — a comment explains what is unclear, or why
     the code does something this particular way. Rule 10 describes the same
     failure for a comment that states a current condition; rule 13 limits how
-    much a comment says. Full rules and examples: [`COMMENTS.md`](COMMENTS.md).
+    much a comment says. Full rules and examples: [`COMMENTS.md`](convention/COMMENTS.md).
 15. **A type declaration carries no doc comment.** A class, a contract, a
     trait, an enum, and a struct explain themselves:
-    [`STRUCTURE.md`](STRUCTURE.md) encodes the kind in the name and the
+    [`STRUCTURE.md`](convention/STRUCTURE.md) encodes the kind in the name and the
     segment, and each method's doc comment — one sentence that
     enhances the signature, plus the annotations — states what the type does.
     The one exception is a test fixture's one-line block, which says what the
-    fixture is for. Full rules and examples: [`COMMENTS.md`](COMMENTS.md).
+    fixture is for. Full rules and examples: [`COMMENTS.md`](convention/COMMENTS.md).
 16. **Verify a claim before you write it.** A sentence about another file is a
     claim, and you check a claim rather than assert it. Open the file, and read
     the code the sentence describes. This governs a comment, a `README.md`, a
@@ -240,7 +240,7 @@ prepend parent names until the name is **unique across the entire framework**.
   guide (e.g. Java extends `IllegalArgumentException`; TypeScript extends `Error`
   and sets `this.name`).
 
-Detail: [`THROWABLES.md`](THROWABLES.md).
+Detail: [`THROWABLES.md`](convention/THROWABLES.md).
 
 ### Providers
 
@@ -301,7 +301,7 @@ segment and the runtime is the prefix, and the default entry keeps the bare name
 **Never nest a starter-app entry under the runtime** (`App\Http\OpenSwoole\App`). It
 yields several classes named `App` inside one protocol — a dozen once gRPC and Queue
 land — and the variant axis is not always an adapter, so it cannot be a segment:
-[`QUEUE.md`](QUEUE.md) ships non-adapter `PullQueue` / `PushQueue` defaults, which
+[`QUEUE.md`](component/QUEUE.md) ships non-adapter `PullQueue` / `PushQueue` defaults, which
 become `App\Queue\App` and `App\Queue\PushApp` alongside a per-runtime
 `App\Queue\OpenSwoolePushApp`.
 
@@ -315,7 +315,7 @@ the language has an architecture linter, and review enforces it elsewhere. For
 must not repeat it — an abstract `Stream` is `Abstract\Stream`, never
 `AbstractStream`. Each Layer-2 guide gives the per-language spelling. The full
 table, the test-class rules, the author-docblock rule, and the examples:
-[`STRUCTURE.md`](STRUCTURE.md).
+[`STRUCTURE.md`](convention/STRUCTURE.md).
 
 ### What a data object holds
 
@@ -325,7 +325,7 @@ hold a static method: a **factory** takes construction, a **support class**
 takes a calculation or a rendering, and an **enum** is exempt. One static
 method stays on the data object — a named constructor that returns its own
 type. The full rules, the examples, and the replacement for static metadata:
-[`STATIC_METHODS.md`](STATIC_METHODS.md).
+[`STATIC_METHODS.md`](convention/STATIC_METHODS.md).
 
 ### Component config
 
@@ -354,7 +354,7 @@ implementation lives in the `Data\` segment beside it. A contract with no
 usable default gets none, and the service provider throws instead of binding
 one. The service provider publishes each contract as its own container
 binding. The full rules and examples:
-[`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md).
+[`COMPONENT_CONFIG.md`](convention/COMPONENT_CONFIG.md).
 
 ### Method naming
 
@@ -367,7 +367,7 @@ Two per-language caveats matter most. A language without pass-by-reference canno
 the in-place convention for an immutable type. **Go reports a failure with a returned
 `error`, not a throw**, so a Go signature carries an extra return value.
 
-The full table and the per-language spelling: [`METHOD_NAMING.md`](METHOD_NAMING.md).
+The full table and the per-language spelling: [`METHOD_NAMING.md`](convention/METHOD_NAMING.md).
 
 ### Binding-key constants
 
@@ -379,7 +379,7 @@ language-specific — TypeScript writes
 `Valkyrja.Container.Manager.ContainerContract`, and Go and Python write
 `valkyrja.container.manager.ContainerContract`. PHP holds `::class`
 strings, Java holds `.class` objects, Go/Python/TypeScript hold string
-literals. Detail: [`CONTAINER_BINDINGS.md`](CONTAINER_BINDINGS.md).
+literals. Detail: [`CONTAINER_BINDINGS.md`](convention/CONTAINER_BINDINGS.md).
 
 ### Shell scripts
 
@@ -400,7 +400,7 @@ Warning: shell inside a GitHub Actions `run:` block is invisible to both tools,
 so a rule goes unenforced until the shell moves into a `.sh` file. That is a
 reason to put the work in a script, not a reason to relax the rule.
 
-The rules and their examples: [`SHELL_SCRIPTS.md`](SHELL_SCRIPTS.md).
+The rules and their examples: [`SHELL_SCRIPTS.md`](convention/SHELL_SCRIPTS.md).
 
 ### Port order for a new component
 
@@ -476,7 +476,7 @@ file, for every file added or touched — and never drops** — see the Definiti
 done in §3, which also states that a green gate is not proof of coverage, and
 says how an unreachable line may be excluded. Per-code-shape recipes and
 coverage gotchas:
-[`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md). Exact directory paths, test
+[`TESTING_METHODOLOGY.md`](convention/TESTING_METHODOLOGY.md). Exact directory paths, test
 framework, and the PHPUnit→target mapping live in your Layer-2 guide.
 
 ---
@@ -502,7 +502,7 @@ Keep each branch and PR small and atomic — one focused change per PR.
 Commits and PR titles carry a **root** for where the change lands and a **type**
 for what kind of change it is — neither may restate the other. Full rules, the
 root kinds, and worked examples:
-[`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md). The essentials:
+[`COMMIT_CONVENTION.md`](convention/COMMIT_CONVENTION.md). The essentials:
 
 ```
 [Root] type: Message.                 [Root] type!: Message.
@@ -546,7 +546,7 @@ root kinds, and worked examples:
   stay uppercase (`[CI]`, `[GitHub]`), never `[Ci]` / `[Github]`.
 - The type is not decoration: `feat`, `deprecate`, and `!` drive the middle
   version component and everything else is a patch, so the type you choose is
-  what determines the next release. See [`VERSIONING.md`](VERSIONING.md).
+  what determines the next release. See [`VERSIONING.md`](convention/VERSIONING.md).
 - No body / co-author lines unless explicitly asked. This governs the commits
   _you_ write; the squash merge takes its subject from the PR title and its body
   from the PR description, which is why that description is where durable
@@ -556,7 +556,7 @@ root kinds, and worked examples:
   [PR template](https://github.com/valkyrjaio/.github/blob/26.x/.github/PULL_REQUEST_TEMPLATE.md),
   it holds the what and the why, and it keeps no sentence the diff already
   shows. Full rules:
-  [`PR_DESCRIPTION.md`](PR_DESCRIPTION.md).
+  [`PR_DESCRIPTION.md`](convention/PR_DESCRIPTION.md).
 
 ### Push work that is ready to review
 
@@ -570,14 +570,14 @@ not. Read the branch's commits for the reversal below:
 
 - **A claim you did not check.** See §3, rule 16.
 - **A test that passes for a wrong implementation.** See
-  [`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md) §1.
+  [`TESTING_METHODOLOGY.md`](convention/TESTING_METHODOLOGY.md) §1.
 - **A document that this change made false.** A `README.md`, a design document,
   or a doc comment describes behavior that the diff changed. A later commit on
   the branch also moves the code under prose that an earlier commit wrote. See
   §3, rule 11.
 - **A line that breaks a documentation rule.** The writing rules, the selection
   rule, and the rules for code examples, in
-  [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md).
+  [`DOCUMENTATION_STYLE.md`](convention/DOCUMENTATION_STYLE.md).
 - **A fix that answers part of the finding it came from.** A finding that lists
   criteria is a checklist. Read the fix back against the list before you resolve
   the thread.
@@ -718,7 +718,7 @@ The `prefix` and the PR's base branch are both set by the change type:
 
 Warning: the current-year branch overrides this table until the framework has
 users. Every change targets that branch, including a new feature, a deprecation
-and a breaking change. See [`VERSIONING.md`](VERSIONING.md).
+and a breaking change. See [`VERSIONING.md`](convention/VERSIONING.md).
 
 ### Contracts land first
 
@@ -829,7 +829,7 @@ Write an example, never a copy of the source. When you edit an existing
 document, rewrite the paragraph you touch, not the whole file.
 
 The scope, the eleven writing rules, the selection rule, and the rules for code
-examples: [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md).
+examples: [`DOCUMENTATION_STYLE.md`](convention/DOCUMENTATION_STYLE.md).
 
 ---
 
@@ -837,23 +837,23 @@ examples: [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md).
 
 Read these in order when starting or extending a port:
 
-1. [`PORTS.md`](PORTS.md) — per-language characteristics
-2. [`STRUCTURE.md`](STRUCTURE.md) — the structure taxonomy
-3. [`THROWABLES.md`](THROWABLES.md) — exception hierarchy
-4. [`CONTAINER_BINDINGS.md`](CONTAINER_BINDINGS.md) — binding keys & closures
-5. [`HANDLERS.md`](HANDLERS.md) — handler contracts
-6. [`DATA_CACHE.md`](DATA_CACHE.md) — provider contracts & cache generation
-7. [`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md) — the component config shape
-8. [`BUILD_TOOL.md`](BUILD_TOOL.md) — `sindri` implementation
-9. [`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md) — testing & 100% coverage
-10. [`METHOD_NAMING.md`](METHOD_NAMING.md) — method name prefixes
-11. [`COMMENTS.md`](COMMENTS.md) — what a comment may state
-12. [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md) — the writing rules for documentation prose
-13. [`PACKAGE_NAMING.md`](PACKAGE_NAMING.md) — package, registry, and source namespace names
-14. [`SHELL_SCRIPTS.md`](SHELL_SCRIPTS.md) — the rules for shell
-15. [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md) — commit & PR title format
-16. [`PR_DESCRIPTION.md`](PR_DESCRIPTION.md) — what a pull request description holds
-17. [`VERSIONING.md`](VERSIONING.md) — version scheme & release automation
+1. [`PORTS.md`](convention/PORTS.md) — per-language characteristics
+2. [`STRUCTURE.md`](convention/STRUCTURE.md) — the structure taxonomy
+3. [`THROWABLES.md`](convention/THROWABLES.md) — exception hierarchy
+4. [`CONTAINER_BINDINGS.md`](convention/CONTAINER_BINDINGS.md) — binding keys & closures
+5. [`HANDLERS.md`](convention/HANDLERS.md) — handler contracts
+6. [`DATA_CACHE.md`](convention/DATA_CACHE.md) — provider contracts & cache generation
+7. [`COMPONENT_CONFIG.md`](convention/COMPONENT_CONFIG.md) — the component config shape
+8. [`BUILD_TOOL.md`](convention/BUILD_TOOL.md) — `sindri` implementation
+9. [`TESTING_METHODOLOGY.md`](convention/TESTING_METHODOLOGY.md) — testing & 100% coverage
+10. [`METHOD_NAMING.md`](convention/METHOD_NAMING.md) — method name prefixes
+11. [`COMMENTS.md`](convention/COMMENTS.md) — what a comment may state
+12. [`DOCUMENTATION_STYLE.md`](convention/DOCUMENTATION_STYLE.md) — the writing rules for documentation prose
+13. [`PACKAGE_NAMING.md`](convention/PACKAGE_NAMING.md) — package, registry, and source namespace names
+14. [`SHELL_SCRIPTS.md`](convention/SHELL_SCRIPTS.md) — the rules for shell
+15. [`COMMIT_CONVENTION.md`](convention/COMMIT_CONVENTION.md) — commit & PR title format
+16. [`PR_DESCRIPTION.md`](convention/PR_DESCRIPTION.md) — what a pull request description holds
+17. [`VERSIONING.md`](convention/VERSIONING.md) — version scheme & release automation
 18. `{language}/PROVIDER_CONTRACTS.md` — full contracts + examples
 19. `{language}/README.md` — port notes & priority order
 20. `{language}/AGENTS.md` — the Layer-2 agent guide for that language

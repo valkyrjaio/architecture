@@ -178,14 +178,14 @@ A reviewer reports a finding on the description in these cases:
 - The description does not say why the change is right.
 - The description lacks a line that a guide requires, such as `Closes #123`.
 - The description links a sibling pull request, which
-  [`AGENTS.md`](AGENTS.md) forbids.
+  [`AGENTS.md`](../AGENTS.md) forbids.
 - The description uses British spelling instead of American English.
 
 A reviewer reports only the cases above. A reviewer does not report a
 description because the description is short or long. A reviewer does not
 report a preference for other words.
 
-The author follows every rule in this document, in [`AGENTS.md`](AGENTS.md), and
+The author follows every rule in this document, in [`AGENTS.md`](../AGENTS.md), and
 in [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md). The rules that the cases
 above do not name, such as a named position or a sentence that fails the test,
 bind the author only.

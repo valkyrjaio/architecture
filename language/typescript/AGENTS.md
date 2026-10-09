@@ -1,7 +1,7 @@
 # AGENTS.md — TypeScript (Layer 2)
 
 Per-language guide for the **TypeScript** Valkyrja repos. Read the cross-language
-canonical first: [`../AGENTS.md`](../AGENTS.md). This file only records the
+canonical first: [`../AGENTS.md`](../../AGENTS.md). This file only records the
 TypeScript **deltas**. PHP is the reference implementation; mirror it.
 
 ---
@@ -32,13 +32,13 @@ Contract>`) for direct runtime instantiation.
 Three abstract branches, all extending native `Error`:
 `ValkyrjaThrowable` / `ValkyrjaRuntimeException` / `ValkyrjaInvalidArgumentException`
 → abstract `Component*` → concrete `Component<Specific>Exception`, which sets
-`this.name` in its constructor. Detail: [`../THROWABLES.md`](../THROWABLES.md).
+`this.name` in its constructor. Detail: [`../THROWABLES.md`](../../convention/THROWABLES.md).
 
 ---
 
 ## Structure taxonomy
 
-The cross-language taxonomy ([`../STRUCTURE.md`](../STRUCTURE.md)) applies, with
+The cross-language taxonomy ([`../STRUCTURE.md`](../../convention/STRUCTURE.md)) applies, with
 **PascalCase directory** segments mirroring PHP: `Contract/`, `Provider/`,
 `Factory/`, `Constant/`, `Exception/`, `Throwable/`, `Abstract/`, `Enum/`,
 `Type/`, `Model/`, `Entity/`, `Security/`.
@@ -184,7 +184,7 @@ so a failed run still reports a signed statement.
   cache data classes. Dev-only; the framework has zero AST/build deps.
 - **Architecture-enforcement & security are known toolchain gaps** in TS
   (no strong ArchUnit/PHPArkitect equivalent, no dedicated taint scanner) —
-  enforce those rules in review. See [`../CI_TOOLS.md`](../CI_TOOLS.md).
+  enforce those rules in review. See [`../CI_TOOLS.md`](../../convention/CI_TOOLS.md).
 - **Discriminate contracts with reusable type guards, not inline `in` checks.**
   TS has no `instanceof` for interface contracts, so runtime discrimination
   (request vs response vs route, etc.) is structural. Put the check in one place —

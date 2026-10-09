@@ -6,8 +6,8 @@
 
 The older ports describe themselves as a framework "for web and console
 applications" — the two entry points that existed when that line was written.
-With gRPC and Queue landing as first-class protocols (see [`GRPC.md`](../GRPC.md)
-and [`QUEUE.md`](../QUEUE.md)), the wording becomes:
+With gRPC and Queue landing as first-class protocols (see [`GRPC.md`](../../component/GRPC.md)
+and [`QUEUE.md`](../../component/QUEUE.md)), the wording becomes:
 
 > Valkyrja is a fast, light, and robust Go framework for multi-protocol
 > applications — HTTP, CLI, gRPC, and queues

@@ -163,7 +163,7 @@ Key constraints, established during investigation:
 - Run each repo's full suite + tsc + eslint + prettier before proposing a PR;
   keep coverage at 100%. Keep the three PRs (framework + sindri + app) and the
   PHP/Java siblings standalone — see the cross-link warning in
-  [`../AGENTS.md`](../AGENTS.md) §7.
+  [`../AGENTS.md`](../../AGENTS.md) §7.
 
 ## Out of scope (separate, tracked follow-up)
 

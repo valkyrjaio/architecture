@@ -7,7 +7,7 @@ existing container, middleware, dispatch, error-handling, and observability mach
 reinventing any of it.
 
 If you are building a concrete module, read this alongside the design doc for that module (e.g.
-[`GRPC.md`](GRPC.md)) and the implementation notes for the closest existing one.
+[`GRPC.md`](../component/GRPC.md)) and the implementation notes for the closest existing one.
 
 ## What a "module" is
 
@@ -150,7 +150,7 @@ inbound, …)` per unit of work, creating an isolated child container each time 
   `Exchange*`). Most protocols cannot and rely entirely on external adapter modules.
 
 Name them on the two axes in
-[`AGENTS.md` § Application entry points](AGENTS.md#application-entry-points): the framework
+[`AGENTS.md` § Application entry points](../AGENTS.md#application-entry-points): the framework
 groups by **adapter** with the protocol in the class name (`Entry/OpenSwoole/OpenSwooleGrpc`),
 the starter app and `template` group by **protocol** with the runtime in the class name
 (`App\Grpc\App`, `App\Grpc\OpenSwooleApp`). A new module adds an `App\<Module>` namespace to
@@ -202,4 +202,4 @@ framework with a build-tool composite build, then release the framework, then bu
 - **CLI** — map lookup, no client transport; closest to Queue.
 - **HTTP** — pattern matching, request/response bytes, in-core `Exchange*` server.
 - **gRPC** — map lookup, typed messages, cooperative cancellation, external adapters. See
-  [`GRPC.md`](GRPC.md) and [`GRPC_IMPLEMENTATION.md`](GRPC_IMPLEMENTATION.md).
+  [`GRPC.md`](../component/GRPC.md) and [`GRPC_IMPLEMENTATION.md`](../component/GRPC_IMPLEMENTATION.md).

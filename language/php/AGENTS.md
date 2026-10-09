@@ -1,7 +1,7 @@
 # AGENTS.md — PHP (Layer 2)
 
 Per-language guide for the **PHP** Valkyrja repos. Read the cross-language
-canonical first: [`../AGENTS.md`](../AGENTS.md). This file only records the PHP
+canonical first: [`../AGENTS.md`](../../AGENTS.md). This file only records the PHP
 **deltas**.
 
 PHP is the **reference implementation** — when a port disagrees with PHP on
@@ -62,13 +62,13 @@ fails when the two disagree.
 
 `ValkyrjaThrowable` (interface) → abstract `ValkyrjaRuntimeException` /
 `ValkyrjaInvalidArgumentException` → abstract `Component*` → concrete
-`Component<Specific>Exception`. Detail: [`../THROWABLES.md`](../THROWABLES.md).
+`Component<Specific>Exception`. Detail: [`../THROWABLES.md`](../../convention/THROWABLES.md).
 
 ---
 
 ## Structure taxonomy
 
-The cross-language taxonomy ([`../STRUCTURE.md`](../STRUCTURE.md)) is **enforced
+The cross-language taxonomy ([`../STRUCTURE.md`](../../convention/STRUCTURE.md)) is **enforced
 here** by **PHPArkitect** (`composer phparkitect`; the rules live in
 the `valkyrja/ci-phparkitect` package's `Rules` class). Segments are PascalCase
 namespace parts exactly as in `STRUCTURE.md` — `Contract\`, `Provider\`,
@@ -105,7 +105,7 @@ PHP nuances:
   lines only, because `--path-coverage` is too slow to bundle there; branches
   need `composer phpunit-path-coverage-parallel` and are nobody's gate, so check
   them before calling work done (see the CI tools section). Recipes & gotchas:
-  [`../TESTING_METHODOLOGY.md`](../TESTING_METHODOLOGY.md).
+  [`../TESTING_METHODOLOGY.md`](../../convention/TESTING_METHODOLOGY.md).
 
 ---
 
@@ -209,7 +209,7 @@ categories and their remedies.
 - **CI-tool config repos** (`ci/*`) are tested by asserting the full rule set is
   configured exactly as expected (`assertSame` lock on `getRules()`), plus branch
   tests for any custom expressions/rules. See
-  [`../TESTING_METHODOLOGY.md`](../TESTING_METHODOLOGY.md) §3.
+  [`../TESTING_METHODOLOGY.md`](../../convention/TESTING_METHODOLOGY.md) §3.
 - **Entry workers** (the per-runtime `Application\Entry\<Runtime>` HTTP workers —
   FrankenPHP, OpenSwoole, RoadRunner) reach **100% line + branch** coverage: each
   `run()` wraps its irreducible runtime call (`frankenphp_handle_request`,

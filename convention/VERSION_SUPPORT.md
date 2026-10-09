@@ -62,7 +62,7 @@ range when the port declares one. Do not read the empty cell as "unsupported" �
 read it as "not yet decided".
 
 Kotlin has no row. The Kotlin port is planned and it has no repository, so it
-has no release and no declared runtime. See [`AGENTS.md`](AGENTS.md) §1 for the
+has no release and no declared runtime. See [`AGENTS.md`](../AGENTS.md) §1 for the
 port list and the status of each port.
 
 ## Where each port publishes this

@@ -10,7 +10,7 @@ manual cherry-pick dispatch in the `.github` repository.
 ## 1. The problem
 
 A fix merges to the lowest affected `??.x` branch (see
-[`AGENTS.md`](AGENTS.md) §7). Every higher branch needs the same fix. Two
+[`AGENTS.md`](../AGENTS.md) §7). Every higher branch needs the same fix. Two
 mechanisms carry fixes upward today, and each one has a limit:
 
 - **`rebase-to-master`** force-pushes `master` onto the latest `??.x`. The
@@ -38,7 +38,7 @@ The squash merge on the source branch produces a commit that identifies itself:
 - The **subject** is the pull request title plus the pull request number.
   GitHub links the number to the origin pull request from any branch.
 - The **body** is the pull request description, which holds the durable
-  explanation (see [`AGENTS.md`](AGENTS.md) §3, rule 10).
+  explanation (see [`AGENTS.md`](../AGENTS.md) §3, rule 10).
 - The **author** is the person who wrote the change.
 
 A promotion preserves all three, and adds one line: the

@@ -2019,9 +2019,9 @@ and the 24 module counts above do not count them.
 A tree shows a file. A tree does not show what a file means, or what a file
 extends. Three documents carry that:
 
-- [`../STRUCTURE.md`](../STRUCTURE.md) — the taxonomy kinds, and the name
+- [`../STRUCTURE.md`](../../convention/STRUCTURE.md) — the taxonomy kinds, and the name
   suffix, the segment, and the modifier that each kind takes.
-- [`../PROVIDERS.md`](../PROVIDERS.md) — the provider types, the naming
+- [`../PROVIDERS.md`](../../convention/PROVIDERS.md) — the provider types, the naming
   convention, and the contract that each provider type satisfies.
-- [`../THROWABLES.md`](../THROWABLES.md) — the throwable and exception
+- [`../THROWABLES.md`](../../convention/THROWABLES.md) — the throwable and exception
   hierarchy, and the naming rule that makes each name unique.

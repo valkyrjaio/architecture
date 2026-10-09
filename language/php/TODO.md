@@ -70,7 +70,7 @@ not a task.
 
 ### Queue
 
-Read [`../QUEUE.md`](../QUEUE.md) first. It carries the settled design.
+Read [`../QUEUE.md`](../../component/QUEUE.md) first. It carries the settled design.
 
 - **Message, and the `QueueResult` enum** — [valkyrja-php#1065](https://github.com/valkyrjaio/valkyrja-php/issues/1065)
 - **Middleware** — [valkyrja-php#1066](https://github.com/valkyrjaio/valkyrja-php/issues/1066)
@@ -341,6 +341,6 @@ Each one needs a decision before it can become an issue.
   Both raise the same question: does this framework want a PSR dependency?
 - **Undo the UuidV1 int cast change.** No commit is named.
 - **Expand `ApplicationTest`.** To cover what?
-- **Implement gRPC fully.** [`../GRPC.md`](../GRPC.md) and
-  [`../GRPC_IMPLEMENTATION.md`](../GRPC_IMPLEMENTATION.md) describe a very large body of
+- **Implement gRPC fully.** [`../GRPC.md`](../../component/GRPC.md) and
+  [`../GRPC_IMPLEMENTATION.md`](../../component/GRPC_IMPLEMENTATION.md) describe a very large body of
   work. Break it into pieces before any of it becomes an issue.

@@ -1,7 +1,7 @@
 # AGENTS.md — Go (Layer 2)
 
 Per-language guide for the **Go** Valkyrja repos. Read the cross-language
-canonical first: [`../AGENTS.md`](../AGENTS.md). This file records the Go
+canonical first: [`../AGENTS.md`](../../AGENTS.md). This file records the Go
 **deltas**. PHP is the reference implementation; mirror its behavior, adapting to
 Go idiom. Authoritative port detail: [`README.md`](README.md),
 [`PROVIDER_CONTRACTS.md`](PROVIDER_CONTRACTS.md).
@@ -14,7 +14,7 @@ Go idiom. Authoritative port detail: [`README.md`](README.md),
   (`project-template-go`, in progress) — the source of truth for repo/file/class
   structure (canonical rule: §3.9).
 - **Module path:** `github.com/valkyrjaio/valkyrja-go/vN`, where `vN` is the
-  current year major (see [`../PACKAGE_NAMING.md`](../PACKAGE_NAMING.md)).
+  current year major (see [`../PACKAGE_NAMING.md`](../../convention/PACKAGE_NAMING.md)).
   Components map to lowercase packages (`container`, `http`, `cli`, `event`,
   `application`),
   with a `contract` sub-package for interfaces and a `data` sub-package for
@@ -46,13 +46,13 @@ exported structs — `ValkyrjaRuntimeError`, `ValkyrjaInvalidArgumentError`,
 `ContainerNotFoundError`, etc. — with an unexported marker interface
 (`valkyrjaThrowable` embedding `error`) standing in for the abstract base and
 unexported categoricals like `containerRuntimeError`. Return errors; do not
-`panic` for normal control flow. Detail: [`../THROWABLES.md`](../THROWABLES.md).
+`panic` for normal control flow. Detail: [`../THROWABLES.md`](../../convention/THROWABLES.md).
 
 ---
 
 ## Structure taxonomy
 
-The cross-language taxonomy ([`../STRUCTURE.md`](../STRUCTURE.md)) applies
+The cross-language taxonomy ([`../STRUCTURE.md`](../../convention/STRUCTURE.md)) applies
 loosely — Go's model diverges most of the five. Segments are **lowercase**
 packages: `contract`, `provider`, `data`, `factory`, `constant`, `security`,
 `command`.
@@ -163,4 +163,4 @@ make.
 ---
 
 More: [`README.md`](README.md), [`PROVIDER_CONTRACTS.md`](PROVIDER_CONTRACTS.md),
-[`TODO.md`](TODO.md), and the Go section of [`../CI_TOOLS.md`](../CI_TOOLS.md).
+[`TODO.md`](TODO.md), and the Go section of [`../CI_TOOLS.md`](../../convention/CI_TOOLS.md).

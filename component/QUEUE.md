@@ -7,7 +7,7 @@ Python).
 Queues reuse the same shape as the other three protocol modules — **Http**, **Cli**, and **gRPC**: a worker-agnostic
 core, external adapters, and a flat map lookup by name. The main new idea is the **outcome model**: a consumed message
 is not answered to a waiting client — it is **acknowledged, retried, or dead-lettered**. Read this alongside
-[`ADDING_A_MODULE.md`](ADDING_A_MODULE.md) and, for the adapter patterns it reuses, [`GRPC.md`](GRPC.md) and
+[`ADDING_A_MODULE.md`](../convention/ADDING_A_MODULE.md) and, for the adapter patterns it reuses, [`GRPC.md`](GRPC.md) and
 [`GRPC_IMPLEMENTATION.md`](GRPC_IMPLEMENTATION.md).
 
 ## Design Principles

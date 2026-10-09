@@ -46,61 +46,61 @@ Architecture Documents
 
 Cross-cutting architectural decisions that apply to all ports.
 
-| Document                                           | Description                                                                       |
-| -------------------------------------------------- | --------------------------------------------------------------------------------- |
-| [`SUMMARY.md`](SUMMARY.md)                         | Full session summary — all decisions and reasoning                                |
-| [`PORTS.md`](PORTS.md)                             | Language port list, per-language notes, comparison tables                         |
-| [`STRUCTURE.md`](STRUCTURE.md)                     | The structure taxonomy                                                            |
-| [`THROWABLES.md`](THROWABLES.md)                   | Exception naming convention, hierarchy, language mapping                          |
-| [`CONTAINER_BINDINGS.md`](CONTAINER_BINDINGS.md)   | Closure bindings, string constants, per-component files                           |
-| [`HANDLERS.md`](HANDLERS.md)                       | Handler contracts, typed closure signatures, the supplier pattern                 |
-| [`DATA_CACHE.md`](DATA_CACHE.md)                   | Cache architecture, provider contracts, build flows                               |
-| [`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md)       | The component config shape                                                        |
-| [`BUILD_TOOL.md`](BUILD_TOOL.md)                   | Build tool design, Bin extraction, AST implementations                            |
-| [`STATIC_METHODS.md`](STATIC_METHODS.md)           | Static interface methods — cross-language design and registry pattern             |
-| [`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md) | Testing taxonomy and the 100% per-file coverage rules                             |
-| [`METHOD_NAMING.md`](METHOD_NAMING.md)             | Method name prefixes — what a method does, and whether the caller's value changes |
-| [`COMMENTS.md`](COMMENTS.md)                       | What a comment may state                                                          |
-| [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md) | The writing rules for documentation prose                                         |
-| [`PACKAGE_NAMING.md`](PACKAGE_NAMING.md)           | Package name, registry namespace, and source namespace per language               |
-| [`SHELL_SCRIPTS.md`](SHELL_SCRIPTS.md)             | The rules for shell                                                               |
-| [`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md)     | Commit and PR title format, conventional types, roots                             |
-| [`PR_DESCRIPTION.md`](PR_DESCRIPTION.md)           | What a pull request description holds                                             |
-| [`VERSIONING.md`](VERSIONING.md)                   | Version scheme, bump mapping, release automation                                  |
-| [`VERSION_SUPPORT.md`](VERSION_SUPPORT.md)         | Support policy, release schedule, per-language runtimes                           |
+| Document                                                      | Description                                                                       |
+| ------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| [`SUMMARY.md`](SUMMARY.md)                                    | Full session summary — all decisions and reasoning                                |
+| [`PORTS.md`](convention/PORTS.md)                             | Language port list, per-language notes, comparison tables                         |
+| [`STRUCTURE.md`](convention/STRUCTURE.md)                     | The structure taxonomy                                                            |
+| [`THROWABLES.md`](convention/THROWABLES.md)                   | Exception naming convention, hierarchy, language mapping                          |
+| [`CONTAINER_BINDINGS.md`](convention/CONTAINER_BINDINGS.md)   | Closure bindings, string constants, per-component files                           |
+| [`HANDLERS.md`](convention/HANDLERS.md)                       | Handler contracts, typed closure signatures, the supplier pattern                 |
+| [`DATA_CACHE.md`](convention/DATA_CACHE.md)                   | Cache architecture, provider contracts, build flows                               |
+| [`COMPONENT_CONFIG.md`](convention/COMPONENT_CONFIG.md)       | The component config shape                                                        |
+| [`BUILD_TOOL.md`](convention/BUILD_TOOL.md)                   | Build tool design, Bin extraction, AST implementations                            |
+| [`STATIC_METHODS.md`](convention/STATIC_METHODS.md)           | Static interface methods — cross-language design and registry pattern             |
+| [`TESTING_METHODOLOGY.md`](convention/TESTING_METHODOLOGY.md) | Testing taxonomy and the 100% per-file coverage rules                             |
+| [`METHOD_NAMING.md`](convention/METHOD_NAMING.md)             | Method name prefixes — what a method does, and whether the caller's value changes |
+| [`COMMENTS.md`](convention/COMMENTS.md)                       | What a comment may state                                                          |
+| [`DOCUMENTATION_STYLE.md`](convention/DOCUMENTATION_STYLE.md) | The writing rules for documentation prose                                         |
+| [`PACKAGE_NAMING.md`](convention/PACKAGE_NAMING.md)           | Package name, registry namespace, and source namespace per language               |
+| [`SHELL_SCRIPTS.md`](convention/SHELL_SCRIPTS.md)             | The rules for shell                                                               |
+| [`COMMIT_CONVENTION.md`](convention/COMMIT_CONVENTION.md)     | Commit and PR title format, conventional types, roots                             |
+| [`PR_DESCRIPTION.md`](convention/PR_DESCRIPTION.md)           | What a pull request description holds                                             |
+| [`VERSIONING.md`](convention/VERSIONING.md)                   | Version scheme, bump mapping, release automation                                  |
+| [`VERSION_SUPPORT.md`](convention/VERSION_SUPPORT.md)         | Support policy, release schedule, per-language runtimes                           |
 
 Language Contracts
 ------------------
 
 Per-language provider contract specifications.
 
-| Document                                                               | Description                                       |
-| ---------------------------------------------------------------------- | ------------------------------------------------- |
-| [`java/PROVIDER_CONTRACTS.md`](java/PROVIDER_CONTRACTS.md)             | Java provider contracts and implementations       |
-| [`go/PROVIDER_CONTRACTS.md`](go/PROVIDER_CONTRACTS.md)                 | Go provider contracts and implementations         |
-| [`python/PROVIDER_CONTRACTS.md`](python/PROVIDER_CONTRACTS.md)         | Python provider contracts and implementations     |
-| [`typescript/PROVIDER_CONTRACTS.md`](typescript/PROVIDER_CONTRACTS.md) | TypeScript provider contracts and implementations |
+| Document                                                                        | Description                                       |
+| ------------------------------------------------------------------------------- | ------------------------------------------------- |
+| [`java/PROVIDER_CONTRACTS.md`](language/java/PROVIDER_CONTRACTS.md)             | Java provider contracts and implementations       |
+| [`go/PROVIDER_CONTRACTS.md`](language/go/PROVIDER_CONTRACTS.md)                 | Go provider contracts and implementations         |
+| [`python/PROVIDER_CONTRACTS.md`](language/python/PROVIDER_CONTRACTS.md)         | Python provider contracts and implementations     |
+| [`typescript/PROVIDER_CONTRACTS.md`](language/typescript/PROVIDER_CONTRACTS.md) | TypeScript provider contracts and implementations |
 
 Implementation Notes
 --------------------
 
 Per-language implementation notes and priority order.
 
-| Document                                       | Description                                               |
-| ---------------------------------------------- | --------------------------------------------------------- |
-| [`php/README.md`](php/README.md)               | PHP — changes required to existing implementation         |
-| [`java/README.md`](java/README.md)             | Java — port implementation notes and priority order       |
-| [`go/README.md`](go/README.md)                 | Go — port implementation notes and priority order         |
-| [`python/README.md`](python/README.md)         | Python — port implementation notes and priority order     |
-| [`typescript/README.md`](typescript/README.md) | TypeScript — port implementation notes and priority order |
+| Document                                                | Description                                               |
+| ------------------------------------------------------- | --------------------------------------------------------- |
+| [`php/README.md`](language/php/README.md)               | PHP — changes required to existing implementation         |
+| [`java/README.md`](language/java/README.md)             | Java — port implementation notes and priority order       |
+| [`go/README.md`](language/go/README.md)                 | Go — port implementation notes and priority order         |
+| [`python/README.md`](language/python/README.md)         | Python — port implementation notes and priority order     |
+| [`typescript/README.md`](language/typescript/README.md) | TypeScript — port implementation notes and priority order |
 
 TODO Checklists
 ---------------
 
-| Document                           | Description           |
-| ---------------------------------- | --------------------- |
-| [`php/TODO.md`](php/TODO.md)       | PHP change checklist  |
-| [`python/TODO.md`](python/TODO.md) | Python port checklist |
+| Document                                    | Description           |
+| ------------------------------------------- | --------------------- |
+| [`php/TODO.md`](language/php/TODO.md)       | PHP change checklist  |
+| [`python/TODO.md`](language/python/TODO.md) | Python port checklist |
 
 Core Architectural Principles
 -----------------------------
@@ -149,14 +149,14 @@ Key Decisions At a Glance
 - All base and categorical exceptions are abstract
 - Every component always ships `ComponentRuntimeException` and
   `ComponentInvalidArgumentException`
-- See [`THROWABLES.md`](THROWABLES.md)
+- See [`THROWABLES.md`](convention/THROWABLES.md)
 
 ### Container Bindings
 
 - All bindings use explicit closure factories — no reflection-based
   instantiation
 - Per-component string constants files for cross-language binding key identity
-- See [`CONTAINER_BINDINGS.md`](CONTAINER_BINDINGS.md)
+- See [`CONTAINER_BINDINGS.md`](convention/CONTAINER_BINDINGS.md)
 
 ### Handlers
 
@@ -167,7 +167,7 @@ Key Decisions At a Glance
   parameters
 - `#[RouteHandler]` / `@RouteHandler` / `@route_handler` — metadata marker in all languages,
   never active registrar
-- See [`HANDLERS.md`](HANDLERS.md)
+- See [`HANDLERS.md`](convention/HANDLERS.md)
 
 ### Cache Generation
 
@@ -177,7 +177,7 @@ Key Decisions At a Glance
   compiles regex, stored pre-compiled
 - Python `@route_handler` is metadata only — `_valkyrja_handler` on the function,
   read by framework at bootstrap, skipped when cache loaded
-- See [`DATA_CACHE.md`](DATA_CACHE.md)
+- See [`DATA_CACHE.md`](convention/DATA_CACHE.md)
 
 ### Build Tool
 
@@ -187,13 +187,13 @@ Key Decisions At a Glance
   there, not in the framework
 - Build tool is itself a Valkyrja application — validates the cache-optional
   architecture
-- See [`BUILD_TOOL.md`](BUILD_TOOL.md)
+- See [`BUILD_TOOL.md`](convention/BUILD_TOOL.md)
 
 PHP — Changes Required
 ----------------------
 
 The PHP implementation is complete but requires alignment changes before other
-ports diverge too far. See [`php/TODO.md`](php/TODO.md) for the full checklist.
+ports diverge too far. See [`php/TODO.md`](language/php/TODO.md) for the full checklist.
 
 Priority items:
 
@@ -212,14 +212,14 @@ Port components in this order:
 
 Read these files in order:
 
-1. [`PORTS.md`](PORTS.md) — language-specific characteristics and decisions
-2. [`THROWABLES.md`](THROWABLES.md) — exception hierarchy for your language
-3. [`CONTAINER_BINDINGS.md`](CONTAINER_BINDINGS.md) — binding key constants and
+1. [`PORTS.md`](convention/PORTS.md) — language-specific characteristics and decisions
+2. [`THROWABLES.md`](convention/THROWABLES.md) — exception hierarchy for your language
+3. [`CONTAINER_BINDINGS.md`](convention/CONTAINER_BINDINGS.md) — binding key constants and
    closure factories
-4. [`HANDLERS.md`](HANDLERS.md) — handler contracts and typed closure
+4. [`HANDLERS.md`](convention/HANDLERS.md) — handler contracts and typed closure
    signatures
-5. [`DATA_CACHE.md`](DATA_CACHE.md) — provider contracts and cache generation
-6. [`BUILD_TOOL.md`](BUILD_TOOL.md) — build tool implementation for your
+5. [`DATA_CACHE.md`](convention/DATA_CACHE.md) — provider contracts and cache generation
+6. [`BUILD_TOOL.md`](convention/BUILD_TOOL.md) — build tool implementation for your
    language
 7. `{language}/PROVIDER_CONTRACTS.md` — full contract and implementation
    examples
@@ -253,7 +253,7 @@ Contributing
 Contributions to the architecture — new decision records, port planning
 updates, clarifications to existing decisions — are welcome. See
 [`CONTRIBUTING.md`][contributing url] for the submission process,
-[`COMMIT_CONVENTION.md`](COMMIT_CONVENTION.md) for the commit and PR title
+[`COMMIT_CONVENTION.md`](convention/COMMIT_CONVENTION.md) for the commit and PR title
 format, [`REPOSITORY_NAMING.md`][repository naming url] for how repos are named,
 and [`VOCABULARY.md`][vocabulary url] for terminology used across the project.
 
@@ -265,7 +265,7 @@ License
 -------
 
 Licensed under the [MIT license][MIT license url]. See
-[`LICENSE.md`](./LICENSE.md).
+[`LICENSE.md`](LICENSE.md).
 
 [valkyrja url]: https://valkyrja.io
 [contributing url]: https://github.com/valkyrjaio/.github/blob/26.x/CONTRIBUTING.md
