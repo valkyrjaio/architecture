@@ -273,9 +273,8 @@ class UserServiceProvider(ServiceProviderContract):
     @staticmethod
     def publish_user_repository(container: ContainerContract) -> None:
         """
-        Build tool reads the @route_handler decorator argument from AST.
-        The decorator carries the handler reference used for cache generation.
-        The method body is the runtime implementation.
+        The publishers() map above names this method, and the build tool reads
+        that map from AST. A publisher carries no decorator.
         """
         container.set_singleton(
             UserRepositoryClass,
@@ -369,13 +368,13 @@ class UserHttpRouteProvider(HttpRouteProviderContract):
         ]
 
     @staticmethod
-    def index_orders(c: ContainerContract, args: dict) -> ResponseContract:
+    def index_orders(c: ContainerContract, route: RouteContract) -> ResponseContract:
         """Handler method lives on the same class — all imports self-contained."""
-        return c.get_singleton(OrderControllerClass).index(args)
+        return c.get_singleton(OrderControllerClass).index(route)
 
     @staticmethod
-    def index_users(c: ContainerContract, args: dict) -> ResponseContract:
-        return c.get_singleton(UserControllerClass).index(args)
+    def index_users(c: ContainerContract, route: RouteContract) -> ResponseContract:
+        return c.get_singleton(UserControllerClass).index(route)
 ```
 
 ### Controller with @route_handler Decorator
@@ -410,18 +409,19 @@ def handler(handler_ref):
 
 class UserController:
 
-    @route_handler(UserController.index_handler)
-    def index(self, request) -> Response:
+    @route_handler(UserHttpRouteProvider.index_users)
+    def index(self, route: RouteContract) -> Response:
         """
         Build tool reads _valkyrja_handler metadata from AST
         when scanning this class for route handlers.
-        The decorator carries the handler reference used in cache generation.
+        The decorator names the handler method, which lives on the provider —
+        a class body cannot reference the class it is defining.
         The method body is the actual runtime implementation.
         """
         pass
 
-    @route_handler(UserController.store_handler)
-    def store(self, request) -> Response:
+    @route_handler(UserHttpRouteProvider.store_user)
+    def store(self, route: RouteContract) -> Response:
         pass
 ```
 

@@ -180,9 +180,10 @@ class HttpServiceProvider implements ServiceProviderContract
 }
 ```
 
-**Container lambda wrapping (Python only):** The Python container wraps each publisher method reference in a lambda when
-registering from a provider at runtime. The generated cache already stores lambdas. Resolution is always `binding()()` —
-uniform, no conditional check. See `CONTAINER_BINDINGS.md`.
+**The container wraps every registration, in every port.** A provider declares a method reference; the container wraps
+it so that resolution always invokes something callable and no resolution path needs a conditional. The generated cache
+holds the reference in the shape the provider declared it, which is what makes the cached and uncached paths behave
+alike. See [`CONTAINER_BINDINGS.md`](CONTAINER_BINDINGS.md).
 
 ---
 
@@ -195,7 +196,7 @@ Registers HTTP routes, either explicitly via `getRoutes()` or via annotated cont
 // PHP
 interface HttpRouteProviderContract
 {
-    public function getControllerClasses(): array;  // PHP, Java, Python only
+    public function getControllerClasses(): array;  // a port whose language declares a route on the class
     public function getRoutes(): array;
 }
 ```
@@ -208,7 +209,7 @@ GetRoutes() []RouteContract
 ```
 
 ```typescript
-// TypeScript — no getControllerClasses(), annotations not supported
+// TypeScript — decorators are supported, so it declares getControllerClasses() too
 interface HttpRouteProviderContract {
     getRoutes(): RouteContract[]
 }
@@ -267,7 +268,7 @@ Identical structure to `HttpRouteProviderContract`. CLI commands instead of HTTP
 ```php
 interface CliRouteProviderContract
 {
-    public function getControllerClasses(): array;  // PHP, Java, Python only
+    public function getControllerClasses(): array;  // a port whose language declares a route on the class
     public function getRoutes(): array;
 }
 ```
@@ -283,7 +284,7 @@ Registers event listeners, either explicitly via `getListeners()` or via annotat
 // PHP
 interface ListenerProviderContract
 {
-    public function getListenerClasses(): array;  // PHP, Java, Python only
+    public function getListenerClasses(): array;  // a port whose language declares a route on the class
     public function getListeners(): array;
 }
 ```
@@ -493,7 +494,7 @@ HttpServiceProvider.publishers()
 UserHttpRoutesProvider.getRoutes()
   → [HttpRoute::get('/users/{id}', [self::class, 'showUser']), ...]
 
-UserHttpRoutesProvider.getControllerClasses()   // PHP, Java, Python only
+UserHttpRoutesProvider.getControllerClasses()   // where the language declares a route on the class
   → [UserController::class, ...]
 ```
 

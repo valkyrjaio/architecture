@@ -138,9 +138,11 @@ The framework walks that tree from the config, depth first and post-order: a
 provider's whole dependency subtree registers before the provider itself, so
 anything a provider depends on is already registered when it runs.
 
-**The walk keeps no record of what it has already visited.** A provider reachable
-from two parents is therefore collected twice, and a cycle in the tree does not
-terminate. Declare the tree as a tree.
+**The walk keeps a record of the providers it has already visited and passes over
+a repeat.** So a provider reachable from two parents registers once, and a cycle
+terminates rather than recursing without end. The build tool's walk keeps the same
+record, which is what makes the cached and uncached paths agree
+([`SINDRI.md`](../convention/SINDRI.md)).
 
 **The config's order decides precedence among siblings**, and the post-order walk
 decides the rest: a provider's dependencies register before it, whatever order the

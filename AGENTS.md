@@ -421,7 +421,9 @@ The rules and their examples: [`SHELL_SCRIPTS.md`](convention/SHELL_SCRIPTS.md).
 
 ### Port order for a new component
 
-**Container → Event → Application → CLI → HTTP → Bin.**
+The dependency order a port builds in is in
+[`PORT_PARITY.md`](convention/PORT_PARITY.md), which supersedes the older
+`Container → Event → Application → CLI → HTTP → Bin` sequence.
 
 ---
 

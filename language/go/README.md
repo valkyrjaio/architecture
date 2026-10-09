@@ -2,7 +2,7 @@
 
 > Reference docs, in `convention/`: `THROWABLES.md`, `CONTAINER_BINDINGS.md`,
 > `HANDLERS.md`, `DATA_CACHE.md`, `SINDRI.md`, `CONTRACTS.md`
-> Port order: Container → Event → Application → CLI → HTTP → Bin
+> Port order: the dependency tiers in `convention/PORT_PARITY.md`
 
 ---
 

@@ -188,12 +188,14 @@ takes: `RequestHandler`, `ServiceHandler`, `JobHandler`, `InputHandler`. Each
 declares `run` as the entry point a runtime calls, and `handle` as the method
 that produces the outcome from stages 1 to 5.
 
-The terminal methods are not yet consistent. `JobHandler` names them for their
-stages, `settlingResult` and `resultSettled`, which is the convention above. The
-other three carry legacy names — `send` and `terminate` on `RequestHandler`,
-`sending` and `terminate` on `ServiceHandler`, and `exit` on `InputHandler`. A
-port mirrors the handler it ports today. The rename is a cross-language change,
-and it is tracked rather than done one port at a time.
+**The terminal methods carry their stage names**, the same rule the stage
+handlers follow: the stage-6 method is named for stage 6 and the stage-7 method
+for stage 7. So a server handler declares `sendingResponse` and `responseSent`,
+or `settlingResult` and `resultSettled`, or `processExiting`, according to the
+stages its protocol has.
+
+Warning: a port that still carries a different name for one of these is behind
+this document, not an exception to it.
 
 ---
 

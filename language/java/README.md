@@ -2,7 +2,7 @@
 
 > Reference docs, in `convention/`: `THROWABLES.md`, `CONTAINER_BINDINGS.md`,
 > `HANDLERS.md`, `DATA_CACHE.md`, `SINDRI.md`, `CONTRACTS.md`
-> Port order: Container → Event → Application → CLI → HTTP → Bin
+> Port order: the dependency tiers in `convention/PORT_PARITY.md`
 
 ---
 
@@ -286,20 +286,23 @@ public class ValkyrjaAnnotationProcessor extends AbstractProcessor {
 }
 ```
 
-### Lambda extraction via Trees API
+### Declaration extraction via Trees API
 
-The Trees API gives access to lambda source text from the AST at compile time.
-FQN resolution is automatic via the compilation unit's import list.
+The Trees API gives access to the declaration's source text from the AST at
+compile time, and FQN resolution is automatic via the compilation unit's import
+list. What is read is a named method reference, never a lambda body
+([`HANDLERS.md`](../../convention/HANDLERS.md)).
 
 ### Code generation via JavaPoet
 
 Generated cache data records are written via JavaPoet during annotation
 processing — compiled in the same `javac` pass as application source.
 
-### valkyrja.yaml
+### The config class is the entry point
 
-The annotation processor reads the application config class to discover the full
-provider tree, then walks each provider's source file via Trees API.
+There is no configuration file. The annotation processor reads the application
+config class to discover the full provider tree, then walks each provider's
+source file via Trees API.
 
 ---
 

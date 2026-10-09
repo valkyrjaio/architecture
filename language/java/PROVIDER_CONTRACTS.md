@@ -242,8 +242,6 @@ package io.valkyrja.http.routing.provider.contract;
 
 import io.valkyrja.http.routing.data.contract.RouteContract;
 
-import java.util.Map;
-
 import java.util.List;
 
 public interface HttpRouteProviderContract {
@@ -279,7 +277,6 @@ import app.http.controllers.UserController;
 import app.http.controllers.OrderController;
 
 import java.util.List;
-import java.util.Map;
 
 public class UserHttpRouteProvider implements HttpRouteProviderContract {
 
@@ -335,13 +332,13 @@ public class UserController {
     @Route(method = "GET", path = "/users/{id}")
     @Parameter(name = "id", pattern = "[0-9]+")
     @RouteHandler(handlerClass = UserController.class, handlerMethod = "showHandler")
-    public ResponseContract show(String id) {
-        return userService.findById(id).toResponse();
+    public ResponseContract show(RouteContract route) {
+        return userService.findById(route).toResponse();
     }
 
     @Route(method = "POST", path = "/users")
     @RouteHandler(handlerClass = UserController.class, handlerMethod = "storeHandler")
-    public ResponseContract store(Map<String, Object> data) {
+    public ResponseContract store(RouteContract route) {
         // actual implementation
     }
 
@@ -366,7 +363,7 @@ public class UserController {
     @Route(method = "GET", path = "/users/{id}")
     @Parameter(name = "id", pattern = "[0-9]+")
     @RouteHandler(handlerClass = UserHttpRouteProvider.class, handlerMethod = "showUser")
-    public ResponseContract show(String id) {
+    public ResponseContract show(RouteContract route) {
         // actual implementation
     }
 }

@@ -46,12 +46,14 @@ providers the application registers.
 So the tool and the framework read the **same declaration**. The framework walks
 it at run time; the tool reads it statically. One source, two readers.
 
-They are not identical walks, though. The tool keeps a record of the providers it
-has visited and passes over a repeat; the framework keeps none
-([`APPLICATION.md`](../component/APPLICATION.md)). A provider reachable from two
-parents is therefore collected once by the tool and twice by the framework, which
-is a divergence between the cached and uncached paths rather than an intended
-difference.
+**Both walks keep a record of the providers they have visited, and pass over a
+repeat.** So a provider reachable from two parents registers once, and a cycle in
+the tree terminates instead of recursing without end.
+
+That is the normative behavior, and it is the tool's today. A framework walk that
+keeps no such record collects a repeat twice and does not survive a cycle, which
+makes the cached and uncached paths disagree — a defect in the port, not a
+difference to preserve.
 
 ---
 

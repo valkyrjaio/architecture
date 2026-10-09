@@ -2,7 +2,7 @@
 
 > Reference docs, in `convention/`: `THROWABLES.md`, `CONTAINER_BINDINGS.md`,
 > `HANDLERS.md`, `DATA_CACHE.md`, `SINDRI.md`, `CONTRACTS.md`
-> Port order: Container → Event → Application → CLI → HTTP → Bin
+> Port order: the dependency tiers in `convention/PORT_PARITY.md`
 
 ---
 
@@ -220,7 +220,7 @@ This means TypeScript works without cache exactly as the other ports do.
 
 **Reference:** `HANDLERS.md`
 
-### Three named types — compiler enforced
+### The handler signatures — compiler enforced
 
 A route handler takes the container and the **route**. Only a listener takes a
 map, because a listener has no route. See

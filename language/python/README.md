@@ -2,7 +2,7 @@
 
 > Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `HANDLERS.md`, `DATA_CACHE.md`, `SINDRI.md`,
 > `PROVIDER_CONTRACTS.md`
-> Port order: Container → Event → Application → CLI → HTTP → Bin
+> Port order: the dependency tiers in `convention/PORT_PARITY.md`
 
 ---
 
@@ -153,7 +153,7 @@ class ServiceProviderContract(ABC):
     def publishers() -> dict[str, Callable[[ContainerContract], None]]: ...
 ```
 
-Publisher methods carry `@handler` decorator — build tool reads decorator argument from AST:
+The `publishers()` map names each publisher method, and the build tool reads that map from AST:
 
 ```python
 @staticmethod
@@ -216,7 +216,7 @@ modifying the route, per
 ### @route_handler decorator on controller methods
 
 ```python
-@route_handler(UserController.show_handler)
+@route_handler(UserHttpRouteProvider.show_user)
 @parameter('id', pattern='[0-9]+')
 def show(self, id: int) -> ResponseContract:
     pass

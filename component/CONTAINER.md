@@ -175,8 +175,13 @@ with no conditional logic ([`PROVIDERS.md`](../convention/PROVIDERS.md)).
 
 **Deferred registration is the default.** The container records which provider
 publishes which id, and it runs that provider's callback on the first resolution
-of that id. A provider whose services nobody resolves never runs. The container
-tracks this through `register`, `isDeferred`, `isPublished` and `publish`.
+of that id. A provider whose services nobody resolves never runs.
+
+The container tracks this through a second canonical surface, separate from the
+operations above because it is about providers rather than about resolving an id:
+`register` records a provider's publishers, `isDeferred` answers whether an id is
+registered and not yet published, `isPublished` answers whether its callback has
+run, and `publish` runs it. Every port declares these four.
 
 **A binding made outside a provider is invisible to the build tool.** The tool
 reads the provider tree, so a direct registration cannot reach the generated
