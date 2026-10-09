@@ -65,9 +65,9 @@ stage without being told where it goes.
    `ThrowableCaught`. The object says what the stage is about, and the participle
    says the thing already happened. This is the dominant form, and stages 1 to 5
    all take it.
-2. **Stage 6 is a gerund.** `SendingResponse`, `SettlingResult`,
-   `ProcessExiting`. The gerund says the irreversible act is about to happen.
-   Code at this stage can still change the outcome.
+2. **Stage 6 is a gerund.** `SendingResponse`, `SettlingResult`. The gerund says
+   the irreversible act is about to happen. Code at this stage can still change
+   the outcome.
 3. **Stage 7 is a past participle.** `ResponseSent`, `ResultSettled`. The
    participle says the act happened. Code at this stage cannot change the
    outcome.

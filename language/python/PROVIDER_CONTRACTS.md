@@ -7,7 +7,7 @@
 
 Python provider contracts differ from PHP/Java in several ways:
 
-- Decorators are **metadata markers** — they attach closure metadata to methods at import time but do NOT self-register
+- Decorators are **metadata markers** — they attach a handler reference to methods at import time but do NOT self-register
   routes. The framework reads metadata during bootstrap; skips it when loading from cache.
 - `inspect.getfile(ClassName)` resolves class to source file — equivalent of PHP's `ReflectionClass::getFileName()`
 - No `::class` needed — `X()` creates an instance directly; Python classes are first-class callables
@@ -274,7 +274,7 @@ class UserServiceProvider(ServiceProviderContract):
     def publish_user_repository(container: ContainerContract) -> None:
         """
         Build tool reads the @route_handler decorator argument from AST.
-        The decorator carries the closure used for cache generation.
+        The decorator carries the handler reference used for cache generation.
         The method body is the runtime implementation.
         """
         container.set_singleton(
@@ -381,7 +381,7 @@ class UserHttpRouteProvider(HttpRouteProviderContract):
 ### Controller with @route_handler Decorator
 
 The `@route_handler` decorator is a **metadata marker only** — it does not self-register routes at import time. It
-attaches the closure as metadata on the method. The framework reads this metadata during bootstrap (no cache) and skips it
+attaches the handler reference as metadata on the method. The framework reads this metadata during bootstrap (no cache) and skips it
 entirely when loading from cache.
 
 This is intentional and consistent with PHP's `#[RouteHandler]` attribute — both are inert metadata that the framework
@@ -393,16 +393,16 @@ from valkyrja.container.manager.contract import ContainerContract
 from app.http.controllers.contract import UserControllerClass
 
 
-def handler(closure):
+def handler(handler_ref):
     """
-    Metadata marker — attaches closure to method as _valkyrja_handler.
+    Metadata marker — attaches the handler reference to the method as _valkyrja_handler.
     Does NOT register the route at import time.
     Framework reads _valkyrja_handler during bootstrap (no cache).
     Framework skips entirely when loading from cache.
     """
 
     def decorator(func):
-        func._valkyrja_handler = closure  # metadata only — no registration
+        func._valkyrja_handler = handler_ref  # metadata only — no registration
         return func
 
     return decorator
@@ -415,7 +415,7 @@ class UserController:
         """
         Build tool reads _valkyrja_handler metadata from AST
         when scanning this class for route handlers.
-        The decorator carries the closure used in cache generation.
+        The decorator carries the handler reference used in cache generation.
         The method body is the actual runtime implementation.
         """
         pass

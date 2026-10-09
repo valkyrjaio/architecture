@@ -334,18 +334,18 @@ public class UserController {
     // @RouteHandler carries (class, method) — Sindri follows it to wherever the handler lives.
     @Route(method = "GET", path = "/users/{id}")
     @Parameter(name = "id", pattern = "[0-9]+")
-    @RouteHandler(clazz = UserController.class, method = "showHandler")
+    @RouteHandler(handlerClass = UserController.class, handlerMethod = "showHandler")
     public ResponseContract show(String id) {
         return userService.findById(id).toResponse();
     }
 
     @Route(method = "POST", path = "/users")
-    @RouteHandler(clazz = UserController.class, method = "storeHandler")
+    @RouteHandler(handlerClass = UserController.class, handlerMethod = "storeHandler")
     public ResponseContract store(Map<String, Object> data) {
         // actual implementation
     }
 
-    // Sindri resolves clazz=UserController.class, method="showHandler" → this file
+    // Sindri resolves handlerClass=UserController.class, handlerMethod="showHandler" → this file
     // reads this method body using this file's imports
     public static ResponseContract showHandler(ContainerContract c, RouteContract route) {
         return c.getSingleton(UserController.class).show(route);
@@ -365,7 +365,7 @@ public class UserController {
     // @RouteHandler points to the route provider — Sindri follows the callable
     @Route(method = "GET", path = "/users/{id}")
     @Parameter(name = "id", pattern = "[0-9]+")
-    @RouteHandler(clazz = UserHttpRouteProvider.class, method = "showUser")
+    @RouteHandler(handlerClass = UserHttpRouteProvider.class, handlerMethod = "showUser")
     public ResponseContract show(String id) {
         // actual implementation
     }

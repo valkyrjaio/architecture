@@ -13,7 +13,7 @@
 - **`@staticmethod @abstractmethod`** throughout — providers are stateless
 - **`inspect.getfile()`** for class-to-file resolution (equivalent of PHP's `ReflectionClass::getFileName()`)
 - **`ast` module** for build tool AST parsing
-- **Decorators are runtime-executable** — `@route_handler` self-registers at import time
+- **Decorators are runtime-executable**, which is why `@route_handler` must be metadata only and never self-register
 - **`class_()` helper** for FQN derivation (`class` is reserved in Python)
 - **ASGI (Uvicorn/Hypercorn)** as the worker mode deployment model
 - **CGI mode** supported — Python is interpreted, cache optional in dev
@@ -216,7 +216,7 @@ modifying the route, per
 ### @route_handler decorator on controller methods
 
 ```python
-@route_handler(lambda c, route: c.get_singleton(UserControllerClass).show(route))
+@route_handler(UserController.show_handler)
 @parameter('id', pattern='[0-9]+')
 def show(self, id: int) -> ResponseContract:
     pass
@@ -382,9 +382,9 @@ Python decorators execute at import time — but `@route_handler` must **not** s
 metadata marker only:
 
 ```python
-def handler(closure):
+def handler(handler_ref):
     def decorator(func):
-        func._valkyrja_handler = closure  # metadata only — no registration
+        func._valkyrja_handler = handler_ref  # metadata only — no registration
         return func
 
     return decorator
@@ -400,7 +400,7 @@ bootstrap. It reads the metadata and registers routes from it.
 **How it works with cache:** The framework loads cache data files directly and never calls `get_controller_classes()` or
 scans for `_valkyrja_handler`. Decorator metadata is never read.
 
-The `@route_handler` decorator carries the closure for build tool extraction. The build tool reads `_valkyrja_handler`
+The `@route_handler` decorator carries a reference to the handler method for build tool extraction. The build tool reads `_valkyrja_handler`
 metadata from AST via `inspect.getfile()` + `ast.parse()`.
 
 ### Accessing _valkyrja_handler at Runtime
@@ -423,14 +423,14 @@ def scan_controller_for_handlers(controller_class: type) -> list[dict]:
         if not hasattr(method, '_valkyrja_handler'):
             continue
 
-        handler_closure = method._valkyrja_handler
+        handler_ref = method._valkyrja_handler
 
         # @parameter decorator attaches parameter list similarly
         parameters = getattr(method, '_valkyrja_parameters', [])
 
         handlers.append({
             'method': name,
-            'handler': handler_closure,
+            'handler': handler_ref,
             'parameters': parameters,
         })
 

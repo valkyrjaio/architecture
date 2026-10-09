@@ -34,10 +34,10 @@ ones it depends on.
 
 | Tier | Components                                            | Why this tier                          |
 | ---- | ----------------------------------------------------- | -------------------------------------- |
-| 1    | Container, Event, Application                         | nothing runs without them              |
-| 2    | Cli, Http                                             | the first two protocols                |
-| 3    | Throwable, Type, Support, Reflection, Log             | every other component depends on these |
-| 4    | Validation, Queue, Grpc                               | the remaining first-class protocols    |
+| 1    | Throwable, Type, Support, Reflection                  | every other component depends on these |
+| 2    | Container, Event, Application                         | nothing runs without them              |
+| 3    | Cli, Http                                             | the first two protocols                |
+| 4    | Log, Validation, Queue, Grpc                          | the remaining first-class protocols    |
 | 5    | Cache, Session, Filesystem, Crypt, Jwt                | the service components                 |
 | 6    | Auth, Orm, View, Mail, Sms, Broadcast, Api, Attribute | the application components             |
 

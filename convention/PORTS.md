@@ -125,7 +125,7 @@ Every port shares the same architectural identity:
 **Key characteristics:**
 
 - Interpreted — no compile step, cache optional exactly like PHP
-- Decorators are executable at import time — self-registration pattern works
+- Decorators are executable at import time, so a decorator must be metadata only and never self-register
 - **Minimum version: Python 3.14** — lazy imports used natively, no older version support
 - GIL limits true thread parallelism — ASGI async is the idiomatic concurrency model
 - Python 3.14 lazy imports resolve the eager import cold start problem at the language level
@@ -143,7 +143,7 @@ Every port shares the same architectural identity:
 - Abstract classes via ABC — `abstract class` raises `TypeError` on direct instantiation
 - No checked exceptions — convention and ABC enforce the hierarchy
 - `class_(cls)` helper (note: `class` is a reserved word) constructs FQN from `__module__.__qualname__`
-- Decorators self-register at import time — route provider imports trigger registration automatically
+- A decorator attaches metadata at import time; registration stays with the provider, never the decorator
 - `ast` module provides full AST for the build tool
 
 **Deployment models:**
@@ -194,13 +194,13 @@ frontend use without requiring it. Positioning stays: backend framework that hap
 
 ## Language Comparison Summary
 
-|              | Concurrency               | Annotations              | `class` ref        | Works without cache | Worker mode |
-| ------------ | ------------------------- | ------------------------ | ------------------ | ------------------- | ----------- |
-| PHP          | FPM / FrankenPHP / Swoole | ✅ Attributes            | ✅ `::class`       | ✅ always           | ✅ yes      |
-| Java         | Virtual threads (Loom)    | ✅ Annotations           | ✅ `.class`        | ✅ always           | ✅ yes      |
-| Go           | Goroutines (native)       | ❌ none                  | ❌ string const    | ✅ always           | ✅ always   |
-| Python 3.14+ | asyncio / ASGI            | ✅ Decorators (metadata) | string const       | ✅ always           | ✅ yes      |
-| TypeScript   | Node.js event loop        | ⚠️ experimental          | ✅ constructor ref | ✅ always           | ✅ yes      |
+|              | Concurrency               | Annotations              | `class` ref     | Works without cache | Worker mode |
+| ------------ | ------------------------- | ------------------------ | --------------- | ------------------- | ----------- |
+| PHP          | FPM / FrankenPHP / Swoole | ✅ Attributes            | ✅ `::class`    | ✅ always           | ✅ yes      |
+| Java         | Virtual threads (Loom)    | ✅ Annotations           | ✅ `.class`     | ✅ always           | ✅ yes      |
+| Go           | Goroutines (native)       | ❌ none                  | ❌ string const | ✅ always           | ✅ always   |
+| Python 3.14+ | asyncio / ASGI            | ✅ Decorators (metadata) | string const    | ✅ always           | ✅ yes      |
+| TypeScript   | Node.js event loop        | ✅ decorators            | ✅ instances    | ✅ always           | ✅ yes      |
 
 ---
 
@@ -295,7 +295,7 @@ disappears at execution. Forces the framework to work where static types are a d
 | Dynamic typing                        | PHP, Python                            |
 | Static typing, compiled               | Java, Go, TypeScript                   |
 | Annotations / attributes              | PHP, Java, Python                      |
-| No annotations at all                 | Go, TypeScript                         |
+| No annotations at all                 | Go                                     |
 | Runtime class identity                | PHP, Java, Python                      |
 | No runtime class identity             | Go, TypeScript                         |
 | Eager import system                   | Python                                 |

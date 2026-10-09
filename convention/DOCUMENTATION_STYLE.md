@@ -164,14 +164,22 @@ Every rule that has a code shape gets a code example. Prose states the rule; the
 example shows it. A reader who does not yet know the rule must be able to copy
 the example and be correct.
 
-**A `component/` document is the exception, and it carries no code example at
-all.** Those documents state a contract that every port satisfies, and an example
-has to pick one language. A reader then copies the syntax instead of satisfying
-the contract, and the port that reads it last inherits the first port's spelling
-as though it were the rule. The examples for a component live in that component's
-`README.md` in each port, next to the code they describe.
+**A document that states a cross-port contract is the exception, and it carries no
+code example at all.** Every `component/` document is one, and so is a
+`convention/` document whose subject is a contract the ports implement rather than
+a rule about how code is written — the lifecycle, the handlers, the binding keys,
+the generated data, the build tool, and the parity baseline.
 
-A `component/` document still **names** things. A stage name, a contract name and
+The reason is that an example has to pick one language. A reader then copies the
+syntax instead of satisfying the contract, and the port that reads it last
+inherits the first port's spelling as though it were the rule. The examples live
+in each port's own `README.md`, next to the code they describe.
+
+A `convention/` document whose subject **is** a code shape still carries examples,
+because the shape is the rule: the structure taxonomy, the comment rules, the
+shell rules, and this document.
+
+A contract document still **names** things. A stage name, a contract name and
 a method name are shared vocabulary, so the document states them and a port takes
 each one as it is. What the document must not do is narrate one implementation:
 naming the method a caller invokes is the contract, and tracing which private
