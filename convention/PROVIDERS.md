@@ -124,7 +124,9 @@ interface ServiceProviderContract {
 
 **The `publishers()` map** — keys are binding identifiers, values are method references on the same class. Sindri reads
 this from AST and writes each value into the generated `AppContainerData` in the same shape the provider declared it — a
-method reference, not a lambda. The `provides()` method from
+method reference, not a lambda. A port whose language has no compile-time type
+reference wraps that reference in a thunk in the generated file, for the import
+reason in [`CONTAINER_BINDINGS.md`](CONTAINER_BINDINGS.md). The `provides()` method from
 earlier versions is removed — the publishers map is the sole source of truth for what a service provider registers.
 
 > **Cache compatibility:** Bindings registered imperatively inside `getContainerProviders()` (e.g. calling

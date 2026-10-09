@@ -340,6 +340,6 @@ source file via Trees API.
 5. The handler on the route contract — getHandler / withHandler
 6. @RouteHandler and @Parameter annotations
 7. Records for data classes
-8. Annotation processor setup + Trees API lambda extraction
+8. Annotation processor setup + Trees API declaration extraction
 9. JavaPoet cache data class generation
 10. `sindri` Java artifact

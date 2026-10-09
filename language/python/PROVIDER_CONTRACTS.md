@@ -215,10 +215,9 @@ class ServiceProviderContract(ABC):
     The map must be a simple dict literal — no conditional logic permitted.
     Each value must be a static method reference on the same class.
 
-    The build tool reads the publishers map from AST, resolves each method
-    reference via inspect.getfile(), and reads the _valkyrja_handler metadata
-    on that method for cache generation. The @handler decorator on publisher
-    methods is a metadata marker only — it does not execute at import time.
+    The build tool reads the publishers map from AST and resolves each method
+    reference via inspect.getfile(). A publisher carries no decorator — the map
+    is the declaration the tool reads.
 
     Note: 'class_' helper available for FQN derivation since 'class' is reserved:
         def class_(cls) -> str:
@@ -387,12 +386,11 @@ This is intentional and consistent with PHP's `#[RouteHandler]` attribute — bo
 reads when needed, not active registrars.
 
 ```python
-from valkyrja.http.routing.handler import handler
-from valkyrja.container.manager.contract import ContainerContract
-from app.http.controllers.contract import UserControllerClass
+from valkyrja.http.routing.data.contract import RouteContract
+from app.http.provider import UserHttpRouteProvider
 
 
-def handler(handler_ref):
+def route_handler(handler_ref):
     """
     Metadata marker — attaches the handler reference to the method as _valkyrja_handler.
     Does NOT register the route at import time.

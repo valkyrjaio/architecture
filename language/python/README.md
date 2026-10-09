@@ -268,8 +268,9 @@ The container design does **not** depend on lazy imports for correctness — it 
   {ContainerConstants.USER_REPOSITORY: lambda: UserServiceProvider.publish_user_repository}
   ```
 
-  The lambda wrapper is **Python-only**. PHP's `[SomeClass::class, 'method']` uses `::class`, a compile-time string with
-  no class loading; compiled languages have no equivalent concern.
+  The thunk is required wherever the language has **no compile-time reference to a type**, which is the permitted
+  variation in `convention/CONTAINER_BINDINGS.md`. A port whose reference is resolved by the compiler names the method
+  directly and loads nothing.
 
 **Why not a lambda as the key?** The deferral trick that works for values cannot work for keys — Python must evaluate
 every key at dict-construction time to know where to store the value, and would have to re-call a key-lambda on every

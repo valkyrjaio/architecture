@@ -115,7 +115,15 @@ construction is neither checkable nor readable.
 
 **The container wraps every registration in a function of its own**, so that
 resolution is uniform: a resolution always invokes something callable, and no
-path needs a check for which kind of registration it found. That wrapping is the
+path needs a check for which kind of registration it found.
+
+**A generated cache may add one more wrapper, where the language forces it.** A
+language with a compile-time reference to a type names the method in the
+generated file and loads nothing. A language without one evaluates the name as
+the file loads, which would import every provider module at cache load and undo
+the saving the cache exists for. Such a port wraps each generated value in a
+thunk, so the name is looked up when the binding first resolves rather than when
+the cache loads. The declared shape is unchanged; only the generated file differs. That wrapping is the
 container's, not the author's — it is why a resolution path has no branch, and it
 is not an invitation to write the function by hand. The build tool writes the generated form in the same shape
 the container holds at run time, so the cached path and the uncached path behave
