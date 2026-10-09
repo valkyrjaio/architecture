@@ -1,6 +1,16 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.25...26.x)
+## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.26...26.x)
+
+## [v26.0.26](https://github.com/valkyrjaio/architecture/compare/v26.0.25...v26.0.26) - 2026-10-09
+
+* [Workflow] ci: Update .github workflow refs to v26.25.7 by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/architecture/pull/232
+* [Process] docs: Let a short description stand, and review only what is wrong by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/233
+* [Workflow] ci: Update .github workflow refs to v26.26.0 by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/architecture/pull/234
+* [Process] docs: State that a changes bullet stays general by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/235
+* [Coverage] docs: Stop claiming that no gate fails on coverage by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/236
+* [Workflow] ci: Update .github workflow refs to v26.26.1 by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/architecture/pull/237
+* [Convention] docs: Make the architecture documents the reference every port is built from by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/239
 
 ## [v26.0.25](https://github.com/valkyrjaio/architecture/compare/v26.0.24...v26.0.25) - 2026-10-08
 
