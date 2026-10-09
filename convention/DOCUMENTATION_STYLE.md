@@ -170,6 +170,10 @@ code example at all.** Every `component/` document is one, and so is a
 a rule about how code is written — the lifecycle, the handlers, the binding keys,
 the generated data, the build tool, and the parity baseline.
 
+`PROVIDERS.md` is the one contract document that still carries per-language code
+blocks. It predates this rule, and stripping them is a change of its own rather
+than part of applying the rule, so it is a known exception until that happens.
+
 The reason is that an example has to pick one language. A reader then copies the
 syntax instead of satisfying the contract, and the port that reads it last
 inherits the first port's spelling as though it were the rule. The examples live

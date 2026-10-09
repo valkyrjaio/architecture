@@ -60,8 +60,8 @@ before it. Order the list by what depends on what, because that order is the onl
 control over precedence: a later provider's binding for the same id replaces an
 earlier one's.
 
-Declare the tree as a tree. The walk keeps no record of where it has been, so a
-provider reachable from two parents is registered twice.
+The walk keeps a record of where it has been, so a provider reachable from two
+parents registers once and a cycle terminates.
 
 ### Point a runtime at an entry
 

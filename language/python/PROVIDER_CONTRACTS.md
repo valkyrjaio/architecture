@@ -194,9 +194,8 @@ class HttpComponentProvider(ComponentProviderContract):
 ## ServiceProviderContract
 
 Container bindings provider. `publishers()` returns a map of binding key to publisher method reference. The build tool
-reads the map from AST, resolves each method reference via `inspect.getfile()`, and reads that method body. Publisher
-methods carry a `@route_handler` decorator — the build tool reads the decorator argument from AST for cache
-generation.
+reads the map from AST, resolves each method reference via `inspect.getfile()`, and reads that method body. A publisher
+carries no decorator — the map is the declaration the tool reads.
 
 ```python
 # package: valkyrja.container.provider.contract

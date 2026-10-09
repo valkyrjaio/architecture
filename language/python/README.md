@@ -383,7 +383,7 @@ Python decorators execute at import time — but `@route_handler` must **not** s
 metadata marker only:
 
 ```python
-def handler(handler_ref):
+def route_handler(handler_ref):
     def decorator(func):
         func._valkyrja_handler = handler_ref  # metadata only — no registration
         return func
