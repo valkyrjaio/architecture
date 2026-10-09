@@ -32,14 +32,14 @@ Every port reaches this set. The order is the port order in
 [`AGENTS.md`](../AGENTS.md) §4, and a port does not start a component before the
 ones it depends on.
 
-| Tier | Components                                | Why this tier                           |
-| ---- | ----------------------------------------- | --------------------------------------- |
-| 1    | Container, Event, Application             | nothing runs without them               |
-| 2    | Cli, Http                                 | the first two protocols                 |
-| 3    | Throwable, Type, Support, Reflection, Log | every other component depends on these  |
-| 4    | Validation, Queue, Grpc                   | the remaining first-class protocols     |
-| 5    | Cache, Session, Filesystem, Crypt, Jwt    | the service components                  |
-| 6    | Auth, Orm, View, Mail, Sms, Broadcast, Api, Attribute | the application components |
+| Tier | Components                                            | Why this tier                          |
+| ---- | ----------------------------------------------------- | -------------------------------------- |
+| 1    | Container, Event, Application                         | nothing runs without them              |
+| 2    | Cli, Http                                             | the first two protocols                |
+| 3    | Throwable, Type, Support, Reflection, Log             | every other component depends on these |
+| 4    | Validation, Queue, Grpc                               | the remaining first-class protocols    |
+| 5    | Cache, Session, Filesystem, Crypt, Jwt                | the service components                 |
+| 6    | Auth, Orm, View, Mail, Sms, Broadcast, Api, Attribute | the application components             |
 
 A tier is a dependency order, not a priority. A port finishes a tier before it
 starts the next one, because a component in a later tier depends on an earlier
@@ -49,34 +49,34 @@ one.
 
 ## Where each port stands
 
-| Component   | PHP | Java | TypeScript | Go  | Python |
-| ----------- | --- | ---- | ---------- | --- | ------ |
-| Container   | yes | yes  | yes        | no  | no     |
-| Event       | yes | yes  | yes        | no  | no     |
-| Application | yes | yes  | yes        | no  | no     |
-| Cli         | yes | yes  | yes        | no  | no     |
-| Http        | yes | yes  | yes        | no  | no     |
-| Throwable   | yes | yes  | yes        | no  | no     |
-| Type        | yes | yes  | yes        | no  | no     |
-| Support     | yes | yes  | no         | no  | no     |
-| Reflection  | yes | yes  | no         | no  | no     |
-| Log         | yes | yes  | yes        | no  | no     |
-| Validation  | yes | yes  | yes        | no  | no     |
-| Queue       | partial | no | no        | no  | no     |
-| Grpc        | no  | yes  | in progress | no | no     |
-| Cache       | yes | no   | no         | no  | no     |
-| Session     | yes | no   | no         | no  | no     |
-| Filesystem  | yes | no   | no         | no  | no     |
-| Crypt       | yes | no   | no         | no  | no     |
-| Jwt         | yes | no   | no         | no  | no     |
-| Auth        | yes | no   | no         | no  | no     |
-| Orm         | yes | no   | no         | no  | no     |
-| View        | yes | no   | no         | no  | no     |
-| Mail        | yes | no   | no         | no  | no     |
-| Sms         | yes | no   | no         | no  | no     |
-| Broadcast   | yes | no   | no         | no  | no     |
-| Api         | yes | no   | no         | no  | no     |
-| Attribute   | yes | no   | no         | no  | no     |
+| Component   | PHP     | Java | TypeScript  | Go  | Python |
+| ----------- | ------- | ---- | ----------- | --- | ------ |
+| Container   | yes     | yes  | yes         | no  | no     |
+| Event       | yes     | yes  | yes         | no  | no     |
+| Application | yes     | yes  | yes         | no  | no     |
+| Cli         | yes     | yes  | yes         | no  | no     |
+| Http        | yes     | yes  | yes         | no  | no     |
+| Throwable   | yes     | yes  | yes         | no  | no     |
+| Type        | yes     | yes  | yes         | no  | no     |
+| Support     | yes     | yes  | no          | no  | no     |
+| Reflection  | yes     | yes  | no          | no  | no     |
+| Log         | yes     | yes  | yes         | no  | no     |
+| Validation  | yes     | yes  | yes         | no  | no     |
+| Queue       | partial | no   | no          | no  | no     |
+| Grpc        | no      | yes  | in progress | no  | no     |
+| Cache       | yes     | no   | no          | no  | no     |
+| Session     | yes     | no   | no          | no  | no     |
+| Filesystem  | yes     | no   | no          | no  | no     |
+| Crypt       | yes     | no   | no          | no  | no     |
+| Jwt         | yes     | no   | no          | no  | no     |
+| Auth        | yes     | no   | no          | no  | no     |
+| Orm         | yes     | no   | no          | no  | no     |
+| View        | yes     | no   | no          | no  | no     |
+| Mail        | yes     | no   | no          | no  | no     |
+| Sms         | yes     | no   | no          | no  | no     |
+| Broadcast   | yes     | no   | no          | no  | no     |
+| Api         | yes     | no   | no          | no  | no     |
+| Attribute   | yes     | no   | no          | no  | no     |
 
 Go and Python hold a repository, a license and a release workflow, and no
 framework source. Queue holds its contracts in PHP and no implementation yet.

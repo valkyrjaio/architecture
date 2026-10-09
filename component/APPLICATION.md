@@ -24,15 +24,15 @@ is handed what it needs and never reaches upward.
 
 ## Hierarchy
 
-| Subcomponent | Holds                                                         |
-| ------------ | ------------------------------------------------------------- |
-| `Kernel`     | the application itself, and the child application             |
-| `Entry`      | the entry points, one per protocol and per runtime            |
-| `Data`       | the config contracts, and their default implementations       |
-| `Directory`  | the resolver for a path inside the project                    |
-| `Constant`   | the framework's own version and identity values               |
-| `Provider`   | the component provider contract                               |
-| `Throwable`  | the component's throwable contract and its exceptions         |
+| Subcomponent | Holds                                                   |
+| ------------ | ------------------------------------------------------- |
+| `Kernel`     | the application itself, and the child application       |
+| `Entry`      | the entry points, one per protocol and per runtime      |
+| `Data`       | the config contracts, and their default implementations |
+| `Directory`  | the resolver for a path inside the project              |
+| `Constant`   | the framework's own version and identity values         |
+| `Provider`   | the component provider contract                         |
+| `Throwable`  | the component's throwable contract and its exceptions   |
 
 ---
 
@@ -45,20 +45,20 @@ the build tool reads it statically.
 
 The base config declares the application's identity and environment:
 
-| Setting           | Says                                                     |
-| ----------------- | -------------------------------------------------------- |
-| `applicationName` | what the application is called                           |
-| `version`         | the application's own version                            |
-| `environment`     | which environment this is                                |
-| `debugMode`       | whether the application reports detail on a failure      |
-| `timezone`        | the default timezone                                     |
-| `key`             | the application secret                                   |
-| `namespace`       | the application's own source namespace                   |
-| `dir`             | the application's source directory                       |
-| `dataPath`        | where the generated data classes are written             |
-| `dataNamespace`   | the namespace those generated classes take               |
-| `providers`       | the component providers to register                      |
-| `callbacks`       | the publish callbacks to run                             |
+| Setting           | Says                                                |
+| ----------------- | --------------------------------------------------- |
+| `applicationName` | what the application is called                      |
+| `version`         | the application's own version                       |
+| `environment`     | which environment this is                           |
+| `debugMode`       | whether the application reports detail on a failure |
+| `timezone`        | the default timezone                                |
+| `key`             | the application secret                              |
+| `namespace`       | the application's own source namespace              |
+| `dir`             | the application's source directory                  |
+| `dataPath`        | where the generated data classes are written        |
+| `dataNamespace`   | the namespace those generated classes take          |
+| `providers`       | the component providers to register                 |
+| `callbacks`       | the publish callbacks to run                        |
 
 **`providers` replaces rather than extends.** A config that declares the list
 declares the whole list. A port does not merge an application's list into a
@@ -103,18 +103,18 @@ statically ([`PROVIDERS.md`](../convention/PROVIDERS.md)).
 
 Every port declares these on the application, with no addition and no omission:
 
-| Operation                   | Answers                                              |
-| --------------------------- | ---------------------------------------------------- |
-| `getContainer`              | the container this application built                 |
-| `getProviders`              | every component provider the config named            |
-| `getContainerProviders`     | the service providers collected from the tree        |
-| `getEventProviders`         | the listener providers collected from the tree       |
-| `getHttpProviders`          | the HTTP route providers collected from the tree     |
-| `getCliProviders`           | the CLI route providers collected from the tree      |
-| `publishProviderCallbacks`  | run the config's publish callbacks                   |
-| `getEnvironment`            | which environment this is                            |
-| `getDebugMode`              | whether debug mode is on                             |
-| `getVersion`                | the application's version                            |
+| Operation                  | Answers                                          |
+| -------------------------- | ------------------------------------------------ |
+| `getContainer`             | the container this application built             |
+| `getProviders`             | every component provider the config named        |
+| `getContainerProviders`    | the service providers collected from the tree    |
+| `getEventProviders`        | the listener providers collected from the tree   |
+| `getHttpProviders`         | the HTTP route providers collected from the tree |
+| `getCliProviders`          | the CLI route providers collected from the tree  |
+| `publishProviderCallbacks` | run the config's publish callbacks               |
+| `getEnvironment`           | which environment this is                        |
+| `getDebugMode`             | whether debug mode is on                         |
+| `getVersion`               | the application's version                        |
 
 A port adds one reader per protocol it supports, named for that protocol. A port
 with gRPC adds the gRPC one; a port without it does not.
@@ -174,11 +174,11 @@ nothing it registers reaches the parent. See
 
 ## Permitted variation
 
-| Variation                        | Reason                                            |
-| -------------------------------- | ------------------------------------------------- |
-| which runtimes have an entry     | each ecosystem has its own servers                |
-| which protocol readers exist     | a port declares one per protocol it has           |
-| how a path is resolved           | each language names its own path separator and root |
+| Variation                    | Reason                                              |
+| ---------------------------- | --------------------------------------------------- |
+| which runtimes have an entry | each ecosystem has its own servers                  |
+| which protocol readers exist | a port declares one per protocol it has             |
+| how a path is resolved       | each language names its own path separator and root |
 
 Nothing else varies. The config surface and the provider walk are identical in
 every port.
