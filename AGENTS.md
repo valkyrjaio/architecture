@@ -142,6 +142,10 @@ every repo.** A change is not finished until, for the repo you touched:
   Every path, guard, and error branch gets a test (use synthetic inputs to reach
   defensive guards that normal input can't). ("Branch" here means a code
   path, not a git branch.)
+- **Every declared shape is tested.** Coverage cannot see a shape no test
+  declares, so a syntax-tree reader that silently drops one still reports 100%. A
+  construct an application can declare several ways gets a test for each way. See
+  [`TESTING_METHODOLOGY.md`](convention/TESTING_METHODOLOGY.md).
 - **All tests pass.**
 - **Every CI check passes** — the _full_ gate (static analysis, formatting,
   architecture, migration, tests), never a subset.

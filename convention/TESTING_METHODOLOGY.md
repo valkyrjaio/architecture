@@ -58,6 +58,49 @@ self::assertSame($message->getFormattedText(), file_get_contents($filepath));
 self::assertSame("\e[97;42mtext\e[39;49m", file_get_contents($filepath));
 ```
 
+### Cover every shape, not only every branch
+
+Coverage counts the lines a test runs. Coverage does not count a shape no test
+declares. A reader that accepts one shape and silently drops another reports
+100%, line and branch, because the dropped shape never reaches the code.
+
+An application can declare one construct several ways. A test declares each way,
+and asserts the result for each way.
+
+**Read the shapes from the public API, not from the fixtures that already
+exist.** A data class with a constructor and `with*` methods has two. An
+attribute and a hand-written list are two more. A route has three today: an
+attribute on a controller method, a bare construction in a provider's route
+list, and a builder chain over that construction.
+
+```php
+// Right — the fixture declares each shape, so a reader that drops one fails.
+public function getRoutes(): array
+{
+    return [
+        new Route('/bare', 'bare', [self::class, 'handler']),
+        (new Route('/chained', 'chained', [self::class, 'handler']))
+            ->withAddedRequestMethods(RequestMethod::POST),
+    ];
+}
+```
+
+**Assert the exclusion when a shape stays unsupported.** An exclusion no test
+pins reads as a defect to the next reader, and a later change that starts
+supporting the shape passes silently.
+
+```php
+// Right — the test pins the exclusion, so including the shape later fails.
+self::assertStringNotContainsString('/chained', $generatedFile);
+```
+
+The rule governs every reader and every generator in `sindri`, in every port, and
+it governs a runtime collector too, because a collector reads the same shapes.
+
+Warning: a comment written immediately before an item inside a returned list
+attaches to that item in the syntax tree, and a generator emits it with the
+expression. Keep per-item comments out of a fixture a generator reads.
+
 ---
 
 ## 2. Repository anatomy
