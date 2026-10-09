@@ -129,7 +129,7 @@ earlier versions is removed — the publishers map is the sole source of truth f
 > **Cache compatibility:** Bindings registered imperatively inside `getContainerProviders()` (e.g. calling
 > `$container->bindSingleton()` directly) are invisible to Sindri and will not appear in the generated cache. All bindings
 > intended for cache-based deployments must be declared through service providers returned from `getContainerProviders()`.
-> See [`BUILD_TOOL.md`](BUILD_TOOL.md) for the full explanation.
+> See [`SINDRI.md`](SINDRI.md) for the full explanation.
 
 **The static `make()` factory** — an optional companion pattern for service classes. A publisher normally constructs the
 service inline, and the service class carries no registration code. A service class may instead define a static `make()`

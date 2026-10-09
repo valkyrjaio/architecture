@@ -90,7 +90,7 @@ starting point and confirm against the port before you rely on a row.
 
 Each port ships `sindri`, and the tool is at parity when it generates every data
 class the port's components need, from the same provider declarations, with the
-same output shape ([`BUILD_TOOL.md`](BUILD_TOOL.md)).
+same output shape ([`SINDRI.md`](SINDRI.md)).
 
 | Port       | Boots without cache | Generates the cache |
 | ---------- | ------------------- | ------------------- |

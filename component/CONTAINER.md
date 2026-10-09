@@ -107,7 +107,7 @@ tracks this through `register`, `isDeferred`, `isPublished` and `publish`.
 **A binding made outside a provider is invisible to the build tool.** The tool
 reads the provider tree, so a direct registration cannot reach the generated
 cache. An application that registers directly works without the cache and breaks
-with it. See [`BUILD_TOOL.md`](../convention/BUILD_TOOL.md).
+with it. See [`SINDRI.md`](../convention/SINDRI.md).
 
 ---
 

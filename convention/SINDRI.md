@@ -1,6 +1,6 @@
-# Build Tool
+# Sindri
 
-The **cross-language** definition of `sindri`, the tool that reads an
+The **cross-language** definition of `sindri`, the build tool that reads an
 application's declarations and writes its data classes.
 
 This document holds no code example, for the reason in
@@ -11,8 +11,8 @@ This document holds no code example, for the reason in
 
 ## What it is
 
-`sindri` is the build tool. Every port ships one, under that name, and **it is
-never a production dependency.** It is installed for development and removed from
+Every port ships `sindri`, under that name, and **it is never a production
+dependency.** It is installed for development and removed from
 a deployed application.
 
 The split is strict: **the framework has zero source-reading dependencies.** Every

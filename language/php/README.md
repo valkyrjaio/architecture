@@ -1,6 +1,6 @@
 # PHP Port — Implementation Notes
 
-> Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `HANDLERS.md`, `DATA_CACHE.md`, `BUILD_TOOL.md`
+> Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `HANDLERS.md`, `DATA_CACHE.md`, `SINDRI.md`
 
 PHP is the reference implementation. All other ports are measured against it. The following changes are required to
 bring the existing implementation into alignment with the decisions made during cross-port planning.
@@ -209,7 +209,7 @@ name and pattern.
 
 ## 5. File Generation → sindri
 
-**Reference:** `BUILD_TOOL.md`
+**Reference:** `SINDRI.md`
 
 ### Move the file generation and the `make:*` commands to sindri
 
@@ -310,7 +310,7 @@ interface ListenerProviderContract
 
 ## 7. Application Config as Build Tool Entry Point
 
-**Reference:** `BUILD_TOOL.md`, `DATA_CACHE.md`
+**Reference:** `SINDRI.md`, `DATA_CACHE.md`
 
 ### No valkyrja.yaml needed
 

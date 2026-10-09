@@ -1,7 +1,7 @@
 # Go Port — Implementation Notes
 
 > Reference docs, in `convention/`: `THROWABLES.md`, `CONTAINER_BINDINGS.md`,
-> `HANDLERS.md`, `DATA_CACHE.md`, `BUILD_TOOL.md`, `CONTRACTS.md`
+> `HANDLERS.md`, `DATA_CACHE.md`, `SINDRI.md`, `CONTRACTS.md`
 > Port order: Container → Event → Application → CLI → HTTP → Bin
 
 ---
@@ -272,7 +272,7 @@ from the AST.
 
 ## 6. Build Tool — valkyrja-build Go
 
-**Reference:** `BUILD_TOOL.md`
+**Reference:** `SINDRI.md`
 
 - Separate Go module: `github.com/valkyrjaio/sindri-go/vN`
 - Triggered via `go generate`

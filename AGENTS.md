@@ -870,7 +870,7 @@ Read these in order when starting or extending a port:
 6. [`HANDLERS.md`](convention/HANDLERS.md) — handler contracts
 7. [`DATA_CACHE.md`](convention/DATA_CACHE.md) — provider contracts & cache generation
 8. [`COMPONENT_CONFIG.md`](convention/COMPONENT_CONFIG.md) — the component config shape
-9. [`BUILD_TOOL.md`](convention/BUILD_TOOL.md) — `sindri` implementation
+9. [`SINDRI.md`](convention/SINDRI.md) — `sindri` implementation
 10. [`TESTING_METHODOLOGY.md`](convention/TESTING_METHODOLOGY.md) — testing & 100% coverage
 11. [`PORT_PARITY.md`](convention/PORT_PARITY.md) — the baseline every port reaches
 12. [`METHOD_NAMING.md`](convention/METHOD_NAMING.md) — method name prefixes

@@ -1,7 +1,7 @@
 # Java Port — Implementation Notes
 
 > Reference docs, in `convention/`: `THROWABLES.md`, `CONTAINER_BINDINGS.md`,
-> `HANDLERS.md`, `DATA_CACHE.md`, `BUILD_TOOL.md`, `CONTRACTS.md`
+> `HANDLERS.md`, `DATA_CACHE.md`, `SINDRI.md`, `CONTRACTS.md`
 > Port order: Container → Event → Application → CLI → HTTP → Bin
 
 ---
@@ -281,7 +281,7 @@ replaces the method bodies with populated maps during cache generation.
 
 ## 6. Annotation Processor — Cache Generation
 
-**Reference:** `BUILD_TOOL.md`
+**Reference:** `SINDRI.md`
 
 The annotation processor runs during `javac` — no separate build step needed.
 
@@ -330,7 +330,7 @@ provider tree, then walks each provider's source file via Trees API.
 
 ## 8. Build Tool — valkyrja-build Java
 
-**Reference:** `BUILD_TOOL.md`
+**Reference:** `SINDRI.md`
 
 - Separate Maven/Gradle artifact: `io.valkyrja:build`
 - Dev/test scope only — never in production

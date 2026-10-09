@@ -1,7 +1,7 @@
 # TypeScript / Node.js Port — Implementation Notes
 
 > Reference docs, in `convention/`: `THROWABLES.md`, `CONTAINER_BINDINGS.md`,
-> `HANDLERS.md`, `DATA_CACHE.md`, `BUILD_TOOL.md`, `CONTRACTS.md`
+> `HANDLERS.md`, `DATA_CACHE.md`, `SINDRI.md`, `CONTRACTS.md`
 > Port order: Container → Event → Application → CLI → HTTP → Bin
 
 ---
@@ -295,7 +295,7 @@ be added as non-breaking additions.
 
 ## 7. Build Tool — @valkyrja/build
 
-**Reference:** `BUILD_TOOL.md`
+**Reference:** `SINDRI.md`
 
 - Separate npm package: `@valkyrja/build`
 - Dev dependency only — never in production

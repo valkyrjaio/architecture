@@ -1,6 +1,6 @@
 # Python Port — Implementation Notes
 
-> Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `HANDLERS.md`, `DATA_CACHE.md`, `BUILD_TOOL.md`,
+> Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `HANDLERS.md`, `DATA_CACHE.md`, `SINDRI.md`,
 > `PROVIDER_CONTRACTS.md`
 > Port order: Container → Event → Application → CLI → HTTP → Bin
 
@@ -490,7 +490,7 @@ worker.run(app)
 
 ## 9. Build Tool — sindri (Python)
 
-**Reference:** `BUILD_TOOL.md`
+**Reference:** `SINDRI.md`
 
 - Separate PyPI package: `sindri`
 - Dev dependency only — never in production

@@ -75,7 +75,7 @@ Rust, Ruby.
 | [`CONTAINER_BINDINGS.md`](convention/CONTAINER_BINDINGS.md)   | binding keys, per language                  |
 | [`COMPONENT_CONFIG.md`](convention/COMPONENT_CONFIG.md)       | how a component's config is split           |
 | [`DATA_CACHE.md`](convention/DATA_CACHE.md)                   | the generated data classes                  |
-| [`BUILD_TOOL.md`](convention/BUILD_TOOL.md)                   | `sindri`, and its output                    |
+| [`SINDRI.md`](convention/SINDRI.md)                           | `sindri`, and its output                    |
 | [`METHOD_NAMING.md`](convention/METHOD_NAMING.md)             | what a method prefix promises               |
 | [`PACKAGE_NAMING.md`](convention/PACKAGE_NAMING.md)           | package, registry and namespace names       |
 | [`STATIC_METHODS.md`](convention/STATIC_METHODS.md)           | where a static method may live              |

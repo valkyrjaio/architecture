@@ -5,7 +5,7 @@ what they are named, and the guarantee that an application never needs them.
 
 This document holds no code example, for the reason in
 [`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md). The tool that writes these
-classes is in [`BUILD_TOOL.md`](BUILD_TOOL.md).
+classes is in [`SINDRI.md`](SINDRI.md).
 
 ---
 
@@ -100,7 +100,7 @@ the method named. It is never a silent omission, because a silently missing
 binding fails much later and far away.
 
 The full contract, and what the tool does with each list, are in
-[`PROVIDERS.md`](PROVIDERS.md) and [`BUILD_TOOL.md`](BUILD_TOOL.md).
+[`PROVIDERS.md`](PROVIDERS.md) and [`SINDRI.md`](SINDRI.md).
 
 ---
 
