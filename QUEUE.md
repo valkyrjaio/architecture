@@ -13,8 +13,8 @@ is not answered to a waiting client — it is **acknowledged, retried, or dead-l
 ## Design Principles
 
 1. **Worker-agnostic.** The framework never depends on a specific broker. Adapters bridge external brokers (SQS, Redis,
-   RabbitMQ/AMQP, Beanstalkd, database, in-memory/sync) to the framework's internal contracts: a client adapter on the
-   produce side, and an entry on the consume side.
+   RabbitMQ/AMQP, Beanstalkd, database) to the framework's internal contracts: a client adapter on the produce side,
+   and an entry on the consume side. `Sync`, `Deferred` and `InMemory` are in-process and reach no broker at all.
 
 2. **Framework features are inherited, not reimplemented.** Middleware, the container, event dispatch, exception
    handling, and observability all work the same in queues as everywhere else.
@@ -226,7 +226,7 @@ under [Core Contracts](#core-contracts)) — not a raw map a handler pokes at.
 
 ```
 Queue/
-  Client       // produce side — push(Job) + every publish adapter (Sync, Deferred, InMemory, Guzzle, SQS, …)
+  Client       // produce side — push(Job) + every publish adapter (Sync, Deferred, InMemory, SQS, …)
   Message      // Job, JobResult, Attributes, Payload, JobFactory
   Middleware   // the pipeline stage handlers
   Routing      // Route, Router, RouteCollection, the @Route attribute + collector
@@ -241,7 +241,7 @@ as the class inside (just as `Http/Message` houses `Request`, not a class litera
 Producing and consuming are organized asymmetrically, for the same reason Http is:
 
 - **Producer (`Client`) adapters live _in_ the module** (`Queue/Client`) — one lightweight class per processor (`Sync`,
-  `Deferred`, `InMemory`, a Guzzle/HTTP push, SQS, Redis, …), exactly like `Http/Client`'s adapters. Pushing is cheap
+  `Deferred`, `InMemory`, SQS, Redis, …), exactly like `Http/Client`'s adapters. Pushing is cheap
   (serialize + send) and you push from anywhere, so the framework bundles support for any and all external pushes.
 - **Consumer _entry points_ live in `Application/Entry`** — the bootable classes that select the config and drive
   `JobHandler`. **`Queue`** runs one job and exits. **`WorkerQueue`** is the base that boots once and gives each job a
@@ -392,7 +392,7 @@ contract on the `Job`.)
 3b. RouteDispatched     runs if job was found; post-handler
  OR
 3c. RouteNotMatched     runs if job not found
-    Default terminal produces JobResult::fail() (unknown job → dead-letter)
+    Default terminal produces JobResult::FAIL (unknown job → dead-letter)
 
 [if any above threw]
 4. ThrowableCaught      converts throwable → JobResult (default: RETRY within maxAttempts, else DEAD_LETTER)
