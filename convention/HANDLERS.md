@@ -60,8 +60,16 @@ anything itself, and nothing reads it at run time on the hot path.
 The build tool reads the declaration statically. A port with no cache reads the
 same declaration through reflection at boot.
 
+**A marker's arguments are literals**, for that same reason. The tool reads the
+argument as it is written, so a value computed as the marker's own file loads is
+invisible to it and is dropped without a report
+([`SINDRI.md`](SINDRI.md)).
+
 A port whose language has no such facility declares routes only in a provider
 list, and that is a language limit rather than a gap.
+
+**Only the classes a provider lists are scanned.** Scanning a whole source tree
+is slow, and it finds markers in code the application did not mean to register.
 
 ---
 
