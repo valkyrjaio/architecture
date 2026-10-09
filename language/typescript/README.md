@@ -10,8 +10,8 @@
 
 - **Module namespace:** `@valkyrja/`
 - **`abstract class`** enforces contracts at compile time
-- **No reliable decorators** — explicit registration only, no annotated class
-  scanning
+- **Decorators plus explicit registration** — both supported, with explicit
+  registration the portable form
 - **No `::class` equivalent** — string constants for all binding keys
 - **Constructed providers** in every provider list (`ComponentProviderContract[]`),
   walked directly at runtime
@@ -129,6 +129,8 @@ container.bindSingleton(
 export interface ComponentProviderContract {
     // A list of constructed providers, the same shape every port holds
     // The framework walks them directly — no string lookup needed
+    getComponentProviders(app: ApplicationContract): ComponentProviderContract[]
+
     getContainerProviders(app: ApplicationContract): ServiceProviderContract[]
 
     getEventProviders(app: ApplicationContract): ListenerProviderContract[]
@@ -283,22 +285,25 @@ container if needed.
 
 ---
 
-## 6. No Annotations — Explicit Registration Only
+## 6. Decorators and Explicit Registration
 
-TypeScript decorators are experimental (stage 3). Valkyrja's TypeScript port
-does not rely on them. All route and listener registration is explicit via
-`getRoutes()` and `getListeners()`.
+The port supports both. A provider declares routes explicitly through
+`getRoutes()`, and it declares the controller classes to scan through
+`getControllerClasses()`, whose routing decorators `sindri` reads statically and
+the runtime collector reads on the debug path.
 
-If decorators stabilize, `getControllerClasses()` and `getListenerClasses()` can
-be added as non-breaking additions.
+Explicit registration remains the portable form, because a port whose language
+has no decorator supports only that one. See
+[`DECORATORS.md`](DECORATORS.md) for the decorator rules, including why a
+decorator argument never names a class directly.
 
 ---
 
-## 7. Build Tool — @valkyrja/build
+## 7. Build Tool — `@valkyrjaio/sindri`
 
 **Reference:** `SINDRI.md`
 
-- Separate npm package: `@valkyrja/build`
+- Separate npm package: `@valkyrjaio/sindri`
 - Dev dependency only — never in production
 - Uses TypeScript compiler API (`ts.createProgram`) — full AST with type
   information
@@ -340,7 +345,7 @@ tsc compiles with generated files
 ### CGI / Lambda
 
 - Cache required for production cold start optimization
-- `valkyrja-build` generates cache data files pre-`tsc`
+- `sindri` generates cache data files pre-`tsc`
 - Single compile pass — no two-pass needed
 
 ---
@@ -357,6 +362,6 @@ tsc compiles with generated files
 7. Named handler types — HttpHandlerFunc, CliHandlerFunc, ListenerHandlerFunc
 8. Handler contracts per concern
 9. Route and listener data classes
-10. @valkyrja/build npm package — TypeScript compiler API implementation
+10. `@valkyrjaio/sindri` npm package — TypeScript compiler API implementation
 11. AppContainerData, AppHttpRoutingData, AppCliRoutingData, AppEventData
     generation

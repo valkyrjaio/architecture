@@ -34,7 +34,7 @@ container.Bind(key, publisher) // direct function call ✅
 ```
 
 Cache is a cold-start optimization for CGI and lambda deployments. Go's compiled binary and fast startup mean cache is
-less critical here than in other languages, but it is fully supported via the valkyrja-build tool when needed.
+less critical here than in other languages, but it is fully supported via `sindri` when needed.
 
 ---
 

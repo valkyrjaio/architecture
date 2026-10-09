@@ -270,7 +270,7 @@ from the AST.
 
 ---
 
-## 6. Build Tool — valkyrja-build Go
+## 6. Build Tool — `sindri` Go
 
 **Reference:** `SINDRI.md`
 

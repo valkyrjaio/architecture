@@ -136,8 +136,7 @@ container bindings, event listeners, and the routes for each protocol.
 
 The framework walks that tree from the config, depth first and post-order: a
 provider's whole dependency subtree registers before the provider itself, so
-anything a provider depends on is already registered when it runs. The config's
-order decides precedence among siblings.
+anything a provider depends on is already registered when it runs.
 
 **The walk keeps no record of what it has already visited.** A provider reachable
 from two parents is therefore collected twice, and a cycle in the tree does not

@@ -164,12 +164,12 @@ Every port shares the same architectural identity:
 
 ## TypeScript / Node.js
 
-**Status:** Planned.
+**Status:** In progress.
 
 **Key characteristics:**
 
 - Compiled via `tsc` but type information is erased at runtime
-- No reliable decorators (experimental, stage 3) — explicit registration only
+- Routing decorators are supported, alongside explicit registration
 - `Function.prototype.toString()` unreliable after any build step
 - TypeScript compiler API provides full AST and type information pre-compile
 - Node.js worker model — single bootstrap, routes in memory
@@ -183,7 +183,7 @@ Every port shares the same architectural identity:
 - Result pattern available as additive opt-in layer (`tryMake<T>` style) — not required
 - String constants required for container bindings — no `.class` / `::class` equivalent
 - TypeScript compiler API used by build tool for pre-compile AST extraction and cache data file generation
-- Explicit route registration only — no annotated class scanning
+- Both explicit route registration and decorator scanning, through `getControllerClasses()`
 
 **Worker mode:** Node.js stays running, single bootstrap, routes in memory permanently
 

@@ -4,7 +4,7 @@
 
 TypeScript provider contracts differ from PHP/Java in several important ways:
 
-- No reliable decorators — explicit registration only, no annotated class scanning
+- Decorators are supported for routing, alongside explicit registration
 - `new X()` used in array literals — `NewExpression` nodes carry the class name directly
 - Instance methods throughout — the framework receives provider instances and calls methods directly
 - Publisher methods have no annotation — build tool reads method bodies directly from AST
@@ -221,8 +221,9 @@ export class UserServiceProvider implements ServiceProviderContract {
 
 ## HttpRouteProviderContract
 
-HTTP route provider. TypeScript has no reliable decorators — explicit route definitions only. Routes are complete data
-structures — they cannot be expressed as a publisher-style map without losing the metadata the router requires.
+HTTP route provider. It declares explicit routes, and the controller classes whose routing decorators are scanned.
+Routes are complete data structures — they cannot be expressed as a publisher-style map without losing the metadata the
+router requires.
 
 ```typescript
 // package: @valkyrja/http/routing/provider/contract

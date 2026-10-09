@@ -326,7 +326,7 @@ new AppConfig(
         new ContainerComponentProvider(),
         new EventComponentProvider(),
         new CliComponentProvider(),
-        App\Providers\AppProvider::class,
+        new App\Providers\AppProvider(),
     ]
 )
 ```
@@ -343,7 +343,7 @@ Binding key constants files (for container bindings) are unaffected — they are
 
 Audit all provider list methods (`getComponentProviders`, `getContainerProviders`, `getHttpProviders` etc.) to ensure
 they return a literal list of constructed providers — never a constant reference, and never a `::class` string, which
-the declared `ComponentProviderContract[]` type does not accept. A publish callback is the separate case that takes a
+the declared provider-contract array type does not accept. A publish callback is the separate case that takes a
 method reference.
 
 ---

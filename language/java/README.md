@@ -69,18 +69,10 @@ java.lang.IllegalArgumentException   ← Java has no InvalidArgumentException
 ### Class references
 
 `.class` tokens are used as binding keys — compiler verified. A language that
-names a class natively needs no constants file, so Java ships none; the shape
-below is what a port whose keys are strings holds instead:
-
-```java
-// ContainerConstants.java
-public final class ContainerConstants {
-    public static final Class<RouterContract> ROUTER = RouterContract.class;
-
-    private ContainerConstants() {
-    }
-}
-```
+names a class natively needs no constants file, so Java ships none: the token is
+already the key, and the compiler already checks it. See
+[`CONTAINER_BINDINGS.md`](../../convention/CONTAINER_BINDINGS.md) for the ports
+that do need one, and why.
 
 ### Closure-based bindings
 
@@ -329,15 +321,15 @@ provider tree, then walks each provider's source file via Trees API.
 
 ---
 
-## 8. Build Tool — valkyrja-build Java
+## 8. Build Tool — `sindri` Java
 
 **Reference:** `SINDRI.md`
 
-- Separate Maven/Gradle artifact: `io.valkyrja:build`
+- Separate Maven/Gradle artifact: `io.valkyrja:sindri`
 - Dev/test scope only — never in production
 - Must publish `-sources.jar` as required build dependency for the build tool to
   read framework provider source files
-- Handles project scaffolding, `make:*` commands, cache generation
+- Generates the cache data classes
 - The annotation processor handles cache generation at compile time for
   application code
 - Framework ships pre-generated cache files alongside compiled artifacts
@@ -358,4 +350,4 @@ provider tree, then walks each provider's source file via Trees API.
 8. Records for data classes
 9. Annotation processor setup + Trees API lambda extraction
 10. JavaPoet cache data class generation
-11. valkyrja-build Java artifact
+11. `sindri` Java artifact

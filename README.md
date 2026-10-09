@@ -40,7 +40,7 @@ The examples live in that component's `README.md` in each port.
 | 2   | **Java**       | In progress                     | `io.valkyrja:sindri`                 |
 | 3   | **Go**         | Proof of concept                | `github.com/valkyrjaio/sindri-go/vN` |
 | 4   | **Python**     | Planned                         | `valkyrja-sindri`                    |
-| 5   | **TypeScript** | Planned                         | `@valkyrja/sindri`                   |
+| 5   | **TypeScript** | In progress                     | `@valkyrjaio/sindri`                 |
 
 **No port is the reference — the documents here are.** Every port is built from
 `component/` and `convention/`, which is what keeps the ports from drifting

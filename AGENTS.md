@@ -54,7 +54,7 @@ document first, then every port together in one batch (see §7).
 | 2   | **Java**       | In progress                           | `io.valkyrja`            |
 | 3   | **Go**         | Proof of concept                      | `valkyrja`               |
 | 4   | **Python**     | Planned                               | `valkyrja`               |
-| 5   | **TypeScript** | Planned                               | `@valkyrjaio/valkyrja`   |
+| 5   | **TypeScript** | In progress                           | `@valkyrjaio/valkyrja`   |
 | 6   | **Kotlin**     | Planned (JVM — nearly free from Java) | `io.valkyrja`            |
 
 Each language has parallel repos: the **framework** (runtime, zero build/AST

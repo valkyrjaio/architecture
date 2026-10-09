@@ -139,9 +139,10 @@ framework builds the collection from the route providers. With it off, it reads
 the routing data, which a generated class supplies when one exists and which is
 otherwise built from those same providers at boot.
 
-So the cache is never required here either: with no generated class, both
-settings build from the providers, and debug mode changes only whether the result
-is reused.
+So the cache is never required here either. What debug mode changes is whether a
+generated class is consulted at all: with it on the providers are walked even
+when a generated class exists, and with it off the generated class is used when
+there is one.
 
 Either way the collection is built **once**, on the first resolution of it, and
 reused after that — a persistent runtime builds it once per process, not once per
