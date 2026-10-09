@@ -345,14 +345,14 @@ class UserController
     }
 
     // Sindri resolves Handler → this file, reads this method body using this file's imports
-    public static function showHandler(ContainerContract $c, array $args): ResponseContract
+    public static function showHandler(ContainerContract $c, RouteContract $route): ResponseContract
     {
-        return $c->getSingleton(self::class)->show($args['id']);
+        return $c->getSingleton(self::class)->show($route);
     }
 
-    public static function storeHandler(ContainerContract $c, array $args): ResponseContract
+    public static function storeHandler(ContainerContract $c, RouteContract $route): ResponseContract
     {
-        return $c->getSingleton(self::class)->store($args);
+        return $c->getSingleton(self::class)->store($route);
     }
 }
 ```
@@ -372,9 +372,9 @@ class UserController
 class UserHttpRouteProvider implements HttpRouteProviderContract
 {
     // Sindri resolves callable → this file, reads this method using this file's imports
-    public static function showUser(ContainerContract $c, array $args): ResponseContract
+    public static function showUser(ContainerContract $c, RouteContract $route): ResponseContract
     {
-        return $c->getSingleton(UserController::class)->show($args['id']);
+        return $c->getSingleton(UserController::class)->show($route);
     }
 }
 ```

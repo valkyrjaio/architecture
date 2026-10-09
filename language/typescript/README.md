@@ -247,18 +247,18 @@ modifying the route, per
 ### Usage
 
 ```typescript
-// HTTP
-route.setHandler((container, args) =>
-    container.getSingleton<UserController>(UserControllerClass).show(args['id'] as string)
+// HTTP — the route is the second parameter, and withHandler returns a copy
+route = route.withHandler((container, route) =>
+    container.getSingleton<UserController>(UserControllerClass).show(route)
 )
 
 // CLI
-command.setHandler((container, args) =>
-    container.getSingleton<SendEmailCommand>(SendEmailCommandClass).run(args)
+command = command.withHandler((container, route) =>
+    container.getSingleton<SendEmailCommand>(SendEmailCommandClass).run(route)
 )
 
-// Listener
-listener.setHandler((container, args) =>
+// Listener — a listener has no route, so it takes a map
+listener = listener.withHandler((container, args) =>
     container.getSingleton<UserCreatedListener>(UserCreatedListenerClass).handle(args['user_id'] as string)
 )
 ```

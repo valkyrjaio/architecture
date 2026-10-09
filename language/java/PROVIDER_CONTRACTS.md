@@ -346,12 +346,12 @@ public class UserController {
 
     // Sindri resolves clazz=UserController.class, method="showHandler" → this file
     // reads this method body using this file's imports
-    public static ResponseContract showHandler(ContainerContract c, Map<String, Object> args) {
-        return c.getSingleton(UserController.class).show((String) args.get("id"));
+    public static ResponseContract showHandler(ContainerContract c, RouteContract route) {
+        return c.getSingleton(UserController.class).show(route);
     }
 
-    public static ResponseContract storeHandler(ContainerContract c, Map<String, Object> args) {
-        return c.getSingleton(UserController.class).store(args);
+    public static ResponseContract storeHandler(ContainerContract c, RouteContract route) {
+        return c.getSingleton(UserController.class).store(route);
     }
 }
 ```
@@ -373,8 +373,8 @@ public class UserController {
 public class UserHttpRouteProvider implements HttpRouteProviderContract {
 
     // Sindri resolves callable → this file, reads this method using this file's imports
-    public static ResponseContract showUser(ContainerContract c, Map<String, Object> args) {
-        return c.getSingleton(UserController.class).show((String) args.get("id"));
+    public static ResponseContract showUser(ContainerContract c, RouteContract route) {
+        return c.getSingleton(UserController.class).show(route);
     }
 }
 ```

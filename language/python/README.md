@@ -219,7 +219,7 @@ modifying the route, per
 ### @route_handler decorator on controller methods
 
 ```python
-@route_handler(lambda c, args: c.get_singleton(UserControllerClass).show(args['id']))
+@route_handler(lambda c, route: c.get_singleton(UserControllerClass).show(route))
 @parameter('id', pattern='[0-9]+')
 def show(self, id: int) -> ResponseContract:
     pass
