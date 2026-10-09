@@ -26,15 +26,15 @@ stage to run middleware at. The pipeline belongs to the protocol components
 
 ## Hierarchy
 
-| Subcomponent | Holds                                                    |
-| ------------ | -------------------------------------------------------- |
-| `Dispatcher` | the dispatcher, the one entry point a caller uses        |
-| `Collection` | the listener collection, keyed by event id               |
-| `Collector`  | the readers that build listeners from a declaration      |
-| `Contract`   | the contracts an event implements to opt into a behavior |
-| `Data`       | the listener data object, and the generated listener set |
-| `Provider`   | the listener provider contract                           |
-| `Throwable`  | the component's throwable contract and its exceptions    |
+| Subcomponent | Holds                                                                                         |
+| ------------ | --------------------------------------------------------------------------------------------- |
+| `Dispatcher` | the dispatcher, the one entry point a caller uses                                             |
+| `Collection` | the listener collection, keyed by event id                                                    |
+| `Collector`  | the readers that build listeners from a declaration, where the language declares one that way |
+| `Contract`   | the contracts an event implements to opt into a behavior                                      |
+| `Data`       | the listener data object, and the generated listener set                                      |
+| `Provider`   | the listener provider contract                                                                |
+| `Throwable`  | the component's throwable contract and its exceptions                                         |
 
 A port adds `Attribute` when the language declares a listener with an attribute
 or an annotation, and `Constant` when it needs string binding keys.
@@ -44,7 +44,12 @@ or an annotation, and `Constant` when it needs string binding keys.
 ## The event id
 
 A listener is registered against an **event id**, and the id is what the
-collection is keyed by. The id is a string, and it names one event type.
+collection is keyed by. The id names one event type.
+
+**The id's type follows the language**, the same way a binding key does
+([`CONTAINER_BINDINGS.md`](../convention/CONTAINER_BINDINGS.md)): a language with
+a first-class reference to a type keys by that reference, and a language without
+one keys by a string.
 
 How the id is derived is the component's one real asymmetry, and the language
 decides it:
@@ -87,8 +92,10 @@ and the dispatcher resolves the event from the container — so dispatching by i
 is a claim that the id is a registered binding
 ([`CONTAINER.md`](CONTAINER.md)).
 
-Use the `IfHasListeners` form when building the event is expensive and nothing
-may be listening. It checks the collection first and skips the work.
+Use the `IfHasListeners` form to skip **the listeners**, not the event. It
+resolves the event first and checks the collection second, so the event is built
+either way and only the dispatch is skipped. The plain form takes an event the
+caller already holds, so there is nothing left for it to skip.
 
 **Dispatch returns the event.** A listener may change it, so the caller reads the
 result from the object the dispatch returned rather than the one it passed in.
@@ -174,10 +181,10 @@ a route, because a listener has no route.
 ## The collection
 
 **The collection holds a function that returns each listener, not the listener.**
-The function runs on the first read for that key, and the collection keeps what
-it returned, so an application pays only for the listeners it dispatches. The
-route collections in [`HTTP.md`](HTTP.md) and the other protocols hold their
-routes the same way, for the same reason.
+Reading a key runs that function, so an application pays only for the listeners
+it dispatches. The function is not memoized — each read runs it again. The route
+collections in [`HTTP.md`](HTTP.md) and the other protocols hold their routes the
+same way, for the same reason.
 
 The collection is addressable two ways for every operation: by the listener or
 the event itself, and by its id. So each read and write appears twice, once bare
@@ -226,10 +233,12 @@ list, and that is a language limit rather than a gap.
 
 ## Permitted variation
 
-| Variation                        | Reason                                               |
-| -------------------------------- | ---------------------------------------------------- |
-| whether an event declares its id | the language can or cannot name a type cheaply       |
-| an `Attribute` subcomponent      | only a language with attributes declares that way    |
-| a standard stoppable interface   | a port uses its language's standard where one exists |
+| Variation                        | Reason                                                          |
+| -------------------------------- | --------------------------------------------------------------- |
+| whether an event declares its id | the language can or cannot name a type cheaply                  |
+| the event id's type              | a type reference where the language has one, else a string      |
+| a `Collector` subcomponent       | only a language that declares a listener on the class needs one |
+| an `Attribute` subcomponent      | only a language with attributes declares that way               |
+| a standard stoppable interface   | a port uses its language's standard where one exists            |
 
 Nothing else varies. The dispatcher surface is the same in every port.

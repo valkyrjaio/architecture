@@ -46,8 +46,14 @@ already declared in the config, because the config already lists the component
 providers the application registers.
 
 So the tool and the framework read the **same declaration**. The framework walks
-it at run time; the tool reads it statically. One source, two readers, and no way
-for them to disagree about what is registered.
+it at run time; the tool reads it statically. One source, two readers.
+
+They are not identical walks, though. The tool keeps a record of the providers it
+has visited and passes over a repeat; the framework keeps none
+([`APPLICATION.md`](../component/APPLICATION.md)). A provider reachable from two
+parents is therefore collected once by the tool and twice by the framework, which
+is a divergence between the cached and uncached paths rather than an intended
+difference.
 
 ---
 
@@ -64,9 +70,15 @@ order, skipping a provider it has already visited.
 no loop. This is a hard contract, not a preference: a syntax-tree reader can read
 a literal and cannot evaluate an expression.
 
-A list the tool cannot read is **reported as a failure**, naming the provider and
-the method. It is never skipped quietly, because a silently missing binding fails
-far from its cause.
+**A declaration the tool cannot read is skipped silently.** An entry whose key or
+value is not in the readable shape is passed over, and a provider whose file
+cannot be found is passed over, with nothing written about either.
+
+Warning: this is the tool's most dangerous behavior. A binding that is skipped is
+absent from the generated class, so the application runs correctly without the
+cache and is missing a service with it, and the failure surfaces far from its
+cause. Treat a declaration the rules below forbid as a defect you have to find by
+reading, because the tool will not tell you.
 
 **Imperative code inside a provider method is invisible to the tool.** A binding
 registered there reaches the uncached run only. See
@@ -112,16 +124,16 @@ generating:
 - **One line per generated class**, naming what is being generated.
 - **A status per line**, from a closed set: the class was written, the class was
   unchanged and so skipped, or generating it failed.
-- **A detail line only when there is something to say.** A class that generated
-  cleanly takes one line. A failure names the provider and the file.
-- **A summary line** reporting how long the run took and how many classes landed
-  in each status.
 
 **Skipped is not a failure.** A generated class whose content has not changed is
-not rewritten, so a repeated run reports skipped and exits successfully.
+not rewritten, so a repeated run reports skipped.
 
-**The exit code reports whether anything failed**, and nothing else. An
-unchanged run exits successfully.
+Two gaps are worth stating, because a reader expects both and neither exists. The
+failure status carries **no detail** — not the provider, not the file, just the
+status. And the run sets **no exit code**: the output is created successful and
+never changed, so a run that fails every class still exits successfully. A caller
+that needs to know whether generation worked reads the output rather than the
+exit status.
 
 ---
 

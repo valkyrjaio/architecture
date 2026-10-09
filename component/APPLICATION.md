@@ -37,6 +37,49 @@ is handed what it needs and never reaches upward.
 
 ---
 
+## Using it
+
+### Write the config
+
+An application declares one config class. Give it the application's identity and
+environment, then list the component providers the application registers. That
+list is everything the framework needs to assemble itself.
+
+Add a protocol's config for each protocol the application serves, carrying the
+middleware scheduled at each of that protocol's stages.
+
+A port whose config contracts are split per concern lets one class implement
+several of them, so an application that needs a setting from two contracts
+declares one class rather than two objects
+([`COMPONENT_CONFIG.md`](../convention/COMPONENT_CONFIG.md)).
+
+### List the providers in dependency order
+
+The list is walked in order, and a provider's own dependencies are registered
+before it. Order the list by what depends on what, because that order is the only
+control over precedence: a later provider's binding for the same id replaces an
+earlier one's.
+
+Declare the tree as a tree. The walk keeps no record of where it has been, so a
+provider reachable from two parents is registered twice.
+
+### Point a runtime at an entry
+
+Pick the entry for the protocol and the runtime being deployed, and point the
+runtime at it. The entry selects the config and drives the component; nothing
+else needs wiring.
+
+### Boot without the cache first
+
+An application runs with no generated data at all, so build and test it that way,
+and generate the cache when a deployment needs the cold start
+([`DATA_CACHE.md`](../convention/DATA_CACHE.md)).
+
+Warning: a binding registered outside a provider reaches the uncached run only.
+An application that registers directly works until it generates a cache.
+
+---
+
 ## The config is the entry point for everything
 
 An application declares one config class. It is the single place the framework
@@ -46,20 +89,24 @@ the build tool reads it statically.
 
 The base config declares the application's identity and environment:
 
-| Setting           | Says                                                |
-| ----------------- | --------------------------------------------------- |
-| `applicationName` | what the application is called                      |
-| `version`         | the application's own version                       |
-| `environment`     | which environment this is                           |
-| `debugMode`       | whether the application reports detail on a failure |
-| `timezone`        | the default timezone                                |
-| `key`             | the application secret                              |
-| `namespace`       | the application's own source namespace              |
-| `dir`             | the application's source directory                  |
-| `dataPath`        | where the generated data classes are written        |
-| `dataNamespace`   | the namespace those generated classes take          |
-| `providers`       | the component providers to register                 |
-| `callbacks`       | the publish callbacks to run                        |
+| Setting         | Says                                                |
+| --------------- | --------------------------------------------------- |
+| `version`       | the application's own version                       |
+| `environment`   | which environment this is                           |
+| `debugMode`     | whether the application reports detail on a failure |
+| `timezone`      | the default timezone                                |
+| `key`           | the application secret                              |
+| `namespace`     | the application's own source namespace              |
+| `dir`           | the application's source directory                  |
+| `dataPath`      | where the generated data classes are written        |
+| `dataNamespace` | the namespace those generated classes take          |
+| `providers`     | the component providers to register                 |
+| `callbacks`     | the publish callbacks to run                        |
+
+The application's own **name** is also configured, and which contract carries it
+varies: a port holds it on the base config, or on the config of the protocol that
+prints it. The name is read where an identity is shown, so either placement
+works, and nothing else reads it.
 
 **`providers` replaces rather than extends.** A config that declares the list
 declares the whole list. A port does not merge an application's list into a
@@ -87,16 +134,25 @@ A **component provider** declares what a component contributes. It names the
 component providers it depends on, and then the providers it adds for each kind:
 container bindings, event listeners, and the routes for each protocol.
 
-The framework walks that tree from the config, depth first, in declaration order,
-and registers everything it finds. A provider already visited is skipped, so a
-cycle terminates.
+The framework walks that tree from the config, depth first and post-order: a
+provider's whole dependency subtree registers before the provider itself, so
+anything a provider depends on is already registered when it runs. The config's
+order decides precedence among siblings.
+
+**The walk keeps no record of what it has already visited.** A provider reachable
+from two parents is therefore collected twice, and a cycle in the tree does not
+terminate. Declare the tree as a tree.
 
 **The order the config declares is the order that is registered.** The walk
 imposes no ordering of its own, so an application controls precedence entirely
 through its own list.
 
-Each list is a literal with no conditional logic, because the build tool reads it
-statically ([`PROVIDERS.md`](../convention/PROVIDERS.md)).
+**A provider list holds constructed providers, not references to their types.** The
+build tool reads the construction expression statically and resolves the type from
+it, so the list is still readable without being run.
+
+Each list is a literal with no conditional logic, for that same reason
+([`PROVIDERS.md`](../convention/PROVIDERS.md)).
 
 ---
 
@@ -155,9 +211,10 @@ The cache is a cold-start optimization. It is required only where a process
 handles one unit of work and then exits, because that process pays the whole boot
 cost every time. A persistent runtime pays it once.
 
-This is why a provider exposes a class or constructor reference rather than a
-string: the framework can walk the tree itself, and the build tool can read the
-same declaration statically. See [`DATA_CACHE.md`](../convention/DATA_CACHE.md).
+This is why a provider list is a literal of constructed providers rather than a
+list of strings: the framework can walk the tree itself, and the build tool can
+read the same declaration statically. See
+[`DATA_CACHE.md`](../convention/DATA_CACHE.md).
 
 ---
 

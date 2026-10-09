@@ -75,11 +75,11 @@ Use the shared vocabulary (app, module, component, tool) consistently — see
 
 These hold in **every** language. Do not violate them in a port.
 
-- **Every language works without cache.** Providers expose class/constructor
-  references (PHP/Java/Python `::class`/`.class`, TypeScript `new () => T`, Go
-  interface methods) so the framework can walk the provider tree and register
-  everything at runtime. Cache is a cold-start optimization, not a correctness
-  requirement.
+- **Every language works without cache.** A provider list holds **constructed
+  providers**, so the framework can walk the provider tree and register everything
+  at runtime, and `sindri` can read the same construction expression statically
+  and resolve the type from it. Cache is a cold-start optimization, not a
+  correctness requirement.
 - **The framework has zero AST dependencies.** All source extraction and code
   generation lives in `sindri` (the build tool), never in the framework.
 - **One data class per major component.** `sindri` aggregates every provider
@@ -674,9 +674,16 @@ statement was right.
 Each finding gets one of three answers:
 
 - **The finding is right.** Read the fix back against the finding, in the
-  context of the whole change. Push the fix, then resolve the thread in the
-  same turn. Do not wait for the reviewer to confirm. See **Push work that is
-  ready to review** above.
+  context of the whole change. Review the fix and run the checks, then push it
+  and resolve the thread in the same turn. Do not wait for the reviewer to
+  confirm. See **Push work that is ready to review** above.
+
+**A fix that answers a finding is a change, so it gets the review.** The
+local review and the full check gate both still apply to it. What the review
+answer removes is the confirmation prompt before the push, and the second cold
+draw — nothing else. A fix pushed straight from the editor is how a review round
+ends up reporting the fix's own defect.
+
 - **The finding is wrong, or you disagree.** Leave the thread open and reply with
   the evidence. The user decides, not you.
 - **The finding is right and out of scope.** Leave the thread open, open an

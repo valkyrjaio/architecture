@@ -253,7 +253,7 @@ be rediscovered.
 
 | Variation                                     | Reason                                                         |
 | --------------------------------------------- | -------------------------------------------------------------- |
-| which gRPC library an adapter bridges         | each ecosystem has its own                                     |
+| which gRPC library an adapter bridges         | each ecosystem has its own, and the component ships no adapter |
 | the concurrency primitive per call            | each language has its own                                      |
 | whether the library is an optional dependency | the bridge is in core; the library is the application's choice |
 | an `Attribute` routing subcomponent           | only a language with attributes declares that way              |

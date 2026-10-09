@@ -47,10 +47,10 @@ application's config ([`APPLICATION.md`](../component/APPLICATION.md)).
 **The cache is an optimization, never a correctness requirement.** Every port
 runs with no generated class at all, by walking the provider tree at run time.
 
-This is the rule that shapes the provider declarations. A provider exposes a
-class or constructor reference rather than a string, so the framework can walk
-the tree itself and the tool can read the same declaration statically. One
-declaration, two readers.
+This is the rule that shapes the provider declarations. A list holds constructed
+providers rather than strings, so the framework can walk the tree itself and the
+tool can read the same construction expression statically. One declaration, two
+readers.
 
 The cached path and the uncached path **behave identically**. A difference between
 them is a defect in the tool, not a trade-off.
@@ -83,10 +83,11 @@ A generated class is loaded before the component that uses it, and the container
 data is loaded first, because every other component resolves through the
 container.
 
-A layer may ship its own generated data: the framework, a third-party package
-built on the framework, and the application each generate their own. A later
-layer's data is loaded after an earlier one's, so an application can override
-what a package registered.
+There is one set of generated classes, not one per layer. The classes aggregate
+the application's whole tree, the framework's own providers included, and they
+are written to the one location the application's config names. So precedence is
+decided by the order the provider tree is walked, not by a later layer's data
+overriding an earlier one's.
 
 ---
 
@@ -95,9 +96,10 @@ what a package registered.
 The tool reads a declaration; it does not run one. So every provider list is a
 plain literal, with no variable, no call and no conditional.
 
-A list the tool cannot read is a failure the tool reports, with the provider and
-the method named. It is never a silent omission, because a silently missing
-binding fails much later and far away.
+**A list the tool cannot read is skipped silently.** The entry is absent from the
+generated class and nothing is reported, so the application runs correctly
+without the cache and is missing a service with it. A declaration that breaks the
+rule above is therefore found by reading, not by running the tool.
 
 The full contract, and what the tool does with each list, are in
 [`PROVIDERS.md`](PROVIDERS.md) and [`SINDRI.md`](SINDRI.md).

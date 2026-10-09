@@ -48,9 +48,13 @@ property per stage, and the default command name
 ([`APPLICATION.md`](APPLICATION.md)). An entry point builds the input from the
 runtime's argument vector and drives the component.
 
-Each interactivity level and each built-in command has its own config contract,
-so an application configures the ones it changes and constructs nothing for the
-rest.
+The interaction config carries the level as three independent flags —
+interactive, quiet and silent — so a run's level is the combination of them
+rather than one of four named values.
+
+The option that **selects** each level is configured separately: each has its own
+contract holding that option's long and short name, so an application renames one
+without constructing the others.
 
 ### Declare commands
 
@@ -69,9 +73,13 @@ An argument is positional. An option is named, with a long name and an optional
 short one. Each declares whether it is required, whether it takes a value, and
 the type its value casts to.
 
-The framework casts before the handler runs, so a handler reads a typed value and
-never parses a string. Give each one a description, because that description is
-what help text prints.
+Give each one a description, because that description is what help text prints.
+
+**A declared type is validated before the handler runs, and cast when it is
+read.** The router checks every value against its declaration first, so an
+invalid value fails before any handler code runs. The cast itself happens on
+read, and the route's plain readers hand back the raw string — a handler that
+wants the typed value asks for the cast values.
 
 ### Write a handler
 
@@ -119,9 +127,12 @@ each runtime hands over a differently shaped vector. The rules, and the index ea
 port reads the command name from, are in
 [`PORTS.md`](../convention/PORTS.md).
 
-An **argument** is positional. An **option** is named, and carries a long name
-and an optional short name. Each declares whether it is required, whether it
-takes a value, and the type its value casts to. A port casts before the command
+An **argument** is positional. An **option** is named, and carries one long name
+and **any number of short names**, so one option answers to several spellings.
+
+Each declares whether it is required and the type its value casts to. An option
+also declares whether it takes a value, and may declare that it takes none; an
+argument always takes one, and may declare that it takes many. A port casts before the command
 runs, so a command receives a typed value and never parses a string.
 
 ---
@@ -211,11 +222,17 @@ A run has a level, and the level decides what reaches the person:
 | --------------- | ----------------------------------------------------- |
 | interactive     | questions are asked, and answers are read             |
 | non-interactive | questions are not asked, and a default answer is used |
-| quiet           | only errors are written                               |
-| silent          | nothing is written                                    |
+| quiet           | nothing is written for a successful run               |
+| silent          | nothing is written, ever                              |
 
-Each level is a separate config contract, so an application configures one
-without constructing the others
+**Quiet keys on the outcome, not on the message kind.** A run that succeeds writes
+nothing at all, and a run that fails writes everything it would normally write. So
+quiet suppresses the output of a run nobody needs to read, rather than filtering
+the messages of every run.
+
+The three flags live on one interaction config. What is split per contract is the
+**option name** that selects each level, which is why renaming one option does not
+mean constructing the rest
 ([`COMPONENT_CONFIG.md`](../convention/COMPONENT_CONFIG.md)).
 
 ---
@@ -230,8 +247,9 @@ completion.
 Every other command prints one, and an application suppresses it globally if it
 wants to.
 
-The name of each built-in command and of each built-in option is configurable, so
-an application can rename one it conflicts with.
+**The help and version commands carry a configurable name**, as do the built-in
+options, so an application renames one it conflicts with. The two listing
+commands take their names from a constant and are not renameable.
 
 ---
 

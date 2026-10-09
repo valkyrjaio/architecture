@@ -111,14 +111,20 @@ than the framework's to hide ([`LIFECYCLE.md`](../convention/LIFECYCLE.md)).
 
 ### Refine a declared route
 
-A declaration may be refined rather than repeated. A **path modifier** on the
-class prepends a path to every route the class declares, and on a method it
-appends one to that method's routes, so a controller states its prefix once.
-Other modifiers set the name, the middleware, the parameters and the defaults the
-same way: declared once on the class, applied to every route in it.
+A declaration may be refined rather than repeated, and **which modifiers reach
+the whole class is part of the contract**:
 
-This is how a group of related routes shares its prefix, its middleware and its
-defaults without each route restating them.
+| Modifier   | Declared on                        | Applies to                                        |
+| ---------- | ---------------------------------- | ------------------------------------------------- |
+| path       | the class or a method              | every route in the class, or that method's routes |
+| name       | the class or a method              | the same                                          |
+| middleware | a method                           | that method's routes, and it repeats              |
+| parameter  | a method, or one of its parameters | that method's routes                              |
+
+A path or a name on the class is how a group of related routes shares its prefix
+without each route restating it. Middleware and parameters do not reach the class,
+so a group that shares middleware schedules it per route or globally in the
+config.
 
 ### Generate a url
 
@@ -129,14 +135,13 @@ A static route supplies an empty parameter set rather than omitting the argument
 ### Know when routes are collected
 
 **Debug mode decides where the collection comes from.** With debug mode on, the
-framework collects the routes from the providers on **every** unit of work, so a
-declaration change is visible without a rebuild. With it off, the collection
-loads from the routing data singleton — the generated data class in a deployed
-application, or data built from the providers once at boot where no generated
-class exists.
+framework builds the collection from the route providers. With it off, it loads
+the collection from the generated routing data.
 
-So a route that appears in development and not in production is a generated class
-that was not regenerated.
+Either way the collection is built **once**, on the first resolution of it, and
+reused after that — a persistent runtime builds it once per process, not once per
+unit of work. So a route that appears in development and not in production is a
+generated class that was not regenerated.
 
 A built-in command lists every registered route, which is how you confirm what
 the collection actually holds.
@@ -195,8 +200,8 @@ writable and seekable, and report its metadata.
 
 Two backings satisfy it, and which one a port uses is a language fact:
 
-| Backing             | Ports                                                   | Because |
-| ------------------- | ------------------------------------------------------- | ------- |
+| Backing             | Used where                                              |
+| ------------------- | ------------------------------------------------------- |
 | a native handle     | the language has a seekable, synchronous I/O type       |
 | an in-memory buffer | the language's streams are asynchronous and cannot seek |
 
@@ -228,13 +233,16 @@ The route pipeline is the same in every port:
 
 ### The collection defers construction
 
-**A collection holds a function that returns the route, not the route.** The
-function runs on the first read for that key, and the collection keeps what it
-returned.
+**A collection holds a function that returns the route, not the route.** Reading a
+key runs that function and returns what it produced.
 
 A unit of work matches one route and ignores every other, so constructing all of
 them to serve one is waste that scales with the route count. Deferring means a
-large application pays for the routes it actually reaches.
+large application pays only for the routes it actually reaches.
+
+The function is **not** memoized: each read runs it again and returns a fresh
+object. So a caller that reads the same route twice holds two objects, and a
+route is immutable precisely so that costs nothing but the construction.
 
 This is a cross-component rule: the listener collection in
 [`EVENT.md`](EVENT.md) holds its listeners the same way, for the same reason.

@@ -51,8 +51,11 @@ attributes are its headers.
 ### Configure it and run a consumer
 
 The application's Queue config declares the middleware scheduled at each stage,
-one property per stage ([`APPLICATION.md`](APPLICATION.md)), and names the
-processor the entry bridges.
+one property per stage ([`APPLICATION.md`](APPLICATION.md)).
+
+Which processor is bridged is the **entry's** own configuration, not the
+component config's. The component config holds the pipeline and nothing about a
+broker, which is what keeps the component free of any processor.
 
 Running a consumer is the deployment's job. The framework ships the entries, not
 a server and not a long-running command: point a process manager at the polling
@@ -263,11 +266,11 @@ handled at the edge. It is not a field on the job and not a framework contract.
 
 ## Permitted variation
 
-| Variation                        | Reason                                              |
-| -------------------------------- | --------------------------------------------------- |
-| which processors a port bridges  | each ecosystem has its own clients available        |
-| the runtime entry for a sent job | each language has its own server runtimes           |
-| the human-readable time twin     | a port may write it or omit it; code never reads it |
+| Variation                        | Reason                                                                              |
+| -------------------------------- | ----------------------------------------------------------------------------------- |
+| which processors a port bridges  | each ecosystem has its own clients available, and the component bridges none itself |
+| the runtime entry for a sent job | each language has its own server runtimes                                           |
+| the human-readable time twin     | a port may write it or omit it; code never reads it                                 |
 
 Nothing else varies. The envelope, the outcome set and the pipeline are identical
 in every port.

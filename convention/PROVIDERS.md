@@ -461,7 +461,7 @@ All provider list methods must satisfy the build tool contract — simple litera
 ❌ Inline closures or lambdas as route handlers
 ```
 
-If any provider method violates this contract Sindri emits an error and aborts cache generation. The application still
+If any provider method violates this contract Sindri skips the entry silently, so the binding is simply absent from the generated class. The application still
 runs without cache — the provider tree is traversed at runtime instead.
 
 ---
