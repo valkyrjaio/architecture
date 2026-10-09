@@ -242,6 +242,8 @@ package io.valkyrja.http.routing.provider.contract;
 
 import io.valkyrja.http.routing.data.contract.RouteContract;
 
+import java.util.Map;
+
 import java.util.List;
 
 public interface HttpRouteProviderContract {
