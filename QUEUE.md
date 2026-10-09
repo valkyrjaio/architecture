@@ -642,12 +642,13 @@ an entry.
   the outer push returns. On `RETRY` it appends the `attempts++` `Job` and the same drain runs it again at once, because
   no durable place holds `retry_delay_ms`. The chain ends when the job acknowledges or reaches `max_attempts`. Only the
   timing differs from production, and the retry count is identical.
-- **`Deferred`** buffers each job, and a per-host terminate bridge middleware drains the buffer after the response. The
-  bridge runs at the Http terminate stage, the Cli after-run stage, or the gRPC `Terminated` stage. To use `Deferred`,
-  an application registers the bridge. A deferred job is not durable, because a crash after the response loses the job.
-  The drain needs a host that keeps working after the response, such as PHP-FPM with `fastcgi_finish_request`, Swoole,
-  RoadRunner, or Node. A host without that capability drains at the end of the request, so the client waits for the
-  drain and the caller pays its cost.
+- **`Deferred`** buffers each job, and a per-host bridge middleware drains the buffer. The bridge runs at the
+  `ResponseSent` stage in Http and gRPC, after the response. Cli has no stage after the exit, so the bridge runs at
+  `ProcessExiting` and the drain completes before the process ends. To use `Deferred`, an application registers the
+  bridge. A deferred job is not durable, because a crash after the response loses the job. The drain needs a host that
+  keeps working after the response, such as PHP-FPM with `fastcgi_finish_request`, Swoole, RoadRunner, or Node. A host
+  without that capability drains at the end of the request, so the client waits for the drain and the caller pays its
+  cost.
 - **`InMemory`** — the test adapter. `push` buffers the job, and a test reads the buffer with `getBuffered()` or takes
   it with `drain()`. Distinct from `Sync` (which runs now) — `InMemory` holds the jobs until you process them.
 
