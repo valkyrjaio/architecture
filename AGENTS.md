@@ -106,10 +106,11 @@ These hold in **every** language. Do not violate them in a port.
   configuration for adapters that the application never uses. An adapter
   contract prefixes every property with the adapter name, so one application
   config class can implement several adapter contracts. See §4.
-- **No provider-reference constants class.** Provider references use
-  `::class` / `.class` / class objects / constructor references directly so
-  `sindri` can resolve them statically. (Binding-_key_ constants files are fine
-  and expected — see §4.)
+- **No provider-reference constants class.** A provider list constructs its
+  providers inline so `sindri` can read the construction expression and resolve
+  the type from it. A constants class holding provider references would hide that
+  expression. (Binding-_key_ constants files are a different thing, and are fine
+  where the language needs them — see §4.)
 - **Route middleware is appended, never deduplicated.** Across every protocol
   (HTTP, CLI, gRPC, Queue), both the runtime collector and `sindri` codegen _append_ each
   registered middleware in order — they never dedupe. If the same middleware is
@@ -678,11 +679,11 @@ Each finding gets one of three answers:
   and resolve the thread in the same turn. Do not wait for the reviewer to
   confirm. See **Push work that is ready to review** above.
 
-**A fix that answers a finding is a change, so it gets the review.** The
-local review and the full check gate both still apply to it. What the review
-answer removes is the confirmation prompt before the push, and the second cold
-draw — nothing else. A fix pushed straight from the editor is how a review round
-ends up reporting the fix's own defect.
+  A fix that answers a finding is a change, so **it gets the review**. The local
+  review and the full check gate both still apply. What the review answer removes
+  is the confirmation prompt before the push, and the second cold draw — nothing
+  else. A fix pushed straight from the editor is how a round ends up reporting
+  the fix's own defect.
 
 - **The finding is wrong, or you disagree.** Leave the thread open and reply with
   the evidence. The user decides, not you.

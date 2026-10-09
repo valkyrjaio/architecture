@@ -25,8 +25,8 @@ reference; build from those.
 - **Style:** contracts are `interface` (never `type` aliases); shared behavior in
   an `abstract class` implementing the contract; concrete classes extend it.
   Binding keys are `static readonly` string constants (no `::class` equivalent);
-  provider class lists use **constructor references** (`Array<new () =>
-Contract>`) for direct runtime instantiation.
+  provider lists hold **constructed providers** (`ComponentProviderContract[]`),
+  which `sindri` reads as construction expressions through the compiler API.
 
 ### Exceptions
 
@@ -177,8 +177,8 @@ so a failed run still reports a signed statement.
 - **Framework source shipping:** ships `.ts` source **only** — never compiled
   `.js`. Consumers compile the framework together with their own app (a loader
   such as `tsx`, or their bundler). Source must be present because the
-  cache-optional runtime relies on constructor references and `sindri` reads that
-  same source through the compiler API; publishing `.js` alongside it would split
+  cache-optional runtime walks the constructed provider tree and `sindri` reads
+  that same source through the compiler API; publishing `.js` alongside it would split
   those into two module graphs, so the runtime could load a different copy of a
   class than the generated data cache references.
 - **`sindri` (build tool)** uses the TypeScript compiler API to generate the

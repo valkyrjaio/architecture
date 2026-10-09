@@ -13,8 +13,8 @@
 - **No reliable decorators** — explicit registration only, no annotated class
   scanning
 - **No `::class` equivalent** — string constants for all binding keys
-- **Constructor references** (`Array<new () => Contract>`) allow direct
-  instantiation at runtime
+- **Constructed providers** in every provider list (`ComponentProviderContract[]`),
+  walked directly at runtime
 - **Named types** (`HttpHandlerFunc`, `CliHandlerFunc`, `ListenerHandlerFunc`)
   for typed closures
 - **TypeScript compiler API** for build tool
@@ -127,15 +127,15 @@ container.bindSingleton(
 
 ```typescript
 export interface ComponentProviderContract {
-    // Array<new () => T> is TypeScript's equivalent of PHP's ::class list
-    // Allows direct instantiation at runtime — no string lookup needed
-    getContainerProviders(app: ApplicationContract): Array<new () => ServiceProviderContract>
+    // A list of constructed providers, the same shape every port holds
+    // The framework walks them directly — no string lookup needed
+    getContainerProviders(app: ApplicationContract): ServiceProviderContract[]
 
-    getEventProviders(app: ApplicationContract): Array<new () => ListenerProviderContract>
+    getEventProviders(app: ApplicationContract): ListenerProviderContract[]
 
-    getCliProviders(app: ApplicationContract): Array<new () => CliRouteProviderContract>
+    getCliProviders(app: ApplicationContract): CliRouteProviderContract[]
 
-    getHttpProviders(app: ApplicationContract): Array<new () => HttpRouteProviderContract>
+    getHttpProviders(app: ApplicationContract): HttpRouteProviderContract[]
 }
 ```
 
@@ -193,23 +193,24 @@ logic.
 
 ---
 
-## 4. Constructor References — Works Without Cache
+## 4. Constructed Providers — Works Without Cache
 
-The `Array<new () => Contract>` return type is the key insight. The framework
-receives actual class constructors — not strings — so it can instantiate
-providers and call methods directly at runtime:
+A provider list holds constructed providers, not strings, so the framework walks
+them and calls their methods directly at runtime:
 
 ```typescript
-// framework bootstrap — direct instantiation, no cache, no string lookup
-for (const ProviderClass of component.getHttpProviders(app)) {
-    const provider = new ProviderClass()
+// framework bootstrap — walk the tree, no cache, no string lookup
+for (const provider of component.getHttpProviders(app)) {
     for (const route of provider.getRoutes()) {
         router.register(route)
     }
 }
 ```
 
-This means TypeScript works without cache exactly like PHP and Python.
+`sindri` reads the same construction expressions through the compiler API, so the
+cached and uncached paths register from one declaration.
+
+This means TypeScript works without cache exactly as the other ports do.
 
 ---
 

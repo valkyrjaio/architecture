@@ -69,9 +69,9 @@ listing shows them together.
 
 ### Declare arguments and options
 
-An argument is positional. An option is named, with a long name and an optional
-short one. Each declares whether it is required, whether it takes a value, and
-the type its value casts to.
+An argument is positional. An option is named, with one long name and any number
+of short names. Each declares whether it is required and the type its value casts
+to, and an option also declares whether it takes a value or takes none.
 
 Give each one a description, because that description is what help text prints.
 
@@ -132,8 +132,7 @@ and **any number of short names**, so one option answers to several spellings.
 
 Each declares whether it is required and the type its value casts to. An option
 also declares whether it takes a value, and may declare that it takes none; an
-argument always takes one, and may declare that it takes many. A port casts before the command
-runs, so a command receives a typed value and never parses a string.
+argument always takes one, and may declare that it takes many.
 
 ---
 

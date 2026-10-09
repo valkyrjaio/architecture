@@ -68,8 +68,9 @@ java.lang.IllegalArgumentException   ← Java has no InvalidArgumentException
 
 ### Class references
 
-`.class` tokens are used as binding keys — compiler verified. Per-component
-constants files are recommended alongside:
+`.class` tokens are used as binding keys — compiler verified. A language that
+names a class natively needs no constants file, so Java ships none; the shape
+below is what a port whose keys are strings holds instead:
 
 ```java
 // ContainerConstants.java

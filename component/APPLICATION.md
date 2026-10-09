@@ -143,9 +143,9 @@ order decides precedence among siblings.
 from two parents is therefore collected twice, and a cycle in the tree does not
 terminate. Declare the tree as a tree.
 
-**The order the config declares is the order that is registered.** The walk
-imposes no ordering of its own, so an application controls precedence entirely
-through its own list.
+**The config's order decides precedence among siblings**, and the post-order walk
+decides the rest: a provider's dependencies register before it, whatever order the
+config lists them in.
 
 **A provider list holds constructed providers, not references to their types.** The
 build tool reads the construction expression statically and resolves the type from

@@ -26,12 +26,10 @@ tool's job, and the framework never invokes it.
 
 ## What it does
 
-| Job                       | Means                                                      |
-| ------------------------- | ---------------------------------------------------------- |
-| generate the data classes | read the provider tree and write one class per component   |
-| scaffold an application   | create a new project from the language's template          |
-| scaffold a file           | create a provider, a controller or a config from a pattern |
-| list its own commands     | report what the tool can do                                |
+| Job                       | Means                                                    |
+| ------------------------- | -------------------------------------------------------- |
+| generate the data classes | read the provider tree and write one class per component |
+| list its own commands     | report what the tool can do                              |
 
 It is a CLI application built on the framework's own Cli component, so its
 commands are routes and its output follows [`CLI.md`](../component/CLI.md).

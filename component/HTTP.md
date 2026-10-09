@@ -135,8 +135,13 @@ A static route supplies an empty parameter set rather than omitting the argument
 ### Know when routes are collected
 
 **Debug mode decides where the collection comes from.** With debug mode on, the
-framework builds the collection from the route providers. With it off, it loads
-the collection from the generated routing data.
+framework builds the collection from the route providers. With it off, it reads
+the routing data, which a generated class supplies when one exists and which is
+otherwise built from those same providers at boot.
+
+So the cache is never required here either: with no generated class, both
+settings build from the providers, and debug mode changes only whether the result
+is reused.
 
 Either way the collection is built **once**, on the first resolution of it, and
 reused after that — a persistent runtime builds it once per process, not once per
@@ -240,9 +245,8 @@ A unit of work matches one route and ignores every other, so constructing all of
 them to serve one is waste that scales with the route count. Deferring means a
 large application pays only for the routes it actually reaches.
 
-The function is **not** memoized: each read runs it again and returns a fresh
-object. So a caller that reads the same route twice holds two objects, and a
-route is immutable precisely so that costs nothing but the construction.
+The collection does **not** memoize: each read invokes the function again rather
+than replacing the entry with what it returned.
 
 This is a cross-component rule: the listener collection in
 [`EVENT.md`](EVENT.md) holds its listeners the same way, for the same reason.

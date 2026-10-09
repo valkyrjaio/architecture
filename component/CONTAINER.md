@@ -32,8 +32,10 @@ constructs its own dependency, and a class never reaches for a global.
 | `Provider`   | the service provider contract, and the component providers |
 | `Throwable`  | the component's throwable contract and its exceptions      |
 
-A port adds `Constant` when it needs a binding-key constants file. A language
-that names a class natively needs none. The rule is in
+A port adds `Constant` when it needs a binding-key constants file; a language that
+names a class natively needs none. A port whose language has attributes or
+annotations may also add a segment for the marker that declares a provider
+method. The binding-key rule is in
 [`CONTAINER_BINDINGS.md`](../convention/CONTAINER_BINDINGS.md).
 
 ---
@@ -218,11 +220,12 @@ The naming rule and the hierarchy are in
 
 ## Permitted variation
 
-| Variation                     | Reason                                               |
-| ----------------------------- | ---------------------------------------------------- |
-| the binding key type          | a language names a class natively or it does not     |
-| a `Constant` subcomponent     | only a port whose keys are strings needs one         |
-| the child container's backing | a port may offer a native variant beside the default |
+| Variation                        | Reason                                                |
+| -------------------------------- | ----------------------------------------------------- |
+| the binding key type             | a language names a class natively or it does not      |
+| a `Constant` subcomponent        | only a port whose keys are strings needs one          |
+| a provider-method marker segment | only a language with attributes declares one that way |
+| the child container's backing    | a port may offer a native variant beside the default  |
 
 Nothing else varies. A port that omits a canonical operation has a gap, not a
 deviation.

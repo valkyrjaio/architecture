@@ -339,10 +339,12 @@ build tool cannot resolve from AST.
 
 Binding key constants files (for container bindings) are unaffected — they are correct and should remain.
 
-### Ensure all provider list methods use ::class directly
+### Ensure all provider list methods return constructed providers
 
 Audit all provider list methods (`getComponentProviders`, `getContainerProviders`, `getHttpProviders` etc.) to ensure
-they return `::class` references directly — never constant references.
+they return a literal list of constructed providers — never a constant reference, and never a `::class` string, which
+the declared `ComponentProviderContract[]` type does not accept. A publish callback is the separate case that takes a
+method reference.
 
 ---
 
