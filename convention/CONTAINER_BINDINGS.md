@@ -14,27 +14,27 @@ is in [`CONTAINER.md`](../component/CONTAINER.md).
 A binding is a **key** and a **factory**. The key identifies the service. The
 factory builds it.
 
-PHP and Java originally conflated them, because a class reference can serve as
-both an identifier and the instruction for how to construct the thing. Separating
-them is what makes the container portable, because three of the five languages
-cannot use a type as a key at all.
+A language with a first-class reference to a type can conflate them, because that
+reference serves as both an identifier and the instruction for how to construct
+the thing. Separating them is what makes the container portable, because a
+language without such a reference cannot key by type at all.
 
 ---
 
 ## The key
 
-| Port       | Key is            | Verified by  |
-| ---------- | ----------------- | ------------ |
-| PHP        | a class reference | the compiler |
-| Java       | a class token     | the compiler |
-| TypeScript | a string constant | nothing      |
-| Go         | a string constant | nothing      |
-| Python     | a string constant | nothing      |
+| Key is                  | Verified by  | Used where                                 |
+| ----------------------- | ------------ | ------------------------------------------ |
+| a reference to the type | the compiler | the language has one and importing is free |
+| a string constant       | nothing      | everywhere else                            |
 
-A language that erases its types, or that has no reference to a type at all,
-cannot key by type. Python could, and deliberately does not: using a type object
-as a key forces the module to import before anything resolves it, which defeats
-the lazy import that is Python's answer to a slow cold start.
+Three cases force a string. A language that erases its types at run time has no
+reference to use. A language with no type reference at all has nothing to use.
+And a language where naming a type forces its module to load **could** use one
+and must not: the import would run before anything resolves the binding, which
+defeats the lazy loading that answers a slow cold start.
+
+So the string key is the portable case, not the exception.
 
 ### How a string key is spelled
 

@@ -2,7 +2,8 @@
 
 Per-language guide for the **TypeScript** Valkyrja repos. Read the cross-language
 canonical first: [`../AGENTS.md`](../../AGENTS.md). This file only records the
-TypeScript **deltas**. PHP is the reference implementation; mirror it.
+TypeScript **deltas**. The documents in `component/` and `convention/` are the
+reference; build from those.
 
 ---
 

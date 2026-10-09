@@ -1,13 +1,14 @@
 # Queue
 
-The **cross-language** definition of the Queue component. It states the
-hierarchy, the names and the behavior that every port implements.
+The Queue component: what it does, how it is used, and the names and behavior
+every language port shares.
 
-A port implements this document. A port does not redefine it. The reference
-implementation is PHP ([`AGENTS.md`](../AGENTS.md) §1).
+This is the definition the ports are built from. Each port's `README.md` for this
+component carries the same content with that language's examples added, so the
+two read alike and anyone moving between ports recognizes both.
 
-This document holds no code example. The component's `README.md` in each port
-holds the examples and the per-language spelling.
+It holds no code example of its own, because an example has to pick one language,
+and the spelling then travels further than the rule.
 
 ---
 
@@ -42,6 +43,63 @@ platform that delivers over HTTP.
 `Message` holds `Job`, `Payload`, `Attributes` and the outcome `Enum`. The
 split mirrors Http: a job is the unit of work, a payload is its body, and
 attributes are its headers.
+
+---
+
+## Using it
+
+### Configure it and run a consumer
+
+The application's Queue config declares the middleware scheduled at each stage,
+one property per stage ([`APPLICATION.md`](APPLICATION.md)), and names the
+processor the entry bridges.
+
+Running a consumer is the deployment's job. The framework ships the entries, not
+a server and not a long-running command: point a process manager at the polling
+entry, or point your existing web server at the entry that receives a sent job.
+
+### Declare job routes
+
+A job name routes to a handler, exactly as a path routes to a controller. Declare
+the routes in a **route provider** listed in the config, as a literal list, or
+declare one on the handler method where the language allows it
+([`PROVIDERS.md`](../convention/PROVIDERS.md)).
+
+The route's name is the job's `name` field on the wire. It is a plain string, so
+renaming a handler class does not strand a job already in the queue.
+
+### Write a handler
+
+A handler receives the container and the route, and returns an outcome
+([`HANDLERS.md`](../convention/HANDLERS.md)). It reads the job's payload and
+attributes, does the work, and returns the outcome that describes what happened.
+
+**Write every handler to tolerate a duplicate delivery**, because delivery is at
+least once. The job's id is stable across every retry, so it is what an
+idempotency check keys on.
+
+### Publish a job
+
+Resolve a **client** and publish. The client that runs the job at once, the one
+that defers it to the end of the current unit of work, and the one that holds it
+in memory are interchangeable with a durable client, so a test or a local run
+needs no broker.
+
+The **producer sets the retry policy**, not the consumer: the maximum attempts,
+the initial delay, the retry hold, and whether that hold ramps with the attempt
+count all ride on the job.
+
+### Report an outcome
+
+Return the outcome rather than throwing, where the handler knows what happened.
+Throw only for a genuine failure, and let the throwable stage map it.
+
+Mark a throwable **non-retryable** when retrying cannot help, and it fails at once
+instead of consuming the attempt budget.
+
+Warning: catching the component's throwable contract does **not** bound the catch
+to the component, because the non-retryable marker extends it. An application
+throwable carrying that marker is caught too.
 
 ---
 

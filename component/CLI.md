@@ -1,13 +1,14 @@
 # Cli
 
-The **cross-language** definition of the Cli component. It states the hierarchy,
-the names and the behavior that every port implements.
+The Cli component: what it does, how it is used, and the names and behavior
+every language port shares.
 
-A port implements this document. A port does not redefine it. The reference
-implementation is PHP ([`AGENTS.md`](../AGENTS.md) §1).
+This is the definition the ports are built from. Each port's `README.md` for this
+component carries the same content with that language's examples added, so the
+two read alike and anyone moving between ports recognizes both.
 
-This document holds no code example. The component's `README.md` in each port
-holds the examples and the per-language spelling.
+It holds no code example of its own, because an example has to pick one language,
+and the spelling then travels further than the rule.
 
 ---
 
@@ -35,6 +36,75 @@ collection and the same dispatch.
 
 `Interaction` is Cli's name for what Http calls `Message`. The unit of work is a
 conversation rather than a message, so the subcomponent is named for that.
+
+---
+
+## Using it
+
+### Configure it and point a runtime at it
+
+The application's CLI config declares the middleware scheduled at each stage, one
+property per stage, and the default command name
+([`APPLICATION.md`](APPLICATION.md)). An entry point builds the input from the
+runtime's argument vector and drives the component.
+
+Each interactivity level and each built-in command has its own config contract,
+so an application configures the ones it changes and constructs nothing for the
+rest.
+
+### Declare commands
+
+A command is a route. Declare commands in a **route provider** listed in the
+config, as a literal list, or declare one on the controller method where the
+language allows it and list the controller classes to scan
+([`PROVIDERS.md`](../convention/PROVIDERS.md)).
+
+A command states its name, its description, its handler, and the arguments and
+options it accepts. **Group related commands by prefixing the name**, so a
+listing shows them together.
+
+### Declare arguments and options
+
+An argument is positional. An option is named, with a long name and an optional
+short one. Each declares whether it is required, whether it takes a value, and
+the type its value casts to.
+
+The framework casts before the handler runs, so a handler reads a typed value and
+never parses a string. Give each one a description, because that description is
+what help text prints.
+
+### Write a handler
+
+A handler receives the container and the route, and returns an output
+([`HANDLERS.md`](../convention/HANDLERS.md)). It reads its arguments and options
+from the route.
+
+### Build the output
+
+Add messages to the output and return it. Each message names the **formatter** it
+wants rather than carrying rendered text, so the same output renders plainly where
+color is unavailable.
+
+The output is immutable: adding a message returns a copy, and so does writing it.
+Return the copy.
+
+### Ask a question
+
+A question is a message that waits. Ask one only where the run is interactive;
+the framework supplies the default answer at every other level, so a command
+written this way also runs unattended in a pipeline.
+
+### Report the outcome
+
+Return the exit code that names what happened, from the enum rather than a bare
+integer. A warning exits zero, so a warning does not fail a build; an application
+that wants otherwise opts in.
+
+### Attach middleware
+
+Middleware is scheduled **globally** in the config, per stage, or **per command**
+on the route. Both run at the stage they are scheduled for, global first, and
+neither is deduplicated.
 
 ---
 

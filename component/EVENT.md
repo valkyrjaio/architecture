@@ -1,13 +1,14 @@
 # Event
 
-The **cross-language** definition of the Event component. It states the
-hierarchy, the names and the behavior that every port implements.
+The Event component: what it does, how it is used, and the names and behavior
+every language port shares.
 
-A port implements this document. A port does not redefine it. The reference
-implementation is PHP ([`AGENTS.md`](../AGENTS.md) §1).
+This is the definition the ports are built from. Each port's `README.md` for this
+component carries the same content with that language's examples added, so the
+two read alike and anyone moving between ports recognizes both.
 
-This document holds no code example. The component's `README.md` in each port
-holds the examples and the per-language spelling.
+It holds no code example of its own, because an example has to pick one language,
+and the spelling then travels further than the rule.
 
 ---
 
@@ -45,22 +46,92 @@ or an annotation, and `Constant` when it needs string binding keys.
 A listener is registered against an **event id**, and the id is what the
 collection is keyed by. The id is a string, and it names one event type.
 
-How a port derives the id is the component's one real asymmetry:
+How the id is derived is the component's one real asymmetry, and the language
+decides it:
 
-| Port derives the id from     | Ports                  | So an event                                       |
-| ---------------------------- | ---------------------- | ------------------------------------------------- |
-| the language's type identity | PHP, Java              | needs no method, and any object dispatches        |
-| a method on the event        | TypeScript, Go, Python | implements `EventContract` and returns its own id |
+| Where the id comes from      | So an event                                       |
+| ---------------------------- | ------------------------------------------------- |
+| the language's type identity | needs no method, and any object dispatches        |
+| a method on the event        | implements `EventContract` and returns its own id |
 
-A language that erases its types at run time, or that cannot name a type
-cheaply, cannot derive the id. So those ports declare `EventContract` with one
-method that returns the id, and an event implements it. This is the same trade
-that [`CONTAINER_BINDINGS.md`](../convention/CONTAINER_BINDINGS.md) makes for a
-binding key, and it is accepted for the same reason: the alternative is a globally
-unique event name in every port.
+A language that keeps its types at run time and can name one cheaply derives the
+id itself. A language that erases its types, or that pays an import to name one,
+cannot. Those languages declare `EventContract` with one method that returns the
+id, and an event implements it.
+
+This is the same trade that
+[`CONTAINER_BINDINGS.md`](../convention/CONTAINER_BINDINGS.md) makes for a
+binding key, and it is accepted for the same reason: the alternative is an event
+name that has to be globally unique in every port.
 
 Warning: the id is shared vocabulary. Two components must not register a listener
 under the same id for different events.
+
+---
+
+## Using it
+
+### Define an event
+
+An event is a plain object the application owns. It carries the data the
+listeners need, as typed properties with a reader for each one. It extends no
+framework class.
+
+A port whose language cannot derive the event id from the type implements the
+event contract and returns the id. Every other port needs nothing.
+
+### Dispatch it
+
+Dispatch the event object when you hold one. Dispatch by **id** when you do not,
+and the dispatcher resolves the event from the container — so dispatching by id
+is a claim that the id is a registered binding
+([`CONTAINER.md`](CONTAINER.md)).
+
+Use the `IfHasListeners` form when building the event is expensive and nothing
+may be listening. It checks the collection first and skips the work.
+
+**Dispatch returns the event.** A listener may change it, so the caller reads the
+result from the object the dispatch returned rather than the one it passed in.
+
+### Write a listener
+
+A listener's handler receives the container and a map. The event is in the map
+under a known key, and the handler resolves whatever else it needs from the
+container ([`HANDLERS.md`](../convention/HANDLERS.md)).
+
+### Pass data from the call site
+
+A dispatch by id has no event object to carry the caller's data. An event that
+needs it implements the arguments-capable contract, which declares one method
+that receives the call site's arguments. The dispatcher calls it after it
+resolves the event and before it invokes any listener. The event stores them as
+typed properties and exposes a reader for each.
+
+### Collect what listeners return
+
+**The dispatcher discards a handler's return value by default.** An event that
+needs the values implements the dispatch-collectable contract, which declares one
+method to receive each value and one to read them all back.
+
+The dispatcher passes every handler's return value, in invocation order,
+including the empty value from a handler that returns nothing. This is the shape
+for a pipeline where each listener contributes one part of a result.
+
+### Stop the remaining listeners
+
+An event that may be stopped implements the stoppable contract. The dispatcher
+checks after **every** listener, so a stopped event runs no further listener. A
+port whose language has a standard interface for this uses the standard one.
+
+### Register the listeners
+
+Declare a **listener provider** and list it in the application's config. The
+provider declares its listeners as a literal list, and a port whose language
+declares a listener on the class itself may instead list the classes to scan
+([`PROVIDERS.md`](../convention/PROVIDERS.md)).
+
+A listener may also be added to or removed from the collection at run time. The
+collection is not frozen once the application boots.
 
 ---
 

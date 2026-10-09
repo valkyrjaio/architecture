@@ -155,7 +155,7 @@ public static function publishUserRepository(ContainerContract $container): void
 ```
 
 This moves ownership of instantiation into the class. Use it when more than one caller must reuse the construction step.
-Otherwise construct the service in the publisher, which is what the reference implementation does. Neither form uses
+Otherwise construct the service in the publisher, which is the usual form. Neither form uses
 reflection or autowiring.
 
 ```php

@@ -1,13 +1,14 @@
 # Application
 
-The **cross-language** definition of the Application component. It states the
-hierarchy, the names and the behavior that every port implements.
+The Application component: what it does, how it is used, and the names and behavior
+every language port shares.
 
-A port implements this document. A port does not redefine it. The reference
-implementation is PHP ([`AGENTS.md`](../AGENTS.md) §1).
+This is the definition the ports are built from. Each port's `README.md` for this
+component carries the same content with that language's examples added, so the
+two read alike and anyone moving between ports recognizes both.
 
-This document holds no code example. The component's `README.md` in each port
-holds the examples and the per-language spelling.
+It holds no code example of its own, because an example has to pick one language,
+and the spelling then travels further than the rule.
 
 ---
 

@@ -202,7 +202,7 @@ func GetParsedPath(path string) (string, error)
 
 ## 5. Examples
 
-Show the wrong form first, then the right form. PHP is the reference implementation, so
+Show the wrong form first, then the right form. PHP is the most complete port, so
 every example is PHP unless a language spells it differently.
 
 The parse pair — the bare verb changes the argument, the `get` form does not:

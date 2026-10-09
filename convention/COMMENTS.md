@@ -9,7 +9,7 @@ carries no comment. A file where every block carries a comment is a wall of
 text, and a reader skips walls. ([`AGENTS.md`](../AGENTS.md) §3 summarizes this
 document's rules as golden rules 10, 13, 14, and 15.)
 
-PHP examples are shown, because PHP is the reference implementation; a rule
+PHP examples are shown, because it is the most complete port; a rule
 about config shows YAML. The rules hold in every port. The examples are generic
 by design: they show the shape in the framework's naming style, and they copy
 no real method, so this document does not drift when the source changes.

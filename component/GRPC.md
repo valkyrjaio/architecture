@@ -1,17 +1,14 @@
 # Grpc
 
-The **cross-language** definition of the Grpc component. It states the
-hierarchy, the names and the behavior that every port implements.
+The Grpc component: what it does, how it is used, and the names and behavior
+every language port shares.
 
-A port implements this document. A port does not redefine it.
+This is the definition the ports are built from. Each port's `README.md` for this
+component carries the same content with that language's examples added, so the
+two read alike and anyone moving between ports recognizes both.
 
-**The reference implementation for this component is Java**, not PHP. Grpc is the
-one component where the reference is not the reference port
-([`AGENTS.md`](../AGENTS.md) §1). When a port disagrees with Java on this
-component, Java is right.
-
-This document holds no code example. The component's `README.md` in each port
-holds the examples and the per-language spelling.
+It holds no code example of its own, because an example has to pick one language,
+and the spelling then travels further than the rule.
 
 ---
 
@@ -43,6 +40,74 @@ the only place a library is named.
 
 `Message` divides into `Call`, `Response`, `Status`, `Metadata`, `Deadline`,
 `Cancellation`, `Peer` and `Stream`. Each is a value type with its own contract.
+
+---
+
+## Using it
+
+### Configure it and point a transport at it
+
+The application's gRPC config declares the middleware scheduled at each stage,
+one property per stage ([`APPLICATION.md`](APPLICATION.md)). An adapter for the
+gRPC library you deploy on receives the call and drives the component.
+
+### Define a service
+
+**A service is a class, and each remote method is a method of that class.** The
+service declares its full service name, in the protocol's own
+`package.Service` form, and each method declares the remote method's name and
+which side streams.
+
+A method's own middleware is declared on the method, and the declaration is
+repeatable, so a method may carry several.
+
+A collector reads each class that declares a service and each method of it that
+declares a remote method. It builds the routing key from the **two** names — the
+service name and the method name — and wires the method as the handler.
+
+### Write a handler
+
+A handler receives the container and the route, and returns a service response
+([`HANDLERS.md`](../convention/HANDLERS.md)). It resolves the call from the
+container when it needs the messages, the metadata, the deadline or the peer.
+
+Warning: a port that invokes the handler reflectively **constructs the controller
+with no arguments**. A controller therefore takes its dependencies from the
+container inside the method, not through a constructor.
+
+### Register the service
+
+A **route provider** returns the controller classes to scan and any prebuilt
+route, and the application lists that provider in its config
+([`PROVIDERS.md`](../convention/PROVIDERS.md)). The component discovers nothing
+on its own.
+
+### Read the call
+
+The messages arrive as the port's own any-or-object type. A buffered call holds
+every message by the time the handler runs. A streaming call yields them as they
+arrive, and the handler replies through the call's own send operation rather than
+by returning.
+
+### Return a status
+
+Return a response carrying `OK` and the body for success, and a response carrying
+the code that names the failure otherwise. Prefer returning a status to throwing,
+because a status is the protocol's own vocabulary and a throwable has to be
+mapped to it.
+
+Set metadata on the response through its `with` forms. Metadata validates on
+write, so an invalid header name fails where it is set.
+
+### Handle a caller that gives up
+
+Check the cancellation token in any loop or long computation, and stop when it is
+set. The framework checks between its own steps and **never interrupts handler
+code**, so a handler that does not check runs to completion after the caller has
+gone.
+
+A cancellation the framework detects produces a response rather than a throwable,
+so the throwable stage never sees it.
 
 ---
 

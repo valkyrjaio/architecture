@@ -86,7 +86,7 @@ the declaration rather than running it ([`PROVIDERS.md`](PROVIDERS.md)).
 The build tool generates route data. It does **not** generate the handler, and
 the reason is a correctness rule rather than a limit.
 
-**Every port runs correctly with no cache** ([`AGENTS.md`](../AGENTS.md) §2). The
+**Every port runs correctly with no cache** ([`DATA_CACHE.md`](DATA_CACHE.md)). The
 uncached path and the cached path must behave identically, so the handler the
 cache carries has to be the same handler the uncached path uses. A generated
 handler would be a second implementation, and the two would drift.

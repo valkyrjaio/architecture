@@ -2,7 +2,8 @@
 
 Per-language guide for the **Python** Valkyrja repos. Read the cross-language
 canonical first: [`../AGENTS.md`](../../AGENTS.md). This file records the Python
-**deltas**. PHP is the reference implementation; mirror its behavior, adapting to
+**deltas**. The documents in `component/` and `convention/` are the reference;
+build from those, adapting to
 Python idiom. Authoritative port detail: [`README.md`](README.md),
 [`PROVIDER_CONTRACTS.md`](PROVIDER_CONTRACTS.md).
 

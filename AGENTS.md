@@ -35,20 +35,22 @@ This is **Layer 1** of a three-layer guide:
 
 ## 1. What Valkyrja is
 
-Valkyrja is a single framework ported to five languages in priority order. PHP is
-the **reference implementation**; every other port mirrors its structure,
-naming, and tests.
+Valkyrja is a single framework ported to five languages in priority order.
 
-**The reference implementation is per component.** PHP is the reference for every
-component it holds. A component PHP does not hold takes the reference of the port
-that built it first, and that port's `component/` document names it. Grpc is the
-case today: Java built it, PHP has no gRPC source, so Java is the reference for
-that component and PHP will mirror Java when it lands. Read the component's
-document before you assume PHP decides.
+**The documents in this repository are the reference.** `component/` defines each
+component and `convention/` defines each rule that holds across all of them.
+Every port is built from those definitions, which is what keeps the ports from
+drifting apart: there is one description of the framework, and five
+implementations of it.
+
+So **no port is the reference.** A port may be the most complete, and that still
+does not make it the authority. When a port and a document disagree, the port is
+the defect: fix the port. When the document is the one that is wrong, change the
+document first, then every port together in one batch (see §7).
 
 | #   | Language       | Status                                | Package root / namespace |
 | --- | -------------- | ------------------------------------- | ------------------------ |
-| 1   | **PHP**        | Production — reference implementation | `Valkyrja\`              |
+| 1   | **PHP**        | Production — most complete port       | `Valkyrja\`              |
 | 2   | **Java**       | In progress                           | `io.valkyrja`            |
 | 3   | **Go**         | Proof of concept                      | `valkyrja`               |
 | 4   | **Python**     | Planned                               | `valkyrja`               |
@@ -809,7 +811,7 @@ existing contract is one pull request, and a bug fix is one pull request.
 
 If a change affects more than one language port, make it in **every affected
 language in the same batch** — never a deferred follow-up. A bug fixed in the PHP
-reference implementation that also exists in Java/TypeScript/etc. is fixed there
+most complete port that also exists in the others is fixed in those
 at the same time, code and tests together. Open one PR per language repo.
 
 **Warning: never cross-link the sibling PRs.** The cost of a cross-link is a

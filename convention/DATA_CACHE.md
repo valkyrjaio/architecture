@@ -73,7 +73,7 @@ needs to know which it found.
 **Middleware is appended, never deduplicated.** The generated data mirrors what
 the run-time walk produces, including a middleware registered twice. A duplicate
 is the application's own bug, and the cache must not quietly differ from the
-uncached run by fixing it ([`AGENTS.md`](../AGENTS.md) §2).
+uncached run by fixing it ([`LIFECYCLE.md`](LIFECYCLE.md)).
 
 ---
 
@@ -117,10 +117,9 @@ application cannot use the cache at all.
 
 ## Permitted variation
 
-| Variation                       | Reason                                                                  |
-| ------------------------------- | ----------------------------------------------------------------------- |
-| which protocol classes exist    | a port generates one per protocol it holds                              |
-| the file extension and layout   | each language writes its own source form                                |
-| whether generation is built yet | a port reaches it on the schedule in [`PORT_PARITY.md`](PORT_PARITY.md) |
+| Variation                     | Reason                                     |
+| ----------------------------- | ------------------------------------------ |
+| which protocol classes exist  | a port generates one per protocol it holds |
+| the file extension and layout | each language writes its own source form   |
 
 The class names, what each one aggregates, and the load order do not vary.

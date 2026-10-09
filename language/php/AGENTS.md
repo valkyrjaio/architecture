@@ -4,13 +4,9 @@ Per-language guide for the **PHP** Valkyrja repos. Read the cross-language
 canonical first: [`../AGENTS.md`](../../AGENTS.md). This file only records the PHP
 **deltas**.
 
-PHP is the **reference implementation** for every component it holds — when a
-port disagrees with PHP on structure, naming, or tests, PHP is right.
-
-**The reference is per component.** A component PHP does not hold takes the
-reference of the port that built it first, and that component's document in
-`component/` names it. Grpc is the case today: Java built it, PHP has no gRPC
-source, so Java decides and PHP mirrors Java when it lands.
+PHP is the **most complete port**, and it is not the reference. The documents in
+`component/` and `convention/` are. When PHP and a document disagree, PHP is the
+defect — the fact that PHP shipped it first does not make it right.
 
 ---
 

@@ -5,7 +5,7 @@
 Valkyrja is being ported to the following languages in priority order based on developer audience size, architectural
 fit, and the framework's cross-language consistency goals:
 
-1. **PHP** — original, production, reference implementation
+1. **PHP** — original, production, most complete port
 2. **Java** — in progress, enterprise market
 3. **Go** — proof of concept started, cloud-native sweet spot
 4. **Python** — large developer audience, clear differentiation from FastAPI
@@ -35,7 +35,7 @@ Every port shares the same architectural identity:
 
 ## PHP
 
-**Status:** Production, reference implementation.
+**Status:** Production, and the most complete port.
 
 **Key characteristics:**
 
@@ -270,7 +270,7 @@ The five chosen languages are not arbitrary. Together they represent the full sp
 could encounter. Every architectural decision made for these five has already been stress-tested against the hardest
 cases each paradigm presents.
 
-**PHP** — dynamic, interpreted, autoloaded. The origin and reference implementation. Establishes the baseline patterns
+**PHP** — dynamic, interpreted, autoloaded. The origin, and the most complete port. Establishes the baseline patterns
 everything else maps from. If a decision works cleanly in PHP it is a valid framework pattern.
 
 **Java** — strictly compiled, JVM, annotation processor, generics, checked exceptions. The enterprise end of the

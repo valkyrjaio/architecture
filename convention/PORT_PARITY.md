@@ -4,8 +4,8 @@ The **baseline every port reaches**, and the order it reaches it in. This
 document replaces the per-language `TODO.md` files, which tracked each port's
 gaps separately and so let a port fall behind without anything saying so.
 
-A gap here is work. A gap is not a deviation, and it is never closed by changing
-this document.
+A gap between a port and this baseline is missing work, not a variation. The
+baseline does not move to accommodate a port.
 
 ---
 
@@ -18,7 +18,8 @@ Two ports are at parity for a component when all of these hold:
 3. Every canonical name matches, transformed only as
    [`PORTS.md`](PORTS.md) permits.
 4. The component's tests mirror the reference port's tests.
-5. Coverage is 100%, line and branch ([`AGENTS.md`](../AGENTS.md) §3).
+5. Coverage is 100%, line and branch
+   ([`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md)).
 6. The component has a `README.md` holding that port's examples.
 
 Parity is per component, not per repository. A port is "at parity for Http" or it
@@ -28,8 +29,7 @@ is not.
 
 ## The component baseline
 
-Every port reaches this set. The order is the port order in
-[`AGENTS.md`](../AGENTS.md) §4, and a port does not start a component before the
+Every port reaches this set, and a port does not start a component before the
 ones it depends on.
 
 | Tier | Components                                            | Why this tier                          |
@@ -47,42 +47,16 @@ one.
 
 ---
 
-## Where each port stands
+## Status is not recorded here
 
-| Component   | PHP     | Java | TypeScript  | Go  | Python |
-| ----------- | ------- | ---- | ----------- | --- | ------ |
-| Container   | yes     | yes  | yes         | no  | no     |
-| Event       | yes     | yes  | yes         | no  | no     |
-| Application | yes     | yes  | yes         | no  | no     |
-| Cli         | yes     | yes  | yes         | no  | no     |
-| Http        | yes     | yes  | yes         | no  | no     |
-| Throwable   | yes     | yes  | yes         | no  | no     |
-| Type        | yes     | yes  | yes         | no  | no     |
-| Support     | yes     | yes  | no          | no  | no     |
-| Reflection  | yes     | yes  | no          | no  | no     |
-| Log         | yes     | yes  | yes         | no  | no     |
-| Validation  | yes     | yes  | yes         | no  | no     |
-| Queue       | partial | no   | no          | no  | no     |
-| Grpc        | no      | yes  | in progress | no  | no     |
-| Cache       | yes     | no   | no          | no  | no     |
-| Session     | yes     | no   | no          | no  | no     |
-| Filesystem  | yes     | no   | no          | no  | no     |
-| Crypt       | yes     | no   | no          | no  | no     |
-| Jwt         | yes     | no   | no          | no  | no     |
-| Auth        | yes     | no   | no          | no  | no     |
-| Orm         | yes     | no   | no          | no  | no     |
-| View        | yes     | no   | no          | no  | no     |
-| Mail        | yes     | no   | no          | no  | no     |
-| Sms         | yes     | no   | no          | no  | no     |
-| Broadcast   | yes     | no   | no          | no  | no     |
-| Api         | yes     | no   | no          | no  | no     |
-| Attribute   | yes     | no   | no          | no  | no     |
+**This document does not say which port has which component.** A status table
+goes stale the moment a component lands, because the port that lands it has no
+reason to come back and edit this repository. A stale table is worse than no
+table: a reader trusts it and plans against it.
 
-Go and Python hold a repository, a license and a release workflow, and no
-framework source. Queue holds its contracts in PHP and no implementation yet.
-
-Warning: this table goes stale the moment a component lands. Read it as a
-starting point and confirm against the port before you rely on a row.
+Read the port's own source tree for what it has. The component's document under
+`component/` says what that component **must** be; the port says what it **is**
+today.
 
 ---
 
@@ -92,13 +66,9 @@ Each port ships `sindri`, and the tool is at parity when it generates every data
 class the port's components need, from the same provider declarations, with the
 same output shape ([`SINDRI.md`](SINDRI.md)).
 
-| Port       | Boots without cache | Generates the cache |
-| ---------- | ------------------- | ------------------- |
-| PHP        | yes                 | yes                 |
-| Java       | yes                 | yes                 |
-| TypeScript | yes                 | yes                 |
-| Go         | —                   | no                  |
-| Python     | —                   | no                  |
+Booting without the cache is not optional, and it is not a parity milestone. It
+is a correctness requirement every port satisfies from its first component
+([`DATA_CACHE.md`](DATA_CACHE.md)).
 
 ---
 

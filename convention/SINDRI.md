@@ -78,18 +78,16 @@ registered there reaches the uncached run only. See
 
 Each language has its own facility, and the choice is the port's:
 
-| Port       | Reads source with                                          |
-| ---------- | ---------------------------------------------------------- |
-| PHP        | a syntax-tree parser library                               |
-| Java       | the compiler's own tree API, at annotation-processing time |
-| TypeScript | the compiler's API                                         |
-| Go         | the standard library's syntax-tree packages                |
-| Python     | the standard library's syntax-tree module                  |
+| Reads source with      | Available where                              |
+| ---------------------- | -------------------------------------------- |
+| the standard library   | a syntax-tree module ships with the language |
+| the compiler's own API | the compiler exposes its tree                |
+| a parser library       | neither of the above exists                  |
 
-**A port that needs the framework's own source needs it available.** A language
-that ships only compiled artifacts has to pull the framework's sources
-explicitly, where a language that ships source always has them. That is a
-packaging difference, and a port records it in its own guide.
+**The tool needs the framework's own source available.** A language that
+distributes compiled artifacts has to obtain the sources explicitly, where a
+language that distributes source always has them. That is a packaging
+difference, not a difference in what the tool does.
 
 ---
 

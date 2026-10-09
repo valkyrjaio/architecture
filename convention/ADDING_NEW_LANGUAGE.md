@@ -31,7 +31,7 @@ Before touching anything, understand the moving parts:
 | **Entry adapters**     | `entry/*` in the framework repo                      | Server adapters for the language's ecosystem                                               |
 | **Org config**         | `SUPPORTED_LANGUAGES` var, org secrets               | Publishing credentials, language enablement                                                |
 
-**PHP is the reference implementation.** When any port disagrees with PHP on
+**The documents in `component/` and `convention/` are the reference.** When any port disagrees with them on
 structure, naming, or tests, PHP wins unless an architecture doc says otherwise.
 For a _new_ language, first pick the **closest existing port** to crib from — a
 statically-typed/compiled language mirrors the compiled ports; a

@@ -188,7 +188,8 @@ method that one delegates to is the mechanism that goes stale.
   [Verify every name](#verify-every-name).
 - **Tag every fence with its language** — `php`, `java`, `ts`, `go`, `python`,
   `bash`. Highlighting and tooling read the tag.
-- **Show PHP first**, because PHP is the reference implementation. Add a second
+- **Show PHP first**, because it is the most complete port and so the most likely
+  to have the shape already. Add a second
   example only for a language whose spelling differs. A Layer-2 guide shows only
   its own language.
 - **Keep every example valid.** An example that does not compile teaches the

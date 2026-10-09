@@ -1,17 +1,14 @@
 # Application Lifecycle
 
-The **cross-language** definition of how a Valkyrja application handles one unit
-of work. It states the stages, their order, what is guaranteed at each one, and
-the names every port gives them.
+How a Valkyrja application handles one unit of work: the stages it passes
+through, their order, what is guaranteed at each one, and the names every
+language port shares.
 
-A port implements this document. A port does not redefine it. When a port and
-this document disagree, one of the two is a defect, and
-[`AGENTS.md`](../AGENTS.md) §1 says which: the reference implementation for that
-component decides.
+This is the definition the ports are built from. Each port's own `LIFECYCLE.md`
+carries the same content with that language's entry points, bootstrap sequence
+and examples added.
 
-This document holds no code example. A port's own `LIFECYCLE.md` holds the entry
-points, the bootstrap sequence and the runtime notes for that language. Read
-that file for the spelling. Read this file for the shape.
+It holds no code example of its own, because an example has to pick one language.
 
 ---
 
@@ -81,9 +78,8 @@ stage without being told where it goes.
 The irreversible act the name precedes is the process exit, not the write. The
 write already happened, so nothing at that stage can change the output.
 
-Warning: a stage name is shared vocabulary across every port. A rename is a
-cross-language event, not a local edit, and it lands in every port in the same
-batch ([`AGENTS.md`](../AGENTS.md) §7).
+A stage name is shared vocabulary. Every port uses the same one, so the name
+means the same thing wherever it is read.
 
 ---
 
@@ -108,6 +104,48 @@ stage 7 still run, because they always run.
 Stage 7 is where work that the caller never waits for belongs. The outcome is
 already delivered, so a log write, a cache write, or a dispatched event costs the
 caller nothing.
+
+---
+
+## What each stage is for
+
+The guarantee decides what belongs at a stage. These are the uses each stage
+exists to serve, and they are the same in every protocol.
+
+**Stage 1 — the arrival.** Nothing is routed yet, so this is the only stage that
+sees every unit of work, including one that matches no route. It holds the
+concerns that apply to all of them: a maintenance-mode check, rate limiting, and
+a full-outcome cache lookup. Code here can answer immediately and skip the rest.
+
+**Stage 2 — a route matched.** The route is known and the handler has not run, so
+this is where a decision about **this** route belongs: authentication,
+authorization, resolving a tenant, validating input. Code here can answer
+immediately instead of letting the handler run.
+
+**Stage 3 — no route matched.** A default outcome already exists, so this stage
+exists to replace it: a custom not-found page, or a fallback that handles the
+unmatched work itself.
+
+**Stage 4 — the handler ran.** The outcome exists and is not yet final. This is
+where the outcome is transformed: adding a header, reshaping a body, recording
+what the handler produced.
+
+**Stage 5 — a throwable was caught.** The stage receives the throwable and a
+default outcome built from it, so it holds error reporting and the
+application's own error presentation. Returning an outcome here is what turns a
+failure into a reply.
+
+**Stage 6 — the act is about to happen.** The outcome is final and nothing has
+been committed, so this is the last chance to change it: compression, a header
+that depends on the finished body, a cache-control decision.
+
+**Stage 7 — the act happened.** Nothing can change the outcome. This is where
+deferred side effects belong, and it is the stage that makes a slow side effect
+free to the caller.
+
+Warning: stage 6 and stage 7 **always run**, including after a short-circuit at
+stage 1 and after a throwable at stage 5. Code at either one cannot assume a
+route was matched or a handler ran.
 
 ---
 

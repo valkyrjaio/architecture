@@ -2,10 +2,8 @@
 
 Per-language guide for the **Java** Valkyrja repos. Read the cross-language
 canonical first: [`../AGENTS.md`](../../AGENTS.md). This file only records the Java
-**deltas**. PHP is the reference implementation for every component it holds, so
-mirror it. **Java is the reference for Grpc**, because Java built that component
-and PHP has no gRPC source; see
-[`GRPC.md`](../../component/GRPC.md).
+**deltas**. The documents in `component/` and `convention/` are the reference, not
+any port; build from those.
 
 ---
 

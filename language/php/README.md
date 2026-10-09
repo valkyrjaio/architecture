@@ -2,7 +2,8 @@
 
 > Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `HANDLERS.md`, `DATA_CACHE.md`, `SINDRI.md`
 
-PHP is the reference implementation. All other ports are measured against it. The following changes are required to
+PHP is the most complete port. The documents in `component/` and `convention/` are what every port is measured
+against, PHP included. The following changes are required to
 bring the existing implementation into alignment with the decisions made during cross-port planning.
 
 ---

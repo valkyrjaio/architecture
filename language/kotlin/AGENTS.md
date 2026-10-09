@@ -2,7 +2,8 @@
 
 Per-language guide for the **Kotlin** Valkyrja repos. Read the cross-language
 canonical first: [`../AGENTS.md`](../../AGENTS.md). This file records the Kotlin
-**deltas**. PHP is the reference implementation; mirror its behavior, adapting to
+**deltas**. The documents in `component/` and `convention/` are the reference;
+build from those, adapting to
 Kotlin idiom.
 
 > **Brand-new port — no Kotlin repos exist yet.** The **first task** is to create

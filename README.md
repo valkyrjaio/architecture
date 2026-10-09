@@ -34,18 +34,18 @@ The examples live in that component's `README.md` in each port.
 
 ## The ports
 
-| #   | Language       | Status                                | Build tool                           |
-| --- | -------------- | ------------------------------------- | ------------------------------------ |
-| 1   | **PHP**        | Production — reference implementation | `valkyrja/sindri`                    |
-| 2   | **Java**       | In progress                           | `io.valkyrja:sindri`                 |
-| 3   | **Go**         | Proof of concept                      | `github.com/valkyrjaio/sindri-go/vN` |
-| 4   | **Python**     | Planned                               | `valkyrja-sindri`                    |
-| 5   | **TypeScript** | Planned                               | `@valkyrja/sindri`                   |
+| #   | Language       | Status                          | Build tool                           |
+| --- | -------------- | ------------------------------- | ------------------------------------ |
+| 1   | **PHP**        | Production — most complete port | `valkyrja/sindri`                    |
+| 2   | **Java**       | In progress                     | `io.valkyrja:sindri`                 |
+| 3   | **Go**         | Proof of concept                | `github.com/valkyrjaio/sindri-go/vN` |
+| 4   | **Python**     | Planned                         | `valkyrja-sindri`                    |
+| 5   | **TypeScript** | Planned                         | `@valkyrja/sindri`                   |
 
-PHP is the reference implementation for every component it holds. **The reference
-is per component**, so a component PHP does not hold takes the reference of the
-port that built it first — Grpc is Java's today. Each `component/` document names
-its own reference.
+**No port is the reference — the documents here are.** Every port is built from
+`component/` and `convention/`, which is what keeps the ports from drifting
+apart: one description of the framework, and five implementations of it. A port
+being the most complete does not make it the authority.
 
 Future languages under consideration: Kotlin (nearly free from Java), Scala,
 Rust, Ruby.
