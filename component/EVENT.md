@@ -1,349 +1,158 @@
-# Event Dispatcher
+# Event
 
-## Overview
+The **cross-language** definition of the Event component. It states the
+hierarchy, the names and the behavior that every port implements.
 
-The event dispatcher is responsible for dispatching events to their registered listeners. Valkyrja's
-`EventDispatcherContract` extends PSR-14's `EventDispatcherInterface`, adding convenience methods for conditional
-dispatch, direct listener invocation, and ID-based dispatch.
+A port implements this document. A port does not redefine it. The reference
+implementation is PHP ([`AGENTS.md`](../AGENTS.md) §1).
 
-The cross-language design has one deliberate asymmetry: **Go, Python, and TypeScript require events to carry
-an `eventId()` method** for listener map lookup, while PHP and Java derive the key internally from the language's native
-type identity mechanism. This is the same tradeoff as string constants for container binding keys — accepting a small
-deviation in three languages to avoid a worse constraint (globally unique class names across the entire event space).
+This document holds no code example. The component's `README.md` in each port
+holds the examples and the per-language spelling.
 
 ---
 
-## PHP Source Contract (Reference)
+## What the component owns
 
-```php
-interface EventDispatcherContract extends EventDispatcherInterface
-{
-    /**
-     * Dispatch an event to its registered listeners.
-     */
-    public function dispatch(object $event): object;
+The component dispatches an event to the listeners registered for it. An event
+says something happened. A listener does the work that the event causes, and the
+code that dispatches the event does not know what that work is.
 
-    /**
-     * Dispatch an event only if it has registered listeners.
-     */
-    public function dispatchIfHasListeners(object $event): object;
-
-    /**
-     * Dispatch an event by its class string identifier.
-     * Constructs the event from the class string and optional arguments.
-     *
-     * @param class-string            $eventId
-     * @param array<array-key, mixed> $arguments
-     */
-    public function dispatchById(string $eventId, array $arguments = []): object;
-
-    /**
-     * Dispatch an event by its class string identifier only if it has listeners.
-     *
-     * @param class-string            $eventId
-     * @param array<array-key, mixed> $arguments
-     */
-    public function dispatchByIdIfHasListeners(string $eventId, array $arguments = []): object;
-
-    /**
-     * Dispatch a specific set of listeners for an event.
-     */
-    public function dispatchListeners(object $event, ListenerContract ...$listeners): object;
-
-    /**
-     * Dispatch a single listener for an event.
-     */
-    public function dispatchListener(object $event, ListenerContract $listener): object;
-}
-```
+The component has **no middleware pipeline**. It resolves no route, so it has no
+stage to run middleware at. The pipeline belongs to the protocol components
+([`LIFECYCLE.md`](../convention/LIFECYCLE.md)).
 
 ---
 
-## Listener Map Key — The Cross-Language Problem
+## Hierarchy
 
-The dispatcher's internal map keys listeners by event type. In PHP and Java this is the FQN class string derived without
-any overhead:
+| Subcomponent | Holds                                                    |
+| ------------ | -------------------------------------------------------- |
+| `Dispatcher` | the dispatcher, the one entry point a caller uses        |
+| `Collection` | the listener collection, keyed by event id               |
+| `Collector`  | the readers that build listeners from a declaration      |
+| `Contract`   | the contracts an event implements to opt into a behavior |
+| `Data`       | the listener data object, and the generated listener set |
+| `Provider`   | the listener provider contract                           |
+| `Throwable`  | the component's throwable contract and its exceptions    |
 
-- **PHP** — `get_class($event)` returns the FQN string. Unique across the application by virtue of PHP's namespace
-  system.
-- **Java** — `event.getClass()` returns the `Class<T>` object. Unique by the JVM's class identity.
-
-In Go, Python, and TypeScript, deriving a reliable unique key from a type at runtime is either expensive (Go's
-`reflect.TypeOf()`), fragile (TypeScript's `event.constructor.name` breaks under minification), or class-object-based (
-Python's `type(event)` forces imports and prevents lazy loading).
-
-Requiring globally unique class names across the entire event space is an unacceptable constraint — it would mean a
-`UserCreatedEvent` could never exist in both an `Http` and a `Queue` component.
-
-**Solution:** Events in Go, Python, and TypeScript implement `EventContract` which requires an `eventId()` / `EventId()`
-method returning a string constant. The dispatcher calls this method to look up listeners — no reflection, no class
-identity, no minification fragility.
+A port adds `Attribute` when the language declares a listener with an attribute
+or an annotation, and `Constant` when it needs string binding keys.
 
 ---
 
-## EventContract
+## The event id
 
-### PHP and Java
+A listener is registered against an **event id**, and the id is what the
+collection is keyed by. The id is a string, and it names one event type.
 
-No `eventId()` method required. Events are plain objects. The dispatcher derives the key internally.
+How a port derives the id is the component's one real asymmetry:
 
-```php
-// PHP — any object, no interface required for basic dispatch
-class UserCreatedEvent
-{
-    public function __construct(public readonly string $userId) {}
-}
+| Port derives the id from     | Ports                  | So an event                                       |
+| ---------------------------- | ---------------------- | ------------------------------------------------- |
+| the language's type identity | PHP, Java              | needs no method, and any object dispatches        |
+| a method on the event        | TypeScript, Go, Python | implements `EventContract` and returns its own id |
 
-// dispatcher uses get_class($event) = 'App\Event\UserCreatedEvent' as key
-```
+A language that erases its types at run time, or that cannot name a type
+cheaply, cannot derive the id. So those ports declare `EventContract` with one
+method that returns the id, and an event implements it. This is the same trade
+that [`CONTAINER_BINDINGS.md`](../convention/CONTAINER_BINDINGS.md) makes for a
+binding key, and it is accepted for the same reason: the alternative is a globally
+unique event name in every port.
 
-```java
-// Java — any object
-public class UserCreatedEvent {
-    public final String userId;
-
-    public UserCreatedEvent(String userId) {
-        this.userId = userId;
-    }
-}
-// dispatcher uses event.getClass() as key
-```
-
-### Go
-
-```go
-// EventContract — required for all Go events
-type EventContract interface {
-EventId() string
-}
-
-// Event implementation
-type UserCreatedEvent struct {
-EventContract // embedded — Sindri convention
-UserId string
-}
-
-func (e *UserCreatedEvent) EventId() string {
-return EventConstants.USER_CREATED // string constant from event_constants.go
-}
-```
-
-### Python
-
-```python
-# EventContract — required for all Python events
-class EventContract(ABC):
-    @abstractmethod
-    def event_id(self) -> str: ...
-
-
-# Event implementation
-class UserCreatedEvent(EventContract):
-    def __init__(self, user_id: str) -> None:
-        self.user_id = user_id
-
-    def event_id(self) -> str:
-        return EventConstants.USER_CREATED  # string constant from event_constants.py
-```
-
-### TypeScript
-
-```typescript
-// EventContract — required for all TypeScript events
-interface EventContract {
-    eventId(): string
-}
-
-// Event implementation
-class UserCreatedEvent implements EventContract {
-    constructor(readonly userId: string) {
-    }
-
-    eventId(): string {
-        return EventConstants.USER_CREATED
-    }
-}
-```
+Warning: the id is shared vocabulary. Two components must not register a listener
+under the same id for different events.
 
 ---
 
-## Method Availability Per Language
+## Canonical operations
 
-| Method                                   | PHP | Java | Go  | Python | TypeScript |
-| ---------------------------------------- | --- | ---- | --- | ------ | ---------- |
-| `dispatch(event)`                        | ✅  | ✅   | ✅  | ✅     | ✅         |
-| `dispatchIfHasListeners(event)`          | ✅  | ✅   | ✅  | ✅     | ✅         |
-| `dispatchById(id, args)`                 | ✅  | ✅   | ❌  | ❌     | ❌         |
-| `dispatchByIdIfHasListeners(id, args)`   | ✅  | ✅   | ❌  | ❌     | ❌         |
-| `dispatchListeners(event, ...listeners)` | ✅  | ✅   | ✅  | ✅     | ✅         |
-| `dispatchListener(event, listener)`      | ✅  | ✅   | ✅  | ✅     | ✅         |
+Every port declares these on the dispatcher, with no addition and no omission.
 
-`dispatchById` and `dispatchByIdIfHasListeners` require constructing an event object from a string identifier — possible
-in PHP via `new $eventId(...$arguments)` and in Java via reflection, but not expressible without a developer-maintained
-factory registry in Go, Python, or TypeScript. The methods are absent from those three language contracts rather than
-introducing a factory registration overhead.
+| Operation                    | Does                                               |
+| ---------------------------- | -------------------------------------------------- |
+| `dispatch`                   | dispatch an event to its listeners                 |
+| `dispatchIfHasListeners`     | dispatch only when a listener is registered        |
+| `dispatchById`               | dispatch by event id, and resolve the event itself |
+| `dispatchByIdIfHasListeners` | the same, and only when a listener is registered   |
+| `dispatchListeners`          | invoke a given set of listeners                    |
+| `dispatchListener`           | invoke one listener                                |
 
----
+`dispatch` returns the event. A listener receives the event and may change it, so
+the caller reads the result from the returned object.
 
-## Per-Language EventDispatcherContract
-
-### PHP
-
-```php
-interface EventDispatcherContract extends EventDispatcherInterface
-{
-    public function dispatch(object $event): object;
-    public function dispatchIfHasListeners(object $event): object;
-    public function dispatchById(string $eventId, array $arguments = []): object;
-    public function dispatchByIdIfHasListeners(string $eventId, array $arguments = []): object;
-    public function dispatchListeners(object $event, ListenerContract ...$listeners): object;
-    public function dispatchListener(object $event, ListenerContract $listener): object;
-}
-```
-
-Dispatcher derives key via `get_class($event)`. Full PSR-14 compliance. No `eventId()` method required on events.
+`dispatchById` resolves the event **from the container**, so dispatching by id is
+a claim that the id is a registered binding.
 
 ---
 
-### Java
+## What a listener is
 
-```java
-public interface EventDispatcherContract {
+A listener is a data object, not a class to subclass. It holds three things, and
+each one has a reader and a `with` form that returns a copy:
 
-    /** Dispatch an event to its registered listeners. */
-    Object dispatch(Object event);
+- the **event id** it listens for
+- its own **name**, unique within the collection
+- its **handler**, the typed callable the dispatcher invokes
 
-    /** Dispatch an event only if it has registered listeners. */
-    Object dispatchIfHasListeners(Object event);
-
-    /**
-     * Dispatch an event by its class identifier.
-     * Constructs the event via reflection from the class and arguments.
-     */
-    Object dispatchById(Class<?> eventId, Map<String, Object> arguments);
-
-    /** Dispatch by class identifier only if listeners are registered. */
-    Object dispatchByIdIfHasListeners(Class<?> eventId, Map<String, Object> arguments);
-
-    /** Dispatch a specific set of listeners for an event. */
-    Object dispatchListeners(Object event, ListenerContract... listeners);
-
-    /** Dispatch a single listener for an event. */
-    Object dispatchListener(Object event, ListenerContract listener);
-}
-```
-
-Java's `dispatchById` takes a `Class<?>` object rather than a string — `.class` is the idiomatic Java equivalent of
-PHP's `class-string`. Dispatcher derives key via `event.getClass()`. No `eventId()` method required on events.
+The handler signature is in [`HANDLERS.md`](../convention/HANDLERS.md). A
+listener's handler is the one handler whose second parameter is a map rather than
+a route, because a listener has no route.
 
 ---
 
-### Go
+## The collection
 
-```go
-type EventDispatcherContract interface {
-// Dispatch dispatches an event to its registered listeners.
-// Uses event.EventId() to look up listeners.
-Dispatch(event EventContract) (EventContract, error)
+The collection is addressable two ways for every operation: by the listener or
+the event itself, and by its id. So each read and write appears twice, once bare
+and once with an `ById` suffix.
 
-// DispatchIfHasListeners dispatches only if listeners are registered.
-DispatchIfHasListeners(event EventContract) (EventContract, error)
+It answers whether a listener is registered, adds and removes one, reports every
+listener for an event, replaces the whole set for an event, and exports and
+imports its own data for the cache.
 
-// DispatchListeners dispatches a specific set of listeners.
-DispatchListeners(event EventContract, listeners ...ListenerContract) (EventContract, error)
-
-// DispatchListener dispatches a single listener.
-DispatchListener(event EventContract, listener ListenerContract) (EventContract, error)
-}
-```
-
-No `DispatchById` — callers construct the event and call `Dispatch()`. Dispatcher uses `event.EventId()` for listener
-lookup.
+A listener may be added and removed at run time. The collection is not frozen
+once the application boots.
 
 ---
 
-### Python
+## Event behaviors a port must support
 
-```python
-class EventDispatcherContract(ABC):
+An event opts into a behavior by implementing a contract. Each one is optional,
+and an event that implements none still dispatches.
 
-    @abstractmethod
-    def dispatch(self, event: EventContract) -> EventContract:
-        """Dispatch an event to its registered listeners."""
+| Behavior             | Means                                                       |
+| -------------------- | ----------------------------------------------------------- |
+| stoppable            | a listener can stop the remaining listeners from running    |
+| arguments capable    | the dispatcher passes the caller's arguments into the event |
+| dispatch collectable | the event records what each listener returned               |
 
-    @abstractmethod
-    def dispatch_if_has_listeners(self, event: EventContract) -> EventContract:
-        """Dispatch only if listeners are registered."""
-
-    @abstractmethod
-    def dispatch_listeners(
-            self,
-            event: EventContract,
-            *listeners: ListenerContract,
-    ) -> EventContract:
-        """Dispatch a specific set of listeners."""
-
-    @abstractmethod
-    def dispatch_listener(
-            self,
-            event: EventContract,
-            listener: ListenerContract,
-    ) -> EventContract:
-        """Dispatch a single listener."""
-```
-
-No `dispatch_by_id` — callers construct the event and call `dispatch()`. Dispatcher uses `event.event_id()` for listener
-lookup.
+**Stop means stop.** The dispatcher checks after every listener, so a stopped
+event runs no further listener. A port that holds a language-standard interface
+for this uses the standard one rather than declaring its own.
 
 ---
 
-### TypeScript
+## Listener registration
 
-```typescript
-export interface EventDispatcherContract {
+A **listener provider** declares its listeners, the same way a service provider
+declares its bindings ([`PROVIDERS.md`](../convention/PROVIDERS.md)). It declares
+them two ways, and a port supports both:
 
-    /** Dispatch an event to its registered listeners. */
-    dispatch(event: EventContract): EventContract
+- a literal list of listeners, which the build tool reads statically
+- a list of classes to scan, for a port whose language declares a listener on the
+  class itself
 
-    /** Dispatch only if listeners are registered. */
-    dispatchIfHasListeners(event: EventContract): EventContract
-
-    /** Dispatch a specific set of listeners. */
-    dispatchListeners(event: EventContract, ...listeners: ListenerContract[]): EventContract
-
-    /** Dispatch a single listener. */
-    dispatchListener(event: EventContract, listener: ListenerContract): EventContract
-}
-```
-
-No `dispatchById` — callers construct the event and call `dispatch()`. Dispatcher uses `event.eventId()` for listener
-lookup.
+A port whose language has no attribute or decorator supports only the literal
+list, and that is a language limit rather than a gap.
 
 ---
 
-## PSR-14 Compliance
+## Permitted variation
 
-PHP's `EventDispatcherContract` extends PSR-14's `EventDispatcherInterface`. The `dispatch()` method signature is
-identical — any library expecting PSR-14 accepts a Valkyrja dispatcher.
+| Variation                        | Reason                                               |
+| -------------------------------- | ---------------------------------------------------- |
+| whether an event declares its id | the language can or cannot name a type cheaply       |
+| an `Attribute` subcomponent      | only a language with attributes declares that way    |
+| a standard stoppable interface   | a port uses its language's standard where one exists |
 
-PSR-14 is PHP-specific. Other language ports implement the equivalent concept natively without reference to the PSR.
-
----
-
-## EventContract vs No EventContract — The Reasoning
-
-Requiring `eventId()` on events in Go, Python, and TypeScript is a conscious deviation from PHP/Java. The alternatives
-were worse:
-
-**Global unique class names** — would mean `UserCreatedEvent` could not exist in two different components. Unenforceable
-and unreasonable.
-
-**`reflect.TypeOf()` in Go** — real overhead in a hot dispatch path. Non-idiomatic Go.
-
-**`event.constructor.name` in TypeScript** — works in development, breaks silently under minification.
-
-**`type(event)` as map key in Python** — forces class imports, defeats lazy loading.
-
-The `eventId()` method is one line per event class. The string constant comes from the per-component constants file that
-already exists for container bindings. The cost is minimal and the developer experience is consistent with the rest of
-the framework's cross-language patterns.
+Nothing else varies. The dispatcher surface is the same in every port.
