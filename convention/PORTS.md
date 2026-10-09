@@ -53,7 +53,7 @@ Every port shares the same architectural identity:
 - `::class` used for container bindings — compiler-verified, not a raw string
 - Closure-based handlers only — the framework calls no method through reflection
 
-**Worker mode:** FrankenPHP (Go runtime underneath), OpenSwoole/Swoole (coroutine-based C extension)
+**Worker mode:** FrankenPHP (Go runtime underneath), OpenSwoole/Swoole (coroutine-based C extension), RoadRunner
 
 ---
 

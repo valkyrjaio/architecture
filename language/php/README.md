@@ -3,8 +3,12 @@
 > Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `HANDLERS.md`, `DATA_CACHE.md`, `SINDRI.md`
 
 PHP is the most complete port. The documents in `component/` and `convention/` are what every port is measured
-against, PHP included. The following changes are required to
-bring the existing implementation into alignment with the decisions made during cross-port planning.
+against, PHP included.
+
+> **Warning: this document is a plan, and parts of it predate the current contracts.** It was written before the
+> component and convention documents existed, so an item here may describe a shape those documents have since settled
+> differently. **They govern.** Read the component's own document before you act on an item below, and treat a
+> disagreement as this plan being out of date.
 
 ---
 
@@ -55,24 +59,18 @@ No throwing abstract base exceptions.
 
 **Reference:** `CONTAINER_BINDINGS.md`
 
-### Add per-component constants files
+### No per-component constants files
 
-Every component needs a constants file containing FQN string identifiers for all classes, interfaces, and contracts in
-that component:
+**Retired.** PHP names a class natively and the compiler checks it, so a constants file of FQN strings adds a second
+place to get the name wrong. Only a port whose binding keys are strings holds one. See
+[`CONTAINER_BINDINGS.md`](../../convention/CONTAINER_BINDINGS.md).
 
-```php
-// Http/HttpConstants.php
-final class HttpConstants
-{
-    public const ROUTER           = RouterContract::class;
-    public const REQUEST          = ServerRequestContract::class;
-    public const RESPONSE_FACTORY = ResponseFactoryContract::class;
-}
-```
+Binding-key constants that a port genuinely needs are a different thing, and this does not retire those.
 
-### Migrate container bindings to closure-based factories
+### Container bindings declare their factory
 
-All container bindings must use explicit closure factories. Remove all dynamic reflection-based instantiation:
+A provider's `publishers()` map holds a reference to a named method, because the build tool reads that map statically. A
+binding registered directly takes any callable. Either way, remove dynamic reflection-based instantiation:
 
 ```php
 // Wrong — the container instantiates the class through reflection.
@@ -170,24 +168,21 @@ literals with no conditional logic, variables, or method calls other than constr
 
 **Reference:** `HANDLERS.md`
 
-### Add typed handler function types
+### The typed handler signatures
 
-Define the three handler function types as docblock-enforced closure signatures:
+These are settled and already implemented. A route handler takes the container and the **route**; only a listener takes
+a map. See [`HANDLERS.md`](../../convention/HANDLERS.md).
 
 ```php
 // HTTP routes
-/** Closure(ContainerContract, array<string, mixed>): ResponseContract */
+/** callable(ContainerContract, RouteContract): ResponseContract */
 
 // CLI routes
-/** Closure(ContainerContract, array<string, mixed>): OutputContract */
+/** callable(ContainerContract, RouteContract): OutputContract */
 
 // Event listeners
-/** Closure(ContainerContract, array<string, mixed>): mixed */
+/** callable(ContainerContract, array<string, mixed>): mixed */
 ```
-
-### Add HttpHandlerContract, CliHandlerContract, ListenerHandlerContract
-
-Each concern gets its own handler contract extending the base `HandlerContract` with the typed closure signature.
 
 ### Add the handler attributes to route/listener data classes
 
@@ -195,8 +190,8 @@ Routes need `#[RouteHandler]` attribute support on controller/action methods, an
 Each attribute carries the typed closure:
 
 ```php
-#[Handler(static fn(ContainerContract $c, array<string, mixed> $args): ResponseContract
-    => $c->getSingleton(UserController::class)->show($args['id']))]
+#[RouteHandler(static fn(ContainerContract $c, RouteContract $route): ResponseContract
+    => $c->getSingleton(UserController::class)->show($route))]
 #[Parameter('id', pattern: '[0-9]+')]
 public function show(int $id): ResponseContract {}
 ```
@@ -357,4 +352,4 @@ method reference.
 5. **#[Parameter] attribute**
 6. **File generation and `make:*` commands to sindri**
 7. **Container constants files** — additive, can happen incrementally per component
-8. **Closure-based container bindings** — additive, can happen incrementally per component
+8. **Explicit binding factories** — additive, can happen incrementally per component

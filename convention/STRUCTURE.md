@@ -5,9 +5,10 @@ every Valkyrja port, and to every contributor, human or agent.
 
 A class's _kind_ is encoded three ways at once — its **name suffix**, the
 **segment** (namespace/package/directory) it lives in, and its **modifier** —
-and all three must agree. This is the machine-verified spec (PHP's PHPArkitect
-`Rules` is the reference; Java ArchUnit and Kotlin Konsist mirror it; where a
-language has no architecture linter — Go, Python, TypeScript — it is enforced
+and all three must agree. **The table below is the spec**, and each port's
+architecture linter is one enforcement of it (PHP's PHPArkitect `Rules`, Java
+ArchUnit, Kotlin Konsist; where a language has no architecture linter it is
+enforced
 in review). PHP segment spellings are shown; **each Layer-2 guide gives the
 per-language spelling** (case + reserved-word handling + constructs a language
 lacks).
