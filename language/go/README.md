@@ -1,7 +1,7 @@
 # Go Port — Implementation Notes
 
-> Reference docs: `THROWABLES.md`, `CONTAINER_BINDINGS.md`, `HANDLERS.md`,
-> `DATA_CACHE.md`, `BUILD_TOOL.md`, `CONTRACTS_GO.md`
+> Reference docs, in `convention/`: `THROWABLES.md`, `CONTAINER_BINDINGS.md`,
+> `HANDLERS.md`, `DATA_CACHE.md`, `BUILD_TOOL.md`, `CONTRACTS.md`
 > Port order: Container → Event → Application → CLI → HTTP → Bin
 
 ---
@@ -136,7 +136,7 @@ return NewRouter(c.GetSingleton(EventDispatcherClass).(EventDispatcherContract))
 
 ## 3. Provider Contracts
 
-**Reference:** `CONTRACTS_GO.md`, `DATA_CACHE.md`
+**Reference:** `PROVIDER_CONTRACTS.md`, and `DATA_CACHE.md` in `convention/`
 
 ### ComponentProviderContract
 

@@ -4,31 +4,35 @@
 
 # Valkyrja Architecture
 
-The architectural record of how [Valkyrja][valkyrja url] is designed, why
-decisions were made, and what needs to be built across all language ports.
+The contract every [Valkyrja][valkyrja url] port implements. It states the
+hierarchy, the names and the behavior that must be the same in every language, so
+a reader who knows one port can read another.
 
-This repository is not end-user documentation. It exists to keep the
-architecture consistent as the framework expands to new languages and as the
-existing PHP implementation evolves. Decisions that affect multiple ports,
-cross-language contracts, and implementation roadmaps are recorded here.
+This repository is not end-user documentation, and it is not a design journal. A
+document here earns its place by stating a rule that holds **across** languages.
+How one port spells that rule lives in that port, next to the code.
 
-What's Included
----------------
+## How it is organized
 
-- **Architecture documents** — cross-cutting decisions on throwables,
-  container bindings, handlers, cache generation, and the build tool
-- **Language contracts** — per-language provider contract specifications for
-  Java, Go, Python, and TypeScript
-- **Implementation notes** — per-language README files with port priority
-  order and implementation guidance
-- **TODO checklists** — per-language change and port checklists
-- **Port roadmap** — priority order and current status across all five
-  languages
+| Directory     | Holds                                                         |
+| ------------- | ------------------------------------------------------------- |
+| `component/`  | one document per component: its hierarchy, names and behavior |
+| `convention/` | a rule that holds across every component and every port       |
+| `language/`   | the per-port deltas, one directory per language               |
 
-The Ports
----------
+A `component/` document **carries no code example**. An example in one language
+becomes the spelling a port copies, instead of the contract it has to satisfy.
+The examples live in that component's `README.md` in each port.
 
-Valkyrja is being ported to five languages in priority order:
+## Start here
+
+- [`AGENTS.md`](AGENTS.md) — the operating guide, and the golden rules
+- [`LIFECYCLE.md`](convention/LIFECYCLE.md) — the pipeline stages, their order
+  and what each one guarantees
+- [`PORT_PARITY.md`](convention/PORT_PARITY.md) — the baseline every port
+  reaches, and where each one stands
+
+## The ports
 
 | #   | Language       | Status                                | Build tool                           |
 | --- | -------------- | ------------------------------------- | ------------------------------------ |
@@ -38,237 +42,77 @@ Valkyrja is being ported to five languages in priority order:
 | 4   | **Python**     | Planned                               | `valkyrja-sindri`                    |
 | 5   | **TypeScript** | Planned                               | `@valkyrja/sindri`                   |
 
+PHP is the reference implementation for every component it holds. **The reference
+is per component**, so a component PHP does not hold takes the reference of the
+port that built it first — Grpc is Java's today. Each `component/` document names
+its own reference.
+
 Future languages under consideration: Kotlin (nearly free from Java), Scala,
 Rust, Ruby.
 
-Architecture Documents
-----------------------
+## Components
 
-Cross-cutting architectural decisions that apply to all ports.
+| Document                                     | Covers                                        |
+| -------------------------------------------- | --------------------------------------------- |
+| [`APPLICATION.md`](component/APPLICATION.md) | boot, the provider tree, config, entry points |
+| [`CONTAINER.md`](component/CONTAINER.md)     | registration, resolution, child scopes        |
+| [`EVENT.md`](component/EVENT.md)             | dispatch, listeners, the event id             |
+| [`HTTP.md`](component/HTTP.md)               | requests, responses, routing                  |
+| [`CLI.md`](component/CLI.md)                 | input, output, commands                       |
+| [`GRPC.md`](component/GRPC.md)               | calls, status, streaming, cancellation        |
+| [`QUEUE.md`](component/QUEUE.md)             | jobs, the wire envelope, outcomes             |
 
-| Document                                                      | Description                                                                       |
-| ------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| [`SUMMARY.md`](SUMMARY.md)                                    | Full session summary — all decisions and reasoning                                |
-| [`PORTS.md`](convention/PORTS.md)                             | Language port list, per-language notes, comparison tables                         |
-| [`STRUCTURE.md`](convention/STRUCTURE.md)                     | The structure taxonomy                                                            |
-| [`THROWABLES.md`](convention/THROWABLES.md)                   | Exception naming convention, hierarchy, language mapping                          |
-| [`CONTAINER_BINDINGS.md`](convention/CONTAINER_BINDINGS.md)   | Closure bindings, string constants, per-component files                           |
-| [`HANDLERS.md`](convention/HANDLERS.md)                       | Handler contracts, typed closure signatures, the supplier pattern                 |
-| [`DATA_CACHE.md`](convention/DATA_CACHE.md)                   | Cache architecture, provider contracts, build flows                               |
-| [`COMPONENT_CONFIG.md`](convention/COMPONENT_CONFIG.md)       | The component config shape                                                        |
-| [`BUILD_TOOL.md`](convention/BUILD_TOOL.md)                   | Build tool design, Bin extraction, AST implementations                            |
-| [`STATIC_METHODS.md`](convention/STATIC_METHODS.md)           | Static interface methods — cross-language design and registry pattern             |
-| [`TESTING_METHODOLOGY.md`](convention/TESTING_METHODOLOGY.md) | Testing taxonomy and the 100% per-file coverage rules                             |
-| [`METHOD_NAMING.md`](convention/METHOD_NAMING.md)             | Method name prefixes — what a method does, and whether the caller's value changes |
-| [`COMMENTS.md`](convention/COMMENTS.md)                       | What a comment may state                                                          |
-| [`DOCUMENTATION_STYLE.md`](convention/DOCUMENTATION_STYLE.md) | The writing rules for documentation prose                                         |
-| [`PACKAGE_NAMING.md`](convention/PACKAGE_NAMING.md)           | Package name, registry namespace, and source namespace per language               |
-| [`SHELL_SCRIPTS.md`](convention/SHELL_SCRIPTS.md)             | The rules for shell                                                               |
-| [`COMMIT_CONVENTION.md`](convention/COMMIT_CONVENTION.md)     | Commit and PR title format, conventional types, roots                             |
-| [`PR_DESCRIPTION.md`](convention/PR_DESCRIPTION.md)           | What a pull request description holds                                             |
-| [`VERSIONING.md`](convention/VERSIONING.md)                   | Version scheme, bump mapping, release automation                                  |
-| [`VERSION_SUPPORT.md`](convention/VERSION_SUPPORT.md)         | Support policy, release schedule, per-language runtimes                           |
+## Conventions
 
-Language Contracts
-------------------
+| Document                                                      | Covers                                      |
+| ------------------------------------------------------------- | ------------------------------------------- |
+| [`LIFECYCLE.md`](convention/LIFECYCLE.md)                     | the pipeline stages and their guarantees    |
+| [`STRUCTURE.md`](convention/STRUCTURE.md)                     | the structure taxonomy                      |
+| [`CONTRACTS.md`](convention/CONTRACTS.md)                     | what a contract is, per language mechanism  |
+| [`PROVIDERS.md`](convention/PROVIDERS.md)                     | the provider hierarchy and its contracts    |
+| [`THROWABLES.md`](convention/THROWABLES.md)                   | the exception hierarchy and its naming      |
+| [`HANDLERS.md`](convention/HANDLERS.md)                       | handler signatures and registration         |
+| [`CONTAINER_BINDINGS.md`](convention/CONTAINER_BINDINGS.md)   | binding keys, per language                  |
+| [`COMPONENT_CONFIG.md`](convention/COMPONENT_CONFIG.md)       | how a component's config is split           |
+| [`DATA_CACHE.md`](convention/DATA_CACHE.md)                   | the generated data classes                  |
+| [`BUILD_TOOL.md`](convention/BUILD_TOOL.md)                   | `sindri`, and its output                    |
+| [`METHOD_NAMING.md`](convention/METHOD_NAMING.md)             | what a method prefix promises               |
+| [`PACKAGE_NAMING.md`](convention/PACKAGE_NAMING.md)           | package, registry and namespace names       |
+| [`STATIC_METHODS.md`](convention/STATIC_METHODS.md)           | where a static method may live              |
+| [`COMMENTS.md`](convention/COMMENTS.md)                       | what a comment may state                    |
+| [`DOCUMENTATION_STYLE.md`](convention/DOCUMENTATION_STYLE.md) | the writing rules for prose                 |
+| [`TESTING_METHODOLOGY.md`](convention/TESTING_METHODOLOGY.md) | testing, and 100% coverage                  |
+| [`PORT_PARITY.md`](convention/PORT_PARITY.md)                 | the baseline every port reaches             |
+| [`PORTS.md`](convention/PORTS.md)                             | per-language characteristics and transforms |
+| [`ADDING_A_MODULE.md`](convention/ADDING_A_MODULE.md)         | adding a component                          |
+| [`ADDING_NEW_LANGUAGE.md`](convention/ADDING_NEW_LANGUAGE.md) | adding a port                               |
+| [`CI_TOOLS.md`](convention/CI_TOOLS.md)                       | the gate each language runs                 |
+| [`SHELL_SCRIPTS.md`](convention/SHELL_SCRIPTS.md)             | the rules for shell                         |
+| [`COMMIT_CONVENTION.md`](convention/COMMIT_CONVENTION.md)     | commit and pull request title format        |
+| [`PR_DESCRIPTION.md`](convention/PR_DESCRIPTION.md)           | what a pull request description holds       |
+| [`VERSIONING.md`](convention/VERSIONING.md)                   | the version scheme and release automation   |
+| [`VERSION_SUPPORT.md`](convention/VERSION_SUPPORT.md)         | which versions are supported                |
+| [`BRANCH_PROMOTION.md`](convention/BRANCH_PROMOTION.md)       | how a branch is promoted                    |
 
-Per-language provider contract specifications.
+## Languages
 
-| Document                                                                        | Description                                       |
-| ------------------------------------------------------------------------------- | ------------------------------------------------- |
-| [`java/PROVIDER_CONTRACTS.md`](language/java/PROVIDER_CONTRACTS.md)             | Java provider contracts and implementations       |
-| [`go/PROVIDER_CONTRACTS.md`](language/go/PROVIDER_CONTRACTS.md)                 | Go provider contracts and implementations         |
-| [`python/PROVIDER_CONTRACTS.md`](language/python/PROVIDER_CONTRACTS.md)         | Python provider contracts and implementations     |
-| [`typescript/PROVIDER_CONTRACTS.md`](language/typescript/PROVIDER_CONTRACTS.md) | TypeScript provider contracts and implementations |
+Each directory holds that port's agent guide, its provider contracts, and its
+port notes.
 
-Implementation Notes
---------------------
+[`php`](language/php/AGENTS.md) · [`java`](language/java/AGENTS.md) ·
+[`typescript`](language/typescript/AGENTS.md) ·
+[`go`](language/go/AGENTS.md) · [`python`](language/python/AGENTS.md) ·
+[`kotlin`](language/kotlin/AGENTS.md)
 
-Per-language implementation notes and priority order.
+## Keeping it true
 
-| Document                                                | Description                                               |
-| ------------------------------------------------------- | --------------------------------------------------------- |
-| [`php/README.md`](language/php/README.md)               | PHP — changes required to existing implementation         |
-| [`java/README.md`](language/java/README.md)             | Java — port implementation notes and priority order       |
-| [`go/README.md`](language/go/README.md)                 | Go — port implementation notes and priority order         |
-| [`python/README.md`](language/python/README.md)         | Python — port implementation notes and priority order     |
-| [`typescript/README.md`](language/typescript/README.md) | TypeScript — port implementation notes and priority order |
+A document that describes the old behavior is worse than no document, because the
+reader trusts it. Two rules follow, and
+[`AGENTS.md`](AGENTS.md) §3 holds both in full:
 
-TODO Checklists
----------------
-
-| Document                                    | Description           |
-| ------------------------------------------- | --------------------- |
-| [`php/TODO.md`](language/php/TODO.md)       | PHP change checklist  |
-| [`python/TODO.md`](language/python/TODO.md) | Python port checklist |
-
-Core Architectural Principles
------------------------------
-
-**Every language works without cache.** The provider contract design — class
-references in PHP/Java/Python, constructor references in TypeScript, interface
-methods in Go — allows the framework to traverse the provider tree and register
-everything at runtime. Cache is a cold-start performance optimization, not a
-correctness requirement.
-
-**The framework has zero AST dependencies.** All source extraction and code
-generation logic lives in the per-language build tool packages. The framework
-only knows how to load cache data files if they exist and traverse the provider
-tree if they don't.
-
-**The build tool is a text generator.** It writes strings that are valid source
-code. It never needs application classes compiled in — class names from AST are
-written as text, the compiler resolves them later.
-
-**One data class per major component.** The build tool aggregates everything
-across all providers into one class for each major component — container, event,
-HTTP, CLI, Queue and gRPC today. The framework loads one object per component at
-boot.
-
-**Typed handler signatures move errors before production.** Explicit closure
-handlers with typed signatures catch wrong return types at compile time (Java,
-Go, TypeScript) or CI time (PHP, Python).
-
-**The AppConfig class is the build tool entry point.** No separate YAML file.
-The application config already lists all component providers — the build tool
-reads it via AST.
-
-**Component provider constants classes do not exist.** Provider class
-references use `::class` / `.class` / class objects directly. Constants classes
-for provider references would break the build tool's static analysis. Binding
-key constants files are unaffected.
-
-Key Decisions At a Glance
--------------------------
-
-### Throwables
-
-- Naming: `Valkyrja*` → `ComponentName*` → `SubComponent*` or
-  `ParentSubComponent*` (if shared)
-- Rule: prepend parent names until unique across the entire framework
-- All base and categorical exceptions are abstract
-- Every component always ships `ComponentRuntimeException` and
-  `ComponentInvalidArgumentException`
-- See [`THROWABLES.md`](convention/THROWABLES.md)
-
-### Container Bindings
-
-- All bindings use explicit closure factories — no reflection-based
-  instantiation
-- Per-component string constants files for cross-language binding key identity
-- See [`CONTAINER_BINDINGS.md`](convention/CONTAINER_BINDINGS.md)
-
-### Handlers
-
-- Three typed handler signatures: HTTP → `ResponseContract`, CLI →
-  `OutputContract`, Listener → `any`
-- Parameters: `(ContainerContract, map<string, mixed>)` — `ServerRequestContract`
-  and `RouteContract` available via container when needed, not explicit
-  parameters
-- `#[RouteHandler]` / `@RouteHandler` / `@route_handler` — metadata marker in all languages,
-  never active registrar
-- See [`HANDLERS.md`](convention/HANDLERS.md)
-
-### Cache Generation
-
-- Build tool reads `AppConfig` class, walks provider tree via AST, generates
-  one data class per major component
-- Routes: `Parameter` objects carry segment constraints, `ProcessorContract`
-  compiles regex, stored pre-compiled
-- Python `@route_handler` is metadata only — `_valkyrja_handler` on the function,
-  read by framework at bootstrap, skipped when cache loaded
-- See [`DATA_CACHE.md`](convention/DATA_CACHE.md)
-
-### Build Tool
-
-- Separate repository and package per language — dev dependency only, never
-  production
-- PHP `Bin` component extracted to `valkyrja/sindri` — `nikic/php-parser` lives
-  there, not in the framework
-- Build tool is itself a Valkyrja application — validates the cache-optional
-  architecture
-- See [`BUILD_TOOL.md`](convention/BUILD_TOOL.md)
-
-PHP — Changes Required
-----------------------
-
-The PHP implementation is complete but requires alignment changes before other
-ports diverge too far. See [`php/TODO.md`](language/php/TODO.md) for the full checklist.
-
-Priority items:
-
-1. Throwable renaming and abstraction
-2. Provider contract interfaces
-3. `publishers()` map migration
-4. `#[RouteHandler]` and `#[Parameter]` attributes
-5. File generation and `make:*` commands to `valkyrja/sindri`
-
-Starting a New Port
--------------------
-
-Port components in this order:
-
-**Container → Event → Application → CLI → HTTP → Bin**
-
-Read these files in order:
-
-1. [`PORTS.md`](convention/PORTS.md) — language-specific characteristics and decisions
-2. [`THROWABLES.md`](convention/THROWABLES.md) — exception hierarchy for your language
-3. [`CONTAINER_BINDINGS.md`](convention/CONTAINER_BINDINGS.md) — binding key constants and
-   closure factories
-4. [`HANDLERS.md`](convention/HANDLERS.md) — handler contracts and typed closure
-   signatures
-5. [`DATA_CACHE.md`](convention/DATA_CACHE.md) — provider contracts and cache generation
-6. [`BUILD_TOOL.md`](convention/BUILD_TOOL.md) — build tool implementation for your
-   language
-7. `{language}/PROVIDER_CONTRACTS.md` — full contract and implementation
-   examples
-8. `{language}/README.md` — implementation notes and priority order
-
-Relationship to Framework Repositories
---------------------------------------
-
-```
-architecture   ← you are here — decisions and roadmaps
-     │
-     ├── valkyrja-php                 ← PHP framework (runtime, zero build deps)
-     ├── sindri-php                   ← PHP build tool (nikic/php-parser)
-     ├── valkyrja-java                ← Java framework (runtime)
-     ├── sindri-java                  ← Java build tool (annotation processor)
-     ├── valkyrja-go                  ← Go framework (runtime)
-     ├── sindri-go                    ← Go build tool (go/analysis)
-     ├── valkyrja-python              ← Python framework (runtime)
-     ├── sindri-python                ← Python build tool (ast + inspect)
-     ├── valkyrja-ts                  ← TypeScript framework (runtime)
-     └── sindri-ts                    ← TypeScript build tool (TS compiler API)
-```
-
-Each framework repository is runtime-only with zero AST or build tooling
-dependencies. Each build tool (`sindri-*`) is a dev-only dependency
-containing all code generation logic for that language.
-
-Contributing
-------------
-
-Contributions to the architecture — new decision records, port planning
-updates, clarifications to existing decisions — are welcome. See
-[`CONTRIBUTING.md`][contributing url] for the submission process,
-[`COMMIT_CONVENTION.md`](convention/COMMIT_CONVENTION.md) for the commit and PR title
-format, [`REPOSITORY_NAMING.md`][repository naming url] for how repos are named,
-and [`VOCABULARY.md`][vocabulary url] for terminology used across the project.
-
-Architecture decisions should be recorded here _before_ they land in code, so
-that per-language ports can reference the canonical decision rather than
-rediscovering it.
-
-License
--------
-
-Licensed under the [MIT license][MIT license url]. See
-[`LICENSE.md`](LICENSE.md).
+- **Update the document in the same pull request as the change.** Never leave it
+  for a later sweep.
+- **Verify a claim before you write it.** A sentence about another file is a
+  claim. Open the file and read the code the sentence describes.
 
 [valkyrja url]: https://valkyrja.io
-[contributing url]: https://github.com/valkyrjaio/.github/blob/26.x/CONTRIBUTING.md
-[repository naming url]: https://github.com/valkyrjaio/.github/blob/26.x/REPOSITORY_NAMING.md
-[vocabulary url]: https://github.com/valkyrjaio/.github/blob/26.x/VOCABULARY.md
-[MIT license url]: https://opensource.org/licenses/MIT
