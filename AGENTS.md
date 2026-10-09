@@ -111,6 +111,14 @@ These hold in **every** language. Do not violate them in a port.
   the type from it. A constants class holding provider references would hide that
   expression. (Binding-_key_ constants files are a different thing, and are fine
   where the language needs them — see §4.)
+- **A design must be expressible in every language.** A solution that depends on
+  a feature only one language has is not a design, it is that language's habit.
+  The most complete port is where this breaks first, because its shape reads as
+  the architecture rather than as a dependency on its language. Before a shape is
+  settled, state how each port expresses it; a shape that cannot be stated for
+  one of them is rejected, not ported. Construction through a variable class is
+  the worked example:
+  [`STATIC_METHODS.md`](convention/STATIC_METHODS.md).
 - **Route middleware is appended, never deduplicated.** Across every protocol
   (HTTP, CLI, gRPC, Queue), both the runtime collector and `sindri` codegen _append_ each
   registered middleware in order — they never dedupe. If the same middleware is
