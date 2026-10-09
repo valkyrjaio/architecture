@@ -2,7 +2,10 @@
 
 Per-language guide for the **Java** Valkyrja repos. Read the cross-language
 canonical first: [`../AGENTS.md`](../../AGENTS.md). This file only records the Java
-**deltas**. PHP is the reference implementation; mirror it.
+**deltas**. PHP is the reference implementation for every component it holds, so
+mirror it. **Java is the reference for Grpc**, because Java built that component
+and PHP has no gRPC source; see
+[`GRPC.md`](../../component/GRPC.md).
 
 ---
 
@@ -175,4 +178,4 @@ SpotBugs → `junit` (JaCoCo 100%). Use `./gradlew spotlessApply` to auto-format
   once rode through a dependency bump unnoticed.
 
 More: [`README.md`](README.md), [`PROVIDER_CONTRACTS.md`](PROVIDER_CONTRACTS.md),
-[`TODO.md`](TODO.md).
+[`PORT_PARITY.md`](../../convention/PORT_PARITY.md).

@@ -4,9 +4,13 @@ Per-language guide for the **PHP** Valkyrja repos. Read the cross-language
 canonical first: [`../AGENTS.md`](../../AGENTS.md). This file only records the PHP
 **deltas**.
 
-PHP is the **reference implementation** — when a port disagrees with PHP on
-structure, naming, or tests, PHP is right unless the architecture docs say
-otherwise.
+PHP is the **reference implementation** for every component it holds — when a
+port disagrees with PHP on structure, naming, or tests, PHP is right.
+
+**The reference is per component.** A component PHP does not hold takes the
+reference of the port that built it first, and that component's document in
+`component/` names it. Grpc is the case today: Java built it, PHP has no gRPC
+source, so Java decides and PHP mirrors Java when it lands.
 
 ---
 
@@ -195,8 +199,8 @@ condition that is provably dead. Reaching an otherwise-unreachable state by
 subclassing to poke at `protected` state is _excusing_ it: it locks in semantics
 the public API cannot produce, and the TypeScript port had exactly such a test
 pinning "empty allowed responses accepts anything" until the dead clause was
-removed. See the branch-coverage notes in [`TODO.md`](TODO.md) for the known
-categories and their remedies.
+removed. The known categories and their remedies are in
+[`TESTING_METHODOLOGY.md`](../../convention/TESTING_METHODOLOGY.md).
 
 ---
 
@@ -233,4 +237,4 @@ categories and their remedies.
   others, and do not carry PHP's delimiters into a port that cannot use them.
 
 More: [`README.md`](README.md), [`PROVIDER_CONTRACTS.md`](PROVIDER_CONTRACTS.md),
-[`TODO.md`](TODO.md).
+[`PORT_PARITY.md`](../../convention/PORT_PARITY.md).

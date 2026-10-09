@@ -195,7 +195,7 @@ so a failed run still reports a signed statement.
   rather than N call sites, and a wrong property can't silently misclassify at one
   site (e.g. `RequestHandler.dispatchRouter` once used `'getPath' in x` to detect a
   response, but requests have no `getPath`, so every request was treated as a
-  response — see [`TODO.md`](TODO.md)).
+  response).
 
 - **Never name a class in a decorator argument — thunk it.** A decorator argument
   is evaluated at class-definition time, so `[Provider, 'method']` dereferences a

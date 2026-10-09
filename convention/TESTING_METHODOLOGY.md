@@ -137,7 +137,7 @@ Instantiate and assert the resulting structure. These are often large but single
 
 ### CI-tool config repos (php-cs-fixer, phparkitect, phpstan, psalm, phpcodesniffer)
 
-Per `php/TODO.md`: **test that the expected rules exist and are configured exactly as expected.**
+**Test that the expected rules exist and are configured exactly as expected.**
 
 - Call the config builder (`Rules::getConfig(...)`, `Rules::getRules(...)`).
 - Assert the returned object type and top-level settings (e.g. risky allowed, finder passed through).

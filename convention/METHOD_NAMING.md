@@ -279,12 +279,31 @@ Three naming rules live elsewhere. They govern a different axis and do not repea
 
 ### An open question, recorded rather than decided
 
-`php/TODO.md` carries a worked-through position on a second naming convention, for a
-method that retrieves one item: `Create…` and `Get…` and `Retrieve…` throw when the item
-is absent, `GetOrCreate…` creates it, and `Find…` returns null. A collection query always
-returns a collection, empty when nothing matches.
+A second naming convention has a worked-through position and no decision. It
+governs a method that retrieves one item:
 
-That convention is a natural fit for this document, and the reasoning behind it is
-explicitly cross-language — it exists to give parity with Java and Go. **It is not
-adopted here, because it has not been decided.** Read the record in `php/TODO.md`, under
-"Is returning null cheating?", before you rely on it.
+| Prefix         | Returns                            | When absent  |
+| -------------- | ---------------------------------- | ------------ |
+| `Create…`      | a new instance                     | throws       |
+| `Get…`         | an expected existing instance      | throws       |
+| `Retrieve…`    | an expected existing instance      | throws       |
+| `GetOrCreate…` | an existing instance, or a new one | throws       |
+| `Find…`        | an existing instance               | returns null |
+
+A collection query is the exception. `Get…` for a collection always returns a
+collection, empty when nothing matches, and never throws.
+
+The reasoning is a caller who asks a phone system for an operator by name. When
+the operator exists, the system transfers the call. When the operator does not,
+the system throws, and the middleware for that route handles the case with the
+context intact. An empty object instead continues as though nothing happened,
+which loses the context and still makes the caller handle absence.
+
+A second rule falls out of the same thinking: **allow null only on a parameter
+that takes an object.** An array defaults to empty, a string to empty, a boolean
+to false, and a number to zero.
+
+**Neither rule is adopted**, because neither has been decided. The reasoning is
+explicitly cross-language — it exists to give parity with Java and Go — so the
+decision belongs here rather than in one port. Do not rely on it until it is
+decided, and do not apply it to new code in the meantime.

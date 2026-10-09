@@ -114,7 +114,7 @@ canon. Create the folder with:
   _Layout & naming_ → _Exceptions_ → _Structure taxonomy_ (segment spelling +
   nuances) → _Tests_ (framework + PHPUnit→target mapping) → _Build & CI tools_
   (tool list, isolation, run commands) → _CI gate_ → _language-specific notes_.
-- **`TODO.md`** — the port checklist.
+- **`PORT_PARITY.md`** — the baseline the port reaches, in `convention/`.
 
 Then **update the shared docs** so the language is discoverable: add the language
 row + doc links to the top-level `README.md` and [`AGENTS.md`](../AGENTS.md) tables,
@@ -300,7 +300,7 @@ framework, and the `application` (Phase 6) depends on the _published_ framework 
 build tool. So the natural order is **framework → build tool → application**. During
 development, don't wait on releases: wire the downstream repo to the local upstream with
 a composite/workspace build (the same pattern the adapters use — see
-[`GRPC_IMPLEMENTATION.md`](../component/GRPC_IMPLEMENTATION.md) §Adapters), verify it compiles/greens,
+[`GRPC.md`](../component/GRPC.md), under "The adapter"), verify it compiles and greens,
 then release upstream and bump the pin.
 
 ### Framework repo (`valkyrja-<lang>`)
