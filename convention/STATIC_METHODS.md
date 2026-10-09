@@ -132,6 +132,38 @@ MyEntity entity = container.getService(MyEntity.class, Map.of("raw", raw));
 The developer owns the creation logic. If no factory is registered, the
 container throws a resolution error — explicit failure, not silent fallback.
 
+#### Who holds the container
+
+The factory answers **how** the type is built. It leaves open **where the
+container is**, and that question has one answer: **a data object never holds the
+container.** A data object holds data and the behavior of its own state, so a
+route parameter that declares a cast cannot resolve it.
+
+So the container lives with the **actor that needs the resolved value**, and each
+protocol names that actor:
+
+| Protocol | Declares the cast | Resolves it |
+| -------- | ----------------- | ----------- |
+| Cli      | a route parameter | the caster  |
+| Http     | a route parameter | the matcher |
+
+A **caster** takes the parameter and returns its values, cast. It is the one
+class in routing that holds the container, which is why it exists at all rather
+than the parameter casting itself. Where a protocol already has a class that
+resolves the value — the matcher, for HTTP — that class holds the container and
+no caster is added.
+
+Two rules follow:
+
+- **Resolve the cast with `getService`, never `get`.** `get` reads the singleton
+  path first and discards the arguments, so it would build the type once with no
+  value and hand that same instance back for every later value. `getService`
+  passes the value as an argument and builds each time
+  ([`CONTAINER.md`](../component/CONTAINER.md)).
+- **The registered factory returns the type contract.** The caller asks the built
+  object for its value, so a factory that returns anything else fails with an
+  error naming neither the cast nor the binding key.
+
 ### 2. Static Metadata (`getTable`, `getPrimaryKey`, etc.)
 
 PHP pattern:
