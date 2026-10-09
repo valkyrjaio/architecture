@@ -63,7 +63,6 @@ does not depend on one below it.
 | [`TYPE.md`](component/TYPE.md)             | typed values, and identifiers               |
 | [`SUPPORT.md`](component/SUPPORT.md)       | the clock, behind something a test controls |
 | [`REFLECTION.md`](component/REFLECTION.md) | asking the language about its own code      |
-| [`ATTRIBUTE.md`](component/ATTRIBUTE.md)   | reading the markers on declarations         |
 
 **Core** — nothing runs without these.
 

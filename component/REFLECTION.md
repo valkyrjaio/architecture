@@ -50,9 +50,9 @@ itself.
 | `forFunction`      | a free function       |
 | `forClosure`       | an inline function    |
 
-One operation per kind of declaration, each named for the kind. The same
-`for*` naming is used by the attribute collector, so the two read alike
-([`ATTRIBUTE.md`](ATTRIBUTE.md)).
+One operation per kind of declaration, each named for the kind. A port whose
+language has attributes names its attribute-collecting operations the same way,
+so the two read alike.
 
 ### Asking what something needs
 
