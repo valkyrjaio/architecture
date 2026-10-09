@@ -385,6 +385,7 @@ This is intentional and consistent with PHP's `#[RouteHandler]` attribute — bo
 reads when needed, not active registrars.
 
 ```python
+from valkyrja.http.message.response.contract import ResponseContract
 from valkyrja.http.routing.data.contract import RouteContract
 from app.http.provider import UserHttpRouteProvider
 
@@ -407,7 +408,7 @@ def route_handler(handler_ref):
 class UserController:
 
     @route_handler(UserHttpRouteProvider.index_users)
-    def index(self, route: RouteContract) -> Response:
+    def index(self, route: RouteContract) -> ResponseContract:
         """
         Build tool reads _valkyrja_handler metadata from AST
         when scanning this class for route handlers.
@@ -418,7 +419,7 @@ class UserController:
         pass
 
     @route_handler(UserHttpRouteProvider.store_user)
-    def store(self, route: RouteContract) -> Response:
+    def store(self, route: RouteContract) -> ResponseContract:
         pass
 ```
 

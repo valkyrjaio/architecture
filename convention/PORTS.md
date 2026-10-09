@@ -294,7 +294,7 @@ disappears at execution. Forces the framework to work where static types are a d
 | ------------------------------------- | -------------------------------------- |
 | Dynamic typing                        | PHP, Python                            |
 | Static typing, compiled               | Java, Go, TypeScript                   |
-| Annotations / attributes              | PHP, Java, Python                      |
+| Annotations / attributes / decorators | PHP, Java, Python, TypeScript          |
 | No annotations at all                 | Go                                     |
 | Runtime class identity                | PHP, Java, Python                      |
 | No runtime class identity             | Go, TypeScript                         |

@@ -218,7 +218,7 @@ modifying the route, per
 ```python
 @route_handler(UserHttpRouteProvider.show_user)
 @parameter('id', pattern='[0-9]+')
-def show(self, id: int) -> ResponseContract:
+def show(self, route: RouteContract) -> ResponseContract:
     pass
 ```
 
