@@ -1,0 +1,620 @@
+# Valkyrja Provider Contracts — Python
+
+## Overview
+
+**Minimum Python version: 3.14+** for modern typing and language features. Note: PEP 690 lazy imports were
+**withdrawn** and never shipped — these contracts do **not** rely on them (see _Imports and Cold Start_ below).
+
+Python provider contracts differ from PHP/Java in several ways:
+
+- Decorators are **metadata markers** — they attach a handler reference to methods at import time but do NOT self-register
+  routes. The framework reads metadata during bootstrap; skips it when loading from cache.
+- `inspect.getfile(ClassName)` resolves class to source file — equivalent of PHP's `ReflectionClass::getFileName()`
+- No `::class` needed — `X()` creates an instance directly; Python classes are first-class callables
+- ABC enforces abstract contracts — `TypeError` raised on direct instantiation
+- Instance methods throughout — providers are instantiated and their methods called directly
+- The `publishers()` map names each publisher method — the build tool reads that map from AST
+- `class_` helper available (trailing underscore because `class` is reserved) for FQN string derivation
+
+---
+
+## Imports and Cold Start — No Lazy Imports (PEP 690 Withdrawn)
+
+> **PEP 690 (implicit lazy imports) was withdrawn and never shipped. Python 3.14 does _not_ lazy-load imports.** An
+> earlier draft of these contracts assumed it would. Its successor, **PEP 810 (explicit lazy imports)**, is still under
+> discussion and unshipped. Treat lazy imports as a _possible future optimization_, not a mechanism these contracts
+> rely on.
+
+Because there are no lazy imports today, a top-level `from valkyrja.http.provider import HttpContainerProvider`
+**executes that module's body eagerly** at import time. The contracts do **not** depend on deferral for correctness —
+they rely on two things that hold in every Python version:
+
+- **Cache means the provider tree is never walked at runtime.** When Sindri's cache is active,
+  `get_container_providers()` / `get_controller_classes()` / etc. are never called, so the provider modules they would
+  import are never imported at boot. The generated cache file references bindings by **string key** with
+  **lambda-wrapped** values (see `DATA_CACHE.md`), so loading it imports only the constants modules — not the providers.
+- **String binding keys avoid importing the bound class.** A string-literal key loads nothing; a class-object key would
+  force the import. This is plain Python, independent of any lazy-import feature.
+
+What is _not_ avoided today: once a provider module is imported (no cache, or because the cache file references it), its
+top-level imports load eagerly. A future PEP 810 `lazy import` could defer those per-name — and the contracts would need
+no change to benefit — but they are correct without it. For cold-start-sensitive (e.g. Lambda) workloads, the Go or
+TypeScript port is the escape valve.
+
+### If explicit lazy imports (PEP 810) later land
+
+Should an opt-in `lazy import` form ship, these patterns would still force a deferred name to resolve immediately (they
+go beyond name identity), so they could never be deferred:
+
+- Using the class as a **list element or dict key** — `[MyClass]` or `{MyClass: ...}`
+- `isinstance(x, MyClass)`; runtime-evaluated type hints
+- `hasattr` / `getattr` / introspection; anything touching `__class__`, `__module__`, or other class attributes
+
+The two provider methods that must return live class objects — `get_controller_classes()` and `get_listener_classes()`
+(returning `[MyController]` / `[MyListener]`) — could therefore never be deferred even under PEP 810; today they simply
+import eagerly like everything else. Where a string key is sufficient downstream, `publishers()` string keys keep those
+bindings free of forced class imports.
+
+---
+
+## Type Hints
+
+Provider list methods return **instances**, not class objects:
+
+| Method                      | Return type                                      | Reasoning                                                            |
+| --------------------------- | ------------------------------------------------ | -------------------------------------------------------------------- |
+| `get_container_providers()` | `list[ServiceProviderContract]`                  | Returns provider instances called directly by the framework          |
+| `get_event_providers()`     | `list[ListenerProviderContract]`                 | Returns provider instances called directly by the framework          |
+| `get_cli_providers()`       | `list[CliRouteProviderContract]`                 | Returns provider instances called directly by the framework          |
+| `get_http_providers()`      | `list[HttpRouteProviderContract]`                | Returns provider instances called directly by the framework          |
+| `get_controller_classes()`  | `list[type]`                                     | Returns class objects carrying `@route_handler` decorated methods    |
+| `get_listener_classes()`    | `list[type]`                                     | Returns class objects carrying `@listener_handler` decorated methods |
+| `get_routes()`              | `list[RouteContract]`                            | Returns concrete route data objects                                  |
+| `get_listeners()`           | `list[ListenerContract]`                         | Returns concrete listener data objects                               |
+| `publishers()`              | `dict[str, Callable[[ContainerContract], None]]` | Maps binding key to publisher function reference                     |
+
+`list[type]` is used for controller and listener class lists because those classes do not implement a provider contract
+— they carry `@route_handler` decorators. `list[type]` is the honest and accurate type for any list of Python class
+objects.
+
+---
+
+## ComponentProviderContract
+
+Top-level aggregator. Returns lists of sub-provider **instances** by category. Build tool reads return values directly
+from AST — must be simple list literals with no conditional logic. Each list element must be a `X()` call expression —
+Sindri reads `Call.func` (a `Name` node) to extract the provider class name.
+
+```python
+# package: valkyrja.application.provider.contract
+from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from valkyrja.application.kernel.contract import ApplicationContract
+    from valkyrja.container.provider.contract import ServiceProviderContract
+    from valkyrja.event.provider.contract import ListenerProviderContract
+    from valkyrja.cli.routing.provider.contract import CliRouteProviderContract
+    from valkyrja.http.routing.provider.contract import HttpRouteProviderContract
+
+
+class ComponentProviderContract(ABC):
+    """
+    Defines what a component provider must implement.
+
+    All methods must return simple list literals.
+    No conditional logic permitted — Sindri reads these from AST.
+    Each list element must be an X() call expression.
+    """
+
+    @abstractmethod
+    def get_component_providers(self, app: 'ApplicationContract') -> list['ComponentProviderContract']:
+        """
+        Declare this component's dependencies on other components.
+        The framework ensures listed components are registered before this one.
+        Must return a simple list literal — no conditional logic.
+        """
+        ...
+
+    @abstractmethod
+    def get_container_providers(self, app: 'ApplicationContract') -> list['ServiceProviderContract']:
+        """
+        Get the component's container service providers.
+        Must return a simple list literal — no conditional logic.
+        """
+        ...
+
+    @abstractmethod
+    def get_event_providers(self, app: 'ApplicationContract') -> list['ListenerProviderContract']:
+        """
+        Get the component's event listener providers.
+        Must return a simple list literal — no conditional logic.
+        """
+        ...
+
+    @abstractmethod
+    def get_cli_providers(self, app: 'ApplicationContract') -> list['CliRouteProviderContract']:
+        """
+        Get the component's CLI route providers.
+        Must return a simple list literal — no conditional logic.
+        """
+        ...
+
+    @abstractmethod
+    def get_http_providers(self, app: 'ApplicationContract') -> list['HttpRouteProviderContract']:
+        """
+        Get the component's HTTP route providers.
+        Must return a simple list literal — no conditional logic.
+        """
+        ...
+```
+
+### HttpComponentProvider Implementation
+
+```python
+from valkyrja.application.provider.contract import ComponentProviderContract
+from valkyrja.http.provider import (
+    HttpContainerProvider,
+    HttpMiddlewareProvider,
+    HttpEventProvider,
+    HttpRouteProvider,
+)
+
+
+class HttpComponentProvider(ComponentProviderContract):
+
+    def get_component_providers(self, app: ApplicationContract) -> list[ComponentProviderContract]:
+        return [
+            ContainerComponentProvider(),  # HTTP depends on Container
+            EventComponentProvider(),      # HTTP depends on Event
+        ]
+
+    def get_container_providers(self, app: ApplicationContract) -> list[ServiceProviderContract]:
+        return [
+            HttpContainerProvider(),
+            HttpMiddlewareProvider(),
+        ]
+
+    def get_event_providers(self, app: ApplicationContract) -> list[ListenerProviderContract]:
+        return [
+            HttpEventProvider(),
+        ]
+
+    def get_cli_providers(self, app: ApplicationContract) -> list[CliRouteProviderContract]:
+        return []
+
+    def get_http_providers(self, app: ApplicationContract) -> list[HttpRouteProviderContract]:
+        return [
+            HttpRouteProvider(),
+        ]
+```
+
+---
+
+## ServiceProviderContract
+
+Container bindings provider. `publishers()` returns a map of binding key to publisher method reference. The build tool
+reads the map from AST, resolves each method reference via `inspect.getfile()`, and reads that method body. A publisher
+carries no decorator — the map is the declaration the tool reads.
+
+```python
+# package: valkyrja.container.provider.contract
+from abc import ABC, abstractmethod
+from typing import Any, Callable, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from valkyrja.container.manager.contract import ContainerContract
+
+
+class ServiceProviderContract(ABC):
+    """
+    Defines what a container service provider must implement.
+
+    publishers() returns a map of binding key to publisher method reference.
+    The map must be a simple dict literal — no conditional logic permitted.
+    Each value must be a static method reference on the same class.
+
+    The build tool reads the publishers map from AST and resolves each method
+    reference via inspect.getfile(). A publisher carries no decorator — the map
+    is the declaration the tool reads.
+
+    Note: 'class_' helper available for FQN derivation since 'class' is reserved:
+        def class_(cls) -> str:
+            return f"{cls.__module__}.{cls.__qualname__}"
+
+    Example:
+        @staticmethod
+        def publishers() -> dict:
+            return {
+                UserRepositoryClass: UserServiceProvider.publish_user_repository,
+            }
+
+        @staticmethod
+        def publish_user_repository(container: ContainerContract) -> None:
+            container.set_singleton(
+                UserRepositoryClass,
+                UserRepository(container.get_singleton(DatabaseClass))
+            )
+    """
+
+    @abstractmethod
+    def publishers(self) -> dict[str, Callable[['ContainerContract'], None]]:
+        """
+        Return a map of binding key to publisher method reference.
+        Must return a simple dict literal — no conditional logic permitted.
+        """
+        ...
+```
+
+### UserServiceProvider Implementation
+
+```python
+from valkyrja.container.provider.contract import ServiceProviderContract
+from valkyrja.container.manager.contract import ContainerContract
+from app.repositories import UserRepository
+from app.repositories.contract import UserRepositoryClass
+from app.services.contract import DatabaseClass
+
+
+class UserServiceProvider(ServiceProviderContract):
+
+    def publishers(self) -> dict[str, Callable[[ContainerContract], None]]:
+        """
+        Build tool reads this map from AST.
+        Keys are string constants — Sindri writes them as module-level imports in the cache.
+        Values are method references — Sindri wraps them in lambdas in the cache.
+        """
+        return {
+            ContainerConstants.USER_REPOSITORY: UserServiceProvider.publish_user_repository,
+        }
+
+    @staticmethod
+    def publish_user_repository(container: ContainerContract) -> None:
+        """
+        The publishers() map above names this method, and the build tool reads
+        that map from AST. A publisher carries no decorator.
+        """
+        container.set_singleton(
+            UserRepositoryClass,
+            UserRepository(container.get_singleton(DatabaseClass))
+        )
+```
+
+---
+
+## HttpRouteProviderContract
+
+HTTP route provider. Two sources: annotated controller classes (scanned for `@route_handler` decorated methods) and
+explicit route object definitions. Routes are complete data structures — they cannot be expressed as a publisher-style map
+without losing the metadata the router requires.
+
+```python
+# package: valkyrja.http.routing.provider.contract
+from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from valkyrja.http.routing.data.contract import RouteContract
+
+
+class HttpRouteProviderContract(ABC):
+    """Defines what an HTTP route provider must implement."""
+
+    @staticmethod
+    @abstractmethod
+    def get_controller_classes() -> list:
+        """
+        Get a list of attributed controller or action classes.
+        Build tool uses inspect.getfile() to locate each class source file,
+        then scans for @route_handler decorated methods.
+        Returns empty list if using explicit routes only.
+        Must return a simple list literal — no conditional logic permitted.
+
+        NOTE: This returns live class objects ([MyController]), so their modules are
+        imported eagerly (there are no lazy imports — see Imports and Cold Start).
+        With cache active this method is never called, so those imports never happen
+        at boot.
+        """
+        ...
+
+    @staticmethod
+    @abstractmethod
+    def get_routes() -> list:
+        """
+        Get a list of explicit route definitions.
+        Routes are complete data structures — they carry HTTP method, path pattern,
+        dynamic segment constraints, middleware chain, and handler together.
+        They cannot be expressed as a publisher-style map without losing
+        the metadata the router needs to build its dispatcher index.
+        Must return a simple list literal — no conditional logic permitted.
+        """
+        ...
+```
+
+### UserHttpRouteProvider Implementation
+
+```python
+from valkyrja.http.routing.provider.contract import HttpRouteProviderContract
+from valkyrja.http.routing.data import HttpRoute
+from app.http.controllers import UserController, OrderController
+from app.http.controllers.contract import OrderControllerClass
+
+
+class UserHttpRouteProvider(HttpRouteProviderContract):
+
+    @staticmethod
+    def get_controller_classes() -> list[type]:
+        """
+        Build tool calls inspect.getfile(UserController) to locate source,
+        then scans for @route_handler decorated methods.
+        Python classes are first-class type objects — list[type] is accurate.
+        """
+        return [
+            UserController,
+            OrderController,
+        ]
+
+    @staticmethod
+    def get_routes() -> list[RouteContract]:
+        """
+        Handler is a method pointer on this same class.
+        Sindri reads handler method bodies from this file only.
+        """
+        return [
+            HttpRoute.get('/orders', UserHttpRouteProvider.index_orders),
+            HttpRoute.get('/users', UserHttpRouteProvider.index_users),
+        ]
+
+    @staticmethod
+    def index_orders(c: ContainerContract, route: RouteContract) -> ResponseContract:
+        """Handler method lives on the same class — all imports self-contained."""
+        return c.get_singleton(OrderControllerClass).index(route)
+
+    @staticmethod
+    def index_users(c: ContainerContract, route: RouteContract) -> ResponseContract:
+        return c.get_singleton(UserControllerClass).index(route)
+```
+
+### Controller with @route_handler Decorator
+
+The `@route_handler` decorator is a **metadata marker only** — it does not self-register routes at import time. It
+attaches the handler reference as metadata on the method. The framework reads this metadata during bootstrap (no cache) and skips it
+entirely when loading from cache.
+
+This is intentional and consistent with PHP's `#[RouteHandler]` attribute — both are inert metadata that the framework
+reads when needed, not active registrars.
+
+```python
+from valkyrja.http.message.response.contract import ResponseContract
+from valkyrja.http.routing.data.contract import RouteContract
+from app.http.provider import UserHttpRouteProvider
+
+
+def route_handler(handler_ref):
+    """
+    Metadata marker — attaches the handler reference to the method as _valkyrja_handler.
+    Does NOT register the route at import time.
+    Framework reads _valkyrja_handler during bootstrap (no cache).
+    Framework skips entirely when loading from cache.
+    """
+
+    def decorator(func):
+        func._valkyrja_handler = handler_ref  # metadata only — no registration
+        return func
+
+    return decorator
+
+
+class UserController:
+
+    @route_handler(UserHttpRouteProvider.index_users)
+    def index(self, route: RouteContract) -> ResponseContract:
+        """
+        Build tool reads _valkyrja_handler metadata from AST
+        when scanning this class for route handlers.
+        The decorator names the handler method, which lives on the provider —
+        a class body cannot reference the class it is defining.
+        The method body is the actual runtime implementation.
+        """
+        pass
+
+    @route_handler(UserHttpRouteProvider.store_user)
+    def store(self, route: RouteContract) -> ResponseContract:
+        pass
+```
+
+### Why Not Self-Registration
+
+Python decorators execute at module import time. If `@route_handler` self-registered routes, importing a controller
+module would immediately register its routes — even when loading from cache where those routes are already pre-built. The cache
+data file imports the same controller classes anyway (to reference them in route objects), so the imports cannot be
+avoided. Self-registration would cause double registration or conflicting state.
+
+Metadata-first solves this cleanly: the decorator is always inert, the framework decides whether to read the metadata
+based on whether cache is loaded.
+
+---
+
+## CliRouteProviderContract
+
+```python
+# package: valkyrja.cli.routing.provider.contract
+from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from valkyrja.cli.routing.data.contract import RouteContract
+
+
+class CliRouteProviderContract(ABC):
+    """Defines what a CLI route provider must implement."""
+
+    @staticmethod
+    @abstractmethod
+    def get_controller_classes() -> list:
+        """
+        Get a list of attributed controller or action classes.
+        Must return a simple list literal — no conditional logic permitted.
+        """
+        ...
+
+    @staticmethod
+    @abstractmethod
+    def get_routes() -> list:
+        """
+        Get a list of explicit CLI route definitions.
+        Must return a simple list literal — no conditional logic permitted.
+        """
+        ...
+```
+
+---
+
+## ListenerProviderContract
+
+```python
+# package: valkyrja.event.provider.contract
+from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from valkyrja.event.data.contract import ListenerContract
+
+
+class ListenerProviderContract(ABC):
+    """Defines what an event listener provider must implement."""
+
+    @staticmethod
+    @abstractmethod
+    def get_listener_classes() -> list:
+        """
+        Get a list of attributed listener classes.
+        Build tool uses inspect.getfile() to locate each class source file,
+        then scans for @route_handler decorated methods.
+        Must return a simple list literal — no conditional logic permitted.
+
+        NOTE: Same as get_controller_classes() — live class objects in the list are
+        imported eagerly; with cache active this method is never called at boot.
+        """
+        ...
+
+    @staticmethod
+    @abstractmethod
+    def get_listeners() -> list:
+        """
+        Get a list of explicit listener definitions.
+        Listeners carry event type, priority, and handler together.
+        Cannot be expressed as a key/body map without losing
+        the metadata the event dispatcher requires.
+        Must return a simple list literal — no conditional logic permitted.
+        """
+        ...
+```
+
+---
+
+## Data Classes — @dataclass
+
+Route data, listener data, and parameter data objects use `@dataclass` — the Python equivalent of PHP readonly classes
+and Java records. `frozen=True` makes them immutable:
+
+```python
+from dataclasses import dataclass, field
+from typing import Callable, Any
+
+
+@dataclass(frozen=True)
+class Parameter:
+    name: str
+    pattern: str = '[^/]+'
+
+
+@dataclass(frozen=True)
+class HttpRoute:
+    path: str
+    method: str
+    handler: tuple[type, str]  # (ProviderClass, 'method_name')
+    parameters: list[Parameter] = field(default_factory=list)
+    name: str | None = None
+    middleware: list[str] = field(default_factory=list)
+    compiled_regex: str | None = None  # set by ProcessorContract
+
+
+@dataclass(frozen=True)
+class Listener:
+    event_type: type
+    handler: tuple[type, str]  # (ProviderClass, 'method_name')
+    priority: int = 0
+```
+
+`frozen=True` prevents mutation after construction — the same guarantee PHP's `readonly` classes provide. mypy and
+pyright fully validate all field types.
+
+---
+
+## Build Tool Contract
+
+Any method the build tool reads must return a single flat literal with no logic:
+
+```python
+# ✅ simple list of instances
+return [HttpContainerProvider(), HttpMiddlewareProvider()]
+
+# ✅ simple dict literal with method reference
+return {UserRepositoryClass: UserServiceProvider.publish_user_repository}
+
+# ✅ simple list of route objects
+return [HttpRoute.get('/users', UserHttpRouteProvider.index_users)]
+
+# ❌ conditional logic
+if condition:
+    return [...]
+return [...]
+
+# ❌ variable accumulation
+routes = []
+routes.append(...)
+return routes
+
+# ❌ method calls other than constructors — a static factory is not readable either
+return get_extra_routes()
+```
+
+---
+
+## Handler Method Pointer Convention
+
+All handler methods must be **static methods on the same class** as the provider or controller that defines the route or
+listener. This is the same pattern used by `publishers()` in service providers.
+
+**Why:** Sindri reads exactly one file per provider or controller. All imports for handler bodies are in that one file —
+no cross-file import aggregation, no conflict detection, no registry needed.
+
+```
+✅ Method reference on the same class
+✅ All type references imported in the same file
+
+❌ Inline closures or lambdas in route/listener definitions
+❌ References to types not imported in the current file
+❌ Handler methods on a different class
+```
+
+---
+
+## Design Note — Why Routes Cannot Use a Publisher-Style Map
+
+An early consideration was expressing routes the same way as container bindings — a map of route identifier to handler
+function, with the build tool reading function bodies directly. This was rejected because routes are multi-dimensional
+data structures, not simple key→factory pairs.
+
+A route carries: HTTP method, path pattern, dynamic segment constraints, regex compilation data, middleware chain,
+name/alias, parameter defaults, host constraints, and scheme constraints — all in addition to the handler. The
+`HttpRoute.get("/users/{id}", handler)` call is what populates all of these fields together. Decomposing this into a
+key/function-body map would lose all metadata the router needs to build its dispatcher index and compile route regexes.
+
+The same reasoning applies to listeners — they carry event type binding, priority, and stop-propagation behavior
+alongside the handler. These cannot be expressed as a flat key/body map without losing the data the event dispatcher
+requires.
+
+Container bindings by contrast are simple key→factory pairs. This is why `publishers()` works as a map but
+`get_routes()` must return complete route objects.
