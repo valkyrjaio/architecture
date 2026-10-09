@@ -13,8 +13,9 @@ is not answered to a waiting client — it is **acknowledged, retried, or dead-l
 ## Design Principles
 
 1. **Worker-agnostic.** The framework never depends on a specific broker. Adapters bridge external brokers (SQS, Redis,
-   RabbitMQ/AMQP, Beanstalkd, database) to the framework's internal contracts: a client adapter on the produce side,
-   and an entry on the consume side. `Sync`, `Deferred` and `InMemory` are in-process and reach no broker at all.
+   RabbitMQ/AMQP, Beanstalkd, Pub/Sub, database, …) to the framework's internal contracts: a client adapter on the
+   produce side, and an entry on the consume side. `Sync`, `Deferred` and `InMemory` are in-process and reach no broker
+   at all.
 
 2. **Framework features are inherited, not reimplemented.** Middleware, the container, event dispatch, exception
    handling, and observability all work the same in queues as everywhere else.
