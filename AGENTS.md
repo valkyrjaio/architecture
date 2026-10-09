@@ -127,11 +127,10 @@ every repo.** A change is not finished until, for the repo you touched:
 
 The 100% rule is **per file, not an aggregate**, and it binds both directions:
 every file you add is at 100% on its own, and every file you touch stays at
-100%. A green gate is not proof — no language's gate currently fails on
-coverage — so read the coverage report yourself, per file, before you call a
-change done. Code that genuinely cannot be covered is excluded narrowly, in the
-coverage tool's own config, with a comment saying why. The full rules:
-[`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md).
+100%. A green gate is not proof, so read the coverage report yourself, per
+file, before you call a change done. Code that genuinely cannot be covered is
+excluded narrowly, in the coverage tool's own config, with a comment saying
+why. The full rules: [`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md).
 
 Then:
 
@@ -474,9 +473,9 @@ the language's test-name convention; reusable doubles are production-shaped
 classes in `Fixtures`, never named like tests. **Every code branch is tested, all
 tests and the full CI gate pass, and coverage is 100% (line and branch) — per
 file, for every file added or touched — and never drops** — see the Definition of
-done in §3, which also covers why a green gate is not proof of coverage and how
-an unreachable line may be excluded. Per-code-shape recipes and coverage
-gotchas:
+done in §3, which also states that a green gate is not proof of coverage, and
+says how an unreachable line may be excluded. Per-code-shape recipes and
+coverage gotchas:
 [`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md). Exact directory paths, test
 framework, and the PHPUnit→target mapping live in your Layer-2 guide.
 
