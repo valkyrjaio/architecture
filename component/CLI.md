@@ -196,9 +196,10 @@ integer. The set covers success, a general error, and the specific failures a
 command can report: a usage error, a data error, a missing input, an
 unavailable service, a permission failure, a configuration error, and the rest.
 
-**A warning exits zero.** A warning is informational, so it does not fail a build
-or a pipeline. An application that wants a warning to fail opts into that; the
-component never decides it.
+**A warning is a message, not an outcome.** There is no warning exit code, so
+emitting a warning does not change what the command returns: a run that warns and
+succeeds exits successfully, and nothing fails a build on its own. An application
+that wants a warning to fail returns a failing code itself.
 
 ---
 

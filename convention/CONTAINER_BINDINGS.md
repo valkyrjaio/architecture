@@ -94,20 +94,24 @@ that the config matches it.
 
 ## The factory
 
-**A factory is declared as a reference to a named method, not as an inline
-function.** The method lives on the provider that registers the binding, or on
-the class being built, and the declaration names it.
+A factory is anything the language can call. **Which form is permitted depends on
+who reads the declaration**, and there are two readers.
 
-The reason is that the declaration has two readers. A person reads it, and the
-build tool reads it statically. A named method is a value the tool can carry into
-generated output; an inline function body is not. So a provider's map holds
-method references, and the same rule governs every list a provider declares
+**A provider's map is read statically by the build tool, so its values are
+references to named methods.** An inline function body is not a value the tool
+can carry into generated output, so a provider that holds one cannot be cached.
+The same rule governs every list a provider declares
 ([`PROVIDERS.md`](PROVIDERS.md)).
 
-A named method is also better for the reader. It has a name that says what it
-builds, it resolves each dependency explicitly, it constructs without reflection,
-and it is testable on its own. Reflection-based construction is neither checkable
-nor readable.
+**A binding registered directly is read by nothing, so any callable is fine
+there**, an inline function included. Such a binding is already outside what the
+build tool can see, so the restriction that exists for the tool's sake does not
+apply.
+
+A named method is still better for the reader wherever there is a choice. It has
+a name that says what it builds, it resolves each dependency explicitly, it
+constructs without reflection, and it is testable on its own. Reflection-based
+construction is neither checkable nor readable.
 
 **The container wraps every registration in a function of its own**, so that
 resolution is uniform: a resolution always invokes something callable, and no
