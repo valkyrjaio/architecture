@@ -18,13 +18,13 @@ $entity = $class::fromValue($raw);
 
 No other Valkyrja target language supports this:
 
-| Language       | Static interface methods | Notes                                                    |
-| -------------- | ------------------------ | -------------------------------------------------------- |
-| **PHP**        | Yes                      | Reference implementation — being changed for consistency |
-| **Java**       | No                       | Static interface methods exist but cannot be overridden  |
-| **TypeScript** | No                       | Same limitation as Java                                  |
-| **Go**         | No                       | No static methods at all; interfaces are instance-only   |
-| **Python**     | Partial                  | `typing.Protocol` can express it, but runtime-only check |
+| Language       | Static interface methods | Notes                                                     |
+| -------------- | ------------------------ | --------------------------------------------------------- |
+| **PHP**        | Yes                      | Permitted by the language — being changed for consistency |
+| **Java**       | No                       | Static interface methods exist but cannot be overridden   |
+| **TypeScript** | No                       | Same limitation as Java                                   |
+| **Go**         | No                       | No static methods at all; interfaces are instance-only    |
+| **Python**     | Partial                  | `typing.Protocol` can express it, but runtime-only check  |
 
 No other language can enforce or dynamically dispatch a static interface method.
 **PHP therefore removes the static method that the framework calls on a variable

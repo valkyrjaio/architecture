@@ -7,7 +7,7 @@ that are **the same in every language**.
 This is **Layer 1** of a three-layer guide:
 
 1. **This file** — cross-language rules that apply everywhere.
-2. **`<language>/AGENTS.md`** (in this repo, next to this file) — the per-language
+2. **`language/<name>/AGENTS.md`** (in this repo, under `language/`) — the per-language
    deltas: exact CI commands, package roots, tool lists, test mapping, and the
    per-language spelling of the structure taxonomy ([`STRUCTURE.md`](convention/STRUCTURE.md)).
    → [`php`](language/php/AGENTS.md) · [`java`](language/java/AGENTS.md) · [`go`](language/go/AGENTS.md) ·

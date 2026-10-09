@@ -157,7 +157,7 @@ full gate: `ruff format` + `ruff check` → `mypy` → `import-linter` → `band
   syntax (`(`, `(?:`, `)`, `)?`, `>`) is identical. Anchors are `^` / `$` with
   **no** delimiters — `re.compile` takes a bare pattern, and PHP's `/^…$/` would be
   read as literal slashes (PHP needs them because `preg_match` requires them; see
-  [`AGENTS.md`](../php/AGENTS.md)). `\/` is a valid escape for a literal
+  [`php/AGENTS.md`](../php/AGENTS.md)). `\/` is a valid escape for a literal
   `/`, so `Regex.PATH` carries over unchanged. Match with **`re.fullmatch()`**, not
   `re.match()`: `$` also matches just before a trailing newline, so `re.match` lets
   `/users/42\n` satisfy a `^…$` route — `fullmatch` (or ending with `\Z`) closes

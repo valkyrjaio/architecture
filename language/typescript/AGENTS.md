@@ -207,7 +207,7 @@ so a failed run still reports a signed statement.
   Python implications: [`DECORATORS.md`](DECORATORS.md).
 
 - **Dynamic route regexes are stored as native anchored patterns.** TypeScript
-  sets `Regex.START` / `Regex.END` to `^` / `$`, not the PHP reference's
+  sets `Regex.START` / `Regex.END` to `^` / `$`, not the PHP port's
   PCRE-delimited `/^` / `$/`. `Matcher` compiles the stored regex with
   `new RegExp(regex)`, and a `RegExp` built from a string takes no delimiters — it
   would match the leading and trailing `/` as literal characters, so a
@@ -218,7 +218,7 @@ so a failed run still reports a signed statement.
   the generator's golden snapshot already sits on the production path and pins the
   framework's exact output. (Java precomputes it a layer above the generator and
   therefore carries a second, end-to-end guard — see
-  [`AGENTS.md`](../java/AGENTS.md). That asymmetry is deliberate; do not
+  [`java/AGENTS.md`](../java/AGENTS.md). That asymmetry is deliberate; do not
   collapse it into parity.)
 
 More: [`README.md`](README.md), [`PROVIDER_CONTRACTS.md`](PROVIDER_CONTRACTS.md),

@@ -282,13 +282,13 @@ Three naming rules live elsewhere. They govern a different axis and do not repea
 A second naming convention has a worked-through position and no decision. It
 governs a method that retrieves one item:
 
-| Prefix         | Returns                            | When absent  |
-| -------------- | ---------------------------------- | ------------ |
-| `Create…`      | a new instance                     | throws       |
-| `Get…`         | an expected existing instance      | throws       |
-| `Retrieve…`    | an expected existing instance      | throws       |
-| `GetOrCreate…` | an existing instance, or a new one | throws       |
-| `Find…`        | an existing instance               | returns null |
+| Prefix         | Returns                                             | When it cannot  |
+| -------------- | --------------------------------------------------- | --------------- |
+| `Create…`      | a new instance                                      | throws          |
+| `Get…`         | an expected existing instance                       | throws          |
+| `Retrieve…`    | an expected existing instance                       | throws          |
+| `GetOrCreate…` | an existing instance, or a new one when none exists | throws          |
+| `Find…`        | an existing instance                                | returns nothing |
 
 A collection query is the exception. `Get…` for a collection always returns a
 collection, empty when nothing matches, and never throws.

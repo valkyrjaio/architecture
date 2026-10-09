@@ -21,7 +21,7 @@ Before touching anything, understand the moving parts:
 
 | Piece                  | Where it lives                                       | Purpose                                                                                    |
 | ---------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| **Architecture docs**  | `architecture/<lang>/`                               | Layer-2 decisions, provider contracts, agent guide, TODO                                   |
+| **Architecture docs**  | `architecture/language/<lang>/`                      | Layer-2 decisions, provider contracts, agent guide                                         |
 | **Template repo**      | `valkyrjaio/project-template-<lang>`                 | The scaffold every new repo of that language is cloned from                                |
 | **Reusable workflows** | `valkyrjaio/.github/.github/workflows/_*-<lang>.yml` | The CI + release machinery every repo calls                                                |
 | **Ruleset**            | `valkyrjaio/.github/rulesets/<lang>/`                | Required-status-check branch protection                                                    |
@@ -32,7 +32,7 @@ Before touching anything, understand the moving parts:
 | **Org config**         | `SUPPORTED_LANGUAGES` var, org secrets               | Publishing credentials, language enablement                                                |
 
 **The documents in `component/` and `convention/` are the reference.** When any port disagrees with them on
-structure, naming, or tests, PHP wins unless an architecture doc says otherwise.
+structure, naming, or tests, the port is the defect.
 For a _new_ language, first pick the **closest existing port** to crib from — a
 statically-typed/compiled language mirrors the compiled ports; a
 dynamic/interpreted one mirrors the interpreted ports. The `template` repos of all
@@ -53,7 +53,7 @@ Read these in the architecture repo, in order: `README.md`,
 [`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md),
 [`SINDRI.md`](SINDRI.md), [`STATIC_METHODS.md`](STATIC_METHODS.md),
 [`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md), then the closest language's
-`<lang>/` folder.
+`language/<lang>/` folder.
 
 Then **decide and write down** (these become the Layer-2 docs in Phase 1):
 
@@ -100,7 +100,7 @@ Then **decide and write down** (these become the Layer-2 docs in Phase 1):
 
 ---
 
-## 2. Phase 1 — Architecture docs (`architecture/<lang>/`)
+## 2. Phase 1 — Architecture docs (`architecture/language/<lang>/`)
 
 These are **Layer-2** guides — the per-language deltas from the cross-language
 canon. Create the folder with:
@@ -440,7 +440,7 @@ fixtures.
 
 **Phase 1 — architecture docs**
 
-- [ ] `architecture/<lang>/{README,PROVIDER_CONTRACTS,AGENTS,TODO}.md`
+- [ ] `architecture/language/<lang>/{README,PROVIDER_CONTRACTS,AGENTS}.md`
 - [ ] Update top-level `README.md`, `AGENTS.md`, `PORTS.md` tables
 - [ ] Reconcile stale names / broken links; canon vs Layer-2 agreement
 

@@ -250,10 +250,10 @@ excused:
   because none of their engines take any — `java.util.regex.Pattern`,
   `new RegExp(string)`, Python `re.compile`, Go `regexp.Compile` — and each records
   that as a deliberate deviation in its own guide
-  ([`AGENTS.md`](../java/AGENTS.md),
-  [`AGENTS.md`](../typescript/AGENTS.md),
-  [`AGENTS.md`](../python/AGENTS.md),
-  [`AGENTS.md`](../go/AGENTS.md)). PHP is the odd one out **by necessity, not
+  ([`java/AGENTS.md`](../java/AGENTS.md),
+  [`typescript/AGENTS.md`](../typescript/AGENTS.md),
+  [`python/AGENTS.md`](../python/AGENTS.md),
+  [`go/AGENTS.md`](../go/AGENTS.md)). PHP is the odd one out **by necessity, not
   by neglect**. Working across ports, do not strip PHP's delimiters to match the
   others, and do not carry PHP's delimiters into a port that cannot use them.
 

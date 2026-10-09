@@ -147,12 +147,12 @@ make.
   - **Named groups are `(?P<name>…)`.** Go 1.22+ also accepts the `(?<name>…)`
     spelling Java and TypeScript emit, but `(?P<name>…)` is the portable form,
     compiles on every toolchain, and matches Python's only option (see
-    [`AGENTS.md`](../python/AGENTS.md)). Read parameters back with
+    [`python/AGENTS.md`](../python/AGENTS.md)). Read parameters back with
     `re.SubexpIndex(name)` against `FindStringSubmatch`.
   - **No delimiters, and the anchors are load-bearing.** `regexp.Compile` takes a
     bare pattern; PHP's `/^…$/` compiles but matches nothing, since the slashes
     are literal (PHP needs them because `preg_match` requires them — see
-    [`AGENTS.md`](../php/AGENTS.md)). Unlike Java's `Matcher.matches()`,
+    [`php/AGENTS.md`](../php/AGENTS.md)). Unlike Java's `Matcher.matches()`,
     which implies a full match on its own, Go's `MatchString` _searches_ — so the
     `^` / `$` framing is what makes a route match exactly, not decoration.
     `\/` compiles fine, so `Regex.PATH` carries over unchanged.

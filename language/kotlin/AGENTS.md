@@ -17,7 +17,7 @@ Kotlin idiom.
 >
 > **Provisional.** Kotlin is "nearly free from Java" and shares the JVM runtime,
 > package root, and provider contracts. Until a Kotlin decision doc exists, the
-> **Java guide is the interim reference** — read [`AGENTS.md`](../java/AGENTS.md)
+> **Java guide is the interim reference** — read [`java/AGENTS.md`](../java/AGENTS.md)
 > alongside this file; Kotlin follows it except where noted. Record Kotlin-only
 > decisions here as they are made.
 
@@ -105,6 +105,6 @@ full gate: ktlint/Spotless → detekt → Konsist → JUnit + Kover (100%).
 
 ---
 
-Interim reference: [`AGENTS.md`](../java/AGENTS.md),
-[`PROVIDER_CONTRACTS.md`](../java/PROVIDER_CONTRACTS.md). Kotlin appears in
+Interim reference: [`java/AGENTS.md`](../java/AGENTS.md),
+[`java/PROVIDER_CONTRACTS.md`](../java/PROVIDER_CONTRACTS.md). Kotlin appears in
 [`PORTS.md`](../../convention/PORTS.md) as a future JVM port.

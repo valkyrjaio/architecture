@@ -25,7 +25,7 @@ naming, structure, testing (100% coverage), CI, and commit/PR conventions
 - Framework: `~/Dropbox/Sites/Valkyrja/typescript/valkyrja` (npm `@valkyrjaio/valkyrja`, GitHub `valkyrjaio/valkyrja-ts` — confirm the remote).
 - Sindri: `~/Dropbox/Sites/Valkyrja/typescript/sindri` (npm `@valkyrjaio/sindri`, GitHub `valkyrjaio/sindri-ts`).
 - Starter app: `~/Dropbox/Sites/Valkyrja/typescript/application` (npm `@valkyrjaio/application`, GitHub `valkyrjaio/valkyrja-starter-app-ts`).
-- PHP reference (source of truth for the pattern): `~/Dropbox/Sites/Valkyrja/php/*`.
+- The PHP port, as the most complete implementation of the pattern: `~/Dropbox/Sites/Valkyrja/php/*`.
 
 Current released versions: `@valkyrjaio/valkyrja` and `@valkyrjaio/sindri` are at
 **26.3.0** (26.3.0 already shipped the imperative-`getRoutes()` generation fix and
