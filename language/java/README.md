@@ -147,7 +147,7 @@ conditional logic.
 
 ---
 
-## 4. Handler Contracts — Typed Closures
+## 4. Handler Signatures
 
 **Reference:** `HANDLERS.md`
 
@@ -189,8 +189,9 @@ public ResponseContract show(String id) {
 }
 ```
 
-`ServerRequestContract` and `RouteContract` are not parameters — fetch from
-container if needed.
+The **route is a parameter**, and it is also set on the container before the
+handler runs, so it is reachable both ways. `ServerRequestContract` is
+container-only — it is never a handler parameter.
 
 ---
 

@@ -301,8 +301,8 @@ public class UserHttpRouteProvider implements HttpRouteProviderContract {
     }
 
     /** Handler method lives on the same class — all imports self-contained. */
-    public static ResponseContract indexOrders(ContainerContract c, Map<String, Object> args) {
-        return c.getSingleton(OrderController.class).index(args);
+    public static ResponseContract indexOrders(ContainerContract c, RouteContract route) {
+        return c.getSingleton(OrderController.class).index(route);
     }
 }
 ```
@@ -320,12 +320,11 @@ handler may live on the controller, the route provider, or any other class.
 package app.http.controllers;
 
 import io.valkyrja.container.manager.contract.ContainerContract;
-import io.valkyrja.http.routing.data.contract.ResponseContract;
-import io.valkyrja.http.routing.annotation.Handler;
-import io.valkyrja.http.routing.annotation.Parameter;
-import io.valkyrja.http.routing.annotation.Route;
-
-import java.util.Map;
+import io.valkyrja.http.message.response.contract.ResponseContract;
+import io.valkyrja.http.routing.attribute.Parameter;
+import io.valkyrja.http.routing.attribute.Route;
+import io.valkyrja.http.routing.attribute.route.RouteHandler;
+import io.valkyrja.http.routing.data.contract.RouteContract;
 
 public class UserController {
 

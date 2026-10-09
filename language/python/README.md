@@ -186,7 +186,7 @@ All provider methods must return simple list/dict literals — no conditional lo
 
 ---
 
-## 4. Handler Contracts — Typed Callable Aliases
+## 4. Handler Signatures
 
 **Reference:** `HANDLERS.md`
 
@@ -225,7 +225,9 @@ def show(self, id: int) -> ResponseContract:
     pass
 ```
 
-`ServerRequestContract` and `RouteContract` are not parameters — fetch from container if needed.
+The **route is a parameter**, and it is also set on the container before the
+handler runs, so it is reachable both ways. `ServerRequestContract` is
+container-only — it is never a handler parameter.
 
 ---
 

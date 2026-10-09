@@ -302,9 +302,9 @@ class UserHttpRouteProvider implements HttpRouteProviderContract
     }
 
     /** Handler method lives on the same class — all imports self-contained. */
-    public static function indexOrders(ContainerContract $c, array $args): ResponseContract
+    public static function indexOrders(ContainerContract $c, RouteContract $route): ResponseContract
     {
-        return $c->getSingleton(OrderController::class)->index($args);
+        return $c->getSingleton(OrderController::class)->index($route);
     }
 }
 ```
@@ -440,7 +440,7 @@ if ($condition) { return [...]; }
 $routes = []; $routes[] = ...; return $routes;
 
 // ❌ inline closures as route handlers
-return [HttpRoute::get('/users', function (ContainerContract $c, array $args) { ... })];
+return [HttpRoute::get('/users', function (ContainerContract $c, RouteContract $route) { ... })];
 ```
 
 ---

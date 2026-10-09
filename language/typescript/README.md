@@ -216,7 +216,7 @@ This means TypeScript works without cache exactly as the other ports do.
 
 ---
 
-## 5. Handler Contracts — Named Types
+## 5. Handler Signatures
 
 **Reference:** `HANDLERS.md`
 
@@ -263,8 +263,9 @@ listener = listener.withHandler((container, args) =>
 )
 ```
 
-`ServerRequestContract` and `RouteContract` are not parameters — fetch from
-container if needed.
+The **route is a parameter**, and it is also set on the container before the
+handler runs, so it is reachable both ways. `ServerRequestContract` is
+container-only — it is never a handler parameter.
 
 ---
 
