@@ -192,24 +192,29 @@ All provider methods must return simple list/dict literals — no conditional lo
 
 ### Three Callable type aliases
 
+A route handler takes the container and the **route**. Only a listener takes a
+map, because a listener has no route. See
+[`HANDLERS.md`](../../convention/HANDLERS.md).
+
 ```python
 from typing import Callable, Any
 
-HttpHandlerFunc = Callable[[ContainerContract, dict[str, Any]], ResponseContract]
-CliHandlerFunc = Callable[[ContainerContract, dict[str, Any]], OutputContract]
-ListenerHandlerFunc = Callable[[ContainerContract, dict[str, Any]], Any]
+# HTTP route
+Callable[[ContainerContract, RouteContract], ResponseContract]
+
+# CLI route
+Callable[[ContainerContract, RouteContract], OutputContract]
+
+# Event listener
+Callable[[ContainerContract, dict[str, Any]], Any]
 ```
 
-### Handler contracts per concern
+### The handler lives on the route contract
 
-```python
-class HttpHandlerContract(ABC):
-    @abstractmethod
-    def get_handler(self) -> HttpHandlerFunc: ...
-
-    @abstractmethod
-    def set_handler(self, handler: HttpHandlerFunc) -> 'HttpHandlerContract': ...
-```
+There is no handler contract per concern. The route contract declares
+`get_handler` and `with_handler`, and `with_handler` returns a copy rather than
+modifying the route, per
+[`METHOD_NAMING.md`](../../convention/METHOD_NAMING.md).
 
 ### @route_handler decorator on controller methods
 
@@ -530,9 +535,8 @@ deploy with generated files
 3. Throwable hierarchy — ABC abstract, three branches, ValueError root for InvalidArgument
 4. Closure-based bindings
 5. Provider contracts with proper type hints
-6. Callable type aliases — HttpHandlerFunc, CliHandlerFunc, ListenerHandlerFunc
-7. Handler contracts per concern
-8. `@route_handler` and `@parameter` decorators
-9. Route and listener data classes
-10. CGI and ASGI entry points
-11. sindri Python implementation
+6. The handler on the route contract — get_handler / with_handler
+7. `@route_handler` and `@parameter` decorators
+8. Route and listener data classes
+9. CGI and ASGI entry points
+10. sindri Python implementation

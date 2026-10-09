@@ -68,7 +68,7 @@ modules exactly.
 
 - **Stage contracts** — one interface per pipeline stage. The common shape is: an always-run
   pre-router stage, matched/not-matched/dispatched stages around the handler, a throwable-caught
-  stage, an always-run "sending" stage, and an always-run "terminated" stage. Each stage method takes
+  stage, an always-run stage 6, and an always-run stage 7 ([`LIFECYCLE.md`](LIFECYCLE.md) names both per protocol). Each stage method takes
   the inbound (and response, where one exists) plus the stage handler as `next`.
 - **Handler contracts + result records** — the per-stage handler interface, and small result records
   for stages that can either continue _or_ short-circuit with a response.
@@ -86,7 +86,7 @@ free to return a response directly (short-circuit) or delegate to `next`.
 - **Kernel `Handler`** (`RequestHandler`/`InputHandler`/`ServiceHandler`/…) — the entry point the
   adapter calls. Orchestrates the stages, runs the top-level try/catch that maps a throwable to a
   response (then through `ThrowableCaught`), and performs any entry-point checks. If the wire write is
-  the adapter's job and must sit between "sending" and "terminated", split the kernel so the adapter
+  the adapter's job and must sit between stage 6 and stage 7, split the kernel so the adapter
   can interleave (see gRPC's `handle`/`sending`/`terminate`).
 - **Adapter contract** — a tiny `start(handler)/stop()` (or equivalent) interface. Portable even though
   every implementation is per-worker.
@@ -125,7 +125,7 @@ Two provider kinds, following the existing pairs:
 - **Service providers** publish the module's services into the container via a `publishers()` map
   (kernel handler, `Router`, `RouteCollection`, collector, and the stage handlers). Publish the stage
   handlers as **singletons** so the `Router` and the kernel handler resolve the _same_ instances —
-  otherwise per-route middleware in the "sending"/"terminated" stages silently never fires.
+  otherwise per-route middleware in stages 6 and 7 silently never fires.
 - **Component providers** group the service providers and declare the module's route providers.
 
 ### Provider aggregation (the invasive part)
@@ -144,7 +144,7 @@ Provide the entry points, mirroring HTTP's `Http`/`WorkerHttp` and gRPC's `Grpc`
 - A **single-shot** entry for embedding/tests (bootstrap + handle one unit of work).
 - A **worker base** for persistent runtimes: `bootstrap(config)` once, then `dispatch(app, data,
 inbound, …)` per unit of work, creating an isolated child container each time so state never bleeds
-  between units. If the adapter must write between "sending" and "terminated", pass it a **writer
+  between units. If the adapter must write between stage 6 and stage 7, pass it a **writer
   callback** so the write slots into the middle while the child container stays alive.
 - If (and only if) the protocol can run on a zero-dependency in-core server, add one (HTTP's
   `Exchange*`). Most protocols cannot and rely entirely on external adapter modules.
@@ -178,7 +178,7 @@ framework with a build-tool composite build, then release the framework, then bu
 - Unit-test each contract/impl through its public API; use container-backed fixtures for middleware
   chains.
 - Add **functional** tests that boot the full stack from a registered controller and drive a unit of
-  work end-to-end — including the "not matched" default and "per-route sending/terminated middleware
+  work end-to-end — including the "not matched" default and "per-route stage 6 and stage 7 middleware
   actually fires".
 - Reusable controllers/middleware are fixtures.
 

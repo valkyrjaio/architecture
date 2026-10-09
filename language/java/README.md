@@ -151,47 +151,38 @@ conditional logic.
 
 **Reference:** `HANDLERS.md`
 
-### Three @FunctionalInterface types
+### The handler types
+
+A route handler takes the container and the **route**. Only a listener takes a map,
+because a listener has no route. See
+[`HANDLERS.md`](../../convention/HANDLERS.md).
 
 ```java
-// HTTP
-@FunctionalInterface
-public interface HttpHandlerFunc {
-    ResponseContract handle(ContainerContract container, Map<String, Object> arguments);
-}
+// HTTP route
+BiFunction<ContainerContract, RouteContract, ResponseContract>
 
-// CLI
-@FunctionalInterface
-public interface CliHandlerFunc {
-    OutputContract handle(ContainerContract container, Map<String, Object> arguments);
-}
+// CLI route
+BiFunction<ContainerContract, RouteContract, OutputContract>
+
+// gRPC route
+BiFunction<ContainerContract, RouteContract, ServiceResponseContract>
 
 // Event listener
-@FunctionalInterface
-public interface ListenerHandlerFunc {
-    Object handle(ContainerContract container, Map<String, Object> arguments);
-}
+BiFunction<ContainerContract, Map<String, Object>, Object>
 ```
 
-### Handler contracts per concern
+### The handler lives on the route contract
 
-```java
-public interface HttpHandlerContract {
-    HttpHandlerFunc getHandler();
-
-    HttpHandlerContract setHandler(HttpHandlerFunc handler);
-}
-```
+There is no handler contract per concern. The route contract declares
+`getHandler()` and `withHandler()`, and `withHandler` returns a copy rather than
+modifying the route, per
+[`METHOD_NAMING.md`](../../convention/METHOD_NAMING.md).
 
 ### @RouteHandler annotation on controller methods
 
 ```java
-@RouteHandler((ContainerContract c, Map < String, Object > args) ->
-        c.
-
-getSingleton(UserController .class).
-
-show(args.get("id")))
+@RouteHandler((ContainerContract c, RouteContract route) ->
+        c.getSingleton(UserController.class).show(route))
 
 @Parameter(name = "id", pattern = "[0-9]+")
 public ResponseContract show(String id) {
@@ -340,14 +331,12 @@ provider tree, then walks each provider's source file via Trees API.
 
 1. Container component (first per port order)
 2. Throwable hierarchy — abstract, renamed, ComponentName* convention
-3. Closure-based bindings + constants files
+3. Explicit binding factories
 4. Provider contracts — ComponentProvider, ServiceProvider, RouteProvider,
    ListenerProvider
-5. Handler functional interfaces — HttpHandlerFunc, CliHandlerFunc,
-   ListenerHandlerFunc
-6. Handler contracts per concern
-7. @RouteHandler and @Parameter annotations
-8. Records for data classes
-9. Annotation processor setup + Trees API lambda extraction
-10. JavaPoet cache data class generation
-11. `sindri` Java artifact
+5. The handler on the route contract — getHandler / withHandler
+6. @RouteHandler and @Parameter annotations
+7. Records for data classes
+8. Annotation processor setup + Trees API lambda extraction
+9. JavaPoet cache data class generation
+10. `sindri` Java artifact

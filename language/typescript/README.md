@@ -15,7 +15,7 @@
 - **No `::class` equivalent** — string constants for all binding keys
 - **Constructed providers** in every provider list (`ComponentProviderContract[]`),
   walked directly at runtime
-- **Named types** (`HttpHandlerFunc`, `CliHandlerFunc`, `ListenerHandlerFunc`)
+- **The handler on the route contract** (`getHandler()` / `withHandler()`)
   for typed closures
 - **TypeScript compiler API** for build tool
 - **Node.js worker model** — single bootstrap, routes in memory permanently
@@ -222,44 +222,27 @@ This means TypeScript works without cache exactly as the other ports do.
 
 ### Three named types — compiler enforced
 
-```typescript
-type HttpHandlerFunc = (
-    container: ContainerContract,
-    arguments: Record<string, unknown>
-) => ResponseContract
-
-type CliHandlerFunc = (
-    container: ContainerContract,
-    arguments: Record<string, unknown>
-) => OutputContract
-
-type ListenerHandlerFunc = (
-    container: ContainerContract,
-    arguments: Record<string, unknown>
-) => unknown
-```
-
-### Handler contracts per concern
+A route handler takes the container and the **route**. Only a listener takes a
+map, because a listener has no route. See
+[`HANDLERS.md`](../../convention/HANDLERS.md).
 
 ```typescript
-interface HttpHandlerContract {
-    getHandler(): HttpHandlerFunc
+// HTTP route
+(container: ContainerContract, route: RouteContract) => ResponseContract
 
-    setHandler(handler: HttpHandlerFunc): this
-}
+// CLI route
+(container: ContainerContract, route: RouteContract) => OutputContract
 
-interface CliHandlerContract {
-    getHandler(): CliHandlerFunc
-
-    setHandler(handler: CliHandlerFunc): this
-}
-
-interface ListenerHandlerContract {
-    getHandler(): ListenerHandlerFunc
-
-    setHandler(handler: ListenerHandlerFunc): this
-}
+// Event listener
+(container: ContainerContract, args: Record<string, unknown>) => unknown
 ```
+
+### The handler lives on the route contract
+
+There is no handler contract per concern. The route contract declares
+`getHandler()` and `withHandler()`, and `withHandler` returns a copy rather than
+modifying the route, per
+[`METHOD_NAMING.md`](../../convention/METHOD_NAMING.md).
 
 ### Usage
 
@@ -359,9 +342,8 @@ tsc compiles with generated files
 5. Closure-based bindings
 6. Provider contracts — ComponentProvider, ServiceProvider, RouteProvider,
    ListenerProvider
-7. Named handler types — HttpHandlerFunc, CliHandlerFunc, ListenerHandlerFunc
-8. Handler contracts per concern
-9. Route and listener data classes
-10. `@valkyrjaio/sindri` npm package — TypeScript compiler API implementation
-11. AppContainerData, AppHttpRoutingData, AppCliRoutingData, AppEventData
+7. The handler on the route contract — getHandler / withHandler
+8. Route and listener data classes
+9. `@valkyrjaio/sindri` npm package — TypeScript compiler API implementation
+10. AppContainerData, AppHttpRoutingData, AppCliRoutingData, AppEventData
     generation

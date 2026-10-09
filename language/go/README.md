@@ -202,53 +202,45 @@ logic.
 
 **Reference:** `HANDLERS.md`
 
-### Three named function types
+### The handler types
+
+A route handler takes the container and the **route**. Only a listener takes a
+map, because a listener has no route. See
+[`HANDLERS.md`](../../convention/HANDLERS.md).
 
 ```go
-// HTTP
-type HttpHandlerFunc func (container ContainerContract, arguments map[string]any) ResponseContract
+// HTTP route
+func (container ContainerContract, route RouteContract) ResponseContract
 
-// CLI
-type CliHandlerFunc func (container ContainerContract, arguments map[string]any) OutputContract
+// CLI route
+func (container ContainerContract, route RouteContract) OutputContract
 
 // Event listener
-type ListenerHandlerFunc func (container ContainerContract, arguments map[string]any) any
+func (container ContainerContract, arguments map[string]any) any
 ```
 
-### Handler contracts per concern
+### The handler lives on the route contract
 
-```go
-type HttpHandlerContract interface {
-GetHandler() HttpHandlerFunc
-SetHandler(HttpHandlerFunc) HttpHandlerContract
-}
-
-type CliHandlerContract interface {
-GetHandler() CliHandlerFunc
-SetHandler(CliHandlerFunc) CliHandlerContract
-}
-
-type ListenerHandlerContract interface {
-GetHandler() ListenerHandlerFunc
-SetHandler(ListenerHandlerFunc) ListenerHandlerContract
-}
-```
+There is no handler contract per concern. The route contract declares
+`GetHandler` and `WithHandler`, and `WithHandler` returns a copy rather than
+modifying the route, per
+[`METHOD_NAMING.md`](../../convention/METHOD_NAMING.md).
 
 ### Usage
 
 ```go
-// HTTP
-route.SetHandler(func (c ContainerContract, args map[string]any) ResponseContract {
-return c.GetSingleton(UserControllerClass).(*UserController).Show(args["id"])
+// HTTP — the route is the second parameter, and WithHandler returns a copy
+route = route.WithHandler(func (c ContainerContract, r RouteContract) ResponseContract {
+return c.GetSingleton(UserControllerClass).(*UserController).Show(r)
 })
 
 // CLI
-command.SetHandler(func (c ContainerContract, args map[string]any) OutputContract {
-return c.GetSingleton(SendEmailCommandClass).(*SendEmailCommand).Run(args)
+command = command.WithHandler(func (c ContainerContract, r RouteContract) OutputContract {
+return c.GetSingleton(SendEmailCommandClass).(*SendEmailCommand).Run(r)
 })
 
-// Listener
-listener.SetHandler(func (c ContainerContract, args map[string]any) any {
+// Listener — a listener has no route, so it takes a map
+listener = listener.WithHandler(func (c ContainerContract, args map[string]any) any {
 return c.GetSingleton(UserCreatedListenerClass).(*UserCreatedListener).Handle(args["user_id"])
 })
 ```
@@ -328,10 +320,8 @@ go build compiles with generated files
 4. Closure-based bindings
 5. Provider contracts — ComponentProvider, ServiceProvider, RouteProvider,
    ListenerProvider
-6. Named handler function types — HttpHandlerFunc, CliHandlerFunc,
-   ListenerHandlerFunc
-7. Handler contracts per concern
-8. Route and listener data classes
-9. go generate + go/analysis build tool
-10. AppContainerData, AppHttpRoutingData, AppCliRoutingData, AppEventData
-    generation
+6. The handler on the route contract — GetHandler / WithHandler
+7. Route and listener data classes
+8. go generate + go/analysis build tool
+9. AppContainerData, AppHttpRoutingData, AppCliRoutingData, AppEventData
+   generation
