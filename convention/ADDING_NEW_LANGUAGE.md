@@ -325,7 +325,7 @@ it uses the framework's own container and CLI — so it is built from the `templ
 other repo and depends on the _published_ framework (it reads the framework's provider and
 attribute/decorator contracts).
 
-- **Pipeline shape** (mirror the reference port's module layout): `Ast/` — readers that
+- **Pipeline shape** (mirror the module layout the component's document defines): `Ast/` — readers that
   parse (never execute) the app's `Config`, walk the provider tree
   (component/service/route/listener providers), and read the per-protocol route/param/
   middleware attributes, returning immutable result/data types; `Generate/` — the

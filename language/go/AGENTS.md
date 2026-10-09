@@ -1,7 +1,7 @@
 # AGENTS.md — Go (Layer 2)
 
 Per-language guide for the **Go** Valkyrja repos. Read the cross-language
-canonical first: [`../AGENTS.md`](../../AGENTS.md). This file records the Go
+canonical first: [`AGENTS.md`](../../AGENTS.md). This file records the Go
 **deltas**. The documents in `component/` and `convention/` are the reference;
 build from those, adapting to
 Go idiom. Authoritative port detail: [`README.md`](README.md),
@@ -15,7 +15,7 @@ Go idiom. Authoritative port detail: [`README.md`](README.md),
   (`project-template-go`, in progress) — the source of truth for repo/file/class
   structure (canonical rule: §3.9).
 - **Module path:** `github.com/valkyrjaio/valkyrja-go/vN`, where `vN` is the
-  current year major (see [`../PACKAGE_NAMING.md`](../../convention/PACKAGE_NAMING.md)).
+  current year major (see [`PACKAGE_NAMING.md`](../../convention/PACKAGE_NAMING.md)).
   Components map to lowercase packages (`container`, `http`, `cli`, `event`,
   `application`),
   with a `contract` sub-package for interfaces and a `data` sub-package for
@@ -47,13 +47,13 @@ exported structs — `ValkyrjaRuntimeError`, `ValkyrjaInvalidArgumentError`,
 `ContainerNotFoundError`, etc. — with an unexported marker interface
 (`valkyrjaThrowable` embedding `error`) standing in for the abstract base and
 unexported categoricals like `containerRuntimeError`. Return errors; do not
-`panic` for normal control flow. Detail: [`../THROWABLES.md`](../../convention/THROWABLES.md).
+`panic` for normal control flow. Detail: [`THROWABLES.md`](../../convention/THROWABLES.md).
 
 ---
 
 ## Structure taxonomy
 
-The cross-language taxonomy ([`../STRUCTURE.md`](../../convention/STRUCTURE.md)) applies
+The cross-language taxonomy ([`STRUCTURE.md`](../../convention/STRUCTURE.md)) applies
 loosely — Go's model diverges most of the five. Segments are **lowercase**
 packages: `contract`, `provider`, `data`, `factory`, `constant`, `security`,
 `command`.
@@ -147,12 +147,12 @@ make.
   - **Named groups are `(?P<name>…)`.** Go 1.22+ also accepts the `(?<name>…)`
     spelling Java and TypeScript emit, but `(?P<name>…)` is the portable form,
     compiles on every toolchain, and matches Python's only option (see
-    [`../python/AGENTS.md`](../python/AGENTS.md)). Read parameters back with
+    [`AGENTS.md`](../python/AGENTS.md)). Read parameters back with
     `re.SubexpIndex(name)` against `FindStringSubmatch`.
   - **No delimiters, and the anchors are load-bearing.** `regexp.Compile` takes a
     bare pattern; PHP's `/^…$/` compiles but matches nothing, since the slashes
     are literal (PHP needs them because `preg_match` requires them — see
-    [`../php/AGENTS.md`](../php/AGENTS.md)). Unlike Java's `Matcher.matches()`,
+    [`AGENTS.md`](../php/AGENTS.md)). Unlike Java's `Matcher.matches()`,
     which implies a full match on its own, Go's `MatchString` _searches_ — so the
     `^` / `$` framing is what makes a route match exactly, not decoration.
     `\/` compiles fine, so `Regex.PATH` carries over unchanged.

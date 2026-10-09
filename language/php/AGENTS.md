@@ -1,7 +1,7 @@
 # AGENTS.md — PHP (Layer 2)
 
 Per-language guide for the **PHP** Valkyrja repos. Read the cross-language
-canonical first: [`../AGENTS.md`](../../AGENTS.md). This file only records the PHP
+canonical first: [`AGENTS.md`](../../AGENTS.md). This file only records the PHP
 **deltas**.
 
 PHP is the **most complete port**, and it is not the reference. The documents in
@@ -62,13 +62,13 @@ fails when the two disagree.
 
 `ValkyrjaThrowable` (interface) → abstract `ValkyrjaRuntimeException` /
 `ValkyrjaInvalidArgumentException` → abstract `Component*` → concrete
-`Component<Specific>Exception`. Detail: [`../THROWABLES.md`](../../convention/THROWABLES.md).
+`Component<Specific>Exception`. Detail: [`THROWABLES.md`](../../convention/THROWABLES.md).
 
 ---
 
 ## Structure taxonomy
 
-The cross-language taxonomy ([`../STRUCTURE.md`](../../convention/STRUCTURE.md)) is **enforced
+The cross-language taxonomy ([`STRUCTURE.md`](../../convention/STRUCTURE.md)) is **enforced
 here** by **PHPArkitect** (`composer phparkitect`; the rules live in
 the `valkyrja/ci-phparkitect` package's `Rules` class). Segments are PascalCase
 namespace parts exactly as in `STRUCTURE.md` — `Contract\`, `Provider\`,
@@ -105,7 +105,7 @@ PHP nuances:
   lines only, because `--path-coverage` is too slow to bundle there; branches
   need `composer phpunit-path-coverage-parallel` and are nobody's gate, so check
   them before calling work done (see the CI tools section). Recipes & gotchas:
-  [`../TESTING_METHODOLOGY.md`](../../convention/TESTING_METHODOLOGY.md).
+  [`TESTING_METHODOLOGY.md`](../../convention/TESTING_METHODOLOGY.md).
 
 ---
 
@@ -195,8 +195,33 @@ condition that is provably dead. Reaching an otherwise-unreachable state by
 subclassing to poke at `protected` state is _excusing_ it: it locks in semantics
 the public API cannot produce, and the TypeScript port had exactly such a test
 pinning "empty allowed responses accepts anything" until the dead clause was
-removed. The known categories and their remedies are in
-[`TESTING_METHODOLOGY.md`](../../convention/TESTING_METHODOLOGY.md).
+removed.
+
+**A phantom uncovered branch is usually namespace function resolution.** An
+unqualified builtin call inside a namespace compiles to a runtime lookup — does
+`Ns\strpos` exist, else fall back to `\strpos` — and Xdebug counts the
+never-taken namespace-local edge as uncovered, which also multiplies the path
+count. Importing the function with `use function` resolves it at compile time and
+the phantom disappears. The `@auto` php-cs-fixer ruleset does this already,
+through `native_function_invocation` and `global_namespace_import`.
+
+Three categories are genuinely unreachable, and each is handled rather than
+excused:
+
+- **An exhaustive `match` over an enum with no `default`.** PHP compiles in an
+  `UnhandledMatchError` throw that no input reaches. Fold the last arm into
+  `default`.
+- **A call a test cannot make.** A syscall intercepted by namespace-function
+  shadowing, where qualifying it for coverage breaks the shadow, and a call that
+  ends the process. Wrap each in a `protected` seam, override the seam in a
+  `Tests\Fixtures` fixture for the behavior assertions, and add one real-call
+  test to cover the seam body. `ResponseSendRecorderFixture` is the pattern.
+  `@codeCoverageIgnore` goes on the seam body only where no real call is possible
+  at all, which is `exit()`.
+- **A conditional inside a trait.** Xdebug keys one function entry per trait
+  method by the _trait_, so every using class shares it and class load order
+  decides whose hits survive. Move the branch into a support class the trait
+  delegates to — `Trait\Arrayable` to `Support\Enumerable` is the pattern.
 
 ---
 
@@ -209,7 +234,7 @@ removed. The known categories and their remedies are in
 - **CI-tool config repos** (`ci/*`) are tested by asserting the full rule set is
   configured exactly as expected (`assertSame` lock on `getRules()`), plus branch
   tests for any custom expressions/rules. See
-  [`../TESTING_METHODOLOGY.md`](../../convention/TESTING_METHODOLOGY.md) §3.
+  [`TESTING_METHODOLOGY.md`](../../convention/TESTING_METHODOLOGY.md) §3.
 - **Entry workers** (the per-runtime `Application\Entry\<Runtime>` HTTP workers —
   FrankenPHP, OpenSwoole, RoadRunner) reach **100% line + branch** coverage: each
   `run()` wraps its irreducible runtime call (`frankenphp_handle_request`,
@@ -225,10 +250,10 @@ removed. The known categories and their remedies are in
   because none of their engines take any — `java.util.regex.Pattern`,
   `new RegExp(string)`, Python `re.compile`, Go `regexp.Compile` — and each records
   that as a deliberate deviation in its own guide
-  ([`../java/AGENTS.md`](../java/AGENTS.md),
-  [`../typescript/AGENTS.md`](../typescript/AGENTS.md),
-  [`../python/AGENTS.md`](../python/AGENTS.md),
-  [`../go/AGENTS.md`](../go/AGENTS.md)). PHP is the odd one out **by necessity, not
+  ([`AGENTS.md`](../java/AGENTS.md),
+  [`AGENTS.md`](../typescript/AGENTS.md),
+  [`AGENTS.md`](../python/AGENTS.md),
+  [`AGENTS.md`](../go/AGENTS.md)). PHP is the odd one out **by necessity, not
   by neglect**. Working across ports, do not strip PHP's delimiters to match the
   others, and do not carry PHP's delimiters into a port that cannot use them.
 

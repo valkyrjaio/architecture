@@ -1,7 +1,7 @@
 # AGENTS.md — Kotlin (Layer 2)
 
 Per-language guide for the **Kotlin** Valkyrja repos. Read the cross-language
-canonical first: [`../AGENTS.md`](../../AGENTS.md). This file records the Kotlin
+canonical first: [`AGENTS.md`](../../AGENTS.md). This file records the Kotlin
 **deltas**. The documents in `component/` and `convention/` are the reference;
 build from those, adapting to
 Kotlin idiom.
@@ -17,7 +17,7 @@ Kotlin idiom.
 >
 > **Provisional.** Kotlin is "nearly free from Java" and shares the JVM runtime,
 > package root, and provider contracts. Until a Kotlin decision doc exists, the
-> **Java guide is the interim reference** — read [`../java/AGENTS.md`](../java/AGENTS.md)
+> **Java guide is the interim reference** — read [`AGENTS.md`](../java/AGENTS.md)
 > alongside this file; Kotlin follows it except where noted. Record Kotlin-only
 > decisions here as they are made.
 
@@ -42,13 +42,13 @@ Kotlin idiom.
 All exceptions are **unchecked** (Kotlin has no checked exceptions). Framework
 base `ValkyrjaInvalidArgumentException : IllegalArgumentException` (parity name,
 native root), then abstract `Component*` → concrete
-`Component<Specific>Exception`. Detail: [`../THROWABLES.md`](../../convention/THROWABLES.md).
+`Component<Specific>Exception`. Detail: [`THROWABLES.md`](../../convention/THROWABLES.md).
 
 ---
 
 ## Structure taxonomy
 
-The cross-language taxonomy ([`../STRUCTURE.md`](../../convention/STRUCTURE.md)) is enforced by
+The cross-language taxonomy ([`STRUCTURE.md`](../../convention/STRUCTURE.md)) is enforced by
 **Konsist** (Kotlin's ArchUnit analog). Segments are **lowercase** packages, same
 as Java: `contract`, `provider`, `factory`, `constant`, `exception`, `throwable`,
 `type`, `model`, `entity`, `security`, `command`.
@@ -105,6 +105,6 @@ full gate: ktlint/Spotless → detekt → Konsist → JUnit + Kover (100%).
 
 ---
 
-Interim reference: [`../java/AGENTS.md`](../java/AGENTS.md),
-[`../java/PROVIDER_CONTRACTS.md`](../java/PROVIDER_CONTRACTS.md). Kotlin appears in
-[`../PORTS.md`](../../convention/PORTS.md) as a future JVM port.
+Interim reference: [`AGENTS.md`](../java/AGENTS.md),
+[`PROVIDER_CONTRACTS.md`](../java/PROVIDER_CONTRACTS.md). Kotlin appears in
+[`PORTS.md`](../../convention/PORTS.md) as a future JVM port.

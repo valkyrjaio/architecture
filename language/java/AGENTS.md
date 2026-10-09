@@ -1,7 +1,7 @@
 # AGENTS.md — Java (Layer 2)
 
 Per-language guide for the **Java** Valkyrja repos. Read the cross-language
-canonical first: [`../AGENTS.md`](../../AGENTS.md). This file only records the Java
+canonical first: [`AGENTS.md`](../../AGENTS.md). This file only records the Java
 **deltas**. The documents in `component/` and `convention/` are the reference, not
 any port; build from those.
 
@@ -33,13 +33,13 @@ All Valkyrja exceptions are **unchecked** (extend `RuntimeException`), no `throw
 declarations. Framework base `ValkyrjaInvalidArgumentException extends
 java.lang.IllegalArgumentException` (keeps the parity name, extends the native
 root). Then abstract `Component*` → concrete `Component<Specific>Exception`.
-Detail: [`../THROWABLES.md`](../../convention/THROWABLES.md).
+Detail: [`THROWABLES.md`](../../convention/THROWABLES.md).
 
 ---
 
 ## Structure taxonomy
 
-The cross-language taxonomy ([`../STRUCTURE.md`](../../convention/STRUCTURE.md)) is enforced by
+The cross-language taxonomy ([`STRUCTURE.md`](../../convention/STRUCTURE.md)) is enforced by
 **ArchUnit** (the PHPArkitect analog, run in the `archunit` CI build). Segments
 are **lowercase** packages: `contract`, `provider`, `factory`, `constant`,
 `exception`, `throwable`, `type`, `model`, `entity`, `security`, `command`.

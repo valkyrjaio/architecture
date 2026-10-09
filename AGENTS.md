@@ -111,7 +111,7 @@ These hold in **every** language. Do not violate them in a port.
   `sindri` can resolve them statically. (Binding-_key_ constants files are fine
   and expected — see §4.)
 - **Route middleware is appended, never deduplicated.** Across every protocol
-  (HTTP, CLI, gRPC), both the runtime collector and `sindri` codegen _append_ each
+  (HTTP, CLI, gRPC, Queue), both the runtime collector and `sindri` codegen _append_ each
   registered middleware in order — they never dedupe. If the same middleware is
   scheduled twice at a stage it runs twice (including the qualified- vs
   simple-name spelling of one class); a duplicate is the developer's bug, not the

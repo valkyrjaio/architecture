@@ -1,7 +1,7 @@
 # AGENTS.md — Python (Layer 2)
 
 Per-language guide for the **Python** Valkyrja repos. Read the cross-language
-canonical first: [`../AGENTS.md`](../../AGENTS.md). This file records the Python
+canonical first: [`AGENTS.md`](../../AGENTS.md). This file records the Python
 **deltas**. The documents in `component/` and `convention/` are the reference;
 build from those, adapting to
 Python idiom. Authoritative port detail: [`README.md`](README.md),
@@ -55,13 +55,13 @@ Keep the **`*Exception` name parity** even though the native bases differ:
 `ValkyrjaThrowable(BaseException, ABC)`, `ValkyrjaRuntimeException(RuntimeError,
 ABC)`, `ValkyrjaInvalidArgumentException(ValueError, ABC)` → abstract
 `Component*` → concrete `Component<Specific>Exception`. Detail:
-[`../THROWABLES.md`](../../convention/THROWABLES.md).
+[`THROWABLES.md`](../../convention/THROWABLES.md).
 
 ---
 
 ## Structure taxonomy
 
-The cross-language taxonomy ([`../STRUCTURE.md`](../../convention/STRUCTURE.md)) applies with
+The cross-language taxonomy ([`STRUCTURE.md`](../../convention/STRUCTURE.md)) applies with
 **snake_case** module/package segments (`contract`, `provider`, `factory`,
 `constant`, `exception`, `throwable`, `abstract`, `enum`, `type`, `model`,
 `entity`, `security`). Name suffixes match `STRUCTURE.md` (`*Contract`,
@@ -157,7 +157,7 @@ full gate: `ruff format` + `ruff check` → `mypy` → `import-linter` → `band
   syntax (`(`, `(?:`, `)`, `)?`, `>`) is identical. Anchors are `^` / `$` with
   **no** delimiters — `re.compile` takes a bare pattern, and PHP's `/^…$/` would be
   read as literal slashes (PHP needs them because `preg_match` requires them; see
-  [`../php/AGENTS.md`](../php/AGENTS.md)). `\/` is a valid escape for a literal
+  [`AGENTS.md`](../php/AGENTS.md)). `\/` is a valid escape for a literal
   `/`, so `Regex.PATH` carries over unchanged. Match with **`re.fullmatch()`**, not
   `re.match()`: `$` also matches just before a trailing newline, so `re.match` lets
   `/users/42\n` satisfy a `^…$` route — `fullmatch` (or ending with `\Z`) closes

@@ -219,10 +219,25 @@ The route pipeline is the same in every port:
    controller class.
 2. A **processor** turns a declared path into a matchable form, and compiles the
    pattern for a route that carries parameters.
-3. A **collection** holds every route, indexed for lookup rather than scanned.
+3. A **collection** holds every route, indexed for lookup rather than scanned,
+   and holds each one **as a function that returns it** rather than as the route
+   itself.
 4. A **matcher** resolves one request to one route, static routes first, then
    dynamic.
 5. A **dispatcher** calls the matched route's handler and returns its response.
+
+### The collection defers construction
+
+**A collection holds a function that returns the route, not the route.** The
+function runs on the first read for that key, and the collection keeps what it
+returned.
+
+A unit of work matches one route and ignores every other, so constructing all of
+them to serve one is waste that scales with the route count. Deferring means a
+large application pays for the routes it actually reaches.
+
+This is a cross-component rule: the listener collection in
+[`EVENT.md`](EVENT.md) holds its listeners the same way, for the same reason.
 
 **A static match is attempted before a dynamic one.** A static path is a direct
 lookup, and a dynamic path costs a pattern match, so the order is a performance

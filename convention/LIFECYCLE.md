@@ -168,6 +168,17 @@ middleware.
 A port spells the method in its own convention and changes nothing else. The
 identifier is the vocabulary; the casing is syntax.
 
+### Middleware is appended, never deduplicated
+
+Middleware registered at a stage runs in registration order, and the framework
+**never** removes a repeat. Scheduling the same class twice at one stage runs it
+twice, including when the two registrations spell the name differently.
+
+A duplicate is the application's own defect, and the framework does not hide it.
+This also binds the generated form: data the build tool writes mirrors what the
+run-time walk produces, duplicate included, so the cached path and the uncached
+path behave identically ([`DATA_CACHE.md`](DATA_CACHE.md)).
+
 ---
 
 ## The server handler
@@ -204,5 +215,7 @@ This document stops at the shape. A port's `LIFECYCLE.md` holds:
 - the worker model for a persistent runtime, and how it isolates state
 - every code example
 
-Keep a statement in one place. A port that restates a stage guarantee will drift
-from this file, and the reader then has two answers.
+A port's document restates the shape above and adds its examples, so the two read
+alike. What a port must **not** do is change a statement while restating it: this
+file is where a stage, an order or a guarantee is decided, and a port that
+disagrees here is reporting its own defect.

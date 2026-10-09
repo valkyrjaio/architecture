@@ -282,9 +282,10 @@ is false.
 - Invent a name only for the caller's own code, such as an application class or
   an application contract.
 - Reuse the invented names that this project established already.
-  [`CONTAINER.md`](../component/CONTAINER.md) holds `NotifierContract`, `SlackNotifier`, and
-  `TeamsNotifier`. A second document uses those names, and it does not redefine
-  them.
+  The PHP port's container `README.md` holds `NotifierContract`,
+  `SlackNotifier`, and `TeamsNotifier`. A second document uses those names, and
+  it does not redefine them. A `component/` document establishes no such name,
+  because it carries no example.
 - Never write `Foo` or `Bar`.
 
 ## When you edit an existing document

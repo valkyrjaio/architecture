@@ -17,7 +17,7 @@ Two ports are at parity for a component when all of these hold:
 2. Every canonical contract exists, with every canonical operation on it.
 3. Every canonical name matches, transformed only as
    [`PORTS.md`](PORTS.md) permits.
-4. The component's tests mirror the reference port's tests.
+4. The component's tests cover the same behavior the other ports' tests cover.
 5. Coverage is 100%, line and branch
    ([`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md)).
 6. The component has a `README.md` holding that port's examples.

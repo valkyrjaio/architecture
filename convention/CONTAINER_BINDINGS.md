@@ -94,18 +94,26 @@ that the config matches it.
 
 ## The factory
 
-**A factory is a closure, in every port.** Every one of the five languages has
-first-class functions, so a closure is the one construction mechanism that is
-available everywhere.
+**A factory is declared as a reference to a named method, not as an inline
+function.** The method lives on the provider that registers the binding, or on
+the class being built, and the declaration names it.
 
-A closure is also better than the alternative in the two languages that have
-one. It names its dependencies explicitly, it constructs without reflection, and
-a reader can see exactly what it builds. Reflection-based construction is neither
-checkable nor readable.
+The reason is that the declaration has two readers. A person reads it, and the
+build tool reads it statically. A named method is a value the tool can carry into
+generated output; an inline function body is not. So a provider's map holds
+method references, and the same rule governs every list a provider declares
+([`PROVIDERS.md`](PROVIDERS.md)).
 
-The container wraps a registration so that resolution is uniform: a resolution
-always invokes a callable, and no path needs a check for which kind of
-registration it found. The build tool writes the generated form in the same shape
+A named method is also better for the reader. It has a name that says what it
+builds, it resolves each dependency explicitly, it constructs without reflection,
+and it is testable on its own. Reflection-based construction is neither checkable
+nor readable.
+
+**The container wraps every registration in a function of its own**, so that
+resolution is uniform: a resolution always invokes something callable, and no
+path needs a check for which kind of registration it found. That wrapping is the
+container's, not the author's — it is why a resolution path has no branch, and it
+is not an invitation to write the function by hand. The build tool writes the generated form in the same shape
 the container holds at run time, so the cached path and the uncached path behave
 identically.
 

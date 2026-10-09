@@ -214,10 +214,13 @@ impose one.
 
 ## The adapter
 
-The adapter bridges one gRPC library to the component. It declares `start` to
-begin serving and `stop` to shut down, and it owns both ends of a call: taking a
-native call apart into the framework's own types, and writing the framework's
-response back out.
+The component declares the **adapter contract** and ships no adapter. The
+contract declares `start` to begin serving and `stop` to shut down, and an
+implementation owns both ends of a call: taking a native call apart into the
+framework's own types, and writing the framework's response back out.
+
+An adapter names a gRPC library, so it is the one piece that cannot live in the
+component. An application supplies one, or installs a package that does.
 
 The write happens **between** stage 6 and stage 7, which is what makes those two
 stages meaningful: stage 6 can still change the response, and stage 7 runs after

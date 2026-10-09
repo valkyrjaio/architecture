@@ -173,6 +173,12 @@ a route, because a listener has no route.
 
 ## The collection
 
+**The collection holds a function that returns each listener, not the listener.**
+The function runs on the first read for that key, and the collection keeps what
+it returned, so an application pays only for the listeners it dispatches. The
+route collections in [`HTTP.md`](HTTP.md) and the other protocols hold their
+routes the same way, for the same reason.
+
 The collection is addressable two ways for every operation: by the listener or
 the event itself, and by its id. So each read and write appears twice, once bare
 and once with an `ById` suffix.
