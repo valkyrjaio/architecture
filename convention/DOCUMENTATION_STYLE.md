@@ -204,8 +204,9 @@ method that one delegates to is the mechanism that goes stale.
   to have the shape already. Add a second
   example only for a language whose spelling differs. A Layer-2 guide shows only
   its own language.
-- **Keep every example valid.** An example that does not compile teaches the
-  wrong thing.
+- **The shape is what has to be right, not the surroundings.** An example is an
+  illustration, not a compilable unit. See
+  [An example illustrates, it does not compile](#an-example-illustrates-it-does-not-compile).
 - **Write an example, never a copy of the source.** See
   [An example, never a copy](#an-example-never-a-copy).
 
@@ -226,6 +227,30 @@ namespace Valkyrja\Log\Logger\Abstract;
 
 abstract class Logger implements LoggerContract {}
 ```
+
+## An example illustrates, it does not compile
+
+An example shows a reader the shape to write. It is not a unit anyone runs, so it
+does not carry what a compiler needs and a reader does not.
+
+**Leave out the surroundings.** An example omits imports, a package or namespace
+line, the enclosing class, a constructor, unrelated members, and the setup a real
+file needs. Showing them buries the one thing the example is for.
+
+**Get the shape right.** These are what a reader copies, so each one is checked
+against the source before it is written:
+
+- the **names** — a class, a method, a property, an attribute, an enum case
+- the **signature** — the parameters, their order, their types, the return type
+- the **declaration** — where a thing is declared, and on what
+
+Warning: a wrong shape teaches a reader to write the wrong code, and it survives
+every check this project runs. A missing import teaches nothing at all, because a
+reader supplies it without noticing. Spend the effort on the first.
+
+So an example that names a method no port declares is a defect. An example whose
+annotation names a type it did not import is not, and neither is one that stops
+mid-body with an ellipsis.
 
 ## An example, never a copy
 
