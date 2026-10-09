@@ -181,8 +181,7 @@ modifying the route, per
 ### @RouteHandler annotation on controller methods
 
 ```java
-@RouteHandler((ContainerContract c, RouteContract route) ->
-        c.getSingleton(UserController.class).show(route))
+@RouteHandler(handlerClass = UserController.class, handlerMethod = "showHandler")
 
 @Parameter(name = "id", pattern = "[0-9]+")
 public ResponseContract show(String id) {

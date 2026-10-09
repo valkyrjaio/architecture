@@ -30,7 +30,7 @@ The examples live in that component's `README.md` in each port.
 - [`LIFECYCLE.md`](convention/LIFECYCLE.md) — the pipeline stages, their order
   and what each one guarantees
 - [`PORT_PARITY.md`](convention/PORT_PARITY.md) — the baseline every port
-  reaches, and where each one stands
+  reaches, and what parity means
 
 ## The ports
 

@@ -196,11 +196,11 @@ a map. See [`HANDLERS.md`](../../convention/HANDLERS.md).
 ### Add the handler attributes to route/listener data classes
 
 Routes need `#[RouteHandler]` attribute support on controller/action methods, and listeners need `#[ListenerHandler]`.
-Each attribute carries the typed closure:
+Each attribute carries a reference to the handler method, not an inline closure — an attribute argument has to be a
+constant expression, so a closure does not compile there:
 
 ```php
-#[RouteHandler(static fn(ContainerContract $c, RouteContract $route): ResponseContract
-    => $c->getSingleton(UserController::class)->show($route))]
+#[RouteHandler([UserController::class, 'showHandler'])]
 #[Parameter('id', pattern: '[0-9]+')]
 public function show(int $id): ResponseContract {}
 ```

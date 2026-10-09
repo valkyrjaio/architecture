@@ -59,8 +59,8 @@ inline.
 ## Where a string key lives
 
 A port whose keys are strings holds them in a **constants class per component**,
-in that component's `Constant` segment, named for the component and suffixed
-`ServiceId`. A caller references the constant and never the literal.
+in that component's `Constant` segment, named for the component and for what it
+holds. A caller references the constant and never the literal.
 
 A port whose language names a class natively holds no such file, because the
 class reference is already the key and the compiler already checks it.

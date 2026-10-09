@@ -271,15 +271,9 @@ func (p *UserHttpRouteProvider) GetControllerClasses() []string {
 
 func (p *UserHttpRouteProvider) GetRoutes() []dataContract.RouteContract {
 	return []dataContract.RouteContract{
-		data.Get("/users", func(c ctnContract.ContainerContract, args []any) any {
-			return c.GetSingleton(controllers.UserControllerClass).(*controllers.UserController).Index(args[0])
-		}),
-		data.Post("/users", func(c ctnContract.ContainerContract, args []any) any {
-			return c.GetSingleton(controllers.UserControllerClass).(*controllers.UserController).Store(args[0])
-		}),
-		data.Get("/orders", func(c ctnContract.ContainerContract, args []any) any {
-			return c.GetSingleton(controllers.OrderControllerClass).(*controllers.OrderController).Index(args[0])
-		}),
+		data.Get("/users", p.IndexUsers),
+		data.Post("/users", p.StoreUser),
+		data.Get("/orders", p.IndexOrders),
 	}
 }
 ```
@@ -338,9 +332,9 @@ type ListenerProviderContract interface {
 Any method or function the build tool reads must return a single flat literal with no logic:
 
 ```go
-// ✅ simple slice of route objects
+// ✅ simple slice of route objects, each handler a method reference
 return []dataContract.RouteContract{
-data.Get("/users", func (c ContainerContract, args []any) any { ... }),
+data.Get("/users", p.IndexUsers),
 }
 
 // ✅ simple map with method reference

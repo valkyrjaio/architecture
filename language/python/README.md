@@ -163,9 +163,6 @@ def publishers() -> dict:
     }
 
 
-@handler(lambda c, args: c.set_singleton(
-    UserRepositoryClass, UserRepository(c.get_singleton(DatabaseClass))
-))
 @staticmethod
 def publish_user_repository(container: ContainerContract) -> None:
     container.set_singleton(UserRepositoryClass, UserRepository(container.get_singleton(DatabaseClass)))

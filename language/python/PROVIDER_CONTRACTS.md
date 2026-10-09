@@ -13,7 +13,7 @@ Python provider contracts differ from PHP/Java in several ways:
 - No `::class` needed — `X()` creates an instance directly; Python classes are first-class callables
 - ABC enforces abstract contracts — `TypeError` raised on direct instantiation
 - Instance methods throughout — providers are instantiated and their methods called directly
-- Publisher methods have a `@handler` decorator carrying the closure — build tool reads the decorator argument from AST
+- The `publishers()` map names each publisher method — the build tool reads that map from AST
 - `class_` helper available (trailing underscore because `class` is reserved) for FQN string derivation
 
 ---
@@ -231,9 +231,6 @@ class ServiceProviderContract(ABC):
                 UserRepositoryClass: UserServiceProvider.publish_user_repository,
             }
 
-        @route_handler(lambda c, args: c.set_singleton(
-            UserRepositoryClass, UserRepository(c.get_singleton(DatabaseClass))
-        ))
         @staticmethod
         def publish_user_repository(container: ContainerContract) -> None:
             container.set_singleton(
@@ -413,7 +410,7 @@ def handler(closure):
 
 class UserController:
 
-    @route_handler(lambda c, args: c.get_singleton(UserControllerClass).index(args[0]))
+    @route_handler(UserController.index_handler)
     def index(self, request) -> Response:
         """
         Build tool reads _valkyrja_handler metadata from AST
@@ -423,7 +420,7 @@ class UserController:
         """
         pass
 
-    @route_handler(lambda c, args: c.get_singleton(UserControllerClass).store(args[0]))
+    @route_handler(UserController.store_handler)
     def store(self, request) -> Response:
         pass
 ```

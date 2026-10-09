@@ -76,6 +76,16 @@ A route provider declares its routes two ways, and a port supports both it can:
 The literal list is the portable form. Every port supports it, and a port whose
 language cannot scan supports only it.
 
+**A handler is named, not inlined, wherever a declaration is read statically.** A
+route in a provider list and a handler on an attribute both name a method, because
+the build tool has to carry the handler into generated output and cannot carry a
+function body. Two languages also reject an inline function in an attribute
+argument outright, since the argument has to be a constant expression.
+
+An inline function is fine where nothing reads the declaration — a route built and
+registered at run time, for instance. That route cannot reach the generated cache
+either way ([`DATA_CACHE.md`](DATA_CACHE.md)).
+
 Each list is a literal with no conditional logic, because the build tool reads
 the declaration rather than running it ([`PROVIDERS.md`](PROVIDERS.md)).
 
