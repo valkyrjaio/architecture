@@ -39,6 +39,13 @@ Valkyrja is a single framework ported to five languages in priority order. PHP i
 the **reference implementation**; every other port mirrors its structure,
 naming, and tests.
 
+**The reference implementation is per component.** PHP is the reference for every
+component it holds. A component PHP does not hold takes the reference of the port
+that built it first, and that port's `component/` document names it. Grpc is the
+case today: Java built it, PHP has no gRPC source, so Java is the reference for
+that component and PHP will mirror Java when it lands. Read the component's
+document before you assume PHP decides.
+
 | #   | Language       | Status                                | Package root / namespace |
 | --- | -------------- | ------------------------------------- | ------------------------ |
 | 1   | **PHP**        | Production — reference implementation | `Valkyrja\`              |
@@ -78,10 +85,15 @@ These hold in **every** language. Do not violate them in a port.
   CLI, Queue and gRPC today. The framework loads one object per component at
   boot.
 - **Handler signatures are typed.** Handlers are explicit
-  typed closures — HTTP → `ResponseContract`, CLI → `OutputContract`, Listener →
-  `any`. Parameters are `(ContainerContract, map<string, mixed>)`; request/route
-  come from the container, not the signature. `#[RouteHandler]` / `@RouteHandler` /
-  `@route_handler` is a **metadata marker only**, never an active registrar.
+  typed closures — HTTP → `ResponseContract`, CLI → `OutputContract`, Queue →
+  `JobResult`, gRPC → `ServiceResponseContract`, Listener → `any`. A route
+  handler takes `(ContainerContract, RouteContract)`, and a listener handler
+  takes `(ContainerContract, map<string, mixed>)` because a listener has no
+  route. The route is also set on the container before the handler runs, so it is
+  reachable both ways; the request is reachable from the container only.
+  `#[RouteHandler]` / `@RouteHandler` / `@route_handler` is a **metadata marker
+  only**, never an active registrar. Detail:
+  [`HANDLERS.md`](convention/HANDLERS.md).
 - **`AppConfig` is the build tool entry point.** No `valkyrja.yaml`. The app
   config class already lists the component providers; `sindri` reads it via AST.
 - **A component config holds only component-wide settings.** Each adapter
@@ -105,7 +117,8 @@ These hold in **every** language. Do not violate them in a port.
   exactly. Never add `distinct` / `array_unique` / `!contains` to middleware
   collection.
 
-Full detail: [`SUMMARY.md`](SUMMARY.md) and [`README.md`](README.md).
+Full detail: the component document for the component you are working in, and
+[`README.md`](README.md).
 
 ---
 
@@ -835,25 +848,50 @@ examples: [`DOCUMENTATION_STYLE.md`](convention/DOCUMENTATION_STYLE.md).
 
 ## 9. Where to read more
 
+The repository holds three kinds of document, and the directory says which kind:
+
+| Directory     | Holds                                                         |
+| ------------- | ------------------------------------------------------------- |
+| `component/`  | one document per component: its hierarchy, names and behavior |
+| `convention/` | a rule that holds across every component and every port       |
+| `language/`   | the per-port deltas, one directory per language               |
+
+A `component/` document carries no code example, because an example in one
+language becomes the spelling a port copies instead of the contract it must
+satisfy. The examples live in that component's `README.md` in each port.
+
 Read these in order when starting or extending a port:
 
 1. [`PORTS.md`](convention/PORTS.md) — per-language characteristics
-2. [`STRUCTURE.md`](convention/STRUCTURE.md) — the structure taxonomy
-3. [`THROWABLES.md`](convention/THROWABLES.md) — exception hierarchy
-4. [`CONTAINER_BINDINGS.md`](convention/CONTAINER_BINDINGS.md) — binding keys & closures
-5. [`HANDLERS.md`](convention/HANDLERS.md) — handler contracts
-6. [`DATA_CACHE.md`](convention/DATA_CACHE.md) — provider contracts & cache generation
-7. [`COMPONENT_CONFIG.md`](convention/COMPONENT_CONFIG.md) — the component config shape
-8. [`BUILD_TOOL.md`](convention/BUILD_TOOL.md) — `sindri` implementation
-9. [`TESTING_METHODOLOGY.md`](convention/TESTING_METHODOLOGY.md) — testing & 100% coverage
-10. [`METHOD_NAMING.md`](convention/METHOD_NAMING.md) — method name prefixes
-11. [`COMMENTS.md`](convention/COMMENTS.md) — what a comment may state
-12. [`DOCUMENTATION_STYLE.md`](convention/DOCUMENTATION_STYLE.md) — the writing rules for documentation prose
-13. [`PACKAGE_NAMING.md`](convention/PACKAGE_NAMING.md) — package, registry, and source namespace names
-14. [`SHELL_SCRIPTS.md`](convention/SHELL_SCRIPTS.md) — the rules for shell
-15. [`COMMIT_CONVENTION.md`](convention/COMMIT_CONVENTION.md) — commit & PR title format
-16. [`PR_DESCRIPTION.md`](convention/PR_DESCRIPTION.md) — what a pull request description holds
-17. [`VERSIONING.md`](convention/VERSIONING.md) — version scheme & release automation
-18. `{language}/PROVIDER_CONTRACTS.md` — full contracts + examples
-19. `{language}/README.md` — port notes & priority order
-20. `{language}/AGENTS.md` — the Layer-2 agent guide for that language
+2. [`LIFECYCLE.md`](convention/LIFECYCLE.md) — the pipeline stages, their order and guarantees
+3. [`STRUCTURE.md`](convention/STRUCTURE.md) — the structure taxonomy
+4. [`THROWABLES.md`](convention/THROWABLES.md) — exception hierarchy
+5. [`CONTAINER_BINDINGS.md`](convention/CONTAINER_BINDINGS.md) — binding keys & closures
+6. [`HANDLERS.md`](convention/HANDLERS.md) — handler contracts
+7. [`DATA_CACHE.md`](convention/DATA_CACHE.md) — provider contracts & cache generation
+8. [`COMPONENT_CONFIG.md`](convention/COMPONENT_CONFIG.md) — the component config shape
+9. [`BUILD_TOOL.md`](convention/BUILD_TOOL.md) — `sindri` implementation
+10. [`TESTING_METHODOLOGY.md`](convention/TESTING_METHODOLOGY.md) — testing & 100% coverage
+11. [`PORT_PARITY.md`](convention/PORT_PARITY.md) — the baseline every port reaches
+12. [`METHOD_NAMING.md`](convention/METHOD_NAMING.md) — method name prefixes
+13. [`COMMENTS.md`](convention/COMMENTS.md) — what a comment may state
+14. [`DOCUMENTATION_STYLE.md`](convention/DOCUMENTATION_STYLE.md) — the writing rules for documentation prose
+15. [`PACKAGE_NAMING.md`](convention/PACKAGE_NAMING.md) — package, registry, and source namespace names
+16. [`SHELL_SCRIPTS.md`](convention/SHELL_SCRIPTS.md) — the rules for shell
+17. [`COMMIT_CONVENTION.md`](convention/COMMIT_CONVENTION.md) — commit & PR title format
+18. [`PR_DESCRIPTION.md`](convention/PR_DESCRIPTION.md) — what a pull request description holds
+19. [`VERSIONING.md`](convention/VERSIONING.md) — version scheme & release automation
+
+Then the component the work touches:
+
+- [`APPLICATION.md`](component/APPLICATION.md) — boot, entry points and config
+- [`CONTAINER.md`](component/CONTAINER.md) — registration and resolution
+- [`EVENT.md`](component/EVENT.md) — dispatch and listeners
+- [`HTTP.md`](component/HTTP.md) · [`CLI.md`](component/CLI.md) ·
+  [`GRPC.md`](component/GRPC.md) · [`QUEUE.md`](component/QUEUE.md) — the protocols
+
+Then the port:
+
+- `language/{name}/AGENTS.md` — the Layer-2 agent guide for that language
+- `language/{name}/PROVIDER_CONTRACTS.md` — full contracts + examples
+- `language/{name}/README.md` — port notes & priority order
