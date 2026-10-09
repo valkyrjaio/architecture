@@ -13,8 +13,8 @@ is not answered to a waiting client — it is **acknowledged, retried, or dead-l
 ## Design Principles
 
 1. **Worker-agnostic.** The framework never depends on a specific broker. Adapters bridge external brokers (SQS, Redis,
-   RabbitMQ/AMQP, Beanstalkd, database, in-memory/sync) to the framework's internal contracts, exactly as HTTP/CLI/gRPC
-   adapters do.
+   RabbitMQ/AMQP, Beanstalkd, database, in-memory/sync) to the framework's internal contracts: a client adapter on the
+   produce side, and an entry on the consume side.
 
 2. **Framework features are inherited, not reimplemented.** Middleware, the container, event dispatch, exception
    handling, and observability all work the same in queues as everywhere else.
@@ -247,8 +247,8 @@ Producing and consuming are organized asymmetrically, for the same reason Http i
   `JobHandler`. **`Queue`** runs one job and exits. **`WorkerQueue`** is the base that boots once and gives each job a
   fresh child container. **`InternalQueue`** runs every job an internal client pushes, **`PullQueue`** holds the poll
   loop that a per-processor entry extends, and **`PushQueue`** (CGI, on the language's built-in HTTP handler) answers a
-  pushing processor. All of them ship out of the box, in three places. `Queue` and `PushQueue` are concrete, and sit
-  directly in `Application/Entry`. `WorkerQueue`, `InternalQueue` and `PullQueue` are abstract bases, and sit in
+  pushing processor. All of them ship out of the box. `Queue` and `PushQueue` are concrete, and sit directly in
+  `Application/Entry`. `WorkerQueue`, `InternalQueue` and `PullQueue` are abstract bases, and sit in
   `Application/Entry/Abstract`. A per-processor pull entry such as `Redis/RedisQueue` sits in a segment of its own. An
   application extends `InternalQueue` itself and implements its one abstract member, `getConfig()`, which returns the
   config of the queue application that entry boots. A sync or deferred client config names that subclass. Only
@@ -397,7 +397,7 @@ contract on the `Job`.)
 [if any above threw]
 4. ThrowableCaught      converts throwable → JobResult (default: RETRY within maxAttempts, else DEAD_LETTER)
 
-5. SettlingResult       always runs (including error paths)
+5. SettlingResult       runs on every outcome
    Entry settles (delete / release + retry_delay / dead-letter)
 6. ResultSettled        runs after settlement (metrics, events, cleanup)
 ```
@@ -456,8 +456,8 @@ entry's whole job on the response side.
 Who actually performs a `RETRY` depends on the processor, and the entry of that processor encapsulates the difference:
 
 - **Internal clients** — the client settles every outcome, for `Sync` and `Deferred`. The client is the processor, so
-  the entry calls `Client.settle` with the outcome, and the client's own `settle` routes a `RETRY` to its `requeue`. The
-  entry never calls `requeue` itself on this path.
+  the entry calls `InternalClient.settle` with the outcome, and that client's own `settle` routes a `RETRY` to its
+  `requeue`. The entry never calls `requeue` itself on this path.
 - **Re-queue entries** — the entry names the retry itself, for a broker with no retry of its own (database, Redis, …).
   The entry still holds the `Job` it dispatched, so on `RETRY` it hands that `Job` to `Client.requeue`. The client
   builds a modified copy via `Job.with*()` (the `Job` is immutable) — `attempts` incremented, `modified_at` stamped —
