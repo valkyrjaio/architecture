@@ -22,13 +22,12 @@ application names the one it wants in config.
 
 ## Hierarchy
 
-| Subcomponent | Holds                                                      |
-| ------------ | ---------------------------------------------------------- |
-| `Messenger`  | the component contract, and one class per adapter          |
-| `Message`    | the message                                                |
-| `Data`       | the component config, and one config per adapter           |
-| `Provider`   | the service provider that binds the contract to an adapter |
-| `Throwable`  | the component's throwable contract and its exceptions      |
+| Subcomponent | Holds                                                         |
+| ------------ | ------------------------------------------------------------- |
+| `Messenger`  | the component contract, and one class per adapter             |
+| `Data`       | the message, the component config, and one config per adapter |
+| `Provider`   | the service provider that binds the contract to an adapter    |
+| `Throwable`  | the component's throwable contract and its exceptions         |
 
 The role subcomponent is `Messenger`, named for the role rather than the
 component, the same way Mail's is `Mailer` and Log's is `Logger`.

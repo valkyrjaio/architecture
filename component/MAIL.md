@@ -26,13 +26,12 @@ application wants a template.
 
 ## Hierarchy
 
-| Subcomponent | Holds                                                      |
-| ------------ | ---------------------------------------------------------- |
-| `Mailer`     | the component contract, and one class per adapter          |
-| `Message`    | the message, and the value types it carries                |
-| `Data`       | the component config, and one config per adapter           |
-| `Provider`   | the service provider that binds the contract to an adapter |
-| `Throwable`  | the component's throwable contract and its exceptions      |
+| Subcomponent | Holds                                                                             |
+| ------------ | --------------------------------------------------------------------------------- |
+| `Mailer`     | the component contract, and one class per adapter                                 |
+| `Data`       | the message and its value types, the component config, and one config per adapter |
+| `Provider`   | the service provider that binds the contract to an adapter                        |
+| `Throwable`  | the component's throwable contract and its exceptions                             |
 
 ---
 
@@ -111,7 +110,7 @@ Two adapters are not integrations, and every port ships both:
 The log adapter is what a development environment binds: a developer reads the
 message without anyone receiving it. The null adapter is what a test binds.
 
-Every service component that reaches a third party ships both, for the same two
+A service component that reaches a third party ships both, for the same two
 reasons.
 
 ---

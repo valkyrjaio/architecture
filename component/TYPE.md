@@ -26,14 +26,19 @@ depends on it.
 
 ## One contract
 
-Every type in the component implements the same contract, and it declares three
+Every type in the component implements the same contract, and it declares four
 operations:
 
 | Operation     | Does                                                       |
 | ------------- | ---------------------------------------------------------- |
+| `fromValue`   | builds the type from a raw value, proving it               |
 | `asValue`     | returns the underlying value                               |
 | `asFlatValue` | returns it reduced to a scalar                             |
 | `modify`      | returns a copy whose value a caller's function transformed |
+
+**`fromValue` is a named constructor, and it is the one static method a data
+object keeps** ([`STATIC_METHODS.md`](../convention/STATIC_METHODS.md)), because
+it returns the type's own kind.
 
 **`asFlatValue` exists because a type may wrap a structure.** A collection or a
 model returns its structure from `asValue`, and something that must store or
@@ -51,13 +56,13 @@ holds any type knows these three operations, whatever the type is.
 
 ## The families
 
-| Family     | Wraps                                               |
-| ---------- | --------------------------------------------------- |
-| scalar     | a string, an integer, a float, a boolean, a null    |
-| structured | an array, an object, a collection, a JSON document  |
-| model      | a declared set of named, typed properties           |
-| identifier | an identifier, in several schemes                   |
-| support    | the abstract bases and the enums the families share |
+| Family     | Wraps                                                               |
+| ---------- | ------------------------------------------------------------------- |
+| scalar     | a string, an integer, a float, a boolean, a null                    |
+| structured | an array, an object, a collection, a JSON document                  |
+| model      | a declared set of named, typed properties                           |
+| identifier | an identifier, in several schemes                                   |
+| support    | the abstract bases, the enums and the throwables the families share |
 
 **A scalar type is not pointless.** Wrapping a string makes a parameter's
 declared type checkable, which is what lets routing cast a matched value before a

@@ -30,6 +30,9 @@ belongs in the component that owns that domain.
 | ------------ | -------------------------- |
 | `Time`       | the clock, and its formats |
 
+A port may hold one more here where it has something that fits the test above and
+belongs to no component.
+
 There is no config, no provider and no adapter, because nothing here is chosen
 by an application.
 
@@ -45,11 +48,16 @@ moment to arrive.
 So the framework never reads the clock directly. It asks this component, and the
 component can be frozen.
 
-| Operation  | Does                                        |
-| ---------- | ------------------------------------------- |
-| `get`      | returns the current time                    |
-| `freeze`   | fixes the time that `get` returns           |
-| `unfreeze` | releases it, so `get` reads the clock again |
+| Operation  | Does                                                          |
+| ---------- | ------------------------------------------------------------- |
+| `get`      | returns the current time                                      |
+| `freeze`   | fixes the time that `get` returns, at a value a caller passes |
+| `unfreeze` | releases it, so `get` reads the clock again                   |
+
+**The clock reads wall time, not elapsed time.** A monotonic reading cannot be
+compared with a stored instant, so a component that reads one cannot tell whether
+a stored expiry has passed. `freeze` takes the value to freeze at, so a test can
+place the clock at a boundary rather than only stopping it where it is.
 
 Two resolutions are available, because the choice has consequences: whole seconds
 for a human-facing value, and sub-second precision for anything that measures or

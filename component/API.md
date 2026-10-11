@@ -55,6 +55,10 @@ say is present and empty rather than absent:
 never checks for a missing one, and a part that appears only sometimes is the
 part a client forgets to handle.
 
+Warning: a serializer that omits a part when it is empty, or omits one
+altogether, breaks that guarantee. Every part above is serialized, including an
+empty message, an empty error set and an empty warning set.
+
 **The status and the status code are separate.** The protocol's status says what
 happened to the request; the envelope's status says what happened to the
 operation. They differ often enough that collapsing them loses information — a
@@ -71,14 +75,14 @@ page of ten out of two hundred has to report both.
 The contract maps each thing an endpoint might return into the envelope, and each
 mapping comes in two forms — the envelope, or a response carrying it:
 
-| Maps from     | Into                                     |
-| ------------- | ---------------------------------------- |
-| an object     | the envelope's data                      |
-| many objects  | the envelope's collection data           |
-| an entity     | the storable form of a record            |
-| many entities | the storable form of many                |
-| an array      | the data as given                        |
-| a throwable   | the errors, and a status that matches it |
+| Maps from     | Into                                                           |
+| ------------- | -------------------------------------------------------------- |
+| an object     | the envelope's data                                            |
+| many objects  | the envelope's collection data                                 |
+| an entity     | the storable form of a record                                  |
+| many entities | the storable form of many                                      |
+| an array      | the data as given                                              |
+| a throwable   | a failed outcome: the message, the status, and the status code |
 
 **The two forms exist so a caller composes or returns.** Code that returns
 immediately asks for the response; code that adds to the envelope first asks for
@@ -88,6 +92,11 @@ the envelope and builds the response itself.
 failure arrive in the same shape as a success, so a client has one parser. A
 failure rendered by whatever caught it is how an API ends up with several error
 shapes.
+
+What the mapping sets is the outcome, not the diagnosis: the message a person
+reads, the status a client branches on, and the status code. It never puts a
+throwable's own text or trace in the envelope, because an envelope reaches a
+client and a trace is for a log ([`THROWABLE.md`](THROWABLE.md)).
 
 ---
 
@@ -105,9 +114,9 @@ Pass the entity to the entity mapping, so the storable form is produced once by
 the component rather than by each endpoint
 ([`ORM.md`](ORM.md)).
 
-### Map the throwable at the throwable stage
+### Map the throwable at the `ThrowableCaught` stage
 
-Catch at the pipeline's throwable stage and map there
+Catch at the `ThrowableCaught` stage and map there
 ([`LIFECYCLE.md`](../convention/LIFECYCLE.md)), so every failure in the request
 takes the same path, including one raised before the handler ran.
 
@@ -116,9 +125,9 @@ takes the same path, including one raised before the handler ran.
 Set the total whenever the data is a page of something larger. A client cannot
 page without it, and it cannot tell a short page from the last one.
 
-### Keep the message for a person and the errors for the client
+### Keep the message for a person and the status for the client
 
-The message is one sentence someone reads. The errors are what code branches on.
+The message is one sentence someone reads. The status is what code branches on.
 Putting the reason only in the message means the client parses prose.
 
 ---

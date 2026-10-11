@@ -46,12 +46,15 @@ attacker can read.
 ## The user is a set of opted-into contracts
 
 **The application owns its user class.** It implements a base contract, and then
-one further contract per capability it wants. The component reads only what the
+one further contract per capability it wants. A capability may build on another —
+being verifiable requires being mailable, because a verification has to be sent —
+so implementing one can bring its prerequisite. The component reads only what the
 user declares, so a feature the application did not opt into does not exist for
 it.
 
-The base contract declares the two values authentication needs: the value a user
-is identified by, and the value a password is checked against.
+The base contract declares what authentication needs: the value a user is
+identified by, the value a password is checked against, and the field a reset
+token is stored under.
 
 Capabilities an application adds by implementing one more contract:
 
@@ -64,9 +67,12 @@ Capabilities an application adds by implementing one more contract:
 | pin                  | authenticate with a short code                           |
 | anti-phish code      | show the user a value only the real site knows           |
 | device-authenticated | recognize a known device, and record the ones it knows   |
-| recovery code        | let a user back in without the second factor             |
 | last-online          | record when the user was last seen                       |
 | permissible          | carry the permissions the application authorizes against |
+
+A recovery code and a known device are **separate records** rather than
+capabilities: each is its own entity the user relates to, so they are declared as
+records and not as contracts the user class implements.
 
 **This is the component's central design.** A fixed user class would force every
 application to carry every feature's columns; a set of contracts means the
@@ -153,7 +159,7 @@ of what was asked.
 
 The component says who the caller is and carries the permissions attached. What
 those permissions mean is the application's, enforced in middleware at the
-matched-route stage ([`LIFECYCLE.md`](../convention/LIFECYCLE.md)).
+`RouteMatched` stage ([`LIFECYCLE.md`](../convention/LIFECYCLE.md)).
 
 ### Regenerate the session identifier on sign-in
 

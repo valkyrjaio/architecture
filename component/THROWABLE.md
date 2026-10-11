@@ -28,12 +28,12 @@ that one is the convention every component follows.
 
 ## Hierarchy
 
-| Subcomponent | Holds                                               |
-| ------------ | --------------------------------------------------- |
-| `Contract`   | the root throwable contract                         |
-| `Exception`  | the abstract bases every concrete throwable extends |
-| `Handler`    | the handler contract, and one class per adapter     |
-| `Factory`    | the support that derives values from a throwable    |
+| Subcomponent | Holds                                                    |
+| ------------ | -------------------------------------------------------- |
+| `Contract`   | the root throwable contract                              |
+| `Exception`  | the abstract bases every concrete throwable extends      |
+| `Handler`    | the handler contract, and one class per adapter          |
+| `Factory`    | the support that derives the trace code from a throwable |
 
 There is no `Data` and no `Provider` subcomponent, because the component is
 configured by nothing and registers one service.
@@ -42,14 +42,19 @@ configured by nothing and registers one service.
 
 ## The root is a contract, not a class
 
-**Every throwable the framework raises implements one root contract**, and that
-contract extends the language's own throwable type.
+**Every throwable the framework raises implements one root contract.** A caller
+catches that contract to mean "a failure from this framework", and catches the
+language's own type to mean "any failure at all".
 
-That is what makes the hierarchy usable: a caller catches the root contract to
-mean "a failure from this framework", and catches the language's own type to mean
-"any failure at all". A root class instead of a contract would force every
-throwable to inherit from it, which a language with single inheritance cannot do
-when it also wants the language's own base.
+A root class instead of a contract would force every throwable to inherit from
+it, which a language with single inheritance cannot do while also extending the
+language's own base.
+
+**Whether the root contract itself extends the language's throwable type depends
+on the language.** Where that type is an interface, the contract extends it and a
+catch on the contract is checked by the compiler. Where it is a class, a contract
+cannot extend it, so the contract stands alone and the abstract bases carry the
+inheritance instead.
 
 Beneath the root sit **two abstract bases**, and the split is the one every
 language already makes:
@@ -76,11 +81,11 @@ operation, **`enable`**, which installs it as the handler for the process.
 
 One operation is all it has, because a handler is not called — it is installed,
 and the runtime calls it. Anything a caller invokes deliberately belongs in the
-pipeline's throwable stage instead
+`ThrowableCaught` stage instead
 ([`LIFECYCLE.md`](../convention/LIFECYCLE.md)).
 
 **A handler is the last resort, not the error path.** A failure a protocol can
-answer is answered at its throwable stage, which can turn it into a response. The
+answer is answered at its `ThrowableCaught` stage, which can turn it into a response. The
 handler catches what escaped that, which means a failure before the pipeline
 started or inside the machinery that runs it.
 

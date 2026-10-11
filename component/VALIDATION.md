@@ -69,13 +69,17 @@ not discoverable by a reader, and its arguments have to be parsed.
 | ---------------------- | ----------------------------------------- |
 | `setRules`             | gives the validator the rules to run      |
 | `validateRules`        | runs them, and reports whether all passed |
-| `getErrorMessages`     | returns every failure                     |
+| `getErrorMessages`     | returns the failures, keyed by subject    |
 | `hasFirstErrorMessage` | reports whether there is at least one     |
 | `getFirstErrorMessage` | returns the first                         |
 
-**The validator collects rather than stopping at the first failure.** A person
-filling a form wants every problem at once, not one per submission. That is the
-whole reason a validator exists rather than callers running rules themselves.
+**The validator runs every rule rather than stopping at the first failure.** A
+person filling a form wants every problem at once, not one per submission. That is
+the whole reason a validator exists rather than callers running rules themselves.
+
+The failures are keyed by subject, so one subject reports one message: a later
+failing rule for the same subject replaces the earlier one. A caller that needs
+every rule's complaint for one subject reads them as the rules run.
 
 The first-message operations exist for the caller that shows one thing — a
 single-field check, or an API that reports one reason.

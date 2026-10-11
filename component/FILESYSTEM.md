@@ -51,10 +51,14 @@ moving from one to the other is a config change.
 | `updateStream` | the stream form of `update`               |
 | `putStream`    | the stream form of `put`                  |
 
-**The three write operations differ in what they assert about the path.** A
-caller that means "create this" says `write` and fails when something is already
-there, which catches the overwrite nobody intended. `put` is for when either is
-fine, and it is the one to reach for only when that is genuinely true.
+**The three write operations differ in what they assert about the path.** `write`
+requires that nothing is there, `update` requires that something is, and `put`
+accepts either. A caller that means "create this" says `write`, so the overwrite
+nobody intended fails instead of succeeding.
+
+Warning: an adapter that implements all three as one unconditional write gives a
+caller no way to express the difference, and the failure it is meant to catch
+passes silently.
 
 **Every write has a stream form.** A whole-file write holds the file in memory,
 so anything that might be large uses the stream form. That is why they are

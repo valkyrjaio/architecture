@@ -107,7 +107,7 @@ code**, so a handler that does not check runs to completion after the caller has
 gone.
 
 A cancellation the framework detects produces a response rather than a throwable,
-so the throwable stage never sees it.
+so the `ThrowableCaught` stage never sees it.
 
 ---
 
@@ -203,7 +203,7 @@ when it is set. A handler that runs a long computation, or calls a library that
 does not know about cancellation, checks the token itself.
 
 **A detected cancellation produces a response, not a throwable.** So cancellation
-is never a special case in the throwable stage, and that stage handles only real
+is never a special case in the `ThrowableCaught` stage, and that stage handles only real
 failures.
 
 A port maps each call to its language's own concurrency primitive. An application
@@ -238,7 +238,7 @@ be rediscovered.
   per-route middleware at those stages never runs, and nothing reports it.
 - **Reflective dispatch rethrows the handler's own throwable.** A language that
   invokes a method reflectively wraps whatever the target threw. Unwrapping it is
-  required, or the throwable stage sees the reflection wrapper instead of the
+  required, or the `ThrowableCaught` stage sees the reflection wrapper instead of the
   failure.
 - **A class that implements several stage contracts is registered at every one of
   them.** How a port decides which stages a class implements depends on whether

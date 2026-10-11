@@ -115,6 +115,15 @@ session.
 
 ---
 
+## The adapters every port ships
+
+| Adapter | Does                                                  |
+| ------- | ----------------------------------------------------- |
+| null    | holds nothing, so every read reports an empty session |
+| log     | records each operation, through [`LOG.md`](LOG.md)    |
+
+---
+
 ## Permitted variation
 
 | Variation                       | Reason                                                     |

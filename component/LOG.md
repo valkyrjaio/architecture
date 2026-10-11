@@ -102,9 +102,10 @@ Beyond its integrations, every port ships a **null adapter** that discards every
 record. It is what a test binds, and what an application binds to turn logging
 off without touching a call site.
 
-Every other service component ships a **log adapter**, which records what it
-would have done instead of doing it. That adapter resolves this component's
-contract, which is why this component depends on no other.
+A service component that reaches a third party also ships a **log adapter**,
+which records what it would have done instead of doing it. That adapter resolves
+this component's contract, so the dependency runs from that component to this
+one.
 
 ---
 

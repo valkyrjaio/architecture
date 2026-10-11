@@ -73,9 +73,13 @@ declares which layout it lives in and fills the layout's named regions, so the
 page describes only what differs. Without blocks, a layout can only wrap, and
 every page repeats the parts the layout cannot reach.
 
-**A template escapes by default.** It offers an explicit operation to render a
-value unescaped, so the unsafe path is the one a caller has to name. The reverse
-default — escaping on request — is how an injection reaches a page.
+**The component's own engine escapes by default.** It offers an explicit form to
+render a value unescaped, so the unsafe path is the one a caller has to name. The
+reverse default — escaping on request — is how an injection reaches a page.
+
+An engine the component wraps brings its own default, and an engine whose
+template is a plain source file escapes nothing. Where an application uses one of
+those, escaping is the application's to apply at every output.
 
 A template reports whether a block exists, so a layout can render a region only
 where the page filled it.

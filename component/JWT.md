@@ -30,7 +30,7 @@ and [`AUTH.md`](AUTH.md) is where that policy usually sits.
 | Subcomponent | Holds                                                      |
 | ------------ | ---------------------------------------------------------- |
 | `Manager`    | the component contract, and one class per adapter          |
-| `Data`       | the component config, and one config per algorithm family  |
+| `Data`       | the component config, and one config per adapter           |
 | `Enum`       | the algorithms                                             |
 | `Provider`   | the service provider that binds the contract to an adapter |
 | `Throwable`  | the component's throwable contract and its exceptions      |
@@ -68,9 +68,14 @@ verify it, so it is for tokens this application both issues and reads. An
 asymmetric token can be verified by a party that cannot issue one, which is what
 lets another service trust a token without being able to mint it.
 
-Each family gets its own config contract, because a shared secret and a key pair
-are not the same settings
+Each adapter gets its own config contract, because a shared secret and a key pair
+are not the same settings, and an adapter adds whatever its library needs
 ([`COMPONENT_CONFIG.md`](../convention/COMPONENT_CONFIG.md)).
+
+Every port also ships a **null adapter**, which encodes and decodes without
+signing or verifying. It is what a test binds, and it is the one place the
+verification rule above does not hold — which is why it is never bound outside a
+test.
 
 ---
 

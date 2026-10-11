@@ -95,7 +95,7 @@ count all ride on the job.
 ### Report an outcome
 
 Return the outcome rather than throwing, where the handler knows what happened.
-Throw only for a genuine failure, and let the throwable stage map it.
+Throw only for a genuine failure, and let the `ThrowableCaught` stage map it.
 
 Mark a throwable **non-retryable** when retrying cannot help, and it fails at once
 instead of consuming the attempt budget.

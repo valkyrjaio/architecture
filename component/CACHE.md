@@ -126,6 +126,10 @@ Every port ships a **null adapter** that stores nothing and reports every read a
 a miss. It is what a test binds, and what an application binds to measure the
 cost of running uncached.
 
+It also ships a **log adapter**, which records each operation instead of storing
+anything ([`LOG.md`](LOG.md)), so a developer can see what an application caches
+without a cache service running.
+
 ---
 
 ## Permitted variation

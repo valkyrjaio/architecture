@@ -38,6 +38,7 @@ because each one hides the one beneath it.
 | `Data`         | the component config, and one config per store               |
 | `Middleware`   | the stages a persistence operation passes through            |
 | `Enum`         | the shared vocabulary: orders, joins, operators              |
+| `Constant`     | the names the component shares across its own layers         |
 | `Factory`      | construction for the pieces a caller does not build itself   |
 | `Provider`     | the service provider                                         |
 | `Throwable`    | the component's throwable contract and its exceptions        |
@@ -73,6 +74,12 @@ extending a base, so the application owns the class.
 **The changed-only form is what makes an update cheap and safe.** Writing every
 property overwrites a column another process changed between the read and the
 write; writing only what this caller changed does not.
+
+An entity also declares the metadata the component reads about it: the table it
+lives in, the field that identifies it, its repository, which of its properties
+are relationships, and which are not stored. That metadata is declared on the
+entity rather than inferred, because inferring it needs reflection the cached
+path must not require ([`STATIC_METHODS.md`](../convention/STATIC_METHODS.md)).
 
 Two further contracts add behavior an entity opts into:
 

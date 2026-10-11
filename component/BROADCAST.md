@@ -27,13 +27,12 @@ rather than a server this framework runs.
 
 ## Hierarchy
 
-| Subcomponent  | Holds                                                      |
-| ------------- | ---------------------------------------------------------- |
-| `Broadcaster` | the component contract, and one class per adapter          |
-| `Message`     | the message                                                |
-| `Data`        | the component config, and one config per adapter           |
-| `Provider`    | the service provider that binds the contract to an adapter |
-| `Throwable`   | the component's throwable contract and its exceptions      |
+| Subcomponent  | Holds                                                         |
+| ------------- | ------------------------------------------------------------- |
+| `Broadcaster` | the component contract, and one class per adapter             |
+| `Data`        | the message, the component config, and one config per adapter |
+| `Provider`    | the service provider that binds the contract to an adapter    |
+| `Throwable`   | the component's throwable contract and its exceptions         |
 
 ---
 

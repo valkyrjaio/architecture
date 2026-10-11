@@ -82,6 +82,12 @@ Anything the application should be unable to read — a password above all — i
 hashed, not encrypted. Encrypting it means the application can read every one of
 them, which is the property an attacker wants.
 
+### Supply a key per call only to rotate
+
+Each operation accepts a key, so a caller can decrypt with the old key while
+writing with the new one. Leave it unset everywhere else, so one configured key
+is the single answer and no call site carries a secret.
+
 ### Treat the key as the secret the whole component rests on
 
 Every value the component ever wrote is readable by whoever holds the key, and
@@ -103,6 +109,6 @@ and writing with the new, which is why `isValidEncryptedMessage` exists.
 | the cipher an adapter uses | an adapter is named for its library, and the library chooses |
 
 The contract, the operations and their names do not vary. Warning: a port does
-**not** add an operation that exposes the cipher, the key or an initialization
-vector to a caller — those are the adapter's, and a caller that can set them can
-set them wrongly.
+**not** add an operation that exposes the cipher or an initialization vector to a
+caller — those are the adapter's, and a caller that can set them can set them
+wrongly. The key is the one exception, and only as the per-call override above.

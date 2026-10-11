@@ -52,17 +52,19 @@ Rust, Ruby.
 
 ## Components
 
-Every component has one. They are grouped by what depends on what: a component
-does not depend on one below it.
+Grouped as a reading order: a component's own document names what it depends on.
+
+Two components have no document, and deliberately: a marker facility and a
+reflection facility are shaped by what one language offers, so there is no
+cross-port contract for either to state.
 
 **Foundation** — everything depends on these.
 
-| Document                                   | Covers                                      |
-| ------------------------------------------ | ------------------------------------------- |
-| [`THROWABLE.md`](component/THROWABLE.md)   | the failure root, and the handler           |
-| [`TYPE.md`](component/TYPE.md)             | typed values, and identifiers               |
-| [`SUPPORT.md`](component/SUPPORT.md)       | the clock, behind something a test controls |
-| [`REFLECTION.md`](component/REFLECTION.md) | asking the language about its own code      |
+| Document                                 | Covers                                      |
+| ---------------------------------------- | ------------------------------------------- |
+| [`THROWABLE.md`](component/THROWABLE.md) | the failure root, and the handler           |
+| [`TYPE.md`](component/TYPE.md)           | typed values, and identifiers               |
+| [`SUPPORT.md`](component/SUPPORT.md)     | the clock, behind something a test controls |
 
 **Core** — nothing runs without these.
 
