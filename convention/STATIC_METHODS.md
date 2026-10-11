@@ -160,8 +160,20 @@ Two rules follow:
   back as it was built, and the value is discarded. `getService` passes the value
   and builds each time ([`CONTAINER.md`](../component/CONTAINER.md)).
 - **The registered factory returns the type contract.** The caller asks the built
-  object for its value. A factory that returns anything else fails with an error
-  naming neither the cast nor the binding key.
+  object for its value, so a factory that returns anything else cannot be used. A
+  port that detects this names the cast and the binding key in the error, because
+  neither is recoverable from the failure itself.
+
+```java
+// Wrong — get tries the singleton path first and passes it no arguments, so a
+// singleton under this id comes back as it was built and the value is dropped.
+TypeContract type = container.get(cast.getType(), Map.of(VALUE, raw));
+```
+
+```java
+// Right — getService passes the value and builds for this call.
+TypeContract type = container.getService(cast.getType(), Map.of(VALUE, raw));
+```
 
 ### 2. Static Metadata (`getTable`, `getPrimaryKey`, etc.)
 
