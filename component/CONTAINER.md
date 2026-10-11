@@ -154,6 +154,14 @@ changes nothing else.
 | `getData`             | export the registration set                  |
 | `setFromData`         | import a registration set                    |
 
+**`get` tries the kinds in order: singleton, then service, then alias.** It passes
+the caller's arguments to the service and the alias. It passes none to the
+singleton, because a singleton takes none.
+
+So `get` is the wrong operation when the arguments matter. A singleton registered
+under that id is returned as it was built, and the arguments are discarded
+without a report.
+
 `get` works for every kind and costs an extra lookup. A caller that knows the
 kind calls the specific method, because route dispatch runs it on every unit of
 work.
