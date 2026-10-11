@@ -142,27 +142,26 @@ route parameter that declares a cast cannot resolve it.
 So the container lives with the **actor that needs the resolved value**, and each
 protocol names that actor:
 
-| Protocol | Declares the cast | Resolves it |
-| -------- | ----------------- | ----------- |
-| Cli      | a route parameter | the caster  |
-| Http     | a route parameter | the matcher |
+| Protocol | Declares the cast        | Resolves it |
+| -------- | ------------------------ | ----------- |
+| Cli      | an argument or an option | the caster  |
+| Http     | a route parameter        | the matcher |
 
-A **caster** takes the parameter and returns its values, cast. It is the one
-class in routing that holds the container, which is why it exists at all rather
-than the parameter casting itself. Where a protocol already has a class that
-resolves the value — the matcher, for HTTP — that class holds the container and
-no caster is added.
+A **caster** takes the declaration and returns its values, cast. It holds the
+container. It exists so that the declaration does not have to.
+
+A protocol that already has a class resolving the value puts the container
+there instead. Http resolves in the matcher, so Http adds no caster.
 
 Two rules follow:
 
-- **Resolve the cast with `getService`, never `get`.** `get` reads the singleton
-  path first and discards the arguments, so it would build the type once with no
-  value and hand that same instance back for every later value. `getService`
-  passes the value as an argument and builds each time
-  ([`CONTAINER.md`](../component/CONTAINER.md)).
+- **Resolve the cast with `getService`, never `get`.** `get` tries the singleton
+  path first, and it passes no arguments there. A singleton under that id comes
+  back as it was built, and the value is discarded. `getService` passes the value
+  and builds each time ([`CONTAINER.md`](../component/CONTAINER.md)).
 - **The registered factory returns the type contract.** The caller asks the built
-  object for its value, so a factory that returns anything else fails with an
-  error naming neither the cast nor the binding key.
+  object for its value. A factory that returns anything else fails with an error
+  naming neither the cast nor the binding key.
 
 ### 2. Static Metadata (`getTable`, `getPrimaryKey`, etc.)
 
