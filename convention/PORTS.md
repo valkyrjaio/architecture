@@ -20,6 +20,23 @@ Future ports (lower priority, some nearly free from earlier work):
 
 ---
 
+## A design must be expressible in every language
+
+A solution that depends on a feature only one language has is not a design. It is
+that language's habit.
+
+The most complete port is where this breaks first. Its shape reads as the
+architecture rather than as a dependency on its language, so the dependency goes
+unnoticed until a second port cannot express it.
+
+Before a shape is settled, state how each port expresses it. A shape that cannot
+be stated for one of them is rejected, not ported.
+
+Construction through a variable class is the worked example:
+[`STATIC_METHODS.md`](STATIC_METHODS.md).
+
+---
+
 ## Core Philosophy Across All Ports
 
 Every port shares the same architectural identity:
