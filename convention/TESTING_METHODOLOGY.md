@@ -69,9 +69,10 @@ and asserts the result for each way.
 
 **Read the shapes from the public API, not from the fixtures that already
 exist.** A data class with a constructor and `with*` methods has two. An
-attribute and a hand-written list are two more. A route has three today: an
-attribute on a controller method, a bare construction in a provider's route
-list, and a builder chain over that construction.
+attribute and a hand-written list are two more. A route is declared as an
+attribute on a controller method, as a bare construction in a provider's route
+list, and as a builder chain over that construction. The example below shows the
+two constructions; the attribute is a third.
 
 ```php
 // Right — the fixture declares each shape, so a reader that drops one fails.
