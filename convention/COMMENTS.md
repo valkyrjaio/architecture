@@ -199,11 +199,12 @@ A statement about one implementation takes these forms:
 - what one line does
 
 Warning: a cut that removes the implementation detail also removes each reason.
-Move each reason the code cannot show to the line it explains. Put that reason in
-a `//` comment directly above the code. A defaulted return, a guard, and an early
-exit each take a reason this way when the reason is not obvious. Delete a
-statement that carries no reason. The reader who edits the code then finds the
-reason, and the reader who calls the method reads a short block.
+Move each reason the code cannot show to the line it explains. Put that reason
+in a `//` comment directly above the code. A defaulted return, a guard, and an
+early exit each take a reason this way when the reason is not obvious. Delete a
+statement that carries no reason, or whose reason the code can show. The reader
+who edits the code then finds the reason, and the reader who calls the method
+reads a short block.
 
 ```php
 // Wrong — the paragraph states one implementation, so the sentences a caller
