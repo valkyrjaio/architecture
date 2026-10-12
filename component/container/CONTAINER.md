@@ -40,6 +40,52 @@ method. The binding-key rule is in
 
 ---
 
+## Structure
+
+Every class a port builds, where it sits, and what it does.
+
+| Class                                                            | Is                                                     |
+| ---------------------------------------------------------------- | ------------------------------------------------------ |
+| `Manager/Contract/ContainerContract`                             | the component contract a caller resolves through       |
+| `Manager/Contract/ProvidersAwareContract`                        | the surface for registering and asking after providers |
+| `Manager/Container`                                              | the container                                          |
+| `Manager/ChildContainer`                                         | a container scoped to one unit of work                 |
+| `Manager/Trait/ProvidersAware`                                   | the provider bookkeeping both containers share         |
+| `Data/ContainerData`                                             | the generated bindings a cached run loads              |
+| `Provider/Contract/ServiceProviderContract`                      | the contract every service provider implements         |
+| `Provider/ContainerComponentProvider`                            | the component aggregator                               |
+| `Provider/ContainerServiceProvider`                              | the component's own bindings                           |
+| `Throwable/Contract/ContainerThrowable`                          | the component's throwable contract                     |
+| `Throwable/Exception/Abstract/ContainerInvalidArgumentException` | the caller's-failure base                              |
+| `Throwable/Exception/Abstract/ContainerRuntimeException`         | the run-time-failure base                              |
+| `Throwable/Exception/ContainerCyclicAliasException`              | raised for an alias chain that returns to itself       |
+| `Throwable/Exception/ContainerInvalidPublishCallbackException`   | raised for a publisher that cannot be called           |
+| `Throwable/Exception/ContainerInvalidReferenceException`         | raised for a service id nothing registered             |
+
+**Two contracts, not one.** `ContainerContract` is what application code
+resolves through. `ProvidersAwareContract` is what the application's boot and the
+build tool use to register providers and ask which have run. A caller that only
+resolves services never sees the second.
+
+**The provider bookkeeping is shared, not inherited.** Both containers register
+providers the same way, and neither is the other's parent, so the behavior lives
+in something both include rather than in a base one extends.
+
+### Order
+
+| In                        | The order is                                                |
+| ------------------------- | ----------------------------------------------------------- |
+| the contract's operations | register, then resolve, then inspect                        |
+| within register           | the singleton, the service, the alias                       |
+| within resolve            | the one for each kind, then the any-kind one                |
+| the throwables            | the contract, the two bases, then the concrete ones by name |
+
+The registering operations come before the resolving ones because nothing
+resolves before something registers, and a reader of the contract meets the two
+in that order.
+
+---
+
 ## The three service types
 
 A registration is one of three kinds, and the kind decides the lifetime.
