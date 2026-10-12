@@ -40,10 +40,10 @@ token is session state and nothing else has the session to put it in.
 message type in the framework returns a copy from a `with` form; a session
 modifies itself through `set` and `remove`.
 
-That is deliberate, and it follows the naming rule rather than breaking it: `set`
-modifies the host and `with` returns a copy. A session is a single
-thing shared by everything handling this unit of work, so a copy would be the
-wrong shape — two holders would write into two sessions and one would lose.
+That is deliberate. `set` modifies the host and `with` returns a copy, which is
+what each name promises. A session is a single thing shared by everything
+handling this unit of work, so a copy would be the wrong shape. Two holders
+would write into two sessions, and one would lose.
 
 ---
 
