@@ -43,6 +43,51 @@ the only place a library is named.
 
 ---
 
+## Structure
+
+The component is the four areas every protocol has.
+
+| Area          | Holds                                                     |
+| ------------- | --------------------------------------------------------- |
+| `Message/`    | the call, and everything that travels with it             |
+| `Routing/`    | the methods, and what turns a call into one               |
+| `Server/`     | the handler that runs a call end to end, and the adapters |
+| `Middleware/` | one contract per pipeline stage, and the handlers         |
+
+### `Message/`
+
+| Directory       | Holds                                               |
+| --------------- | --------------------------------------------------- |
+| `Call/`         | one call, and which of the four shapes it is        |
+| `Response/`     | what the method answers with                        |
+| `Status/`       | the outcome, as the protocol's own code and message |
+| `Metadata/`     | the key and value pairs a call carries each way     |
+| `Deadline/`     | when the caller stops waiting                       |
+| `Cancellation/` | the caller's withdrawal, and what observes it       |
+| `Stream/`       | a sequence of messages, in either direction         |
+| `Peer/`         | who the caller is, as the transport reports it      |
+
+**The deadline and the cancellation are separate.** A deadline passes on its
+own; a cancellation is something the caller did. A port that treated them as one
+could not tell a slow call from an abandoned one.
+
+### `Server/`
+
+`Handler/` holds the call handler. `Adapter/` holds one class per server a port
+can run on, because this protocol's server is the transport rather than the
+language's own.
+
+### Order
+
+| In                       | The order is                                                    |
+| ------------------------ | --------------------------------------------------------------- |
+| the areas                | as the table above lists them                                   |
+| the message directories  | the call, the response, the status, then what travels with them |
+| the middleware contracts | the stages, in the order the pipeline runs them                 |
+| the routing directories  | data, collection, collector, then what reads them               |
+
+---
+
 ## Using it
 
 ### Configure it and point a transport at it
