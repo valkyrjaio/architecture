@@ -52,15 +52,63 @@ Rust, Ruby.
 
 ## Components
 
+Grouped as a reading order. The order a port **builds** them in is the tier
+table in [`PORT_PARITY.md`](convention/PORT_PARITY.md), and that is the one to
+follow when porting.
+
+Two components have no document, and deliberately: a marker facility and a
+reflection facility are shaped by what one language offers, so there is no
+cross-port contract for either to state.
+
+**Foundation** — everything depends on these.
+
+| Document                                 | Covers                                      |
+| ---------------------------------------- | ------------------------------------------- |
+| [`THROWABLE.md`](component/THROWABLE.md) | the failure root, and the handler           |
+| [`TYPE.md`](component/TYPE.md)           | typed values, and identifiers               |
+| [`SUPPORT.md`](component/SUPPORT.md)     | the clock, behind something a test controls |
+
+**Core** — nothing runs without these.
+
 | Document                                     | Covers                                        |
 | -------------------------------------------- | --------------------------------------------- |
-| [`APPLICATION.md`](component/APPLICATION.md) | boot, the provider tree, config, entry points |
 | [`CONTAINER.md`](component/CONTAINER.md)     | registration, resolution, child scopes        |
 | [`EVENT.md`](component/EVENT.md)             | dispatch, listeners, the event id             |
-| [`HTTP.md`](component/HTTP.md)               | requests, responses, routing                  |
-| [`CLI.md`](component/CLI.md)                 | input, output, commands                       |
-| [`GRPC.md`](component/GRPC.md)               | calls, status, streaming, cancellation        |
-| [`QUEUE.md`](component/QUEUE.md)             | jobs, the wire envelope, outcomes             |
+| [`APPLICATION.md`](component/APPLICATION.md) | boot, the provider tree, config, entry points |
+
+**Protocols** — each runs the pipeline in
+[`LIFECYCLE.md`](convention/LIFECYCLE.md).
+
+| Document                         | Covers                                 |
+| -------------------------------- | -------------------------------------- |
+| [`HTTP.md`](component/HTTP.md)   | requests, responses, routing           |
+| [`CLI.md`](component/CLI.md)     | input, output, commands                |
+| [`GRPC.md`](component/GRPC.md)   | calls, status, streaming, cancellation |
+| [`QUEUE.md`](component/QUEUE.md) | jobs, the wire envelope, outcomes      |
+
+**Services** — one contract, adapters behind it, the application names one.
+
+| Document                                   | Covers                                   |
+| ------------------------------------------ | ---------------------------------------- |
+| [`LOG.md`](component/LOG.md)               | records, by severity                     |
+| [`CACHE.md`](component/CACHE.md)           | keyed values, lifetimes, tags            |
+| [`SESSION.md`](component/SESSION.md)       | per-visitor state, and the forgery token |
+| [`FILESYSTEM.md`](component/FILESYSTEM.md) | files, local or remote                   |
+| [`CRYPT.md`](component/CRYPT.md)           | two-way encryption                       |
+| [`JWT.md`](component/JWT.md)               | signed tokens                            |
+| [`MAIL.md`](component/MAIL.md)             | sending to people                        |
+| [`SMS.md`](component/SMS.md)               | sending to phones                        |
+| [`BROADCAST.md`](component/BROADCAST.md)   | pushing to live listeners                |
+| [`VIEW.md`](component/VIEW.md)             | rendering templates                      |
+
+**Application** — the components an application builds on.
+
+| Document                                   | Covers                          |
+| ------------------------------------------ | ------------------------------- |
+| [`AUTH.md`](component/AUTH.md)             | who the caller is               |
+| [`ORM.md`](component/ORM.md)               | records in a relational store   |
+| [`VALIDATION.md`](component/VALIDATION.md) | rules, and what failed          |
+| [`API.md`](component/API.md)               | one envelope for every response |
 
 ## Conventions
 
