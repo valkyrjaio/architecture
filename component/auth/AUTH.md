@@ -15,13 +15,13 @@ and the spelling then travels further than the rule.
 ## What the component owns
 
 Auth decides **who the caller is**, and keeps that decision for the length of a
-session. It is a **service component** on the shape in [`LOG.md`](../LOG/LOG.md).
+session. It is a **service component** on the shape in [`LOG.md`](../log/LOG.md).
 
 It owns authentication. It does not own authorization: whether a user may do a
 thing is the application's rule, and the component's part is only to say which
 user is asking and to carry the permissions the application attached.
 
-**Hashing a password lives here, not in [`CRYPT.md`](../CRYPT/CRYPT.md).** A password is
+**Hashing a password lives here, not in [`CRYPT.md`](../crypt/CRYPT.md).** A password is
 hashed one way, so that nothing — this application included — can read it back.
 Encryption is two-way, and a password that can be decrypted is a password an
 attacker can read.
@@ -58,14 +58,14 @@ identifies a user, and the value a check compares a password against.
 A user is an entity, so the field each value lives in belongs to the `Registry`
 rather than to the contract. The `Registry` also names the field a reset token is
 stored under, and the metadata a capability below reads. Its entries are in
-[`ORM.md`](../ORM/ORM.md).
+[`ORM.md`](../orm/ORM.md).
 
 Capabilities an application adds by implementing one more contract:
 
 | Capability           | Lets the application                                     |
 | -------------------- | -------------------------------------------------------- |
 | verifiable           | require a confirmed address before access                |
-| mailable             | send to the user through [`MAIL.md`](../MAIL/MAIL.md)    |
+| mailable             | send to the user through [`MAIL.md`](../mail/MAIL.md)    |
 | lockable             | lock an account after failed attempts                    |
 | two-factor           | require a second factor                                  |
 | pin                  | authenticate with a short code                           |
@@ -168,7 +168,7 @@ those permissions mean is the application's, enforced in middleware at the
 ### Regenerate the session identifier on sign-in
 
 Authentication changes the trust level, so the session identifier changes with it
-([`SESSION.md`](../SESSION/SESSION.md)).
+([`SESSION.md`](../session/SESSION.md)).
 
 ---
 

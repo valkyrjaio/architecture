@@ -4,7 +4,7 @@ The **cross-language** rule for the key a container binding is registered under,
 and for the factory that builds the service.
 
 This document holds no code example. The container's own behavior is in
-[`CONTAINER.md`](../component/CONTAINER/CONTAINER.md).
+[`CONTAINER.md`](../component/container/CONTAINER.md).
 
 ---
 
@@ -143,4 +143,4 @@ offer and the framework does not use.
 | whether a constants class exists | only a port whose keys are strings needs one     |
 
 The container's own operations do not vary. They are in
-[`CONTAINER.md`](../component/CONTAINER/CONTAINER.md).
+[`CONTAINER.md`](../component/container/CONTAINER.md).

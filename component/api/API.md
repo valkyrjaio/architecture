@@ -19,7 +19,7 @@ shape whatever the endpoint and whatever happened.
 
 The component owns the envelope and the mapping into it. It owns no routing and
 no response: it produces the envelope, or a response carrying it, through
-[`HTTP.md`](../HTTP/HTTP.md).
+[`HTTP.md`](../http/HTTP.md).
 
 ---
 
@@ -51,7 +51,7 @@ say is present and empty rather than absent:
 | the status code | the protocol's own status                         |
 
 **Empty is not absent**, the same rule the Queue envelope states
-([`QUEUE.md`](../QUEUE/QUEUE.md)). A client that can rely on every part being present
+([`QUEUE.md`](../queue/QUEUE.md)). A client that can rely on every part being present
 never checks for a missing one, and a part that appears only sometimes is the
 part a client forgets to handle.
 
@@ -97,7 +97,7 @@ What the mapping sets is the outcome, not the diagnosis: the message a person
 reads, the status a client branches on, and the status code. It never puts a
 throwable's own text or trace in the envelope, because an envelope reaches a
 client and a trace is for a log. The throwable contract and the component's own
-exceptions are in [`THROWABLE.md`](../THROWABLE/THROWABLE.md).
+exceptions are in [`THROWABLE.md`](../throwable/THROWABLE.md).
 
 ---
 
@@ -113,7 +113,7 @@ no benefit from the first.
 
 Pass the entity to the entity mapping, so the storable form is produced once by
 the component rather than by each endpoint. The metadata the mapping reads is in
-[`ORM.md`](../ORM/ORM.md).
+[`ORM.md`](../orm/ORM.md).
 
 ### Map the throwable at the `ThrowableCaught` stage
 

@@ -123,7 +123,7 @@ a singleton registered under that id as it was built, and it discards the cast
 value. The registered
 factory returns the type contract. A data object never holds the container, and
 [`STATIC_METHODS.md`](../../convention/STATIC_METHODS.md) names the actor that
-resolves the cast in each protocol. [`CONTAINER.md`](../CONTAINER/CONTAINER.md) names the
+resolves the cast in each protocol. [`CONTAINER.md`](../container/CONTAINER.md) names the
 three service types and the operation for each one.
 
 ### Pick an identifier scheme by how it is stored
