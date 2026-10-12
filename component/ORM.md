@@ -75,11 +75,23 @@ extending a base, so the application owns the class.
 property overwrites a column another process changed between the read and the
 write; writing only what this caller changed does not.
 
-An entity also declares the metadata the component reads about it: the table it
-lives in, the field that identifies it, its repository, which of its properties
-are relationships, and which are not stored. That metadata is declared on the
-entity rather than inferred, because inferring it needs reflection the cached
-path must not require ([`STATIC_METHODS.md`](../convention/STATIC_METHODS.md)).
+The component also reads metadata about an entity:
+
+| Metadata          | Is                                       |
+| ----------------- | ---------------------------------------- |
+| the table         | where the record lives                   |
+| the identifier    | the field that identifies the record     |
+| the repository    | which repository reads and writes it     |
+| the relationships | which properties hold other records      |
+| the unstored      | which properties the store does not hold |
+
+**A service provider declares that metadata in the `Registry`, keyed by the
+entity.** The entity does not declare it, because a data object holds data and
+not a description of its own type
+([`STATIC_METHODS.md`](../convention/STATIC_METHODS.md)).
+
+**The metadata is declared rather than inferred.** A port that inferred it would
+need reflection, and the cached path must not require reflection.
 
 Two further contracts add behavior an entity opts into:
 
