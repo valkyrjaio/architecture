@@ -36,20 +36,17 @@ order, so every port's document reads alike. The prose stays in the contract. A
 template that carried the prose would put each port's copy out of step at the
 first local edit. That drift is what this repository prevents.
 
-The marker facility and the reflection facility have no contract, so neither has
-a template. A port writes those two documents in its own shape.
-
 ### A feature reaches the architecture first
 
 A change to what a component **is** lands here before it lands in any port.
 [`AGENTS.md`](AGENTS.md) §1 and §7 state the rest, including the rule that every
 port changes together in one batch.
 
-Warning: a change made in one port first makes that port the definition every
+Warning: a port that changes a component first becomes the definition every
 later port inherits. Take these steps in order:
 
 1. Change the contract.
-2. Change the template, where the sections move.
+2. Change the template, when the sections move.
 3. Open one pull request per port, in one batch.
 
 ## Start here
@@ -86,7 +83,8 @@ follow when porting.
 
 Two components have no document, and deliberately: a marker facility and a
 reflection facility are shaped by what one language offers, so there is no
-cross-port contract for either to state.
+cross-port contract for either to state. Neither has a template. A port writes
+those two documents in its own shape.
 
 **Foundation** — everything depends on these.
 
