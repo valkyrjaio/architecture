@@ -69,7 +69,9 @@ asymmetric token can be verified by a party that cannot issue one, which is what
 lets another service trust a token without being able to mint it.
 
 Each adapter gets its own config contract, because a shared secret and a key pair
-are not the same settings, and an adapter adds whatever its library needs.
+are not the same settings, and an adapter adds whatever its library needs. Each
+contract's shape is in
+[`COMPONENT_CONFIG.md`](../convention/COMPONENT_CONFIG.md).
 
 Every port also ships a **null adapter**, which encodes and decodes without
 signing or verifying. It is what a test binds, and it is the one place the

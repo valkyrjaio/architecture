@@ -231,7 +231,8 @@ the messages of every run.
 
 The three flags live on one interaction config. What is split per contract is the
 **option name** that selects each level, which is why renaming one option does not
-mean constructing the rest.
+mean constructing the rest. Each contract's shape is in
+[`COMPONENT_CONFIG.md`](../convention/COMPONENT_CONFIG.md).
 
 ---
 

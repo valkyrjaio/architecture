@@ -162,7 +162,8 @@ never hits, and the write with no read never serves.
 The cache directory and the debug flag come from a config contract. An
 application that sets them implements that contract on its own config class,
 which is why a component's config is split per concern rather than held in one
-object.
+object. Each contract's shape is in
+[`COMPONENT_CONFIG.md`](../convention/COMPONENT_CONFIG.md).
 
 ---
 
