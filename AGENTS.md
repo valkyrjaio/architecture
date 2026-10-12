@@ -876,7 +876,7 @@ The repository holds three document directories:
 
 | Directory     | Holds                                                   |
 | ------------- | ------------------------------------------------------- |
-| `component/`  | one directory per component                             |
+| `component/`  | one lowercase directory per component                   |
 | `convention/` | a rule that holds across every component and every port |
 | `language/`   | the per-port deltas, one directory per language         |
 
