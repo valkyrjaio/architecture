@@ -3,9 +3,8 @@
 The **cross-language** rule for the key a container binding is registered under,
 and for the factory that builds the service.
 
-This document holds no code example, for the reason in
-[`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md). The container's own behavior
-is in [`CONTAINER.md`](../component/CONTAINER.md).
+This document holds no code example. The container's own behavior is in
+[`CONTAINER.md`](../component/CONTAINER.md).
 
 ---
 

@@ -37,8 +37,7 @@ operations:
 | `modify`      | returns a copy whose value a caller's function transformed |
 
 **`fromValue` is a named constructor, and it is the one static method a data
-object keeps** ([`STATIC_METHODS.md`](../convention/STATIC_METHODS.md)), because
-it returns the type's own kind.
+object keeps**, because it returns the type's own kind.
 
 **`asFlatValue` exists because a type may wrap a structure.** A collection or a
 model returns its structure from `asValue`, and something that must store or
@@ -118,8 +117,9 @@ and takes the copy, which re-proves the value.
 
 Where the type to build comes from data rather than from the code — a cast a route
 parameter declares, for instance — the type is resolved through the container with
-the value as an argument. The rule, and the two mistakes it prevents, are in
-[`STATIC_METHODS.md`](../convention/STATIC_METHODS.md).
+the value as an argument. A port resolves it with the operation that builds each
+time and passes the value, never the one that returns a cached instance, and the
+registered factory returns the type contract.
 
 ### Pick an identifier scheme by how it is stored
 

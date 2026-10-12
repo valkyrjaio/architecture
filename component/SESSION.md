@@ -41,8 +41,7 @@ message type in the framework returns a copy from a `with` form; a session
 modifies itself through `set` and `remove`.
 
 That is deliberate, and it follows the naming rule rather than breaking it: `set`
-modifies the host and `with` returns a copy
-([`METHOD_NAMING.md`](../convention/METHOD_NAMING.md)). A session is a single
+modifies the host and `with` returns a copy. A session is a single
 thing shared by everything handling this unit of work, so a copy would be the
 wrong shape — two holders would write into two sessions and one would lose.
 
