@@ -14,15 +14,28 @@ How one port spells that rule lives in that port, next to the code.
 
 ## How it is organized
 
-| Directory     | Holds                                                         |
-| ------------- | ------------------------------------------------------------- |
-| `component/`  | one document per component: its hierarchy, names and behavior |
-| `convention/` | a rule that holds across every component and every port       |
-| `language/`   | the per-port deltas, one directory per language               |
+| Directory     | Holds                                                   |
+| ------------- | ------------------------------------------------------- |
+| `component/`  | one directory per component                             |
+| `convention/` | a rule that holds across every component and every port |
+| `language/`   | the per-port deltas, one directory per language         |
 
-A `component/` document **carries no code example**. An example in one language
-becomes the spelling a port copies, instead of the contract it has to satisfy.
-The examples live in that component's `README.md` in each port.
+Each component's directory holds two files:
+
+| File        | Is                                                                            |
+| ----------- | ----------------------------------------------------------------------------- |
+| `<NAME>.md` | the contract: the hierarchy, the names and the behavior every port implements |
+| `README.md` | the template a port's own component `README.md` starts from                   |
+
+A contract **carries no code example**. An example in one language becomes the
+spelling a port copies, instead of the contract it has to satisfy. The examples
+live in each port's own `README.md`, written from the template.
+
+**The template carries headings, not prose.** It fixes the sections and their
+order, so every port's document reads alike, and it leaves the prose in the
+contract. A template that carried the prose would be copied into every port, and
+the first local edit would put one copy out of step with the contract — which is
+the drift this repository exists to prevent.
 
 ## Start here
 
