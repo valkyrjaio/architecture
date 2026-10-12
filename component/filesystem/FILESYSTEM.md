@@ -106,6 +106,50 @@ removes the chance of passing the wrong value.
 
 ---
 
+## Structure
+
+| Subcomponent | Holds                                                                |
+| ------------ | -------------------------------------------------------------------- |
+| `Manager/`   | the component contract, and one class per adapter                    |
+| `Data/`      | the component config, one config per adapter, and the in-memory file |
+| `Enum/`      | the visibility a file may carry                                      |
+| `Provider/`  | the component aggregator, and the component's bindings               |
+| `Throwable/` | the component's throwable contract and its exceptions                |
+
+### An adapter is named for what it wraps, then for the role
+
+| Adapter               | Wraps                                     |
+| --------------------- | ----------------------------------------- |
+| `<Integration><Role>` | one library or service the port speaks to |
+| `Null<Role>`          | nothing; every call is discarded          |
+
+The role comes last, so a reader scanning a directory sees what the classes are
+before seeing what each one wraps. A name stacks where an integration has
+variants of its own, with the narrower part first.
+
+Every port ships the null adapter. Which integrations ship is the port's own
+choice.
+
+**An in-memory adapter is required here**, with the file and its metadata as
+data objects beside the configs. A test writes and reads without touching a
+disk, and nothing else gives a test that.
+
+### `Enum/` carries visibility
+
+A file is public or private, and the two are a closed set rather than a string.
+A store that has no notion of visibility reports the one it always has.
+
+### Order
+
+| In                   | The order is                                        |
+| -------------------- | --------------------------------------------------- |
+| the adapters         | each integration, then the shared kinds, then null  |
+| the config contracts | the component's own, then one per adapter           |
+| the provider's map   | the configs, the component contract, the adapters   |
+| the throwables       | the contract, the two bases, then the concrete ones |
+
+---
+
 ## Using it
 
 ### Configure it
