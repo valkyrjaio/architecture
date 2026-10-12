@@ -890,7 +890,7 @@ and the rules for code examples:
 
 ## 9. Where to read more
 
-The repository holds three kinds of document, and the directory says which kind:
+Three directories divide the repository:
 
 | Directory     | Holds                                                   |
 | ------------- | ------------------------------------------------------- |
@@ -898,9 +898,9 @@ The repository holds three kinds of document, and the directory says which kind:
 | `convention/` | a rule that holds across every component and every port |
 | `language/`   | the per-port deltas, one directory per language         |
 
-A component's directory holds its contract, `<NAME>.md`, and the template a
-port's own component `README.md` starts from, `README.md`
-([`README.md`](README.md)).
+A component's directory holds two files. `<NAME>.md` is the contract. `README.md`
+is the template a port's own component document starts from. The layout section
+of the repository [`README.md`](README.md) covers both.
 
 A contract carries no code example, because an example in one language becomes
 the spelling a port copies instead of the contract it must satisfy. The examples
