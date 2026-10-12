@@ -3,10 +3,9 @@
 The Throwable component: what it does, how it is used, and the names and behavior
 every language port shares.
 
-This is the definition the ports are built from. `README.md` beside this file is
-the template a port's own component `README.md` starts from: it carries these
-headings in this order, so every port's document reads alike and anyone moving
-between ports recognizes both.
+This is the definition the ports are built from. The template beside this file,
+`README.md`, is where a port's own component document starts. It carries these
+headings in this order, so every port's document reads alike.
 
 It holds no code example of its own, because an example has to pick one language,
 and the spelling then travels further than the rule.
