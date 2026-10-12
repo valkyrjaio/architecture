@@ -3,8 +3,7 @@
 The **cross-language** definition of a handler: the typed callable that a router
 or a dispatcher invokes to do an application's own work.
 
-This document holds no code example, for the reason in
-[`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md). Each port's component
+This document holds no code example. Each port's component
 `README.md` holds the examples.
 
 ---

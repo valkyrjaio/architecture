@@ -3,8 +3,7 @@
 The **cross-language** definition of the generated data classes: what they hold,
 what they are named, and the guarantee that an application never needs them.
 
-This document holds no code example, for the reason in
-[`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md). The tool that writes these
+This document holds no code example. The tool that writes these
 classes is in [`SINDRI.md`](SINDRI.md).
 
 ---
