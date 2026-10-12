@@ -62,6 +62,44 @@ because an empty value flows onward and is read as data.
 
 ---
 
+## Structure
+
+| Subcomponent | Holds                                                  |
+| ------------ | ------------------------------------------------------ |
+| `Manager/`   | the component contract, and one class per adapter      |
+| `Data/`      | the component config, and one config per adapter       |
+| `Provider/`  | the component aggregator, and the component's bindings |
+| `Throwable/` | the component's throwable contract and its exceptions  |
+
+### An adapter is named for what it wraps, then for the role
+
+| Adapter               | Wraps                                     |
+| --------------------- | ----------------------------------------- |
+| `<Integration><Role>` | one library or service the port speaks to |
+| `Null<Role>`          | nothing; every call is discarded          |
+
+The role comes last, so a reader scanning a directory sees what the classes are
+before seeing what each one wraps. A name stacks where an integration has
+variants of its own, with the narrower part first.
+
+Every port ships the null adapter. Which integrations ship is the port's own
+choice.
+
+There is no log adapter and no in-memory adapter. Recording what a value would
+have encrypted writes the value in the clear, and holding ciphertext in memory
+proves nothing the real adapter proves.
+
+### Order
+
+| In                   | The order is                                        |
+| -------------------- | --------------------------------------------------- |
+| the adapters         | each integration, then the shared kinds, then null  |
+| the config contracts | the component's own, then one per adapter           |
+| the provider's map   | the configs, the component contract, the adapters   |
+| the throwables       | the contract, the two bases, then the concrete ones |
+
+---
+
 ## Using it
 
 ### Configure it

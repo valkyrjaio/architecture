@@ -80,6 +80,47 @@ test.
 
 ---
 
+## Structure
+
+| Subcomponent | Holds                                                     |
+| ------------ | --------------------------------------------------------- |
+| `Manager/`   | the component contract, and one class per adapter         |
+| `Data/`      | the component config, and one config per algorithm family |
+| `Enum/`      | the algorithms, as a closed set                           |
+| `Provider/`  | the component aggregator, and the component's bindings    |
+| `Throwable/` | the component's throwable contract and its exceptions     |
+
+### An adapter is named for what it wraps, then for the role
+
+| Adapter               | Wraps                                     |
+| --------------------- | ----------------------------------------- |
+| `<Integration><Role>` | one library or service the port speaks to |
+| `Null<Role>`          | nothing; every call is discarded          |
+
+The role comes last, so a reader scanning a directory sees what the classes are
+before seeing what each one wraps. A name stacks where an integration has
+variants of its own, with the narrower part first.
+
+Every port ships the null adapter. Which integrations ship is the port's own
+choice.
+
+### A config per algorithm family, not per algorithm
+
+A shared secret and a key pair are not the same settings, so each family gets its
+own config contract. The algorithm itself is a value in `Enum/`, and a family's
+config names which of its algorithms is used.
+
+### Order
+
+| In                   | The order is                                        |
+| -------------------- | --------------------------------------------------- |
+| the adapters         | each integration, then the shared kinds, then null  |
+| the config contracts | the component's own, then one per adapter           |
+| the provider's map   | the configs, the component contract, the adapters   |
+| the throwables       | the contract, the two bases, then the concrete ones |
+
+---
+
 ## Using it
 
 ### Configure it
