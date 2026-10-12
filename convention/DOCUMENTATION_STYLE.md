@@ -164,13 +164,17 @@ Warning: a pointer on a reason clause reads as the authority for the claim. Stat
 the claim, and attach no pointer to it.
 
 Where a reader needs another document to act, point at it from the sentence that
-says what the thing is. The other document holds a shape, a list, or a procedure
-this document does not.
+says what the thing is, or what the other document holds. That document holds a
+shape, a list, or a procedure this document does not.
 
-The test is where the pointer sits, not whether one exists. Read the clause the
-pointer sits on. A clause that says why the claim holds defends it, whatever
-words it uses: `because`, `since`, `which is why`, `rather than`, `for the
-reason in`. A clause that says what the thing is sends the reader somewhere.
+The test is where the pointer sits, not whether one exists. A pointer stays only
+where the answer to both questions is yes:
+
+1. Does the clause the pointer sits on say what the thing is, rather than why the
+   claim holds? A clause that says why defends the claim, whatever words it uses:
+   `because`, `since`, `which is why`, `rather than`, `for the reason in`.
+2. Does the other document hold a shape, a list, or a procedure this one does
+   not? Where it holds none of those, the reader acts on nothing there.
 
 No claim here needs defending more than another, because each claim follows from
 some convention. A pointer on one claim marks that claim as the one a reviewer

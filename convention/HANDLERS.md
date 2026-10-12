@@ -91,7 +91,7 @@ argument outright, since the argument has to be a constant expression.
 
 An inline function is fine where nothing reads the declaration — a route built and
 registered at run time, for instance. That route cannot reach the generated cache
-either way ([`DATA_CACHE.md`](DATA_CACHE.md)).
+either way.
 
 Each list is a literal with no conditional logic, because the build tool reads
 the declaration rather than running it. The provider hierarchy and its contracts
