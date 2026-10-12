@@ -50,7 +50,7 @@ changed value passes a function and receives a new type, so the validity is
 re-proved on the way out rather than bypassed by a setter.
 
 That one contract is the component's whole reason for existing: a caller that
-holds any type knows these four operations, whatever the type is.
+works with any type knows these four operations, whatever the type is.
 
 ---
 
