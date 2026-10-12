@@ -32,20 +32,25 @@ spelling a port copies, instead of the contract it has to satisfy. The examples
 live in each port's own `README.md`, written from the template.
 
 **The template carries headings, not prose.** It fixes the sections and their
-order, so every port's document reads alike, and it leaves the prose in the
-contract. A template that carried the prose would be copied into every port, and
-the first local edit would put one copy out of step with the contract — which is
-the drift this repository exists to prevent.
+order, so every port's document reads alike. The prose stays in the contract. A
+template that carried the prose would put each port's copy out of step at the
+first local edit. That drift is what this repository prevents.
+
+The marker facility and the reflection facility have no contract, so neither has
+a template. A port writes those two documents in its own shape.
 
 ### A feature reaches the architecture first
 
-A change to what a component **is** lands here before it lands in any port: the
-contract changes, then each port implements it. A change made in one port first
-makes that port the de facto definition, and every later port inherits whatever
-that port happened to do.
+A change to what a component **is** lands here before it lands in any port.
+[`AGENTS.md`](AGENTS.md) §1 and §7 state the rest, including the rule that every
+port changes together in one batch.
 
-So the order is: change the contract, change the template if the sections move,
-then open one pull request per port.
+Warning: a change made in one port first makes that port the definition every
+later port inherits. Take these steps in order:
+
+1. Change the contract.
+2. Change the template, where the sections move.
+3. Open one pull request per port, in one batch.
 
 ## Start here
 
