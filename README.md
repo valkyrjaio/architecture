@@ -37,6 +37,16 @@ contract. A template that carried the prose would be copied into every port, and
 the first local edit would put one copy out of step with the contract — which is
 the drift this repository exists to prevent.
 
+### A feature reaches the architecture first
+
+A change to what a component **is** lands here before it lands in any port: the
+contract changes, then each port implements it. A change made in one port first
+makes that port the de facto definition, and every later port inherits whatever
+that port happened to do.
+
+So the order is: change the contract, change the template if the sections move,
+then open one pull request per port.
+
 ## Start here
 
 - [`AGENTS.md`](AGENTS.md) — the operating guide, and the golden rules
