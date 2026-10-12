@@ -39,6 +39,77 @@ conversation rather than a message, so the subcomponent is named for that.
 
 ---
 
+## Structure
+
+The component is four areas, the same four
+[`HTTP.md`](../http/HTTP.md) has, in this protocol's own vocabulary.
+
+| Area           | Holds                                                          |
+| -------------- | -------------------------------------------------------------- |
+| `Interaction/` | the value types an invocation and its output are made of       |
+| `Routing/`     | the commands, and everything that turns an invocation into one |
+| `Server/`      | the handler that runs an invocation end to end                 |
+| `Middleware/`  | one contract per pipeline stage, and the handlers              |
+
+`Interaction/` is this protocol's `Message/`. An invocation's input and the
+output written back are both values, so they sit together.
+
+### `Interaction/`
+
+| Directory    | Holds                                              |
+| ------------ | -------------------------------------------------- |
+| `Input/`     | the invocation: the arguments and options as given |
+| `Output/`    | what is written back, and where it is written      |
+| `Argument/`  | one positional value, and its declaration          |
+| `Option/`    | one named value, and its declaration               |
+| `Message/`   | one piece of output, before it is formatted        |
+| `Format/`    | the styles a message may carry                     |
+| `Formatter/` | turns a message and its styles into text           |
+| `Writer/`    | puts the text where the output goes                |
+
+**The formatter and the writer are separate.** The formatter decides what the
+text says and how it is styled; the writer decides where it goes. A port that
+joined them could not write unstyled text to something that is not a terminal.
+
+### `Routing/`
+
+| Directory     | Holds                                                      |
+| ------------- | ---------------------------------------------------------- |
+| `Data/`       | a command, its arguments and its options, as data          |
+| `Collection/` | the commands, and the lookup a dispatcher uses             |
+| `Collector/`  | one per way a port declares a command                      |
+| `Caster/`     | resolves an argument's or an option's declared cast        |
+| `Dispatcher/` | calls the command's handler                                |
+| `Controller/` | the base a port's controllers extend, where it has one     |
+| `Marker/`     | the marker a port declares a command with, and its handler |
+
+**The caster holds the container**, because an argument's declaration cannot. It
+takes the declaration and returns the values cast
+([`STATIC_METHODS.md`](../../convention/STATIC_METHODS.md)).
+
+Http needs no caster, because its matcher already resolves what a route declares.
+
+### `Server/`
+
+| Directory     | Holds                                        |
+| ------------- | -------------------------------------------- |
+| `Handler/`    | the invocation handler                       |
+| `Command/`    | the commands the component itself ships      |
+| `Middleware/` | the middleware the component itself attaches |
+| `Data/`       | the server's config contract                 |
+| `Support/`    | a calculation the handler delegates          |
+
+### Order
+
+| In                          | The order is                                      |
+| --------------------------- | ------------------------------------------------- |
+| the areas                   | as the table above lists them                     |
+| the interaction directories | input, output, then the parts of each             |
+| the middleware contracts    | the stages, in the order the pipeline runs them   |
+| the routing directories     | data, collection, collector, then what reads them |
+
+---
+
 ## Using it
 
 ### Configure it and point a runtime at it
