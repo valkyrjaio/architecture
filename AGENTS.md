@@ -892,15 +892,19 @@ and the rules for code examples:
 
 The repository holds three kinds of document, and the directory says which kind:
 
-| Directory     | Holds                                                         |
-| ------------- | ------------------------------------------------------------- |
-| `component/`  | one document per component: its hierarchy, names and behavior |
-| `convention/` | a rule that holds across every component and every port       |
-| `language/`   | the per-port deltas, one directory per language               |
+| Directory     | Holds                                                   |
+| ------------- | ------------------------------------------------------- |
+| `component/`  | one directory per component                             |
+| `convention/` | a rule that holds across every component and every port |
+| `language/`   | the per-port deltas, one directory per language         |
 
-A `component/` document carries no code example, because an example in one
-language becomes the spelling a port copies instead of the contract it must
-satisfy. The examples live in that component's `README.md` in each port.
+A component's directory holds its contract, `<NAME>.md`, and the template a
+port's own component `README.md` starts from, `README.md`
+([`README.md`](README.md)).
+
+A contract carries no code example, because an example in one language becomes
+the spelling a port copies instead of the contract it must satisfy. The examples
+live in that component's `README.md` in each port, written from the template.
 
 Read these in order when starting or extending a port:
 
