@@ -111,6 +111,10 @@ These hold in **every** language. Do not violate them in a port.
   the type from it. A constants class holding provider references would hide that
   expression. (Binding-_key_ constants files are a different thing, and are fine
   where the language needs them — see §4.)
+- **A design must be expressible in every language.** A solution that depends on
+  a feature only one language has is not a design. Before a shape is settled,
+  state how each port expresses it. The rule and its worked example:
+  [`PORTS.md`](convention/PORTS.md).
 - **Route middleware is appended, never deduplicated.** Across every protocol
   (HTTP, CLI, gRPC, Queue), both the runtime collector and `sindri` codegen _append_ each
   registered middleware in order — they never dedupe. If the same middleware is
@@ -134,6 +138,10 @@ every repo.** A change is not finished until, for the repo you touched:
   Every path, guard, and error branch gets a test (use synthetic inputs to reach
   defensive guards that normal input can't). ("Branch" here means a code
   path, not a git branch.)
+- **Every declared shape is tested.** Coverage cannot see a shape no test
+  declares, so a syntax-tree reader that silently drops one still reports 100%. A
+  construct an application can declare several ways gets a test for each way. See
+  [`TESTING_METHODOLOGY.md`](convention/TESTING_METHODOLOGY.md).
 - **All tests pass.**
 - **Every CI check passes** — the _full_ gate (static analysis, formatting,
   architecture, migration, tests), never a subset.

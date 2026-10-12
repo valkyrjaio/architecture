@@ -132,6 +132,49 @@ MyEntity entity = container.getService(MyEntity.class, Map.of("raw", raw));
 The developer owns the creation logic. If no factory is registered, the
 container throws a resolution error — explicit failure, not silent fallback.
 
+#### Who holds the container
+
+The factory answers **how** the type is built. It leaves open **where the
+container is**, and that question has one answer: **a data object never holds the
+container.** A data object holds data and the behavior of its own state, so a
+route parameter that declares a cast cannot resolve it.
+
+So the container lives with the **actor that needs the resolved value**, and each
+protocol names that actor:
+
+| Protocol | Declares the cast        | Resolves it |
+| -------- | ------------------------ | ----------- |
+| Cli      | an argument or an option | the caster  |
+| Http     | a route parameter        | the matcher |
+
+A **caster** takes the declaration and returns its values, cast. It holds the
+container. It exists so that the declaration does not have to.
+
+A protocol that already has a class resolving the value puts the container
+there instead. Http resolves in the matcher, so Http adds no caster.
+
+Two rules follow:
+
+- **Resolve the cast with `getService`, never `get`.** `get` tries the singleton
+  path first, and it passes no arguments there. A singleton under that id comes
+  back as it was built, and the value is discarded. `getService` passes the value
+  and builds each time ([`CONTAINER.md`](../component/CONTAINER.md)).
+- **The registered factory returns the type contract.** The caller asks the built
+  object for its value, so a factory that returns anything else cannot be used. A
+  port that detects this names the cast and the binding key in the error, because
+  neither is recoverable from the failure itself.
+
+```java
+// Wrong — get tries the singleton path first and passes it no arguments, so a
+// singleton under this id comes back as it was built and the value is dropped.
+TypeContract type = container.get(cast.getType(), Map.of(VALUE, raw));
+```
+
+```java
+// Right — getService passes the value and builds for this call.
+TypeContract type = container.getService(cast.getType(), Map.of(VALUE, raw));
+```
+
 ### 2. Static Metadata (`getTable`, `getPrimaryKey`, etc.)
 
 PHP pattern:
