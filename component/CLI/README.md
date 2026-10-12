@@ -1,7 +1,7 @@
 # Cli
 
-<!-- TEMPLATE. Write each section, then delete the comment above it. Delete this
-     comment too. A comment that reaches the published document is a defect.
+<!-- TEMPLATE. Delete every comment in this file before you publish, including
+     this one. A comment that reaches the published document is a defect.
 
      The contract this document implements:
      https://github.com/valkyrjaio/architecture/blob/26.x/component/CLI/CLI.md
@@ -29,43 +29,43 @@
 
 ## The input
 
-<!-- What this port adds here: the names it spells, and an example. Where the
-     contract's section states only a reason, link to it instead. -->
+<!-- What this port adds here: the names it spells, and an example. When the
+     contract's section states only a reason, link to the contract instead. -->
 
 ## The output
 
-<!-- What this port adds here: the names it spells, and an example. Where the
-     contract's section states only a reason, link to it instead. -->
+<!-- What this port adds here: the names it spells, and an example. When the
+     contract's section states only a reason, link to the contract instead. -->
 
 ## The identity header
 
-<!-- What this port adds here: the names it spells, and an example. Where the
-     contract's section states only a reason, link to it instead. -->
+<!-- What this port adds here: the names it spells, and an example. When the
+     contract's section states only a reason, link to the contract instead. -->
 
 ## Output structure
 
-<!-- What this port adds here: the names it spells, and an example. Where the
-     contract's section states only a reason, link to it instead. -->
+<!-- What this port adds here: the names it spells, and an example. When the
+     contract's section states only a reason, link to the contract instead. -->
 
 ## Exit codes
 
-<!-- What this port adds here: the names it spells, and an example. Where the
-     contract's section states only a reason, link to it instead. -->
+<!-- What this port adds here: the names it spells, and an example. When the
+     contract's section states only a reason, link to the contract instead. -->
 
 ## Interactivity
 
-<!-- What this port adds here: the names it spells, and an example. Where the
-     contract's section states only a reason, link to it instead. -->
+<!-- What this port adds here: the names it spells, and an example. When the
+     contract's section states only a reason, link to the contract instead. -->
 
 ## Built-in commands
 
-<!-- What this port adds here: the names it spells, and an example. Where the
-     contract's section states only a reason, link to it instead. -->
+<!-- What this port adds here: the names it spells, and an example. When the
+     contract's section states only a reason, link to the contract instead. -->
 
 ## Why Cli has no stage 6
 
-<!-- What this port adds here: the names it spells, and an example. Where the
-     contract's section states only a reason, link to it instead. -->
+<!-- What this port adds here: the names it spells, and an example. When the
+     contract's section states only a reason, link to the contract instead. -->
 
 ## Permitted variation
 

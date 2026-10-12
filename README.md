@@ -42,8 +42,8 @@ A change to what a component **is** lands here before it lands in any port.
 [`AGENTS.md`](AGENTS.md) §1 and §7 state the rest, including the rule that every
 port changes together in one batch.
 
-Warning: a port that changes a component first becomes the definition every
-later port inherits. Take these steps in order:
+Warning: a port that changes a component first becomes, in practice, the
+definition every later port inherits. Take these steps in order:
 
 1. Change the contract.
 2. Change the template, when the sections move.
@@ -84,7 +84,7 @@ follow when porting.
 Two components have no document, and deliberately: a marker facility and a
 reflection facility are shaped by what one language offers, so there is no
 cross-port contract for either to state. Neither has a template. A port writes
-those two documents in its own shape.
+those two READMEs in its own shape.
 
 **Foundation** — everything depends on these.
 
