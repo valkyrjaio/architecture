@@ -46,18 +46,18 @@ attacker can read.
 ## The user is a set of opted-into contracts
 
 **The application owns its user class.** It implements a base contract, and then
-one further contract per capability it wants. A capability may build on another —
-being verifiable requires being mailable, because a verification has to be sent —
-so implementing one can bring its prerequisite. The component reads only what the
-user declares, so a feature the application did not opt into does not exist for
-it.
+one further contract per capability it wants. A capability may build on another,
+so implementing one can bring its prerequisite. Being verifiable requires being
+mailable, because a verification has to be sent. The component reads only what the
+user implements, so a feature the application did not opt into does not exist
+for it.
 
-The base contract declares the values authentication reads: the value a user is
-identified by, and the value a password is checked against.
+The base contract declares the values authentication reads: the value that
+identifies a user, and the value a check compares a password against.
 
-A user is an entity, so the fields those values live in belong to the entity
-registry rather than to the contract ([`ORM.md`](ORM.md)). The reset token's
-field is one of them.
+A user is an entity, so the field each value lives in belongs to the `Registry`
+rather than to the contract ([`ORM.md`](ORM.md)). The `Registry` also names the
+field a reset token is stored under, and the field each capability below reads.
 
 Capabilities an application adds by implementing one more contract:
 
