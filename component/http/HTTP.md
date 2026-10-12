@@ -43,6 +43,106 @@ component a request; the component never binds a port or reads a socket.
 
 ---
 
+## Structure
+
+The component is six areas. Each holds one concern, and the shape inside each
+repeats.
+
+| Area          | Holds                                                           |
+| ------------- | --------------------------------------------------------------- |
+| `Message/`    | the value types a request and a response are made of            |
+| `Routing/`    | the routes, and everything that turns a request into one        |
+| `Server/`     | the handler that runs a unit of work end to end                 |
+| `Middleware/` | one contract per pipeline stage, and the handlers               |
+| `Struct/`     | the declared shape of a request's input and a response's output |
+| `Client/`     | the outbound side: the framework making a request itself        |
+
+### `Message/`
+
+One directory per value type, each holding its own contract and its class.
+
+| Directory   | Holds                                                  |
+| ----------- | ------------------------------------------------------ |
+| `Message/`  | the contract every message implements                  |
+| `Request/`  | the request, the server request, and the json variant  |
+| `Response/` | the response, and one contract per kind of body        |
+| `Header/`   | a header, its value, and the value's own components    |
+| `Param/`    | a query or body parameter, and the collections of them |
+| `File/`     | an uploaded file                                       |
+| `Stream/`   | the body, as something read and written in parts       |
+| `Uri/`      | the address, in parts                                  |
+
+A request or response kind that the ecosystem already defines gets an adapter
+beside the class, under a directory named for that ecosystem's interface, and a
+factory that builds one from the other.
+
+**A response has one contract per kind of body** — empty, html, json, redirect —
+each extending the response contract. A caller returns the kind it means, and
+the kind sets the status and the content type rather than the call site.
+
+### `Routing/`
+
+| Directory     | Holds                                                    |
+| ------------- | -------------------------------------------------------- |
+| `Data/`       | a route, and its parameters, as data                     |
+| `Collection/` | the routes, and the lookup a matcher uses                |
+| `Collector/`  | one per way a port declares a route                      |
+| `Matcher/`    | turns a request into a route, and resolves its casts     |
+| `Dispatcher/` | calls the route's handler                                |
+| `Processor/`  | fills in what a declared route left out                  |
+| `Url/`        | builds a path from a route and its parameters            |
+| `Controller/` | the base a port's controllers extend, where it has one   |
+| `Factory/`    | construction for a route and its parts                   |
+| `Marker/`     | the marker a port declares a route with, and its handler |
+
+The collection and the collector are separate, for the reason
+[`EVENT.md`](../event/EVENT.md) gives for listeners: a cached run loads the
+collection and runs no collector.
+
+### `Middleware/`
+
+`Contract/` holds **exactly one contract per stage**, named for the stage, and
+`Handler/` holds one handler per stage that runs the middleware attached to it.
+The stages and their names are in
+[`LIFECYCLE.md`](../../convention/LIFECYCLE.md).
+
+### `Server/`
+
+| Directory     | Holds                                                                         |
+| ------------- | ----------------------------------------------------------------------------- |
+| `Handler/`    | the request handler, and the variant that answers with a throwable's response |
+| `Middleware/` | the middleware the component itself attaches                                  |
+| `Data/`       | the server's config contract                                                  |
+
+### `Struct/`
+
+`Request/` and `Response/` each hold the structs a port ships, and `Contract/`
+holds the one every struct implements. A struct is a closed set of fields, so a
+port declares it as whatever its language uses for one.
+
+### `Client/`
+
+The outbound side is a **service component** in its own right, nested here: one
+contract, adapters behind it, a config contract, and a log config contract for
+the adapter that records a request instead of making it.
+
+| Directory  | Holds                                             |
+| ---------- | ------------------------------------------------- |
+| `Manager/` | the client contract, and one class per adapter    |
+| `Data/`    | the client's config, and the log adapter's config |
+
+### Order
+
+| In                          | The order is                                         |
+| --------------------------- | ---------------------------------------------------- |
+| the areas                   | as the table above lists them                        |
+| a message's own directories | the contract, then request, response, then the parts |
+| the response kinds          | the base, then empty, html, json, redirect           |
+| the middleware contracts    | the stages, in the order the pipeline runs them      |
+| the routing directories     | data, collection, collector, then what reads them    |
+
+---
+
 ## Using it
 
 ### Configure it and point a runtime at it
