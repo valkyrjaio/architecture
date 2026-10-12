@@ -37,7 +37,7 @@ The prefix is `App` because the class aggregates the **application's** whole
 tree, framework providers included. It is not one component's data.
 
 Where the classes are written, and the namespace they take, come from the
-application's config ([`APPLICATION.md`](../component/APPLICATION/APPLICATION.md)).
+application's config ([`APPLICATION.md`](../component/application/APPLICATION.md)).
 
 ---
 
