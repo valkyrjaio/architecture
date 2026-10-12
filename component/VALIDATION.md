@@ -73,11 +73,12 @@ not discoverable by a reader, and its arguments have to be parsed.
 | `hasFirstErrorMessage` | reports whether there is at least one     |
 | `getFirstErrorMessage` | returns the first                         |
 
-**The validator declares `isValid`, the same operation a rule declares.** The
-validator is the thing asked whether it is valid, and the rules are what it
-consults to answer. A name that said "validate the rules" would promise a failure
-rather than an answer ([`METHOD_NAMING.md`](../convention/METHOD_NAMING.md)), and
-the rules are not what a caller asks about.
+**The validator declares `isValid`, the same name a rule declares.** A caller
+asks the validator whether the data is valid, and the validator consults its
+rules to answer. The rules are not what the caller asks about, so a name such as
+"validate the rules" would name the wrong subject. It would also promise a
+failure rather than an answer
+([`METHOD_NAMING.md`](../convention/METHOD_NAMING.md)).
 
 **The validator runs every rule rather than stopping at the first failure.** A
 person filling a form wants every problem at once, not one per submission. That is
