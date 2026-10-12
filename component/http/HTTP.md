@@ -95,9 +95,9 @@ the kind sets the status and the content type rather than the call site.
 | `Factory/`    | construction for a route and its parts                   |
 | `Marker/`     | the marker a port declares a route with, and its handler |
 
-The collection and the collector are separate, for the reason
-[`EVENT.md`](../event/EVENT.md) gives for listeners: a cached run loads the
-collection and runs no collector.
+The collection and the collector are separate. A cached run loads the collection
+and runs no collector, so a port with one way of declaring a route still has
+both.
 
 ### `Middleware/`
 
