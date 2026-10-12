@@ -35,8 +35,10 @@ that one is the convention every component follows.
 | `Handler`    | the handler contract, and one class per adapter          |
 | `Factory`    | the support that derives the trace code from a throwable |
 
-There is no `Data` and no `Provider` subcomponent, because the component is
-configured by nothing and registers one service.
+There is no `Data` and no `Provider` subcomponent. Nothing configures the
+component, and the **entry point** registers the handler rather than a provider,
+because a failure raised while the container is still being built must already
+have somewhere to go ([`APPLICATION.md`](APPLICATION.md)).
 
 ---
 
