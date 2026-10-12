@@ -101,6 +101,41 @@ exceptions are in [`THROWABLE.md`](../throwable/THROWABLE.md).
 
 ---
 
+## Structure
+
+| Subcomponent  | Holds                                                    |
+| ------------- | -------------------------------------------------------- |
+| `Manager/`    | the component contract, and the class that implements it |
+| `Model/`      | the envelope, and its parts                              |
+| `Middleware/` | the middleware that turns a throwable into an envelope   |
+| `Constant/`   | the shared vocabulary                                    |
+| `Provider/`   | the component aggregator, and the component's bindings   |
+| `Throwable/`  | the component's throwable contract and its exceptions    |
+
+There is no adapter and no `Data/`. One envelope shape serves every response, so
+there is nothing to swap and nothing to configure.
+
+### `Model/` holds the envelope
+
+The envelope is a data object with a contract, and its parts are data objects
+too. A port declares them rather than building a map, so a field cannot be
+misspelled and the shape is the same for every endpoint.
+
+### `Middleware/` is where a throwable becomes a response
+
+The component attaches middleware at the stage that catches a throwable, so
+every failure in a unit of work takes one path into an envelope, including one
+raised before the handler ran.
+
+### Order
+
+| In                         | The order is                                     |
+| -------------------------- | ------------------------------------------------ |
+| the envelope's parts       | the data, then the status, then the status code  |
+| the component's operations | the mappings from a value, then from a throwable |
+
+---
+
 ## Using it
 
 ### Return the envelope from every machine-readable endpoint

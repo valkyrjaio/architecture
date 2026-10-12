@@ -92,6 +92,46 @@ single-field check, or an API that reports one reason.
 
 ---
 
+## Structure
+
+| Subcomponent | Holds                                                 |
+| ------------ | ----------------------------------------------------- |
+| `Validator/` | the component contract, and the validator             |
+| `Rule/`      | the rule contract, the base, and one class per rule   |
+| `Constant/`  | the shared vocabulary                                 |
+| `Throwable/` | the component's throwable contract and its exceptions |
+
+There is no `Data/`, no `Provider/` and no adapter. A rule is not a service an
+application swaps, so nothing configures this component and nothing binds a
+default.
+
+### `Rule/` groups by what a rule judges
+
+| Directory        | Holds                                          |
+| ---------------- | ---------------------------------------------- |
+| `Rule/Abstract/` | the behavior every rule shares                 |
+| `Rule/Contract/` | the contract every rule implements             |
+| `Rule/Is/`       | the rules that answer a question about a value |
+| `Rule/String/`   | the rules for text                             |
+| `Rule/Int/`      | the rules for a number                         |
+
+A group for a kind of value holds the rules that only apply to it, so a reader
+looking for a rule about text looks in one place.
+
+**A rule that reaches another component gets its own group**, named for that
+component. A rule that checks a record exists reads through the component that
+stores records, so the dependency runs from this component to that one.
+
+### Order
+
+| In                  | The order is                                          |
+| ------------------- | ----------------------------------------------------- |
+| a rule's operations | `getSubject`, `isValid`, `validate`                   |
+| the validator's     | `setRules`, the check, then the error readers         |
+| the rule groups     | the abstract and the contract, then the kinds by name |
+
+---
+
 ## Using it
 
 ### Validate at the boundary, once
