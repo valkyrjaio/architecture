@@ -910,7 +910,7 @@ Then the component the work touches:
 - [`EVENT.md`](component/EVENT.md) — dispatch and listeners
 - [`HTTP.md`](component/HTTP.md) · [`CLI.md`](component/CLI.md) ·
   [`GRPC.md`](component/GRPC.md) · [`QUEUE.md`](component/QUEUE.md) — the protocols
-- Every other component has a document too, grouped by dependency order in
+- Every other component has a document too, grouped as a reading order in
   [`README.md`](README.md)
 
 Then the port:
