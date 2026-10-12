@@ -41,6 +41,60 @@ or an annotation, and `Constant` when it needs string binding keys.
 
 ---
 
+## Structure
+
+Every class a port builds, where it sits, and what it does.
+
+| Class                                                        | Is                                                |
+| ------------------------------------------------------------ | ------------------------------------------------- |
+| `Dispatcher/Contract/EventDispatcherContract`                | the component contract: dispatch an event         |
+| `Dispatcher/EventDispatcher`                                 | the dispatcher                                    |
+| `Collection/Contract/ListenerCollectionContract`             | the surface for adding and asking after listeners |
+| `Collection/ListenerCollection`                              | the listeners, by event                           |
+| `Collector/Contract/ListenerCollectorContract`               | the surface for finding listeners a port declares |
+| `Collector/<Marker>ListenerCollector`                        | one collector per way a port declares a listener  |
+| `Contract/ArgumentsCapableEventContract`                     | the event that carries its own arguments          |
+| `Contract/DispatchCollectableEventContract`                  | the event that collects what its listeners return |
+| `Data/Contract/ListenerContract`                             | one listener's declaration                        |
+| `Data/Listener`                                              | a listener's declaration                          |
+| `Data/EventData`                                             | the generated listeners a cached run loads        |
+| `Marker/Listener`                                            | the marker a port declares a listener with        |
+| `Marker/ListenerHandler`                                     | the handler that turns a marker into a listener   |
+| `Provider/Contract/ListenerProviderContract`                 | the contract a provider of listeners implements   |
+| `Provider/EventComponentProvider`                            | the component aggregator                          |
+| `Provider/EventServiceProvider`                              | the component's own bindings                      |
+| `Throwable/Contract/EventThrowable`                          | the component's throwable contract                |
+| `Throwable/Exception/Abstract/EventInvalidArgumentException` | the caller's-failure base                         |
+| `Throwable/Exception/Abstract/EventRuntimeException`         | the run-time-failure base                         |
+| `Throwable/Exception/EventInvalidEventException`             | raised for an event the dispatcher cannot take    |
+
+**The collection and the collector are separate.** The collection holds
+listeners and answers which apply to an event. The collector finds the ones a
+port declares and puts them in the collection. A port with one way of declaring
+a listener still has both, because the cached run loads the collection without
+running a collector.
+
+**A listener's declaration is data.** `Data/Listener` says what to call for which
+event, and the dispatcher reads it. A port stores declarations rather than
+closures, so the build tool writes them into `Data/EventData` and a cached run
+reads them back.
+
+**Two event contracts, each optional.** An event implements
+`ArgumentsCapableEventContract` where it carries arguments its listeners take,
+and `DispatchCollectableEventContract` where the caller wants what the listeners
+returned. An event that implements neither is a plain event.
+
+### Order
+
+| In                          | The order is                                                |
+| --------------------------- | ----------------------------------------------------------- |
+| the dispatcher's operations | dispatch, then the forms that narrow what is dispatched     |
+| the collection's operations | add, then ask, then remove                                  |
+| the event contracts         | arguments, then collectable                                 |
+| the throwables              | the contract, the two bases, then the concrete ones by name |
+
+---
+
 ## The event id
 
 A listener is registered against an **event id**, and the id is what the
