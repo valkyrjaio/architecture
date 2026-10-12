@@ -77,21 +77,23 @@ write; writing only what this caller changed does not.
 
 The component also reads metadata about an entity:
 
-| Metadata          | Is                                       |
-| ----------------- | ---------------------------------------- |
-| the table         | where the record lives                   |
-| the identifier    | the field that identifies the record     |
-| the repository    | which repository reads and writes it     |
-| the relationships | which properties hold other records      |
-| the unstored      | which properties the store does not hold |
+| Metadata          | Names                                        |
+| ----------------- | -------------------------------------------- |
+| the table         | where the record lives                       |
+| the identifier    | the field that identifies the record         |
+| the repository    | which repository reads and writes the record |
+| the relationships | which properties hold other records          |
+| the unstored      | which properties the store does not hold     |
+| the dated fields  | where the created and changed times live     |
+| the deleted field | where a soft deletion records its time       |
 
 **A service provider declares that metadata in the `Registry`, keyed by the
-entity.** The entity does not declare it, because a data object holds data and
-not a description of its own type
+entity class.** The entity does not declare it, because a data object holds data
+and not a description of its own type
 ([`STATIC_METHODS.md`](../convention/STATIC_METHODS.md)).
 
-**The metadata is declared rather than inferred.** A port that inferred it would
-need reflection, and the cached path must not require reflection.
+**A port declares the metadata rather than inferring it.** A port that infers it
+needs reflection, and the cached path must not require reflection.
 
 Two further contracts add behavior an entity opts into:
 
@@ -101,7 +103,8 @@ Two further contracts add behavior an entity opts into:
 | soft deletion | a deletion that marks the record rather than removing it |
 
 An entity that implements neither is a plain record, and the component does not
-assume either.
+assume either. A contract states that the behavior applies, and the `Registry`
+names the fields it reads and writes, so an entity carries neither field name.
 
 ---
 
@@ -118,7 +121,7 @@ A repository is the surface for one entity:
 | `create`      | writes a new record                                       |
 | `update`      | writes the changes to an existing record                  |
 | `delete`      | deletes, respecting soft deletion where the entity has it |
-| `forceDelete` | removes the record whatever the entity declares           |
+| `forceDelete` | removes the record whatever the entity implements         |
 
 **`delete` and `forceDelete` are separate because the intent differs.** An
 application that marks records deleted still occasionally needs one gone, and a
