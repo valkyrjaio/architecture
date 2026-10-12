@@ -89,9 +89,7 @@ The component also reads metadata about an entity:
 | the date formats  | how the component writes a stored time        |
 
 **A service provider declares that metadata in the `Registry`, keyed by the
-entity class.** The entity does not declare it, because a data object holds data
-and not a description of its own type
-([`STATIC_METHODS.md`](../convention/STATIC_METHODS.md)).
+entity class.** The entity does not declare it.
 
 **A port declares the metadata rather than inferring it.** A port that infers it
 needs reflection, and the cached path must not require reflection.
