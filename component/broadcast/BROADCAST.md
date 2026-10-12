@@ -64,6 +64,51 @@ payload readable by a listener written in another language.
 
 ---
 
+## Structure
+
+| Subcomponent   | Holds                                                  |
+| -------------- | ------------------------------------------------------ |
+| `Broadcaster/` | the component contract, and one class per adapter      |
+| `Data/`        | the message, and the configs                           |
+| `Provider/`    | the component aggregator, and the component's bindings |
+| `Throwable/`   | the component's throwable contract and its exceptions  |
+
+### An adapter is named for what it wraps, then for the role
+
+| Adapter               | Wraps                                       |
+| --------------------- | ------------------------------------------- |
+| `<Integration><Role>` | one service the port sends through          |
+| `Log<Role>`           | nothing; it records what it would have sent |
+| `Null<Role>`          | nothing; every call is discarded            |
+
+The role comes last, so a reader scanning a directory sees what the classes are
+before seeing what each one wraps. A name stacks where one adapter wraps
+another, with the outer behavior first.
+
+**The log adapter is required here.** This component reaches a third party, so a
+developer needs the calls recorded without them leaving the machine, and a test
+needs to assert that one was made.
+
+### An adapter may wrap another adapter
+
+A message pushed to a live channel reaches a browser, so a port ships an adapter
+that encrypts the message and then hands it to the adapter that pushes it. The
+name carries both, with the encrypting part first.
+
+That adapter resolves the component that encrypts, so the dependency runs from
+this component to that one.
+
+### Order
+
+| In                   | The order is                                        |
+| -------------------- | --------------------------------------------------- |
+| the adapters         | each integration, then the log adapter, then null   |
+| the config contracts | the component's own, then one per adapter           |
+| the provider's map   | the configs, the component contract, the adapters   |
+| the throwables       | the contract, the two bases, then the concrete ones |
+
+---
+
 ## Using it
 
 ### Configure it

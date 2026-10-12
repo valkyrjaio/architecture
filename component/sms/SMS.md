@@ -60,6 +60,46 @@ caller states it and every adapter honors the same answer.
 
 ---
 
+## Structure
+
+| Subcomponent | Holds                                                  |
+| ------------ | ------------------------------------------------------ |
+| `Messenger/` | the component contract, and one class per adapter      |
+| `Data/`      | the message, and the configs                           |
+| `Provider/`  | the component aggregator, and the component's bindings |
+| `Throwable/` | the component's throwable contract and its exceptions  |
+
+### An adapter is named for what it wraps, then for the role
+
+| Adapter               | Wraps                                       |
+| --------------------- | ------------------------------------------- |
+| `<Integration><Role>` | one service the port sends through          |
+| `Log<Role>`           | nothing; it records what it would have sent |
+| `Null<Role>`          | nothing; every call is discarded            |
+
+The role comes last, so a reader scanning a directory sees what the classes are
+before seeing what each one wraps. A name stacks where one adapter wraps
+another, with the outer behavior first.
+
+**The log adapter is required here.** This component reaches a third party, so a
+developer needs the calls recorded without them leaving the machine, and a test
+needs to assert that one was made.
+
+`Data/Message` carries the number sent to, the number sent from, and the text.
+There is no recipient object and no attachment, because this component sends one
+text to one number.
+
+### Order
+
+| In                   | The order is                                        |
+| -------------------- | --------------------------------------------------- |
+| the adapters         | each integration, then the log adapter, then null   |
+| the config contracts | the component's own, then one per adapter           |
+| the provider's map   | the configs, the component contract, the adapters   |
+| the throwables       | the contract, the two bases, then the concrete ones |
+
+---
+
 ## Using it
 
 ### Configure it

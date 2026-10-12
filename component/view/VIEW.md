@@ -86,6 +86,44 @@ where the page filled it.
 
 ---
 
+## Structure
+
+| Subcomponent | Holds                                                                                 |
+| ------------ | ------------------------------------------------------------------------------------- |
+| `Renderer/`  | the component contract, and one class per engine                                      |
+| `Template/`  | one template, its data, and its structure                                             |
+| `Factory/`   | the factory that turns a rendered view into a response                                |
+| `Data/`      | the component config, and one config per engine                                       |
+| `Provider/`  | the component aggregator, the component's bindings, and one per engine the port ships |
+| `Throwable/` | the component's throwable contract and its exceptions                                 |
+
+### An adapter is named for the engine, then for the role
+
+| Adapter          | Wraps                          |
+| ---------------- | ------------------------------ |
+| `<Engine><Role>` | one template engine            |
+| `Null<Role>`     | nothing; it renders empty text |
+
+Every port ships the null adapter, so a caller can turn rendering off without
+touching a call site.
+
+### An engine the port ships gets its own provider
+
+An engine the component wraps needs only a config and an adapter. An engine the
+component **ships** has classes of its own to register, so it gets a service
+provider beside the component's, named for the engine.
+
+### Order
+
+| In                   | The order is                                        |
+| -------------------- | --------------------------------------------------- |
+| the adapters         | each integration, then the log adapter, then null   |
+| the config contracts | the component's own, then one per adapter           |
+| the provider's map   | the configs, the component contract, the adapters   |
+| the throwables       | the contract, the two bases, then the concrete ones |
+
+---
+
 ## Using it
 
 ### Configure it
