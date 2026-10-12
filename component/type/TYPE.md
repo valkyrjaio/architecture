@@ -53,6 +53,64 @@ works with any type knows these four operations, whatever the type is.
 
 ---
 
+## Structure
+
+The component is a root, and then one directory per kind of value on one
+repeating shape.
+
+### The root
+
+| Class                   | Is                                                |
+| ----------------------- | ------------------------------------------------- |
+| `Contract/TypeContract` | the contract every type implements                |
+| `Abstract/Type`         | the base every type extends                       |
+| `Data/Cast`             | names a type to build a value into, and how       |
+| `Constant/CastArgument` | the names a cast's own arguments are passed under |
+| `Provider/TypeProvider` | the service provider                              |
+
+### One directory per kind
+
+Each kind holds the same three things, named for the kind.
+
+| Class                                                        | Is                                  |
+| ------------------------------------------------------------ | ----------------------------------- |
+| `<Kind>/Contract/<Kind>Contract`                             | the kind's own contract             |
+| `<Kind>/<Kind>T`                                             | the type class                      |
+| `<Kind>/Throwable/Exception/<Kind>InvalidFromValueException` | raised for a value the kind rejects |
+
+A kind adds a class of its own where the kind has more than one shape, such as a
+boolean's two constants or an array that cannot be empty. It adds a `Factory/`
+where construction takes work beyond proving the value, and a `Support/` for a
+calculation the type delegates.
+
+### The type class carries a `T`
+
+**A type class ends in `T`**, so `IntT`, `StringT`, `BoolT`. The kinds are named
+for the language's own types, and the suffix is what keeps a type class from
+colliding with the type it wraps. A port that dropped the suffix would collide in
+every language that reserves the name.
+
+The kind's contract and its throwable take no suffix. Only the class a caller
+constructs does.
+
+### The kinds
+
+| Group      | Kinds                                    |
+| ---------- | ---------------------------------------- |
+| scalar     | `Int`, `Float`, `String`, `Bool`, `Null` |
+| structured | `Array`, `Object`, `Collection`, `Json`  |
+| modelled   | `Model`, `Enum`                          |
+| identifier | `Id`, `Uid`, `Uuid`, `Ulid`, `Vlid`      |
+
+### Order
+
+| In                  | The order is                                    |
+| ------------------- | ----------------------------------------------- |
+| a kind's operations | `fromValue`, `asValue`, `asFlatValue`, `modify` |
+| the kinds           | the groups above, in that order                 |
+
+---
+
 ## The families
 
 | Family     | Wraps                                                               |
