@@ -136,6 +136,52 @@ limits it read the same object rather than guessing from arguments.
 
 ---
 
+## Structure
+
+| Subcomponent     | Holds                                                          |
+| ---------------- | -------------------------------------------------------------- |
+| `Authenticator/` | the component contract, the base, and one class per capability |
+| `Entity/`        | the user contracts an application's own user implements        |
+| `Store/`         | where a session's authentication is kept, one per backing      |
+| `Hasher/`        | how a password is hashed and checked                           |
+| `Data/`          | the component config, an attempt, and a retrieval              |
+| `Constant/`      | the shared vocabulary                                          |
+| `Provider/`      | the component aggregator, and the component's bindings         |
+| `Throwable/`     | the component's throwable contract and its exceptions          |
+
+### Four surfaces, each swappable on its own
+
+| Surface          | Decides                                      |
+| ---------------- | -------------------------------------------- |
+| `Authenticator/` | what authenticating means for one capability |
+| `Store/`         | where the decision is kept between requests  |
+| `Hasher/`        | how a secret is turned into something stored |
+| `Entity/`        | what the application's user is               |
+
+They are separate because an application changes one without the others. Moving
+a session from a cookie to a store changes the store alone, and changing a hash
+changes the hasher alone.
+
+### `Data/` holds what a request carries
+
+| Class       | Is                                                   |
+| ----------- | ---------------------------------------------------- |
+| `Attempt`   | what a caller offered: the identifier and the secret |
+| `Retrieval` | what was found for it                                |
+
+An attempt and a retrieval are separate objects, so the component never holds a
+caller's secret beside the record it was checked against.
+
+### Order
+
+| In                   | The order is                                              |
+| -------------------- | --------------------------------------------------------- |
+| the surfaces         | the authenticator, the store, the hasher, then the entity |
+| the capabilities     | the base, then each one by name                           |
+| the entity contracts | the base contract, then one per capability                |
+
+---
+
 ## Using it
 
 ### Configure it
