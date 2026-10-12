@@ -1,10 +1,11 @@
 # Session
 
-<!-- TEMPLATE. Replace each comment with your own text, and delete the comment.
-     A comment that reaches the published document is a defect.
+<!-- TEMPLATE. Write each section, then delete the comment above it. Delete this
+     comment too. A comment that reaches the published document is a defect.
 
      The contract this document implements:
      https://github.com/valkyrjaio/architecture/blob/26.x/component/SESSION/SESSION.md
+     Change the ref to the branch this port targets.
 
      Read the contract first. Keep these headings, in this order, so every port's
      README reads alike.
@@ -24,7 +25,8 @@
 
 ## The session is mutable
 
-<!-- This port's spelling for what the contract states here, with an example. -->
+<!-- What this port adds here: the names it spells, and an example. Where the
+     contract's section states only a reason, link to it instead. -->
 
 ## Canonical operations
 
@@ -36,7 +38,8 @@
 
 ## The adapters every port ships
 
-<!-- This port's spelling for what the contract states here, with an example. -->
+<!-- What this port adds here: the names it spells, and an example. Where the
+     contract's section states only a reason, link to it instead. -->
 
 ## Permitted variation
 
