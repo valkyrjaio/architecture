@@ -1,21 +1,26 @@
 # Application
 
-<!-- TEMPLATE. The contract this implements is APPLICATION.md, beside this file in the
-     architecture repository. Read it first.
+<!-- TEMPLATE. Replace each comment with your own text, and delete the comment.
+     A comment that reaches the published document is a defect.
 
-     Keep these headings, in this order, so every port's README reads alike. Add
-     an example wherever a reader would otherwise have to guess the spelling.
+     The contract this document implements:
+     https://github.com/valkyrjaio/architecture/blob/26.x/component/APPLICATION/APPLICATION.md
 
-     Do not restate a rule the contract states. Link to it. A sentence copied here
-     is a sentence that goes stale when the contract changes. -->
+     Read the contract first. Keep these headings, in this order, so every port's
+     README reads alike.
+
+     Write what a reader of this port needs: the names this port spells, the
+     examples, and the caveats this language brings. Do not copy a rule the
+     contract states. Link to the contract instead. A rule copied here goes stale
+     when the contract changes. -->
 
 ## What the component owns
 
-<!-- One paragraph, from the contract. Say what this component does and what it does not. -->
+<!-- One paragraph. Say what this component does, and what it does not. -->
 
 ## Hierarchy
 
-<!-- The subcomponent table from the contract, spelled the way this port spells a segment. -->
+<!-- The subcomponent table, spelled the way this port spells a segment. -->
 
 ## Using it
 
@@ -23,27 +28,27 @@
 
 ## The config is the entry point for everything
 
-<!-- Carry this section from the contract, and add this port's examples. -->
+<!-- This port's spelling for what the contract states here, with an example. -->
 
 ## The provider tree
 
-<!-- Carry this section from the contract, and add this port's examples. -->
+<!-- This port's spelling for what the contract states here, with an example. -->
 
 ## The application surface
 
-<!-- Carry this section from the contract, and add this port's examples. -->
+<!-- The operation table, with this port's signature for each operation. -->
 
 ## Entry points
 
-<!-- Carry this section from the contract, and add this port's examples. -->
+<!-- This port's spelling for what the contract states here, with an example. -->
 
 ## Booting without the cache
 
-<!-- Carry this section from the contract, and add this port's examples. -->
+<!-- This port's spelling for what the contract states here, with an example. -->
 
 ## The child application
 
-<!-- Carry this section from the contract, and add this port's examples. -->
+<!-- This port's spelling for what the contract states here, with an example. -->
 
 ## Permitted variation
 
