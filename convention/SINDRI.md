@@ -31,7 +31,7 @@ tool's job, and the framework never invokes it.
 | list its own commands     | report what the tool can do                              |
 
 It is a CLI application built on the framework's own Cli component, so its
-commands are routes and its output follows [`CLI.md`](../component/CLI.md).
+commands are routes and its output follows [`CLI.md`](../component/CLI/CLI.md).
 
 ---
 
@@ -117,7 +117,7 @@ There is no circular dependency, only one slow first run.
 
 The tool's output follows the same structure as any Valkyrja CLI application: the
 identity header, the work, then a summary. The rules in
-[`CLI.md`](../component/CLI.md) govern it, and these are the ones specific to
+[`CLI.md`](../component/CLI/CLI.md) govern it, and these are the ones specific to
 generating:
 
 - **One line per generated class**, naming what is being generated.

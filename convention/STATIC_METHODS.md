@@ -158,7 +158,7 @@ Two rules follow:
 - **Resolve the cast with `getService`, never `get`.** `get` tries the singleton
   path first, and it passes no arguments there. A singleton under that id comes
   back as it was built, and the value is discarded. `getService` passes the value
-  and builds each time ([`CONTAINER.md`](../component/CONTAINER.md)).
+  and builds each time ([`CONTAINER.md`](../component/CONTAINER/CONTAINER.md)).
 - **The registered factory returns the type contract.** The caller asks the built
   object for its value, so a factory that returns anything else cannot be used. A
   port that detects this names the cast and the binding key in the error, because
