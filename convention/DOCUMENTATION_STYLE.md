@@ -163,22 +163,18 @@ others.
 Warning: a pointer on a reason clause reads as the authority for the claim. State
 the claim, and attach no pointer to it.
 
-A reader who wants the convention behind a claim can read the convention. A
-reader who wants the reasoning reads the pull request that introduced it.
+Where a reader needs another document to act, point at it from the sentence that
+says what the thing is. The other document holds a shape, a list, or a procedure
+this document does not.
 
-Where a reader needs another document to act, point at it from the statement of
-what. That document holds a shape, a list, or a procedure this one does not.
+The test is where the pointer sits, not whether one exists. Read the clause the
+pointer sits on. A clause that says why the claim holds defends it, whatever
+words it uses: `because`, `since`, `which is why`, `rather than`, `for the
+reason in`. A clause that says what the thing is sends the reader somewhere.
 
-One document, one pointer. A second pointer to the same document says nothing
-the first did not.
-
-The test is where the pointer sits, not whether one exists. A pointer after
-`because`, `which is why`, or `rather than` is defending a claim. A pointer after
-a plain statement is sending the reader somewhere.
-
-No claim here needs defending more than another, because each one follows from
-some convention. A pointer on one marks it as the claim a reviewer questioned,
-which tells a reader nothing about the framework.
+No claim here needs defending more than another, because each claim follows from
+some convention. A pointer on one claim marks that claim as the one a reviewer
+questioned, which tells a reader nothing about the framework.
 
 > Wrong — the pointer sits on the reason:
 >
