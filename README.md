@@ -52,7 +52,8 @@ Rust, Ruby.
 
 ## Components
 
-Grouped as a reading order: a component's own document names what it depends on.
+Grouped as a reading order, from what everything depends on to what builds on
+the rest.
 
 Two components have no document, and deliberately: a marker facility and a
 reflection facility are shaped by what one language offers, so there is no
