@@ -36,9 +36,8 @@ that one is the convention every component follows.
 | `Factory`    | the support that derives the trace code from a throwable |
 
 There is no `Data` and no `Provider` subcomponent. Nothing configures the
-component, and the **entry point** registers the handler rather than a provider,
-because a failure raised while the container is still being built must already
-have somewhere to go ([`APPLICATION.md`](APPLICATION.md)).
+component. The entry point installs the handler, which "Install the handler once,
+at the entry point" below states.
 
 ---
 
