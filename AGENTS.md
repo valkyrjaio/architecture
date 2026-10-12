@@ -862,8 +862,9 @@ has a code shape gets a generic code example, and the example shows PHP first.
 Write an example, never a copy of the source. When you edit an existing
 document, rewrite the paragraph you touch, not the whole file.
 
-The scope, the eleven writing rules, the selection rule, and the rules for code
-examples: [`DOCUMENTATION_STYLE.md`](convention/DOCUMENTATION_STYLE.md).
+The scope, the eleven writing rules, the selection rule, the rule for a pointer,
+and the rules for code examples:
+[`DOCUMENTATION_STYLE.md`](convention/DOCUMENTATION_STYLE.md).
 
 ---
 

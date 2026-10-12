@@ -158,38 +158,39 @@ rule forbids compressing a needed sentence into a dense one. This rule forbids
 writing a sentence nobody needs. Write every needed sentence plainly, and no
 others.
 
-## Do not point at another document to justify a claim
+## Never attach a pointer to the clause that says why
 
-State what the thing is. A reader who wants the convention behind it can read
-the convention, and a reader who wants the reasoning can read the pull request
-that introduced it.
+Warning: a pointer on a reason clause reads as the authority for the claim. State
+the claim, and attach no pointer to it.
 
-Point at another document only where a reader has to go there to act, because
-that document states a shape, a list, or a procedure this one does not. Never
-point at one to show that a claim is sanctioned.
+A reader who wants the convention behind a claim can read the convention. A
+reader who wants the reasoning reads the pull request that introduced it.
 
-Warning: a review comment is what usually puts such a pointer on the page. A
-finding asks why a claim holds, and the answer goes into the document instead of
-into the pull request. Answer the finding in the pull request.
+Where a reader needs another document to act, point at it from the statement of
+what. That document holds a shape, a list, or a procedure this one does not.
 
-There is no line between a claim that needs defending and a claim that does not,
-because every statement here follows from some convention. A citation on one
-claim marks it as the one a reviewer happened to question, which tells a reader
-nothing about the framework.
+One document, one pointer. A second pointer to the same document says nothing
+the first did not.
 
-> Wrong — the pointer carries the argument:
+The test is where the pointer sits, not whether one exists. A pointer after
+`because`, `which is why`, or `rather than` is defending a claim. A pointer after
+a plain statement is sending the reader somewhere.
+
+No claim here needs defending more than another, because each one follows from
+some convention. A pointer on one marks it as the claim a reviewer questioned,
+which tells a reader nothing about the framework.
+
+> Wrong — the pointer sits on the reason:
 >
-> The entity does not declare it, because a data object holds data and not a
-> description of its own type ([`STATIC_METHODS.md`](STATIC_METHODS.md)).
+> A component's config is split per concern rather than held in one object
+> ([`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md)).
 
-> Right — the claim stands on its own:
+> Right — the reason stands alone, and the pointer moves to what the reader acts
+> on:
 >
-> The entity does not declare it.
-
-> Right — the reader has to go there to act:
->
-> The component config names the default store, and each store gets its own
-> config contract ([`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md)).
+> A component's config is split per concern rather than held in one object. Each
+> adapter gets its own config contract
+> ([`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md)).
 
 ## Code examples
 
@@ -291,8 +292,8 @@ mid-body with an ellipsis.
 states what the code does.**
 
 A copy of the source does neither. The copy drifts when the source moves, and
-the next reader trusts the copy. Rule 10 in [`AGENTS.md`](../AGENTS.md) §3
-describes the same failure for a comment.
+the next reader trusts the copy. Rule 10 in [`AGENTS.md`](../AGENTS.md) §3 holds
+the same rule for a comment.
 
 This rule holds in every document. A convention document, a design document, and
 a component's `README.md` each obey it.
