@@ -52,9 +52,12 @@ so implementing one can bring its prerequisite. The component reads only what th
 user declares, so a feature the application did not opt into does not exist for
 it.
 
-The base contract declares what authentication needs: the value a user is
-identified by, the value a password is checked against, and the field a reset
-token is stored under.
+The base contract declares the values authentication reads: the value a user is
+identified by, and the value a password is checked against.
+
+A user is an entity, so the fields those values live in belong to the entity
+registry rather than to the contract ([`ORM.md`](ORM.md)). The reset token's
+field is one of them.
 
 Capabilities an application adds by implementing one more contract:
 
