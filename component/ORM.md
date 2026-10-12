@@ -77,15 +77,16 @@ write; writing only what this caller changed does not.
 
 The component also reads metadata about an entity:
 
-| Metadata          | Names                                        |
-| ----------------- | -------------------------------------------- |
-| the table         | where the record lives                       |
-| the identifier    | the field that identifies the record         |
-| the repository    | which repository reads and writes the record |
-| the relationships | which properties hold other records          |
-| the unstored      | which properties the store does not hold     |
-| the dated fields  | where the created and changed times live     |
-| the deleted field | where a soft deletion records its time       |
+| Metadata                | Names                                         |
+| ----------------------- | --------------------------------------------- |
+| the table               | where the record lives                        |
+| the identifier          | the field that identifies the record          |
+| the repository          | which repository reads and writes the record  |
+| the relationships       | which properties hold other records           |
+| the unstored properties | which the store does not hold                 |
+| the dated fields        | where the created and last changed times live |
+| the deleted field       | where a soft deletion records its time        |
+| the date formats        | how the component writes a stored time        |
 
 **A service provider declares that metadata in the `Registry`, keyed by the
 entity class.** The entity does not declare it, because a data object holds data
@@ -95,6 +96,9 @@ and not a description of its own type
 **A port declares the metadata rather than inferring it.** A port that infers it
 needs reflection, and the cached path must not require reflection.
 
+A component that declares its own entity contract registers its own metadata in
+the same `Registry`.
+
 Two further contracts add behavior an entity opts into:
 
 | Contract      | Adds                                                     |
@@ -103,8 +107,9 @@ Two further contracts add behavior an entity opts into:
 | soft deletion | a deletion that marks the record rather than removing it |
 
 An entity that implements neither is a plain record, and the component does not
-assume either. A contract states that the behavior applies, and the `Registry`
-names the fields it reads and writes, so an entity carries neither field name.
+assume either. A contract states that the behavior applies. The `Registry` names
+the fields the component reads and writes, so an entity carries none of those
+field names.
 
 ---
 
@@ -159,6 +164,12 @@ Asking to be _in_ one rather than to _start_ one is the operation that composes.
 
 The component config names the **default store**, and each store gets its own
 config contract ([`COMPONENT_CONFIG.md`](../convention/COMPONENT_CONFIG.md)).
+
+### Register each entity's metadata first
+
+A service provider registers an entity's metadata in the `Registry` before
+anything resolves a repository for it. The `Registry` infers nothing, so an
+unregistered entity fails rather than falling back.
 
 ### Work through a repository
 
