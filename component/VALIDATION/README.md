@@ -1,7 +1,7 @@
 # Validation
 
-<!-- TEMPLATE. Write each section, then delete the comment above it. Delete this
-     comment too. A comment that reaches the published document is a defect.
+<!-- TEMPLATE. Delete every comment in this file before you publish, including
+     this one. A comment that reaches the published document is a defect.
 
      The contract this document implements:
      https://github.com/valkyrjaio/architecture/blob/26.x/component/VALIDATION/VALIDATION.md
