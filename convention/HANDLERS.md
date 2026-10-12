@@ -3,8 +3,8 @@
 The **cross-language** definition of a handler: the typed callable that a router
 or a dispatcher invokes to do an application's own work.
 
-This document holds no code example. Each port's component
-`README.md` holds the examples.
+This document holds no code example. Each port's component `README.md` holds the
+examples.
 
 ---
 
@@ -94,7 +94,8 @@ registered at run time, for instance. That route cannot reach the generated cach
 either way ([`DATA_CACHE.md`](DATA_CACHE.md)).
 
 Each list is a literal with no conditional logic, because the build tool reads
-the declaration rather than running it ([`PROVIDERS.md`](PROVIDERS.md)).
+the declaration rather than running it. The provider hierarchy and its contracts
+are in [`PROVIDERS.md`](PROVIDERS.md).
 
 ---
 

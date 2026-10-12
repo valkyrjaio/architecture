@@ -326,7 +326,7 @@ segment and the runtime is the prefix, and the default entry keeps the bare name
 yields several classes named `App` inside one protocol — a dozen once gRPC and Queue
 land — and the variant axis is not always an adapter, so it cannot be a segment.
 Queue is the case that proves it: its defaults are told apart by **who initiates a
-delivery** rather than by an adapter ([`QUEUE.md`](component/QUEUE.md)), so a
+delivery** rather than by an adapter, so a
 polling default and a sent-job default both need a name inside `App\Queue\`,
 beside a per-runtime variant for the one that needs a server.
 
