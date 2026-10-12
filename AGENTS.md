@@ -931,11 +931,11 @@ Read these in order when starting or extending a port:
 
 Then the component the work touches:
 
-- [`APPLICATION.md`](component/APPLICATION/APPLICATION.md) — boot, entry points and config
-- [`CONTAINER.md`](component/CONTAINER/CONTAINER.md) — registration and resolution
-- [`EVENT.md`](component/EVENT/EVENT.md) — dispatch and listeners
-- [`HTTP.md`](component/HTTP/HTTP.md) · [`CLI.md`](component/CLI/CLI.md) ·
-  [`GRPC.md`](component/GRPC/GRPC.md) · [`QUEUE.md`](component/QUEUE/QUEUE.md) — the protocols
+- [`APPLICATION.md`](component/application/APPLICATION.md) — boot, entry points and config
+- [`CONTAINER.md`](component/container/CONTAINER.md) — registration and resolution
+- [`EVENT.md`](component/event/EVENT.md) — dispatch and listeners
+- [`HTTP.md`](component/http/HTTP.md) · [`CLI.md`](component/cli/CLI.md) ·
+  [`GRPC.md`](component/grpc/GRPC.md) · [`QUEUE.md`](component/queue/QUEUE.md) — the protocols
 - Every other component has a document too, grouped as a reading order in
   [`README.md`](README.md)
 
