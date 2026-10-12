@@ -328,7 +328,7 @@ land — and the variant axis is not always an adapter, so it cannot be a segmen
 Queue is the case that proves it: its defaults are told apart by **who initiates a
 delivery** rather than by an adapter, so a polling default and a sent-job default
 both need a name inside `App\Queue\`, beside a per-runtime variant for the one
-that needs a server. [`QUEUE.md`](component/QUEUE.md) names the two defaults.
+that needs a server.
 
 ### Structure taxonomy (enforced)
 

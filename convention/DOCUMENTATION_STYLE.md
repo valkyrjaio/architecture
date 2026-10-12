@@ -292,8 +292,7 @@ mid-body with an ellipsis.
 states what the code does.**
 
 A copy of the source does neither. The copy drifts when the source moves, and
-the next reader trusts the copy. Rule 10 in [`AGENTS.md`](../AGENTS.md) §3 holds
-the same rule for a comment.
+the next reader trusts the copy.
 
 This rule holds in every document. A convention document, a design document, and
 a component's `README.md` each obey it.

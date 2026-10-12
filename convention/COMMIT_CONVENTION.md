@@ -289,7 +289,8 @@ their shared root:
 ```
 
 A release-version root is the signal that a commit is release bookkeeping rather
-than releasable work — see [`VERSIONING.md`](VERSIONING.md). Distinguish it from a
+than releasable work. [`VERSIONING.md`](VERSIONING.md) holds the scheme.
+Distinguish it from a
 **version line** root: `[26.x]` marks a change made _for_ a maintenance line, e.g.
 a backport.
 
