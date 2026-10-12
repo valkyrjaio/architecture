@@ -57,7 +57,7 @@ identifies a user, and the value a check compares a password against.
 
 A user is an entity, so the field each value lives in belongs to the `Registry`
 rather than to the contract ([`ORM.md`](ORM.md)). The `Registry` also names the
-field a reset token is stored under, and the field each capability below reads.
+field a reset token is stored under, and the metadata a capability below reads.
 
 Capabilities an application adds by implementing one more contract:
 
