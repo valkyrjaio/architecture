@@ -76,6 +76,53 @@ markup, which loses the structure the text wants.
 
 ---
 
+## Structure
+
+| Subcomponent | Holds                                                  |
+| ------------ | ------------------------------------------------------ |
+| `Mailer/`    | the component contract, and one class per adapter      |
+| `Data/`      | the message, its parts, and the configs                |
+| `Provider/`  | the component aggregator, and the component's bindings |
+| `Throwable/` | the component's throwable contract and its exceptions  |
+
+### An adapter is named for what it wraps, then for the role
+
+| Adapter               | Wraps                                       |
+| --------------------- | ------------------------------------------- |
+| `<Integration><Role>` | one service the port sends through          |
+| `Log<Role>`           | nothing; it records what it would have sent |
+| `Null<Role>`          | nothing; every call is discarded            |
+
+The role comes last, so a reader scanning a directory sees what the classes are
+before seeing what each one wraps. A name stacks where one adapter wraps
+another, with the outer behavior first.
+
+**The log adapter is required here.** This component reaches a third party, so a
+developer needs the calls recorded without them leaving the machine, and a test
+needs to assert that one was made.
+
+### `Data/` holds the message and its parts
+
+| Class        | Is                                          |
+| ------------ | ------------------------------------------- |
+| `Message`    | what is sent: the parts below, and the body |
+| `Recipient`  | one address, and the name beside it         |
+| `Attachment` | one file travelling with the message        |
+
+A recipient is a data object rather than a string, because an address and a name
+travel together and every adapter needs both.
+
+### Order
+
+| In                   | The order is                                        |
+| -------------------- | --------------------------------------------------- |
+| the adapters         | each integration, then the log adapter, then null   |
+| the config contracts | the component's own, then one per adapter           |
+| the provider's map   | the configs, the component contract, the adapters   |
+| the throwables       | the contract, the two bases, then the concrete ones |
+
+---
+
 ## Using it
 
 ### Configure it
