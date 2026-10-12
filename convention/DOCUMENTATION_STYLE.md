@@ -158,6 +158,39 @@ rule forbids compressing a needed sentence into a dense one. This rule forbids
 writing a sentence nobody needs. Write every needed sentence plainly, and no
 others.
 
+## Do not point at another document to justify a claim
+
+State what the thing is. A reader who wants the convention behind it can read
+the convention, and a reader who wants the reasoning can read the pull request
+that introduced it.
+
+Point at another document only where a reader has to go there to act, because
+that document states a shape, a list, or a procedure this one does not. Never
+point at one to show that a claim is sanctioned.
+
+Warning: a review comment is what usually puts such a pointer on the page. A
+finding asks why a claim holds, and the answer goes into the document instead of
+into the pull request. Answer the finding in the pull request.
+
+There is no line between a claim that needs defending and a claim that does not,
+because every statement here follows from some convention. A citation on one
+claim marks it as the one a reviewer happened to question, which tells a reader
+nothing about the framework.
+
+> Wrong — the pointer carries the argument:
+>
+> The entity does not declare it, because a data object holds data and not a
+> description of its own type ([`STATIC_METHODS.md`](STATIC_METHODS.md)).
+
+> Right — the claim stands on its own:
+>
+> The entity does not declare it.
+
+> Right — the reader has to go there to act:
+>
+> The component config names the default store, and each store gets its own
+> config contract ([`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md)).
+
 ## Code examples
 
 Every rule that has a code shape gets a code example. Prose states the rule; the
