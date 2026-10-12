@@ -1,10 +1,11 @@
 # Jwt
 
-<!-- TEMPLATE. Replace each comment with your own text, and delete the comment.
-     A comment that reaches the published document is a defect.
+<!-- TEMPLATE. Write each section, then delete the comment above it. Delete this
+     comment too. A comment that reaches the published document is a defect.
 
      The contract this document implements:
      https://github.com/valkyrjaio/architecture/blob/26.x/component/JWT/JWT.md
+     Change the ref to the branch this port targets.
 
      Read the contract first. Keep these headings, in this order, so every port's
      README reads alike.
@@ -28,7 +29,8 @@
 
 ## Signing is asymmetric or symmetric, and the config says which
 
-<!-- This port's spelling for what the contract states here, with an example. -->
+<!-- What this port adds here: the names it spells, and an example. Where the
+     contract's section states only a reason, link to it instead. -->
 
 ## Using it
 
