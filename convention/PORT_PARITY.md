@@ -20,7 +20,8 @@ Two ports are at parity for a component when all of these hold:
 4. The component's tests cover the same behavior the other ports' tests cover.
 5. Coverage is 100%, line and branch
    ([`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md)).
-6. The component has a `README.md` holding that port's examples.
+6. The component has a `README.md` holding that port's examples, with the
+   headings its `component/<NAME>/README.md` template carries, in that order.
 
 Parity is per component, not per repository. A port is "at parity for Http" or it
 is not.
