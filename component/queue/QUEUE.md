@@ -46,6 +46,55 @@ attributes are its headers.
 
 ---
 
+## Structure
+
+The component is the four areas every protocol has, plus the producing side.
+
+| Area          | Holds                                                 |
+| ------------- | ----------------------------------------------------- |
+| `Message/`    | the job, and the envelope it travels in               |
+| `Routing/`    | the jobs, and what turns a delivered message into one |
+| `Server/`     | the handler that runs a job end to end                |
+| `Middleware/` | one contract per pipeline stage, and the handlers     |
+| `Client/`     | the producing side: putting a job on a queue          |
+
+### `Message/`
+
+| Directory  | Holds                                                      |
+| ---------- | ---------------------------------------------------------- |
+| `Job/`     | the job a consumer runs                                    |
+| `Payload/` | the wire envelope, and the fields it always carries        |
+| `Marker/`  | the markers a job carries, such as one that must not retry |
+
+**The envelope's fields are always present.** An empty field is written as
+present and empty rather than left out, so a consumer never distinguishes absent
+from default.
+
+### `Routing/`
+
+| Directory     | Holds                                      |
+| ------------- | ------------------------------------------ |
+| `Data/`       | a job's declaration                        |
+| `Collection/` | the jobs, and the lookup a dispatcher uses |
+| `Collector/`  | one per way a port declares a job          |
+| `Dispatcher/` | calls the job's handler                    |
+
+### `Client/`
+
+The producing side is a **service component** nested here: one contract, one
+adapter per queue the port speaks to, and a config contract for each.
+
+### Order
+
+| In                       | The order is                                      |
+| ------------------------ | ------------------------------------------------- |
+| the areas                | as the table above lists them                     |
+| the message directories  | the job, the envelope, then the markers           |
+| the middleware contracts | the stages, in the order the pipeline runs them   |
+| the routing directories  | data, collection, collector, then what reads them |
+
+---
+
 ## Using it
 
 ### Configure it and run a consumer
