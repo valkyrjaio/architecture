@@ -38,6 +38,51 @@ by an application.
 
 ---
 
+## Structure
+
+Every class a port builds, where it sits, and what it does.
+
+| Class            | Is                                                  |
+| ---------------- | --------------------------------------------------- |
+| `Time/Time`      | the clock, in whole seconds                         |
+| `Time/Microtime` | the clock, in milliseconds                          |
+| `Time/Rfc3339`   | renders an instant as text a person and a wire read |
+
+There is no contract, no adapter, no config and no provider. A clock is a value
+a caller reads, so nothing resolves it and nothing configures it.
+
+### Each clock declares the same three operations
+
+| Operation  | Does                                                         |
+| ---------- | ------------------------------------------------------------ |
+| `get`      | returns the frozen instant where frozen, else reads the host |
+| `freeze`   | holds the clock at an instant the caller passes, or at now   |
+| `unfreeze` | returns the clock to the host                                |
+
+`get` is the only operation a caller outside a test uses. The pair around it
+exists for a test, and a port declares the pair on each clock rather than on one
+of them.
+
+The millisecond clock also answers in milliseconds, for a caller that needs the
+resolution rather than the unit the clock is named for.
+
+### `Rfc3339` renders, and reads nothing
+
+It takes an instant and returns text. It does not read a clock, so a caller
+renders a frozen instant in a test and gets the same text every run.
+
+The format is **RFC 3339**, which is the one rendering a person reads and a
+machine parses, and the one every port writes alike.
+
+### Order
+
+| In                   | The order is                     |
+| -------------------- | -------------------------------- |
+| a clock's operations | `get`, then `freeze`, `unfreeze` |
+| the clocks           | seconds, then milliseconds       |
+
+---
+
 ## Why time is a component at all
 
 **A reading of the clock is the one input a test cannot control from outside.**
@@ -71,7 +116,7 @@ components do not each write their own formatting.
 
 ## Using it
 
-### Never read the clock directly
+### Read the clock through the component
 
 Ask this component. A direct read is untestable, and it is the reason a test ends
 up sleeping or asserting a range instead of a value.
