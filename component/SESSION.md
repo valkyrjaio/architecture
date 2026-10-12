@@ -74,7 +74,7 @@ identifier the visitor holds stops naming anything.
 | ------------------- | ----------------------------------------------------------- |
 | `generateCsrfToken` | creates a token for a form, and stores it in the session    |
 | `validateCsrfToken` | checks a submitted token, and fails loudly when it is wrong |
-| `isCsrfTokenValid`  | checks a submitted token, and answers with a boolean        |
+| `isValidCsrfToken`  | checks a submitted token, and answers with a boolean        |
 
 **Two forms exist because the caller's intent differs.** A middleware that
 rejects a bad request wants the failing form; code that chooses between two paths
