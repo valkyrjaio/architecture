@@ -33,11 +33,54 @@ stream of its own.
 | `Provider`   | the service provider that binds the contract to an adapter |
 | `Throwable`  | the component's throwable contract and its exceptions      |
 
-This is the **service component shape**, shared with Mail, Sms, Broadcast, Cache,
-Crypt, Session, Filesystem and Jwt: a role subcomponent named for what the
-component does, a `Data` subcomponent for the configs, a provider, and
-throwables. The role subcomponent is named for the role, not for the component —
-here `Logger`.
+This is the **service component shape**: a role subcomponent, a `Data`
+subcomponent for the configs, a provider, and throwables. The role subcomponent
+is named for the role rather than for the component, so here it is `Logger`.
+
+---
+
+## Structure
+
+Every class a port builds, where it sits, and what it does.
+
+| Class                                                      | Is                                                                        |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `Logger/Contract/LoggerContract`                           | the component contract: one method per severity, `log`, `throwable`       |
+| `Logger/Abstract/Logger`                                   | a base the adapters share, where the port wants one                       |
+| `Logger/NullLogger`                                        | the adapter that discards every record                                    |
+| `Logger/<Integration>Logger`                               | one class per integration the port ships                                  |
+| `Data/Contract/LogConfigContract`                          | the component config contract: the default adapter                        |
+| `Data/LogConfig`                                           | the component config a port ships, used where the application writes none |
+| `Data/Contract/Log<Adapter>ConfigContract`                 | one per adapter that has settings                                         |
+| `Enum/LogLevel`                                            | the severities, each carrying its own name as its value                   |
+| `Provider/LogComponentProvider`                            | the component aggregator                                                  |
+| `Provider/LogServiceProvider`                              | the container bindings                                                    |
+| `Throwable/Contract/LogThrowable`                          | the component's throwable contract                                        |
+| `Throwable/Exception/Abstract/LogInvalidArgumentException` | the invalid-argument base                                                 |
+| `Throwable/Exception/Abstract/LogRuntimeException`         | the runtime base                                                          |
+| `Throwable/Exception/LogInvalidLogLevelException`          | raised for a severity outside the closed set                              |
+
+### Order
+
+A port declares these in one order, so the same file reads alike in every port.
+
+| In                     | The order is                                                                                |
+| ---------------------- | ------------------------------------------------------------------------------------------- |
+| the component contract | the severities from lowest to highest, then `log`, then `throwable`                         |
+| the severity values    | lowest to highest                                                                           |
+| the provider's map     | the config contracts, the component contract, the adapters, then what an adapter depends on |
+| the adapters           | each integration, then file, then in-memory, then null                                      |
+
+### `Throwable/` carries two bases and one exception
+
+The two abstract bases exist so that a caller catches the component's failures by
+kind: one for an argument the caller got wrong, one for a failure at run time.
+Every concrete exception extends one of them, and both implement
+`LogThrowable`.
+
+`LogInvalidLogLevelException` is the only concrete exception the contract
+requires. A port adds one per failure its own integrations can raise, such as a
+write that fails.
 
 ---
 
@@ -58,12 +101,16 @@ One method per severity, named for the severity, plus two general forms:
 | `log`       | a record at a severity the caller passes       |
 | `throwable` | a throwable, with its type, message and trace  |
 
-**`throwable` exists so a caller never formats a throwable itself.** Formatting it
-in the application loses the trace, or spells it differently in every place that
-logs one.
+**`throwable` exists so a caller does not need to format a throwable itself.**
+Formatting it in the application loses the trace, or spells it differently in
+every place that logs one.
 
 Every operation takes the message and an optional map of context. The context is
 data about the record, not part of the message text.
+
+**`log` validates the severity** against the closed set, and raises
+`LogInvalidLogLevelException` for a value outside it. Where that validation lives
+is the port's own business; that it happens for every adapter is not.
 
 ---
 
@@ -76,11 +123,25 @@ contract resolves to. Each adapter gets its own config contract for its own
 settings, so an application configures the one it uses and constructs nothing for
 the others ([`COMPONENT_CONFIG.md`](../../convention/COMPONENT_CONFIG.md)).
 
-### Resolve the contract, never an adapter
+**The provider registers the contract as a singleton holding the adapter it
+resolved. It does not alias the contract to the adapter.** It reads the named
+adapter from the config, resolves that adapter's own registration, and registers
+the result under the contract.
 
-Resolve the component contract from the container. The provider has already bound
-it to the adapter the config names, so application code never names an adapter
-and never changes when the adapter does.
+The two forms differ where it is observable. A singleton holds the instance from
+the moment the provider runs, so a later registration under the adapter's name
+leaves the contract on the instance it already holds. An alias resolves on each
+call, so the contract would follow the later registration.
+
+### Resolve the contract for the default, an adapter for a specific one
+
+Resolve the component contract where the configured adapter is the one you want.
+The provider has bound it to the adapter the config names, so a config change
+moves every such call site at once.
+
+Resolve an adapter by its own name where you want that adapter and not the
+default. The provider binds each one for that reason, and it is how an
+application uses more than one at a time.
 
 ### Record at the right severity
 
@@ -96,11 +157,107 @@ counted; one with an id in its text cannot.
 
 ---
 
-## The adapter every port ships
+## What a record looks like
 
-Beyond its integrations, every port ships a **null adapter** that discards every
-record. It is what a test binds, and what an application binds to turn logging
-off without touching a call site.
+**The same call writes the same record in every port.** A record is not a port's
+own format with the same parts in it; it is one format, and a tool that parses
+one port's output parses every port's.
+
+```text
+[2026-10-12T03:15:22+00:00] orders.ERROR: Payment declined {"orderId":4821}
+```
+
+The parts, in order:
+
+| Part         | Is                                                        |
+| ------------ | --------------------------------------------------------- |
+| a timestamp  | in brackets, first, as ISO 8601 with the offset           |
+| the channel  | the name the records are written under, then a dot        |
+| the severity | the severity's name in upper case, then a colon and space |
+| the message  | as the caller passed it                                   |
+| the context  | as JSON, after the message, and only where it has entries |
+
+**One record is one line, and the host's own line ending ends it.** A port uses
+the line ending the platform it runs on uses, because the file is read on that
+platform. A record whose message carries its own line breaks still ends with
+one, so the next record starts on a line of its own.
+
+The message comes before the context so that a reader greps the message. A
+record with no context ends at the message, so an empty map adds nothing to
+read.
+
+**The context is JSON**, not the way the language prints a map. JSON is the one
+rendering every port writes alike, so a reader and a parser both see one shape.
+
+## Where a record goes
+
+The file's name has two parts: a **name**, and the extension for a log. The name
+defaults to the application's own name and the current date, so a run writes
+beside the days around it rather than into one growing file.
+
+The directory defaults to the framework's own logs location. The config sets
+either part ([`COMPONENT_CONFIG.md`](../../convention/COMPONENT_CONFIG.md)).
+
+## What `throwable` records
+
+**`throwable` records at `error`**, and it puts the throwable in the message
+rather than in the context. The caller's context passes through as it was given.
+
+The message's parts, in order:
+
+| Part                    | Is                                              |
+| ----------------------- | ----------------------------------------------- |
+| the trace code          | the identifier a reader quotes when reporting   |
+| the throwable's message | what the throwable itself says                  |
+| the caller's message    | what the call site said about it                |
+| the stack trace         | last, and fenced so a reader sees where it ends |
+
+Each part is on its own line and names itself, so a reader finds the caller's
+message without reading the trace. The trace goes last because it is the longest
+part, and a reader who wants the first three should not scroll past it.
+
+## What each provider holds
+
+| Provider               | Holds                                                  |
+| ---------------------- | ------------------------------------------------------ |
+| `LogComponentProvider` | the component's own service provider, and nothing else |
+| `LogServiceProvider`   | every container binding the component makes            |
+
+The component provider declares the component's dependencies on other
+components, and the leaf providers for each concern. Log depends on no other
+component, and it registers no route, no command and no listener, so every list
+it returns is empty except the one naming `LogServiceProvider`.
+
+The service provider's map is ordered, and the order is in **Order** above. It
+reads from the most general binding to the most specific: the config contracts
+the component reads, the component contract a caller resolves, the adapters that
+contract chooses between, then anything an adapter needs built for it.
+
+## The adapters every port ships
+
+Three, whatever else the port adds.
+
+| Adapter   | Records                                        | Is for                            |
+| --------- | ---------------------------------------------- | --------------------------------- |
+| null      | nothing; every record is discarded             | turning logging off               |
+| file      | a line per record, to a file on disk           | a port with nothing else wired up |
+| in-memory | each record in a list the caller can read back | asserting on records in a test    |
+
+The **file** adapter takes no dependency outside the language, so a port is
+useful before an application chooses a logging library. A port whose ecosystem
+interface already writes files satisfies this through that adapter, as PHP does
+through its standard-interface adapter.
+
+The **in-memory** adapter is what makes a record assertable. A test binds it,
+makes the call, and reads the list, rather than reading a file or trusting that
+nothing threw.
+
+A port whose ecosystem has a standard logging interface ships an adapter for it
+as well. Which further integrations ship is the port's own choice.
+
+Log takes no dependency on another component for any of these. Every component
+logs, so an adapter that reached one would invert the dependency, and a failure
+in that component would have nowhere to report itself.
 
 A service component that reaches a third party also ships a **log adapter**,
 which records what it would have done instead of doing it. That adapter resolves
