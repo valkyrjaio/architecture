@@ -32,12 +32,46 @@ that one is the convention every component follows.
 | ------------ | -------------------------------------------------------- |
 | `Contract`   | the root throwable contract                              |
 | `Exception`  | the abstract bases every concrete throwable extends      |
-| `Handler`    | the handler contract, and one class per adapter          |
 | `Factory`    | the support that derives the trace code from a throwable |
+| `Handler`    | the handler contract, and one class per adapter          |
 
 There is no `Data` and no `Provider` subcomponent. Nothing configures the
 component. The entry point installs the handler. See
 [Install the handler once, at the entry point](#install-the-handler-once-at-the-entry-point).
+
+---
+
+## Structure
+
+Every class a port builds, where it sits, and what it does.
+
+| Class                                         | Is                                                       |
+| --------------------------------------------- | -------------------------------------------------------- |
+| `Contract/ThrowableContract`                  | the root every throwable the framework raises implements |
+| `Exception/Abstract/InvalidArgumentException` | the base for a failure the caller caused                 |
+| `Exception/Abstract/RuntimeException`         | the base for a failure at run time                       |
+| `Factory/ThrowableFactory`                    | derives the trace code from a throwable                  |
+| `Handler/Contract/ThrowableHandlerContract`   | the handler contract                                     |
+| `Handler/Abstract/ThrowableHandler`           | the base a handler extends, where the port wants one     |
+| `Handler/<Integration>ThrowableHandler`       | one class per handler the port ships                     |
+
+The root is `ThrowableContract`, not a name prefixed with the framework. A
+contract carries the `Contract` suffix in every port, and the suffix is what says
+the type is implemented rather than instantiated
+([`CONTRACTS.md`](../../convention/CONTRACTS.md)).
+
+The two bases sit under `Abstract/`, because the structure taxonomy places an
+abstract class there and a reader looks for it there
+([`STRUCTURE.md`](../../convention/STRUCTURE.md)).
+
+There is no `Data` and no `Provider` subcomponent, and no `Enum`.
+
+### Order
+
+| In                           | The order is                                            |
+| ---------------------------- | ------------------------------------------------------- |
+| the bases                    | the caller's failure, then the run-time failure         |
+| a component's own throwables | the contract, the bases it adds, then the concrete ones |
 
 ---
 
@@ -103,7 +137,20 @@ and safe to search a log for — which is the pair of properties a message does 
 have, because a message carries values that differ per occurrence.
 
 **A trace code is not a secret and not an identifier.** It does not identify an
-occurrence, only a shape, so two reports with one code are the same bug.
+occurrence, only a shape, so two reports with one code are the same bug. It is
+not a secret, so the component hashes for a short stable value rather than for
+secrecy.
+
+The code is a hash of the throwable's type and its trace, rendered as hex. The
+hash is **MD5**, so every port produces a code of one length and one alphabet.
+
+**A code is comparable within a port, not across ports.** A trace renders as the
+language prints it, so the same logical failure hashes differently in two ports.
+A reader searches one port's records for a code; a reader comparing two ports
+compares the throwable's type and message instead.
+
+A component that puts a code in its output states that the code is a port's own
+([`LOG.md`](../log/LOG.md) records one in a throwable's message).
 
 ---
 
