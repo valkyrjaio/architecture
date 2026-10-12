@@ -53,7 +53,9 @@ Rust, Ruby.
 ## Components
 
 Grouped as a reading order, from what everything depends on to what builds on
-the rest.
+the rest. The order a port **builds** them in is the tier table in
+[`PORT_PARITY.md`](convention/PORT_PARITY.md), and that is the one to follow when
+porting.
 
 Two components have no document, and deliberately: a marker facility and a
 reflection facility are shaped by what one language offers, so there is no
