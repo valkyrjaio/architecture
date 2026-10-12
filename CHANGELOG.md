@@ -1,6 +1,12 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.27...26.x)
+## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.28...26.x)
+
+## [v26.0.28](https://github.com/valkyrjaio/architecture/compare/v26.0.27...v26.0.28) - 2026-10-12
+
+* [Port] docs(#238): Require every design to be expressible in every language by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/241
+* [Component] docs: Add a document for every component that had none by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/242
+* [Convention] docs: Never attach a pointer to the clause that says why by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/245
 
 ## [v26.0.27](https://github.com/valkyrjaio/architecture/compare/v26.0.26...v26.0.27) - 2026-10-10
 
