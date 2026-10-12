@@ -41,8 +41,7 @@ conversation rather than a message, so the subcomponent is named for that.
 
 ## Structure
 
-The component is four areas, the same four
-[`HTTP.md`](../http/HTTP.md) has, in this protocol's own vocabulary.
+The component is four areas.
 
 | Area           | Holds                                                          |
 | -------------- | -------------------------------------------------------------- |
@@ -51,8 +50,8 @@ The component is four areas, the same four
 | `Server/`      | the handler that runs an invocation end to end                 |
 | `Middleware/`  | one contract per pipeline stage, and the handlers              |
 
-`Interaction/` is this protocol's `Message/`. An invocation's input and the
-output written back are both values, so they sit together.
+An invocation's input and the output written back are both values, so they sit
+together.
 
 ### `Interaction/`
 
@@ -84,10 +83,9 @@ joined them could not write unstyled text to something that is not a terminal.
 | `Marker/`     | the marker a port declares a command with, and its handler |
 
 **The caster holds the container**, because an argument's declaration cannot. It
-takes the declaration and returns the values cast
-([`STATIC_METHODS.md`](../../convention/STATIC_METHODS.md)).
-
-Http needs no caster, because its matcher already resolves what a route declares.
+takes the declaration and returns the values cast. The rule for where a
+container lives is in
+[`STATIC_METHODS.md`](../../convention/STATIC_METHODS.md).
 
 ### `Server/`
 
