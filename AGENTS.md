@@ -217,14 +217,16 @@ Then:
     approach fails. Density is itself a defect. Comment the one line in ten
     that needs a comment. Full rules and examples:
     [`COMMENTS.md`](convention/COMMENTS.md).
-14. **A doc comment stays true for every override.** A doc comment describes the
-    method, not one implementation of the method, because every override
-    inherits the comment. Keep the inherited block as it is when you override a
-    method; change only the parameter and return annotations. Inside a body,
-    clear code takes no comment — a comment explains what is unclear, or why
-    the code does something this particular way. Rule 10 describes the same
-    failure for a comment that states a current condition; rule 13 limits how
-    much a comment says. Full rules and examples: [`COMMENTS.md`](convention/COMMENTS.md).
+14. **A doc comment states what the method does, and it stays true for every
+    override.** A doc comment describes the method, not one implementation of
+    the method, because every override inherits the comment. Keep the inherited
+    block as it is when you override a method; change only the parameter and
+    return annotations. Implementation detail never goes in a doc comment.
+    Inside a body, clear code takes no comment. A comment there explains what is
+    unclear, or why the code does something this particular way. Rule 10
+    describes the same failure for a comment that states a current condition;
+    rule 13 limits how much a comment says. Full rules and examples:
+    [`COMMENTS.md`](convention/COMMENTS.md).
 15. **A type declaration carries no doc comment.** A class, a contract, a
     trait, an enum, and a struct explain themselves:
     [`STRUCTURE.md`](convention/STRUCTURE.md) encodes the kind in the name and the
