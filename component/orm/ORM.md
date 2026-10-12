@@ -156,6 +156,65 @@ Asking to be _in_ one rather than to _start_ one is the operation that composes.
 
 ---
 
+## Structure
+
+The component is nine layers. A caller uses the top one and may drop to any
+below it, which is the whole reason the layers are separate.
+
+| Subcomponent    | Holds                                                       |
+| --------------- | ----------------------------------------------------------- |
+| `Manager/`      | the component contract, the base, and one class per store   |
+| `Repository/`   | the per-entity read and write surface                       |
+| `QueryBuilder/` | one builder per statement kind, and the factory for them    |
+| `Statement/`    | a prepared statement, and its result                        |
+| `Schema/`       | tables, columns, indexes, constraints, and migrations       |
+| `Entity/`       | the record contracts an application's own records implement |
+| `Registry/`     | the entity metadata the component reads                     |
+| `Data/`         | the component config, one per store, and the query parts    |
+| `Middleware/`   | the stages a persistence operation passes through           |
+
+`Constant/`, `Enum/`, `Factory/`, `Provider/` and `Throwable/` hold what their
+names say, as in every component.
+
+### The layers are ordered, and a caller may stop at any of them
+
+| Layer           | A caller reaches for it when                                 |
+| --------------- | ------------------------------------------------------------ |
+| `Repository/`   | the operation is about one entity, which is most of the time |
+| `QueryBuilder/` | the query is shaped in a way a repository method is not      |
+| `Statement/`    | the statement is written out, and nothing above fits         |
+
+Each layer is built from the one below, so dropping a layer is giving up
+convenience rather than leaving the component.
+
+### `Data/` holds the query's parts as well as the configs
+
+| Directory          | Holds                                    |
+| ------------------ | ---------------------------------------- |
+| `Data/Where/`      | one condition                            |
+| `Data/WhereGroup/` | conditions grouped, and how they combine |
+| `Data/Join/`       | one join, and what it joins on           |
+
+A condition is a data object rather than a string, so a builder composes
+conditions and a port cannot misspell an operator.
+
+### `Entity/` declares, `Registry/` describes
+
+An entity declares what it is: its properties, and the contracts it opts into.
+The registry holds what the component needs to know _about_ an entity, keyed by
+the entity class. An entity carries none of that itself.
+
+### Order
+
+| In                        | The order is                                            |
+| ------------------------- | ------------------------------------------------------- |
+| the layers                | the manager, the repository, the builder, the statement |
+| a repository's operations | the reads, then the writes, then the deletes            |
+| the query parts           | the conditions, the groups, then the joins              |
+| the throwables            | the contract, the two bases, then the concrete ones     |
+
+---
+
 ## Using it
 
 ### Configure it
