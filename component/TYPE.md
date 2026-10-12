@@ -50,7 +50,7 @@ changed value passes a function and receives a new type, so the validity is
 re-proved on the way out rather than bypassed by a setter.
 
 That one contract is the component's whole reason for existing: a caller that
-holds any type knows these three operations, whatever the type is.
+holds any type knows these four operations, whatever the type is.
 
 ---
 
@@ -136,5 +136,5 @@ order would leak something. Decide once per application rather than per table.
 | how the flat form represents a structure                   | each language names its own scalar conversions   |
 | whether a type is a class or a wrapper over a native value | a language with value types may not need a class |
 
-The contract, its three operations, the families and the identifier schemes do
+The contract, its four operations, the families and the identifier schemes do
 not vary.
