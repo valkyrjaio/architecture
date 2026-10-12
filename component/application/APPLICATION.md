@@ -37,6 +37,74 @@ is handed what it needs and never reaches upward.
 
 ---
 
+## Structure
+
+Every class a port builds, where it sits, and what it does.
+
+| Class                                                              | Is                                                         |
+| ------------------------------------------------------------------ | ---------------------------------------------------------- |
+| `Kernel/Contract/ApplicationContract`                              | the application contract                                   |
+| `Kernel/<Framework>`                                               | the application, named for the framework                   |
+| `Kernel/ChildApplication`                                          | the application scoped to one unit of work                 |
+| `Data/Contract/ConfigContract`                                     | the config contract every application implements           |
+| `Data/Contract/<Protocol>ConfigContract`                           | one per protocol an application may run                    |
+| `Data/<Framework>Config`                                           | the config a port ships, where the application writes none |
+| `Data/<Protocol>Config`                                            | one per protocol, on the same footing                      |
+| `Directory/Directory`                                              | resolves a path inside the project                         |
+| `Constant/<Framework>Info`                                         | the framework's own version and identity                   |
+| `Entry/Abstract/App`                                               | the boot every entry point shares                          |
+| `Entry/<Protocol>`                                                 | one entry point per protocol                               |
+| `Entry/<Runtime>/<Runtime><Protocol>`                              | one per runtime that needs its own server                  |
+| `Provider/Contract/ComponentProviderContract`                      | the contract every component aggregator implements         |
+| `Provider/<Protocol>ApplicationComponentProvider`                  | the components one protocol's application needs            |
+| `Throwable/Contract/ApplicationThrowable`                          | the component's throwable contract                         |
+| `Throwable/Exception/Abstract/ApplicationInvalidArgumentException` | the caller's-failure base                                  |
+| `Throwable/Exception/Abstract/ApplicationRuntimeException`         | the run-time-failure base                                  |
+
+**The application class carries the framework's own name**, not `Application`.
+The contract is `ApplicationContract`, so the class needs a name of its own, and
+the framework's name is the one a reader recognizes.
+
+### `Entry/` has two axes, and they do not mix
+
+An entry point is named for a **protocol**, and, where a runtime needs its own
+server, for a **runtime**.
+
+| Entry                           | Runs                                      |
+| ------------------------------- | ----------------------------------------- |
+| `Entry/Abstract/App`            | nothing; it is the boot the others share  |
+| `Entry/Http`                    | the protocol on the language's own server |
+| `Entry/Cli`                     | the protocol from a command               |
+| `Entry/<Runtime>/<Runtime>Http` | the protocol on that runtime's server     |
+
+The framework groups by **adapter**, with the protocol in the class name. A
+starter application groups by **protocol**, with the runtime in the class name.
+A port keeps the two apart: a runtime directory holds the class for that
+runtime, and the protocol entry at the top holds the one the language serves
+itself.
+
+Warning: a port that nests a protocol entry under a runtime directory, or a
+runtime entry at the top, gives one class two homes and a reader two places to
+look.
+
+### One component provider per protocol
+
+A port ships an aggregator for each shape of application it supports: one for
+the protocol alone, and one per combination an application runs together. Each
+names the components that shape needs, so an application names one provider
+rather than listing components itself.
+
+### Order
+
+| In                          | The order is                                      |
+| --------------------------- | ------------------------------------------------- |
+| the config contracts        | the application's own, then one per protocol      |
+| the entry points            | the abstract, the protocols, then the runtimes    |
+| a provider's component list | the components it depends on, in dependency order |
+| the throwables              | the contract, then the two bases                  |
+
+---
+
 ## Using it
 
 ### Write the config
