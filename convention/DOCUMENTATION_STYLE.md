@@ -32,8 +32,7 @@ It does not govern:
 - Code, identifiers, file paths, commands, and program output.
 - Quoted material from another source. **Never edit a quote to make it
   compliant.**
-- Fixed third-party text, such as the license header ([`AGENTS.md`](../AGENTS.md)
-  §5).
+- Fixed third-party text, such as the license header.
 
 ## The rules
 
