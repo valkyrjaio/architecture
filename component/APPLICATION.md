@@ -50,8 +50,7 @@ middleware scheduled at each of that protocol's stages.
 
 A port whose config contracts are split per concern lets one class implement
 several of them, so an application that needs a setting from two contracts
-declares one class rather than two objects
-([`COMPONENT_CONFIG.md`](../convention/COMPONENT_CONFIG.md)).
+declares one class rather than two objects.
 
 ### List the providers in dependency order
 
@@ -141,8 +140,7 @@ anything a provider depends on is already registered when it runs.
 **The walk keeps a record of the providers it has already visited and passes over
 a repeat.** So a provider reachable from two parents registers once, and a cycle
 terminates rather than recursing without end. The build tool's walk keeps the same
-record, which is what makes the cached and uncached paths agree
-([`SINDRI.md`](../convention/SINDRI.md)).
+record, which is what makes the cached and uncached paths agree.
 
 **The config's order decides precedence among siblings**, and the post-order walk
 decides the rest: a provider's dependencies register before it, whatever order the

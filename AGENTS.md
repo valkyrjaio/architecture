@@ -326,9 +326,9 @@ segment and the runtime is the prefix, and the default entry keeps the bare name
 yields several classes named `App` inside one protocol — a dozen once gRPC and Queue
 land — and the variant axis is not always an adapter, so it cannot be a segment.
 Queue is the case that proves it: its defaults are told apart by **who initiates a
-delivery** rather than by an adapter ([`QUEUE.md`](component/QUEUE.md)), so a
-polling default and a sent-job default both need a name inside `App\Queue\`,
-beside a per-runtime variant for the one that needs a server.
+delivery** rather than by an adapter, so a polling default and a sent-job default
+both need a name inside `App\Queue\`, beside a per-runtime variant for the one
+that needs a server.
 
 ### Structure taxonomy (enforced)
 
@@ -862,8 +862,9 @@ has a code shape gets a generic code example, and the example shows PHP first.
 Write an example, never a copy of the source. When you edit an existing
 document, rewrite the paragraph you touch, not the whole file.
 
-The scope, the eleven writing rules, the selection rule, and the rules for code
-examples: [`DOCUMENTATION_STYLE.md`](convention/DOCUMENTATION_STYLE.md).
+The scope, the eleven writing rules, the selection rule, the rule for a pointer,
+and the rules for code examples:
+[`DOCUMENTATION_STYLE.md`](convention/DOCUMENTATION_STYLE.md).
 
 ---
 

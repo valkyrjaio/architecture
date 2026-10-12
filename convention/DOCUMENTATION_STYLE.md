@@ -32,8 +32,7 @@ It does not govern:
 - Code, identifiers, file paths, commands, and program output.
 - Quoted material from another source. **Never edit a quote to make it
   compliant.**
-- Fixed third-party text, such as the license header ([`AGENTS.md`](../AGENTS.md)
-  §5).
+- Fixed third-party text, such as the license header.
 
 ## The rules
 
@@ -158,6 +157,40 @@ rule forbids compressing a needed sentence into a dense one. This rule forbids
 writing a sentence nobody needs. Write every needed sentence plainly, and no
 others.
 
+## Never attach a pointer to the clause that says why
+
+Warning: a pointer on a reason clause reads as the authority for the claim. State
+the claim, and attach no pointer to it.
+
+Where a reader needs another document to act, point at it from the sentence that
+says what the thing is, or what the other document holds. That document holds a
+shape, a list, or a procedure this document does not.
+
+The test is where the pointer sits, not whether one exists. A pointer stays only
+where the answer to both questions is yes:
+
+1. Does the clause the pointer sits on say what the thing is, rather than why the
+   claim holds? A clause that says why defends the claim, whatever words it uses:
+   `because`, `since`, `which is why`, `rather than`, `for the reason in`.
+2. Does the other document hold a shape, a list, or a procedure this one does
+   not? Where it holds none of those, the reader acts on nothing there.
+
+No claim here needs defending more than another, because each claim follows from
+some convention. A pointer on one claim marks that claim as the one a reviewer
+questioned, which tells a reader nothing about the framework.
+
+> Wrong — the pointer sits on the reason:
+>
+> A component's config is split per concern rather than held in one object
+> ([`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md)).
+
+> Right — the reason stands alone, and the pointer moves to what the reader acts
+> on:
+>
+> A component's config is split per concern rather than held in one object. Each
+> adapter gets its own config contract
+> ([`COMPONENT_CONFIG.md`](COMPONENT_CONFIG.md)).
+
 ## Code examples
 
 Every rule that has a code shape gets a code example. Prose states the rule; the
@@ -258,8 +291,7 @@ mid-body with an ellipsis.
 states what the code does.**
 
 A copy of the source does neither. The copy drifts when the source moves, and
-the next reader trusts the copy. Rule 10 in [`AGENTS.md`](../AGENTS.md) §3
-describes the same failure for a comment.
+the next reader trusts the copy.
 
 This rule holds in every document. A convention document, a design document, and
 a component's `README.md` each obey it.

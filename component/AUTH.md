@@ -56,8 +56,9 @@ The base contract declares the values authentication reads: the value that
 identifies a user, and the value a check compares a password against.
 
 A user is an entity, so the field each value lives in belongs to the `Registry`
-rather than to the contract ([`ORM.md`](ORM.md)). The `Registry` also names the
-field a reset token is stored under, and the metadata a capability below reads.
+rather than to the contract. The `Registry` also names the field a reset token is
+stored under, and the metadata a capability below reads. Its entries are in
+[`ORM.md`](ORM.md).
 
 Capabilities an application adds by implementing one more contract:
 

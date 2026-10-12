@@ -3,8 +3,7 @@
 The **cross-language** definition of `sindri`, the build tool that reads an
 application's declarations and writes its data classes.
 
-This document holds no code example, for the reason in
-[`DOCUMENTATION_STYLE.md`](DOCUMENTATION_STYLE.md). What the tool produces is in
+This document holds no code example. What the tool produces is in
 [`DATA_CACHE.md`](DATA_CACHE.md).
 
 ---

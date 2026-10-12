@@ -96,7 +96,8 @@ shapes.
 What the mapping sets is the outcome, not the diagnosis: the message a person
 reads, the status a client branches on, and the status code. It never puts a
 throwable's own text or trace in the envelope, because an envelope reaches a
-client and a trace is for a log ([`THROWABLE.md`](THROWABLE.md)).
+client and a trace is for a log. The throwable contract and the component's own
+exceptions are in [`THROWABLE.md`](THROWABLE.md).
 
 ---
 
@@ -111,8 +112,8 @@ no benefit from the first.
 ### Map entities rather than serializing them
 
 Pass the entity to the entity mapping, so the storable form is produced once by
-the component rather than by each endpoint
-([`ORM.md`](ORM.md)).
+the component rather than by each endpoint. The metadata the mapping reads is in
+[`ORM.md`](ORM.md).
 
 ### Map the throwable at the `ThrowableCaught` stage
 

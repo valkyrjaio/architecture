@@ -77,8 +77,7 @@ not discoverable by a reader, and its arguments have to be parsed.
 asks the validator whether the data is valid, and the validator consults its
 rules to answer. The rules are not what the caller asks about, so a name such as
 "validate the rules" would name the wrong subject. It would also promise a
-failure rather than an answer
-([`METHOD_NAMING.md`](../convention/METHOD_NAMING.md)).
+failure rather than an answer.
 
 **The validator runs every rule rather than stopping at the first failure.** A
 person filling a form wants every problem at once, not one per submission. That is

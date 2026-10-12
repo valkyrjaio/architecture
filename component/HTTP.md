@@ -107,7 +107,7 @@ on the route itself. Both run at the stage they are scheduled for, global first.
 
 Warning: middleware is appended and never deduplicated. Scheduling the same class
 twice at one stage runs it twice, and that is the application's bug to fix rather
-than the framework's to hide ([`LIFECYCLE.md`](../convention/LIFECYCLE.md)).
+than the framework's to hide.
 
 ### Refine a declared route
 
@@ -162,7 +162,8 @@ never hits, and the write with no read never serves.
 The cache directory and the debug flag come from a config contract. An
 application that sets them implements that contract on its own config class,
 which is why a component's config is split per concern rather than held in one
-object ([`COMPONENT_CONFIG.md`](../convention/COMPONENT_CONFIG.md)).
+object. Each contract's shape is in
+[`COMPONENT_CONFIG.md`](../convention/COMPONENT_CONFIG.md).
 
 ---
 
