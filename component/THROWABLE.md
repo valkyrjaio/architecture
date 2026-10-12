@@ -36,8 +36,8 @@ that one is the convention every component follows.
 | `Factory`    | the support that derives the trace code from a throwable |
 
 There is no `Data` and no `Provider` subcomponent. Nothing configures the
-component. The entry point installs the handler, which "Install the handler once,
-at the entry point" below states.
+component, and the entry point installs the handler. See
+[Install the handler once, at the entry point](#install-the-handler-once-at-the-entry-point).
 
 ---
 
