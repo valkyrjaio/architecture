@@ -90,51 +90,51 @@ those two READMEs in its own shape.
 
 | Document                                           | Covers                                      |
 | -------------------------------------------------- | ------------------------------------------- |
-| [`THROWABLE.md`](component/THROWABLE/THROWABLE.md) | the failure root, and the handler           |
-| [`TYPE.md`](component/TYPE/TYPE.md)                | typed values, and identifiers               |
-| [`SUPPORT.md`](component/SUPPORT/SUPPORT.md)       | the clock, behind something a test controls |
+| [`THROWABLE.md`](component/throwable/THROWABLE.md) | the failure root, and the handler           |
+| [`TYPE.md`](component/type/TYPE.md)                | typed values, and identifiers               |
+| [`SUPPORT.md`](component/support/SUPPORT.md)       | the clock, behind something a test controls |
 
 **Core** — nothing runs without these.
 
 | Document                                                 | Covers                                        |
 | -------------------------------------------------------- | --------------------------------------------- |
-| [`CONTAINER.md`](component/CONTAINER/CONTAINER.md)       | registration, resolution, child scopes        |
-| [`EVENT.md`](component/EVENT/EVENT.md)                   | dispatch, listeners, the event id             |
-| [`APPLICATION.md`](component/APPLICATION/APPLICATION.md) | boot, the provider tree, config, entry points |
+| [`CONTAINER.md`](component/container/CONTAINER.md)       | registration, resolution, child scopes        |
+| [`EVENT.md`](component/event/EVENT.md)                   | dispatch, listeners, the event id             |
+| [`APPLICATION.md`](component/application/APPLICATION.md) | boot, the provider tree, config, entry points |
 
 **Protocols** — each runs the pipeline in
 [`LIFECYCLE.md`](convention/LIFECYCLE.md).
 
 | Document                               | Covers                                 |
 | -------------------------------------- | -------------------------------------- |
-| [`HTTP.md`](component/HTTP/HTTP.md)    | requests, responses, routing           |
-| [`CLI.md`](component/CLI/CLI.md)       | input, output, commands                |
-| [`GRPC.md`](component/GRPC/GRPC.md)    | calls, status, streaming, cancellation |
-| [`QUEUE.md`](component/QUEUE/QUEUE.md) | jobs, the wire envelope, outcomes      |
+| [`HTTP.md`](component/http/HTTP.md)    | requests, responses, routing           |
+| [`CLI.md`](component/cli/CLI.md)       | input, output, commands                |
+| [`GRPC.md`](component/grpc/GRPC.md)    | calls, status, streaming, cancellation |
+| [`QUEUE.md`](component/queue/QUEUE.md) | jobs, the wire envelope, outcomes      |
 
 **Services** — one contract, adapters behind it, the application names one.
 
 | Document                                              | Covers                                   |
 | ----------------------------------------------------- | ---------------------------------------- |
-| [`LOG.md`](component/LOG/LOG.md)                      | records, by severity                     |
-| [`CACHE.md`](component/CACHE/CACHE.md)                | keyed values, lifetimes, tags            |
-| [`SESSION.md`](component/SESSION/SESSION.md)          | per-visitor state, and the forgery token |
-| [`FILESYSTEM.md`](component/FILESYSTEM/FILESYSTEM.md) | files, local or remote                   |
-| [`CRYPT.md`](component/CRYPT/CRYPT.md)                | two-way encryption                       |
-| [`JWT.md`](component/JWT/JWT.md)                      | signed tokens                            |
-| [`MAIL.md`](component/MAIL/MAIL.md)                   | sending to people                        |
-| [`SMS.md`](component/SMS/SMS.md)                      | sending to phones                        |
-| [`BROADCAST.md`](component/BROADCAST/BROADCAST.md)    | pushing to live listeners                |
-| [`VIEW.md`](component/VIEW/VIEW.md)                   | rendering templates                      |
+| [`LOG.md`](component/log/LOG.md)                      | records, by severity                     |
+| [`CACHE.md`](component/cache/CACHE.md)                | keyed values, lifetimes, tags            |
+| [`SESSION.md`](component/session/SESSION.md)          | per-visitor state, and the forgery token |
+| [`FILESYSTEM.md`](component/filesystem/FILESYSTEM.md) | files, local or remote                   |
+| [`CRYPT.md`](component/crypt/CRYPT.md)                | two-way encryption                       |
+| [`JWT.md`](component/jwt/JWT.md)                      | signed tokens                            |
+| [`MAIL.md`](component/mail/MAIL.md)                   | sending to people                        |
+| [`SMS.md`](component/sms/SMS.md)                      | sending to phones                        |
+| [`BROADCAST.md`](component/broadcast/BROADCAST.md)    | pushing to live listeners                |
+| [`VIEW.md`](component/view/VIEW.md)                   | rendering templates                      |
 
 **Application** — the components an application builds on.
 
 | Document                                              | Covers                          |
 | ----------------------------------------------------- | ------------------------------- |
-| [`AUTH.md`](component/AUTH/AUTH.md)                   | who the caller is               |
-| [`ORM.md`](component/ORM/ORM.md)                      | records in a relational store   |
-| [`VALIDATION.md`](component/VALIDATION/VALIDATION.md) | rules, and what failed          |
-| [`API.md`](component/API/API.md)                      | one envelope for every response |
+| [`AUTH.md`](component/auth/AUTH.md)                   | who the caller is               |
+| [`ORM.md`](component/orm/ORM.md)                      | records in a relational store   |
+| [`VALIDATION.md`](component/validation/VALIDATION.md) | rules, and what failed          |
+| [`API.md`](component/api/API.md)                      | one envelope for every response |
 
 ## Conventions
 
