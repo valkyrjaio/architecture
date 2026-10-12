@@ -117,9 +117,12 @@ and takes the copy, which re-proves the value.
 
 Where the type to build comes from data rather than from the code — a cast a route
 parameter declares, for instance — the type is resolved through the container with
-the value as an argument. A port resolves it with the operation that builds each
-time and passes the value, never the one that returns a cached instance, and the
-registered factory returns the type contract.
+the value as an argument. A port resolves it with `getService`, never `get`,
+because `get` tries the singleton first and passes it no argument, so the value
+is discarded and nothing reports it. The registered factory returns the type
+contract. A data object never holds the container, and
+[`STATIC_METHODS.md`](../convention/STATIC_METHODS.md) names the actor that
+resolves the cast in each protocol.
 
 ### Pick an identifier scheme by how it is stored
 
