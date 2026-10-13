@@ -1,64 +1,243 @@
 # Event
 
-<!-- TEMPLATE. Delete every comment in this file before you publish, including
-     this one. A comment that reaches the published document is a defect.
+Implements
+[`EVENT.md`](https://github.com/valkyrjaio/architecture/blob/26.x/component/event/EVENT.md).
 
-     The contract this document implements:
-     https://github.com/valkyrjaio/architecture/blob/26.x/component/event/EVENT.md
-     Change the ref to the branch this port targets.
+## Introduction
 
-     Read the contract first. Keep these headings, in this order, so every port's
-     README reads alike.
+The Event component lets one part of an application announce that something
+happened, and lets other parts act on it without the announcing part knowing they
+exist.
 
-     Write what a reader of this port needs: the names this port spells, the
-     examples, and the caveats this language brings. Do not copy a rule the
-     contract states. Link to the contract instead. A rule copied here goes stale
-     when the contract changes. -->
+An **event** is an object. A **listener** is something to call when that event is
+dispatched. The component holds the listeners, and dispatching an event calls the
+ones registered for it.
 
-## What the component owns
+Use it where the thing that happened matters to code that the code causing it
+should not have to know about. An order being placed is an event; sending the
+confirmation, updating the ledger and warming a cache are listeners.
 
-<!-- One paragraph. Say what this component does, and what it does not. -->
+This document assumes the framework, where the container resolves the dispatcher
+and a provider registers the listeners.
 
-## Hierarchy
+## Resolving the dispatcher
 
-<!-- The subcomponent table, spelled the way this port spells a segment. -->
+A contract is a resolvable set of methods, independent of the class that
+satisfies it. [Container](../container/README.md) covers contracts, bindings and
+the resolve operations.
 
-## The event id
+```text
+dispatcher = container.getSingleton(EventDispatcherContract)
 
-<!-- What this port adds here: the names it spells, and an example. When the
-     contract's section states only a reason, link to the contract instead. -->
+dispatcher.dispatch(new OrderPlaced(order))
+```
 
-## Using it
+## Defining an event
 
-<!-- One subsection per step the contract names, in the same order, each with an example. -->
+An event is a plain object carrying what a listener needs. Nothing to extend and
+nothing to register.
 
-## Canonical operations
+```text
+class OrderPlaced {
+    construct(order: Order) { }
+}
+```
 
-<!-- The operation table, with this port's signature for each operation. -->
+### An event may carry its own arguments
 
-## What a listener is
+Implement the arguments contract where the event is built from values rather than
+constructed directly, which is what dispatching by id does.
 
-<!-- What this port adds here: the names it spells, and an example. When the
-     contract's section states only a reason, link to the contract instead. -->
+```text
+class OrderPlaced implements ArgumentsCapableEventContract {
 
-## The collection
+    setArguments(arguments) {
+        this.order = arguments["order"]
 
-<!-- What this port adds here: the names it spells, and an example. When the
-     contract's section states only a reason, link to the contract instead. -->
+        return this
+    }
+}
+```
 
-## Event behaviors a port must support
+### An event may collect what its listeners return
 
-<!-- What this port adds here: the names it spells, and an example. When the
-     contract's section states only a reason, link to the contract instead. -->
+Implement the collecting contract where the caller wants the listeners' results.
+Each listener's return value is added, and the caller reads them after
+dispatching.
 
-## Listener registration
+```text
+class PriceRequested implements DispatchCollectableEventContract {
 
-<!-- What this port adds here: the names it spells, and an example. When the
-     contract's section states only a reason, link to the contract instead. -->
+    addDispatch(dispatch) {
+        this.quotes.push(dispatch)
+    }
 
-## Permitted variation
+    getDispatches() {
+        return this.quotes
+    }
+}
+```
 
-<!-- Which rows of the contract's variation table this port exercises, and how. -->
+```text
+event = dispatcher.dispatch(new PriceRequested(basket))
 
-<!-- Add a section below this line only for something true of this port alone,
-     and say in one line why the contract does not carry it. -->
+cheapest = min(event.getDispatches())
+```
+
+An event that implements neither contract is a plain event, and dispatching it
+returns it unchanged.
+
+## Dispatching
+
+| Method                       | Does                                                       | Returns   |
+| ---------------------------- | ---------------------------------------------------------- | --------- |
+| `dispatch`                   | calls every listener for the event                         | the event |
+| `dispatchIfHasListeners`     | the same, and does nothing where none are registered       | the event |
+| `dispatchById`               | builds the event from an id and arguments, then dispatches | the event |
+| `dispatchByIdIfHasListeners` | the same, and does nothing where none are registered       | the event |
+
+`dispatch` returns the event, so a collecting event is read from the return
+value.
+
+```text
+// Announce it. Nothing here knows who listens.
+dispatcher.dispatch(new OrderPlaced(order))
+
+// Build from an id and arguments, for a caller holding the id as a value.
+dispatcher.dispatchById(OrderPlaced, { order: order })
+```
+
+### Use the conditional form where building the event costs something
+
+`dispatch` builds the event before it knows whether anything listens.
+`dispatchIfHasListeners` checks first, so an event whose construction reads a
+database is not built for nothing.
+
+```text
+// The event is built either way.
+dispatcher.dispatch(new ReportReady(expensiveSummary()))
+
+// Checked first.
+dispatcher.dispatchByIdIfHasListeners(ReportReady, { id: report.id })
+```
+
+## Listeners
+
+A listener is a declaration: which event, a name, and what to call. It is data
+rather than a closure, so the build tool can write it out and a cached run can
+read it back.
+
+```text
+listener = new Listener(OrderPlaced, "send-confirmation", [Mailer, "sendConfirmation"])
+```
+
+| Part        | Is                                         |
+| ----------- | ------------------------------------------ |
+| the event   | which event this listener is for           |
+| the name    | what identifies this listener among others |
+| the handler | what to call, as a named reference         |
+
+**The name matters.** It is how a listener is removed or replaced, and how a
+second registration of the same handler is told from the first.
+
+### Declaring listeners in a provider
+
+A provider of listeners declares them, and the component registers them.
+
+```text
+class AppListenerProvider implements ListenerProviderContract {
+
+    getListeners() {
+        return [
+            new Listener(OrderPlaced, "send-confirmation", [Mailer, "sendConfirmation"]),
+            new Listener(OrderPlaced, "update-ledger", [Ledger, "record"]),
+        ]
+    }
+}
+```
+
+The list is a literal with no conditional logic, because the build tool reads it
+as written rather than running it.
+
+A provider also declares `getListenerClasses`, returning the classes to scan for
+a declared listener where the port declares one with a marker. A port whose
+language has no marker returns an empty list from it.
+
+### Adding and removing at run time
+
+| Method                    | Does                                 |
+| ------------------------- | ------------------------------------ |
+| `addListener`             | adds one                             |
+| `removeListener`          | removes one                          |
+| `removeListenerById`      | removes one by its name              |
+| `hasListener`             | answers whether one is registered    |
+| `setListenersForEvent`    | replaces every listener for an event |
+| `removeListenersForEvent` | removes every listener for an event  |
+
+```text
+collection = container.getSingleton(ListenerCollectionContract)
+
+collection.addListener(
+    new Listener(OrderPlaced, "audit", [Audit, "record"])
+)
+```
+
+**Every reading and writing method has a by-id form.** A caller holding the event
+object uses the object form; a caller holding only its id uses the id form. The
+two reach the same listeners.
+
+| By object                 | By id                         |
+| ------------------------- | ----------------------------- |
+| `hasListenersForEvent`    | `hasListenersForEventById`    |
+| `getListenersForEvent`    | `getListenersForEventById`    |
+| `setListenersForEvent`    | `setListenersForEventById`    |
+| `removeListenersForEvent` | `removeListenersForEventById` |
+
+### Asking what is registered
+
+| Method                   | Returns                                |
+| ------------------------ | -------------------------------------- |
+| `getListeners`           | every listener                         |
+| `getEvents`              | every event anything is registered for |
+| `getEventsWithListeners` | every event, with its listeners        |
+
+## Exporting and importing
+
+| Method        | Does                          |
+| ------------- | ----------------------------- |
+| `getData`     | returns the listeners as data |
+| `setFromData` | loads listeners from data     |
+
+The build tool reads the providers and the markers, writes the result as data,
+and a cached run loads it rather than collecting again. The collection and the
+collector are separate for this reason: a cached run loads the collection and
+runs no collector.
+
+## Service registration
+
+The component's provider binds:
+
+| Binding                      | Is                                                      |
+| ---------------------------- | ------------------------------------------------------- |
+| `EventDispatcherContract`    | the dispatcher                                          |
+| `ListenerCollectionContract` | the listeners                                           |
+| `ListenerCollectorContract`  | the collector for the way this port declares a listener |
+
+```text
+class EventServiceProvider implements ServiceProviderContract {
+
+    publishers() {
+        return {
+            ListenerCollectionContract: [self, "publishCollection"],
+            EventDispatcherContract: [self, "publishDispatcher"],
+        }
+    }
+
+    static publishDispatcher(container) {
+        container.setSingleton(EventDispatcherContract, new EventDispatcher(
+            container.getSingleton(ContainerContract),
+            container.getSingleton(ListenerCollectionContract),
+        ))
+    }
+}
+```
