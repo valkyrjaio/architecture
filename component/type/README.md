@@ -1,45 +1,130 @@
 # Type
 
-<!-- TEMPLATE. Delete every comment in this file before you publish, including
-     this one. A comment that reaches the published document is a defect.
+Implements
+[`TYPE.md`](https://github.com/valkyrjaio/architecture/blob/26.x/component/type/TYPE.md).
 
-     The contract this document implements:
-     https://github.com/valkyrjaio/architecture/blob/26.x/component/type/TYPE.md
-     Change the ref to the branch this port targets.
+## Introduction
 
-     Read the contract first. Keep these headings, in this order, so every port's
-     README reads alike.
+The Type component wraps a value in something that proves the value is what it
+claims to be. A string that must be a slug becomes a slug type, and nothing
+downstream re-checks it.
 
-     Write what a reader of this port needs: the names this port spells, the
-     examples, and the caveats this language brings. Do not copy a rule the
-     contract states. Link to the contract instead. A rule copied here goes stale
-     when the contract changes. -->
+Use it where a value has rules. A value with no rules stays what the language
+calls it.
 
-## What the component owns
+Every type implements one contract, so code that takes any type knows four
+operations whatever the type is.
 
-<!-- One paragraph. Say what this component does, and what it does not. -->
+## The one contract
 
-## One contract
+| Operation     | Does                                               | Returns        |
+| ------------- | -------------------------------------------------- | -------------- |
+| `fromValue`   | builds the type from a raw value, proving it       | the type       |
+| `asValue`     | returns the underlying value                       | the value      |
+| `asFlatValue` | returns it reduced to a scalar                     | a scalar       |
+| `modify`      | returns a copy whose value a function transformed  | the type       |
 
-<!-- The operation table, with this port's signature for each operation. -->
+```text
+slug = SlugT.fromValue("my-first-post")
 
-## The families
+text = slug.asValue()
+```
 
-<!-- What this port adds here: the names it spells, and an example. When the
-     contract's section states only a reason, link to the contract instead. -->
+**`fromValue` is a named constructor**, so the caller names the type it wants and
+gets that type or a failure. A value that does not satisfy the type raises rather
+than producing a type that lies.
 
-## Identifiers
+```text
+try {
+    slug = SlugT.fromValue(fromRequest)
+} catch (throwable) {
+    return response.badRequest()
+}
+```
 
-<!-- What this port adds here: the names it spells, and an example. When the
-     contract's section states only a reason, link to the contract instead. -->
+### `asFlatValue` exists because a type may wrap a structure
 
-## Using it
+A collection or a model returns its structure from `asValue`. Something that must
+store or transmit one value asks for the flat form. For a type already holding a
+scalar the two agree.
 
-<!-- One subsection per step the contract names, in the same order, each with an example. -->
+```text
+collection.asValue()      // the structure
+collection.asFlatValue()  // one scalar
+```
 
-## Permitted variation
+### `modify` keeps a type immutable
 
-<!-- Which rows of the contract's variation table this port exercises, and how. -->
+A caller that wants a changed value passes a function and receives a new type, so
+the validity is proved again on the way out.
 
-<!-- Add a section below this line only for something true of this port alone,
-     and say in one line why the contract does not carry it. -->
+```text
+upper = slug.modify((value) => value.toUpperCase())
+```
+
+The original is unchanged, and `upper` is a slug or the modification raised.
+
+## The kinds
+
+| Group      | Kinds                                    |
+| ---------- | ---------------------------------------- |
+| scalar     | integer, float, string, boolean, null    |
+| structured | array, object, collection, json          |
+| modelled   | model, enumeration                       |
+| identifier | id, uid, uuid, ulid, vlid                |
+
+A kind's class carries a suffix in a language whose own type names collide with
+the kind, which is most of them.
+
+### Pick an identifier scheme by how it is stored
+
+| Scheme | Suits                                              |
+| ------ | -------------------------------------------------- |
+| uuid   | an identifier generated anywhere, ordered nowhere  |
+| ulid   | an identifier that sorts by when it was made       |
+| vlid   | an identifier with the project's own layout        |
+
+An identifier that sorts by creation keeps an index from fragmenting, which an
+identifier generated at random does not.
+
+## Casts
+
+A **cast** names a type to build a value into, and how. It is data, so a route
+parameter or a command argument declares one and something else resolves it.
+
+| Part      | Is                                             |
+| --------- | ---------------------------------------------- |
+| the type  | which type to build                            |
+| convert   | whether to convert the value, or require it already be the type |
+| is array  | whether the value is a list of that type       |
+
+```text
+cast = new Cast(SlugT, convert: true, isArray: false)
+```
+
+### Resolving a type a cast names
+
+Where the type comes from data rather than from the code, it is resolved through
+the container with the value as an argument.
+
+```text
+type = container.getService(cast.type, { value: raw })
+```
+
+Resolve with the operation that builds for this call, never the any-kind one: the
+any-kind operation tries the singleton path first and passes it no argument, so
+the value is discarded. [Container](../container/README.md) covers the resolve
+operations.
+
+**A data object never holds the container.** A route parameter declares the cast;
+the thing that resolves it holds the container.
+
+## Service registration
+
+| Binding          | Is                                        |
+| ---------------- | ----------------------------------------- |
+| each type a cast names | bound so a cast can resolve it      |
+
+A type a caller constructs by name needs no binding. A type a cast names does,
+because the cast holds the type as data and the container is what turns data into
+an object.
