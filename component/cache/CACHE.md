@@ -3,9 +3,9 @@
 The Cache component: what it does, how it is used, and the names and behavior
 every language port shares.
 
-This is the definition the ports are built from. The template beside this file,
-`README.md`, is where a port's own component document starts. It carries these
-headings in this order, so every port's document reads alike.
+This is the definition the ports are built from. `README.md` beside this file is
+the master copy of this component's README, which every port carries, so that
+every port's document for this component reads alike.
 
 It holds no code example of its own, because an example has to pick one language,
 and the spelling then travels further than the rule.
