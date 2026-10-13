@@ -1,6 +1,10 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.28...26.x)
+## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.29...26.x)
+
+## [v26.0.29](https://github.com/valkyrjaio/architecture/compare/v26.0.28...v26.0.29) - 2026-10-13
+
+* [Comment] docs: Keep implementation detail out of a doc comment by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/246
 
 ## [v26.0.28](https://github.com/valkyrjaio/architecture/compare/v26.0.27...v26.0.28) - 2026-10-12
 
