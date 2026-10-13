@@ -17,18 +17,18 @@ there is no contract, no adapter and no config.
 
 ## Reading the clock
 
-| Clock       | Answers in   |
-| ----------- | ------------ |
-| the second clock | whole seconds |
-| the millisecond clock | milliseconds |
+| Clock                 | Answers in    |
+| --------------------- | ------------- |
+| the second clock      | whole seconds |
+| the millisecond clock | milliseconds  |
 
 Each declares the same three operations.
 
-| Operation  | Does                                                      | Returns      |
-| ---------- | --------------------------------------------------------- | ------------ |
+| Operation  | Does                                                         | Returns     |
+| ---------- | ------------------------------------------------------------ | ----------- |
 | `get`      | returns the frozen instant where frozen, else reads the host | the instant |
-| `freeze`   | holds the clock at the instant passed                      | nothing      |
-| `unfreeze` | returns the clock to the host                              | nothing      |
+| `freeze`   | holds the clock at the instant passed                        | nothing     |
+| `unfreeze` | returns the clock to the host                                | nothing     |
 
 ```text
 // What application code calls.

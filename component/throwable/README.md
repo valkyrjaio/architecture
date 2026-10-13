@@ -83,8 +83,8 @@ language prints it, so the same logical failure hashes differently in two ports.
 
 The handler reports a throwable nothing caught. It has one operation.
 
-| Operation | Does                                                  |
-| --------- | ----------------------------------------------------- |
+| Operation | Does                                                                    |
+| --------- | ----------------------------------------------------------------------- |
 | `enable`  | installs the handler, at a reporting level, and says whether to display |
 
 ```text
@@ -105,9 +105,9 @@ that records one is for production, and what it records goes through
 
 ## Service registration
 
-| Binding                      | Is                                   |
-| ---------------------------- | ------------------------------------ |
-| `ThrowableHandlerContract`   | the handler the entry point installed |
+| Binding                    | Is                                    |
+| -------------------------- | ------------------------------------- |
+| `ThrowableHandlerContract` | the handler the entry point installed |
 
 There is no component config and no component provider binding a default. The
 entry point registers the handler it installed, because a failure raised while
