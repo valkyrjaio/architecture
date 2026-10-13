@@ -169,3 +169,17 @@ condition written inline at a call site is.
 
 The two contracts, their operations and the collect-then-report behavior do not
 vary.
+
+---
+
+## A rule is named for its check, and grouped by what it judges
+
+**A rule's name says what it checks**, so a rule that asks whether a value is an
+address is `IsEmail` rather than `Email`. The name reads as the question at the
+call site.
+
+**A rule's group says what kind of value it judges.** A rule about text sits with
+the text rules, whatever its name begins with. `Rule/Is/` holds only the rules
+that apply to a value of any kind.
+
+So `IsEmail` sits in the text group, because the value it judges is text.

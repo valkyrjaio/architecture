@@ -85,6 +85,16 @@ A root class instead of a contract would force every throwable to inherit from
 it, which a language with single inheritance cannot do while also extending the
 language's own base.
 
+### The root is named `ThrowableContract`
+
+It carries the `Contract` suffix, as every contract in every port does.
+
+A name that read as the language's own throwable with the framework's name in
+front of it would be consistent with one language's built-in interface. That
+consistency is worth having in a framework for one language. This framework has
+five, so the suffix every port shares is worth more than a resemblance one
+language's reader would recognise.
+
 **Whether the root contract itself extends the language's throwable type depends
 on the language.** Where that type is an interface, the contract extends it and a
 catch on the contract is checked by the compiler. Where it is a class, a contract

@@ -136,18 +136,23 @@ caller that means that says so rather than passing a flag.
 
 The manager is the component contract. It owns what is not about one entity:
 
-| Operation            | Does                                       |
-| -------------------- | ------------------------------------------ |
-| `createRepository`   | returns the repository for an entity       |
-| `createQueryBuilder` | returns a builder                          |
-| `prepare`            | prepares a statement                       |
-| `query`              | runs one                                   |
-| `beginTransaction`   | opens a transaction                        |
-| `inTransaction`      | reports whether one is open                |
-| `ensureTransaction`  | opens one only if none is open             |
-| `commit`             | commits                                    |
-| `rollback`           | abandons                                   |
-| `lastInsertId`       | reports the identifier the store generated |
+| Operation            | Does                                         |
+| -------------------- | -------------------------------------------- |
+| `createRepository`   | returns the repository for an entity         |
+| `createQueryBuilder` | returns the builders, one per statement kind |
+| `prepare`            | prepares a statement                         |
+| `query`              | runs one                                     |
+| `beginTransaction`   | opens a transaction                          |
+| `inTransaction`      | reports whether one is open                  |
+| `ensureTransaction`  | opens one only if none is open               |
+| `commit`             | commits                                      |
+
+**`createQueryBuilder` reads as one expression with the kind beside it.**
+`createQueryBuilder().insert()` is the call: the operation returns the builders,
+and the kind chosen from it is the builder. A caller never holds the thing in
+between.
+| `rollback` | abandons |
+| `lastInsertId` | reports the identifier the store generated |
 
 **`ensureTransaction` exists because transactions do not nest.** A method that
 needs a transaction cannot know whether its caller already opened one, and
