@@ -881,12 +881,12 @@ The repository holds three document directories:
 | `language/`   | the per-port deltas, one directory per language         |
 
 A component's directory holds two files. `<NAME>.md` is the contract. `README.md`
-is the template a port's own component document starts from. "How it is
-organized" in the repository [`README.md`](README.md) covers both.
+is the master copy of that component's README, which every port carries. "How it
+is organized" in the repository [`README.md`](README.md) covers both.
 
 A contract carries no code example, because an example in one language becomes
 the spelling a port copies instead of the contract it must satisfy. The examples
-live in that component's `README.md` in each port, written from the template.
+live in that component's `README.md` in each port, copied from the master.
 
 Read these in order when starting or extending a port:
 

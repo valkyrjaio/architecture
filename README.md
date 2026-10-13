@@ -25,16 +25,21 @@ Each component's directory holds two files:
 | File        | Is                                                                            |
 | ----------- | ----------------------------------------------------------------------------- |
 | `<NAME>.md` | the contract: the hierarchy, the names and the behavior every port implements |
-| `README.md` | the template a port's own component `README.md` starts from                   |
+| `README.md` | the master copy of that component's README, which every port carries          |
 
 A contract **carries no code example**. An example in one language becomes the
 spelling a port copies, instead of the contract it has to satisfy. The examples
 live in each port's own `README.md`, written from the template.
 
-**The template carries headings, not prose.** It fixes the sections and their
-order, so every port's document reads alike. The prose stays in the contract. A
-template that carried the prose would put each port's copy out of step at the
-first local edit. That drift is what this repository prevents.
+**The master carries the prose, and every port carries the master.** A port
+copies it, fills each `text` fence with that language's example, adds a row for
+what it ships alone, and changes nothing else. So every port's document for one
+component reads alike, and an edit to the prose lands here rather than in one
+port's copy.
+
+A port that needs the prose changed changes it here, and every port takes the
+change. `component/README.md` holds the rules a port follows when it copies
+one.
 
 ### A feature reaches the architecture first
 
