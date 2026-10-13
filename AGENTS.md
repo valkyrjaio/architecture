@@ -872,17 +872,21 @@ and the rules for code examples:
 
 ## 9. Where to read more
 
-The repository holds three kinds of document, and the directory says which kind:
+The repository holds three document directories:
 
-| Directory     | Holds                                                         |
-| ------------- | ------------------------------------------------------------- |
-| `component/`  | one document per component: its hierarchy, names and behavior |
-| `convention/` | a rule that holds across every component and every port       |
-| `language/`   | the per-port deltas, one directory per language               |
+| Directory     | Holds                                                   |
+| ------------- | ------------------------------------------------------- |
+| `component/`  | one lowercase directory per component                   |
+| `convention/` | a rule that holds across every component and every port |
+| `language/`   | the per-port deltas, one directory per language         |
 
-A `component/` document carries no code example, because an example in one
-language becomes the spelling a port copies instead of the contract it must
-satisfy. The examples live in that component's `README.md` in each port.
+A component's directory holds two files. `<NAME>.md` is the contract. `README.md`
+is the master copy of that component's README, which every port carries. "How it
+is organized" in the repository [`README.md`](README.md) covers both.
+
+A contract carries no code example, because an example in one language becomes
+the spelling a port copies instead of the contract it must satisfy. The examples
+live in that component's `README.md` in each port, copied from the master.
 
 Read these in order when starting or extending a port:
 
@@ -908,11 +912,11 @@ Read these in order when starting or extending a port:
 
 Then the component the work touches:
 
-- [`APPLICATION.md`](component/APPLICATION.md) — boot, entry points and config
-- [`CONTAINER.md`](component/CONTAINER.md) — registration and resolution
-- [`EVENT.md`](component/EVENT.md) — dispatch and listeners
-- [`HTTP.md`](component/HTTP.md) · [`CLI.md`](component/CLI.md) ·
-  [`GRPC.md`](component/GRPC.md) · [`QUEUE.md`](component/QUEUE.md) — the protocols
+- [`APPLICATION.md`](component/application/APPLICATION.md) — boot, entry points and config
+- [`CONTAINER.md`](component/container/CONTAINER.md) — registration and resolution
+- [`EVENT.md`](component/event/EVENT.md) — dispatch and listeners
+- [`HTTP.md`](component/http/HTTP.md) · [`CLI.md`](component/cli/CLI.md) ·
+  [`GRPC.md`](component/grpc/GRPC.md) · [`QUEUE.md`](component/queue/QUEUE.md) — the protocols
 - Every other component has a document too, grouped as a reading order in
   [`README.md`](README.md)
 
