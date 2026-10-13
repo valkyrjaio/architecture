@@ -17,12 +17,12 @@ operations whatever the type is.
 
 ## The one contract
 
-| Operation     | Does                                               | Returns        |
-| ------------- | -------------------------------------------------- | -------------- |
-| `fromValue`   | builds the type from a raw value, proving it       | the type       |
-| `asValue`     | returns the underlying value                       | the value      |
-| `asFlatValue` | returns it reduced to a scalar                     | a scalar       |
-| `modify`      | returns a copy whose value a function transformed  | the type       |
+| Operation     | Does                                              | Returns   |
+| ------------- | ------------------------------------------------- | --------- |
+| `fromValue`   | builds the type from a raw value, proving it      | the type  |
+| `asValue`     | returns the underlying value                      | the value |
+| `asFlatValue` | returns it reduced to a scalar                    | a scalar  |
+| `modify`      | returns a copy whose value a function transformed | the type  |
 
 ```text
 slug = SlugT.fromValue("my-first-post")
@@ -66,23 +66,23 @@ The original is unchanged, and `upper` is a slug or the modification raised.
 
 ## The kinds
 
-| Group      | Kinds                                    |
-| ---------- | ---------------------------------------- |
-| scalar     | integer, float, string, boolean, null    |
-| structured | array, object, collection, json          |
-| modelled   | model, enumeration                       |
-| identifier | id, uid, uuid, ulid, vlid                |
+| Group      | Kinds                                 |
+| ---------- | ------------------------------------- |
+| scalar     | integer, float, string, boolean, null |
+| structured | array, object, collection, json       |
+| modelled   | model, enumeration                    |
+| identifier | id, uid, uuid, ulid, vlid             |
 
 A kind's class carries a suffix in a language whose own type names collide with
 the kind, which is most of them.
 
 ### Pick an identifier scheme by how it is stored
 
-| Scheme | Suits                                              |
-| ------ | -------------------------------------------------- |
-| uuid   | an identifier generated anywhere, ordered nowhere  |
-| ulid   | an identifier that sorts by when it was made       |
-| vlid   | an identifier with the project's own layout        |
+| Scheme | Suits                                             |
+| ------ | ------------------------------------------------- |
+| uuid   | an identifier generated anywhere, ordered nowhere |
+| ulid   | an identifier that sorts by when it was made      |
+| vlid   | an identifier with the project's own layout       |
 
 An identifier that sorts by creation keeps an index from fragmenting, which an
 identifier generated at random does not.
@@ -92,11 +92,11 @@ identifier generated at random does not.
 A **cast** names a type to build a value into, and how. It is data, so a route
 parameter or a command argument declares one and something else resolves it.
 
-| Part      | Is                                             |
-| --------- | ---------------------------------------------- |
-| the type  | which type to build                            |
-| convert   | whether to convert the value, or require it already be the type |
-| is array  | whether the value is a list of that type       |
+| Part     | Is                                                              |
+| -------- | --------------------------------------------------------------- |
+| the type | which type to build                                             |
+| convert  | whether to convert the value, or require it already be the type |
+| is array | whether the value is a list of that type                        |
 
 ```text
 cast = new Cast(SlugT, convert: true, isArray: false)
@@ -121,9 +121,9 @@ the thing that resolves it holds the container.
 
 ## Service registration
 
-| Binding          | Is                                        |
-| ---------------- | ----------------------------------------- |
-| each type a cast names | bound so a cast can resolve it      |
+| Binding                | Is                             |
+| ---------------------- | ------------------------------ |
+| each type a cast names | bound so a cast can resolve it |
 
 A type a caller constructs by name needs no binding. A type a cast names does,
 because the cast holds the type as data and the container is what turns data into
