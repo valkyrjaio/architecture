@@ -182,6 +182,66 @@ A doc comment describes the method, not one implementation of the method. Every
 override inherits the comment, so a sentence about one implementation becomes
 false in the next override, and the next reader trusts the false sentence.
 
+Implementation detail never goes in a doc comment. The test is whether the
+statement binds every implementation.
+
+A statement that repeats an annotation or the first sentence goes, because a doc
+comment does not restate the signature. A statement that otherwise binds every
+implementation stays, because each override must satisfy it too. The key shape
+of a returned map binds every implementation, and no annotation carries it. A
+statement about one implementation goes, because the next override makes it
+false.
+
+A statement about one implementation takes these forms:
+
+- which internal branch returns which value
+- which guard rejects which input
+- what one line does
+
+Warning: a cut that removes the implementation detail also removes each reason.
+Move each reason the code cannot show to the line it explains. Put that reason
+in a `//` comment directly above the code. A defaulted return, a guard, and an
+early exit each take a reason this way when the reason is not obvious. Delete a
+statement that carries no reason, or whose reason the code can show. The reader
+who edits the code then finds the reason, and the reader who calls the method
+reads a short block.
+
+```php
+// Wrong — the paragraph states one implementation, so the sentences a caller
+// needs are buried.
+/**
+ * Get each route name the collection holds for a request method.
+ * The returned list holds each name once.
+ *
+ * The method reads the keys of the array that `getAll` returns, because that
+ * array is keyed by the route name. A request method the collection does not
+ * hold reaches the same line, and `array_keys` then returns an empty list.
+ *
+ * @return list<string>
+ */
+public function getNames(RequestMethod $method): array
+```
+
+```php
+// Right — one sentence states what the method does, the next binds every
+// implementation, and the reason sits above the code it explains.
+/**
+ * Get each route name the collection holds for a request method.
+ * The returned list holds each name once.
+ *
+ * @return list<string>
+ */
+public function getNames(RequestMethod $method): array
+{
+    // The collection keys each route by its name, so the keys are the names.
+    return array_keys($this->getAll($method));
+}
+```
+
+A reason that one or two lines cannot carry goes in the component's `README.md`.
+A paragraph that explains one change goes in the pull request description
+instead.
+
 ## The doc comment on an override
 
 Keep the inherited block as it is. Change only what the new signature requires —
