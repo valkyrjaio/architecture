@@ -207,8 +207,11 @@ registered.
 A child container is scoped to one unit of work. It resolves what the parent
 holds, and anything registered on the child goes away when the unit of work does.
 
+It is constructed with the parent and the registrations, rather than asked for
+from the parent:
+
 ```text
-child = container.forUnitOfWork()
+child = new ChildContainer(container, data)
 
 child.setSingleton(ServerRequestContract, request)
 
@@ -219,8 +222,12 @@ request = child.getSingleton(ServerRequestContract)
 logger = child.getSingleton(LoggerContract)
 ```
 
-Register a per-request value on the child, so one request's value never reaches
-another. The request itself is the usual case.
+**A worker entry point makes one per request.** A server that stays up between
+requests holds one parent container for the process, and gives each request a
+child, so a per-request value never reaches the next request.
+
+An entry point that serves one request per process needs none of this: the
+process is the scope.
 
 ## Exporting and importing
 
