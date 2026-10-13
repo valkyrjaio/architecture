@@ -56,7 +56,7 @@ a caller reads, so nothing resolves it and nothing configures it.
 | Operation  | Does                                                         |
 | ---------- | ------------------------------------------------------------ |
 | `get`      | returns the frozen instant where frozen, else reads the host |
-| `freeze`   | holds the clock at an instant the caller passes, or at now   |
+| `freeze`   | holds the clock at the instant the caller passes             |
 | `unfreeze` | returns the clock to the host                                |
 
 `get` is the only operation a caller outside a test uses. The pair around it
