@@ -163,7 +163,7 @@ import type {ContainerContract} from '@valkyrja/container/manager/contract'
  * read directly from AST.
  *
  * Note: TypeScript has no ::class equivalent — string constants are used
- * for all binding keys. See ContainerConstants files per component.
+ * for all binding keys. See ContainerServiceId files per component.
  *
  * @example
  * publishers(): Record<string, (c: ContainerContract) => void> {
