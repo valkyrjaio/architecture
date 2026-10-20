@@ -194,9 +194,17 @@ more would deadlock.
 **Middleware runs once per call, not once per message.** A stage is about the call,
 so a streaming call does not multiply the pipeline.
 
-**Outbound writes respect backpressure.** A send does not hand the sink more than
-it can take. Honoring that is the adapter's obligation, because only the adapter
-knows the transport's writability.
+**Outbound writes respect backpressure.** A send does not hand the transport more
+than it can take. Honoring that is the adapter's obligation for both call shapes,
+because only the adapter knows the transport's writability.
+
+Warning: most transports deliver the writability signal on the callback path. A
+send that waits for that signal on the same path blocks the signal it waits for.
+Backpressure therefore depends on a free callback path.
+
+**The handler stays off the transport's callback path for both call shapes.** The
+adapter dispatches the handler and returns from the callback at once, so the
+callback path stays free while the handler runs.
 
 ---
 
