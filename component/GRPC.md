@@ -65,6 +65,14 @@ A collector reads each class that declares a service and each method of it that
 declares a remote method. It builds the routing key from the **two** names — the
 service name and the method name — and wires the method as the handler.
 
+**A route carries an optional request message type and an optional response
+message type.** Each one names the generated message class. A `with` form sets
+each one.
+
+The framework reads neither type. An adapter is the consumer, because an adapter
+translates between the generated message and the port's own any-or-object type. A
+route that names no type still dispatches.
+
 ### Write a handler
 
 A handler receives the container and the route, and returns a service response
