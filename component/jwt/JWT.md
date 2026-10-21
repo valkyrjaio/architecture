@@ -68,9 +68,8 @@ verify it, so it is for tokens this application both issues and reads. An
 asymmetric token can be verified by a party that cannot issue one, which is what
 lets another service trust a token without being able to mint it.
 
-Each adapter gets its own config contract, because a shared secret and a key pair
-are not the same settings, and an adapter adds whatever its library needs. Each
-contract's shape is in
+Each adapter gets its own config contract for whatever its library needs, and
+each algorithm family gets one for its keys. Each contract's shape is in
 [`COMPONENT_CONFIG.md`](../../convention/COMPONENT_CONFIG.md).
 
 Every port also ships a **null adapter**, which encodes and decodes without
@@ -82,13 +81,13 @@ test.
 
 ## Structure
 
-| Subcomponent | Holds                                                     |
-| ------------ | --------------------------------------------------------- |
-| `Manager/`   | the component contract, and one class per adapter         |
-| `Data/`      | the component config, and one config per algorithm family |
-| `Enum/`      | the algorithms, as a closed set                           |
-| `Provider/`  | the component aggregator, and the component's bindings    |
-| `Throwable/` | the component's throwable contract and its exceptions     |
+| Subcomponent | Holds                                                           |
+| ------------ | --------------------------------------------------------------- |
+| `Manager/`   | the component contract, and one class per adapter               |
+| `Data/`      | the component config, one per adapter, one per algorithm family |
+| `Enum/`      | the algorithms, as a closed set                                 |
+| `Provider/`  | the component aggregator, and the component's bindings          |
+| `Throwable/` | the component's throwable contract and its exceptions           |
 
 ### An adapter is named for what it wraps, then for the role
 
@@ -107,17 +106,23 @@ choice.
 ### A config per algorithm family, not per algorithm
 
 A shared secret and a key pair are not the same settings, so each family gets its
-own config contract. The algorithm itself is a value in `Enum/`, and a family's
-config names which of its algorithms is used.
+own config contract, holding that family's keys. The algorithm itself is a value
+in `Enum/`.
+
+**The adapter's config names the algorithm, not the family's.** The algorithm is
+what decides which family the adapter reads, so it cannot sit in the family it
+selects. An adapter whose config leaves the algorithm unset keeps the adapter's
+default, reads the family that default belongs to, and signs with that family's
+default key.
 
 ### Order
 
-| In                   | The order is                                        |
-| -------------------- | --------------------------------------------------- |
-| the adapters         | each integration, then the shared kinds, then null  |
-| the config contracts | the component's own, then one per adapter           |
-| the provider's map   | the configs, the component contract, the adapters   |
-| the throwables       | the contract, the two bases, then the concrete ones |
+| In                   | The order is                                            |
+| -------------------- | ------------------------------------------------------- |
+| the adapters         | each integration, then the shared kinds, then null      |
+| the config contracts | the component's own, each adapter's, then each family's |
+| the provider's map   | the configs, the component contract, the adapters       |
+| the throwables       | the contract, the two bases, then the concrete ones     |
 
 ---
 
