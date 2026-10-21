@@ -47,8 +47,9 @@ claims = jwt.decode(token)
 ```
 
 **`decode` verifies before it returns.** A token whose signature does not verify
-raises rather than returning claims, so there is no path where unverified claims
-reach the caller.
+raises rather than returning claims, so a caller that holds claims holds verified
+ones. The null adapter is the exception, which is why it is bound in a test and
+nowhere else.
 
 ```text
 try {
@@ -67,8 +68,8 @@ decoding.
 
 ## Configuration
 
-The component reads one config contract of its own, plus one per algorithm
-family.
+The component reads one config contract of its own, one for the adapter, and one
+per algorithm family.
 
 Your application has one config class. Where it implements one of these
 contracts, the component's provider binds your class. Where it does not, the
@@ -90,21 +91,34 @@ provider binds the component's own default.
 **There is no log adapter here.** A token is the value, so recording what would
 have been signed records the claims and produces nothing a caller can use.
 
-### A config per algorithm family
+### The algorithm, and a config per family
 
-A shared secret and a key pair are not the same settings, so each family gets its
-own config contract. The algorithm is a value in the component's closed set, and
-the family's config names which one is used.
+The adapter's own config names the algorithm, and the algorithm decides which
+family the adapter reads its keys from. A shared secret and a key pair are not
+the same settings, so each family holds its keys in a config of its own. The
+algorithm is a value in the component's closed set.
 
-| Family        | Property             | Holds                      |
-| ------------- | -------------------- | -------------------------- |
-| shared secret | `<family>Key`        | the secret both sides hold |
-| key pair      | `<family>PrivateKey` | the key that signs         |
-|               | `<family>PublicKey`  | the key that verifies      |
+| Config                 | Property             | Holds                      |
+| ---------------------- | -------------------- | -------------------------- |
+| the adapter's own      | `<library>Algorithm` | which algorithm signs      |
+| a shared-secret family | `<family>Key`        | the secret both sides hold |
+| a key-pair family      | `<family>PrivateKey` | the key that signs         |
+|                        | `<family>PublicKey`  | the key that verifies      |
+
+**Name the algorithm as well as the keys.** A config that sets a family's keys
+and leaves the algorithm alone keeps the adapter's default algorithm, so the
+adapter reads a different family and signs with that family's default key.
 
 ```text
-class Config implements ConfigContract, JwtConfigContract, JwtRsConfigContract {
-    defaultJwt = FirebaseJwt
+class Config implements
+    ConfigContract,
+    JwtConfigContract,
+    Jwt<Library>ConfigContract,
+    JwtRsConfigContract {
+
+    defaultJwt = <Library>Jwt
+
+    <library>Algorithm = Algorithm.RS256
 
     rsPrivateKey = file("/etc/keys/jwt.key")
     rsPublicKey = file("/etc/keys/jwt.pub")
@@ -162,4 +176,5 @@ class AppJwtServiceProvider implements ServiceProviderContract {
 | `JwtContract`        | the adapter the component config names        |
 | each adapter         | bound under its own name, for an explicit ask |
 | the component config | your application's own config class           |
+| the adapter's config | your application's own config class           |
 | each family's config | your application's own config class           |
