@@ -65,6 +65,14 @@ A collector reads each class that declares a service and each method of it that
 declares a remote method. It builds the routing key from the **two** names — the
 service name and the method name — and wires the method as the handler.
 
+**A route carries an optional request message type and an optional response
+message type.** Each one names the generated message class. A `with` form sets
+each one.
+
+The framework reads neither type. An adapter is the consumer, because an adapter
+translates between the generated message and the port's own any-or-object type. A
+route that names no type still dispatches.
+
 ### Write a handler
 
 A handler receives the container and the route, and returns a service response
@@ -186,9 +194,17 @@ more would deadlock.
 **Middleware runs once per call, not once per message.** A stage is about the call,
 so a streaming call does not multiply the pipeline.
 
-**Outbound writes respect backpressure.** A send does not hand the sink more than
-it can take. Honoring that is the adapter's obligation, because only the adapter
-knows the transport's writability.
+**Outbound writes respect backpressure.** A send does not hand the transport more
+than it can take. Honoring that is the adapter's obligation for both call shapes,
+because only the adapter knows the transport's writability.
+
+Warning: most transports deliver the writability signal on the callback path. A
+send that waits for that signal on the same path blocks the signal it waits for.
+Backpressure therefore depends on a free callback path.
+
+**The handler stays off the transport's callback path for both call shapes.** The
+adapter dispatches the handler and returns from the callback at once, so the
+callback path stays free while the handler runs.
 
 ---
 
