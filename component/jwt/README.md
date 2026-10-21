@@ -7,7 +7,8 @@ Implements
 
 The Jwt component turns a map of claims into a signed token, and a signed token
 back into the claims. The signature is what makes the token worth anything: a
-token whose signature does not verify is rejected before its claims are read.
+token whose signature does not verify is rejected before its claims are read,
+which is what the null adapter below gives up.
 
 An **adapter** is the thing that signs and verifies. Each one implements
 `JwtContract`, and each is registered under its own name.
@@ -94,28 +95,25 @@ have been signed records the claims and produces nothing a caller can use.
 ### The algorithm, and a config per family
 
 The adapter's own config names the algorithm, and the algorithm decides which
-family the adapter reads its keys from. A shared secret and a key pair are not
-the same settings, so each family holds its keys in a config of its own. The
-algorithm is a value in the component's closed set.
+family's config the adapter reads its keys from. A shared secret and a key pair
+are not the same settings, so each family holds its keys in a config of its own.
+The algorithm is a value in the component's closed set, and the component ships a
+config for the shared-secret, key-pair and Edwards-curve families.
 
-| Config                 | Property             | Holds                      |
-| ---------------------- | -------------------- | -------------------------- |
-| the adapter's own      | `<library>Algorithm` | which algorithm signs      |
-| a shared-secret family | `<family>Key`        | the secret both sides hold |
-| a key-pair family      | `<family>PrivateKey` | the key that signs         |
-|                        | `<family>PublicKey`  | the key that verifies      |
+| Config                 | Property             | Holds                      | Default             |
+| ---------------------- | -------------------- | -------------------------- | ------------------- |
+| the adapter's own      | `<library>Algorithm` | which algorithm signs      | a shared-secret one |
+| a shared-secret family | `<family>Key`        | the secret both sides hold | a placeholder       |
+| a key-pair family      | `<family>PrivateKey` | the key that signs         | a placeholder       |
+|                        | `<family>PublicKey`  | the key that verifies      | a placeholder       |
 
-**Name the algorithm as well as the keys.** A config that sets a family's keys
-and leaves the algorithm alone keeps the adapter's default algorithm, so the
-adapter reads a different family and signs with that family's default key.
+**Name the algorithm as well as the keys.** The algorithm is what selects the
+family, and its default names a shared-secret one. So a config that sets the
+key-pair keys and leaves the algorithm alone reads the shared-secret config
+instead, and signs with the placeholder secret that config ships.
 
 ```text
-class Config implements
-    ConfigContract,
-    JwtConfigContract,
-    Jwt<Library>ConfigContract,
-    JwtRsConfigContract {
-
+class Config implements ConfigContract, JwtConfigContract, Jwt<Library>ConfigContract, JwtRsConfigContract {
     defaultJwt = <Library>Jwt
 
     <library>Algorithm = Algorithm.RS256

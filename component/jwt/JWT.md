@@ -27,13 +27,13 @@ and [`AUTH.md`](../auth/AUTH.md) is where that policy usually sits.
 
 ## Hierarchy
 
-| Subcomponent | Holds                                                      |
-| ------------ | ---------------------------------------------------------- |
-| `Manager`    | the component contract, and one class per adapter          |
-| `Data`       | the component config, and one config per adapter           |
-| `Enum`       | the algorithms                                             |
-| `Provider`   | the service provider that binds the contract to an adapter |
-| `Throwable`  | the component's throwable contract and its exceptions      |
+| Subcomponent | Holds                                                                             |
+| ------------ | --------------------------------------------------------------------------------- |
+| `Manager`    | the component contract, and one class per adapter                                 |
+| `Data`       | the component config, one per adapter with settings, and one per algorithm family |
+| `Enum`       | the algorithms                                                                    |
+| `Provider`   | the service provider that binds the contract to an adapter                        |
+| `Throwable`  | the component's throwable contract and its exceptions                             |
 
 ---
 
@@ -81,13 +81,13 @@ test.
 
 ## Structure
 
-| Subcomponent | Holds                                                           |
-| ------------ | --------------------------------------------------------------- |
-| `Manager/`   | the component contract, and one class per adapter               |
-| `Data/`      | the component config, one per adapter, one per algorithm family |
-| `Enum/`      | the algorithms, as a closed set                                 |
-| `Provider/`  | the component aggregator, and the component's bindings          |
-| `Throwable/` | the component's throwable contract and its exceptions           |
+| Subcomponent | Holds                                                                         |
+| ------------ | ----------------------------------------------------------------------------- |
+| `Manager/`   | the component contract, and one class per adapter                             |
+| `Data/`      | the component config, one per adapter with settings, one per algorithm family |
+| `Enum/`      | the algorithms, as a closed set                                               |
+| `Provider/`  | the component aggregator, and the component's bindings                        |
+| `Throwable/` | the component's throwable contract and its exceptions                         |
 
 ### An adapter is named for what it wraps, then for the role
 
@@ -120,7 +120,7 @@ default key.
 | In                   | The order is                                            |
 | -------------------- | ------------------------------------------------------- |
 | the adapters         | each integration, then the shared kinds, then null      |
-| the config contracts | the component's own, each adapter's, then each family's |
+| the config contracts | the component's own, each family's, then each adapter's |
 | the provider's map   | the configs, the component contract, the adapters       |
 | the throwables       | the contract, the two bases, then the concrete ones     |
 
