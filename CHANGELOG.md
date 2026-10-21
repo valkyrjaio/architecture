@@ -1,6 +1,10 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.29...26.x)
+## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.30...26.x)
+
+## [v26.0.30](https://github.com/valkyrjaio/architecture/compare/v26.0.29...v26.0.30) - 2026-10-21
+
+* [Grpc] docs: Record the route message types and the callback-path obligation by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/247
 
 ## [v26.0.29](https://github.com/valkyrjaio/architecture/compare/v26.0.28...v26.0.29) - 2026-10-13
 
