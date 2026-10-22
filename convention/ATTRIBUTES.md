@@ -120,6 +120,10 @@ and Queue each name the attribute `Route`, because each one builds a `Route`. A
 finer attribute follows the same rule, so an attribute that builds a `Parameter`
 is named `Parameter`.
 
+**An attribute that declares a part of a composed field is named for that part.**
+It builds no data class of its own, so Grpc's class attribute is `Service`, for
+the service name it declares.
+
 Warning: an attribute named for the protocol's own vocabulary hides the pair. A
 reader cannot tell which class the attribute declares, and each port then names
 the pair its own way.
