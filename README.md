@@ -125,6 +125,7 @@ cross-port contract for either to state.
 | [`DATA_CACHE.md`](convention/DATA_CACHE.md)                   | the generated data classes                  |
 | [`SINDRI.md`](convention/SINDRI.md)                           | `sindri`, and its output                    |
 | [`METHOD_NAMING.md`](convention/METHOD_NAMING.md)             | what a method prefix promises               |
+| [`ATTRIBUTES.md`](convention/ATTRIBUTES.md)                   | what a route attribute declares             |
 | [`PACKAGE_NAMING.md`](convention/PACKAGE_NAMING.md)           | package, registry and namespace names       |
 | [`STATIC_METHODS.md`](convention/STATIC_METHODS.md)           | where a static method may live              |
 | [`COMMENTS.md`](convention/COMMENTS.md)                       | what a comment may state                    |

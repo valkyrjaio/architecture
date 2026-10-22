@@ -396,6 +396,24 @@ the in-place convention for an immutable type. **Go reports a failure with a ret
 
 The full table and the per-language spelling: [`METHOD_NAMING.md`](convention/METHOD_NAMING.md).
 
+### Route attributes
+
+A route attribute declares one argument for each field of the route it builds. The route
+data class is the one statement of what a route holds, so the attribute adds no argument
+the route cannot hold. A field the framework derives takes no argument, and a composed
+field takes one argument for each of its parts. The handler is one of those arguments, and
+it is optional, because a convenience attribute declares the same field. An application
+must name the handler on one attribute or the other.
+
+A convenience attribute declares one field apart from the route attribute, and the port
+reads both spellings into the one field. A single-valued field takes the convenience
+attribute's value, a list field adds it, and a path and a name join the class prefix, the
+route attribute's value and the method suffix. A port spells the argument list its own
+way, and the argument names stay the route's. **A language that cannot hold the value
+holds a reference to it**, so Java spells a handler as the class and the method name.
+
+The rules and the per-language spelling: [`ATTRIBUTES.md`](convention/ATTRIBUTES.md).
+
 ### Binding-key constants
 
 Per-component constants files (never one central file). The key is modeled on
@@ -898,13 +916,14 @@ Read these in order when starting or extending a port:
 10. [`TESTING_METHODOLOGY.md`](convention/TESTING_METHODOLOGY.md) — testing & 100% coverage
 11. [`PORT_PARITY.md`](convention/PORT_PARITY.md) — the baseline every port reaches
 12. [`METHOD_NAMING.md`](convention/METHOD_NAMING.md) — method name prefixes
-13. [`COMMENTS.md`](convention/COMMENTS.md) — what a comment may state
-14. [`DOCUMENTATION_STYLE.md`](convention/DOCUMENTATION_STYLE.md) — the writing rules for documentation prose
-15. [`PACKAGE_NAMING.md`](convention/PACKAGE_NAMING.md) — package, registry, and source namespace names
-16. [`SHELL_SCRIPTS.md`](convention/SHELL_SCRIPTS.md) — the rules for shell
-17. [`COMMIT_CONVENTION.md`](convention/COMMIT_CONVENTION.md) — commit & PR title format
-18. [`PR_DESCRIPTION.md`](convention/PR_DESCRIPTION.md) — what a pull request description holds
-19. [`VERSIONING.md`](convention/VERSIONING.md) — version scheme & release automation
+13. [`ATTRIBUTES.md`](convention/ATTRIBUTES.md) — what a route attribute declares
+14. [`COMMENTS.md`](convention/COMMENTS.md) — what a comment may state
+15. [`DOCUMENTATION_STYLE.md`](convention/DOCUMENTATION_STYLE.md) — the writing rules for documentation prose
+16. [`PACKAGE_NAMING.md`](convention/PACKAGE_NAMING.md) — package, registry, and source namespace names
+17. [`SHELL_SCRIPTS.md`](convention/SHELL_SCRIPTS.md) — the rules for shell
+18. [`COMMIT_CONVENTION.md`](convention/COMMIT_CONVENTION.md) — commit & PR title format
+19. [`PR_DESCRIPTION.md`](convention/PR_DESCRIPTION.md) — what a pull request description holds
+20. [`VERSIONING.md`](convention/VERSIONING.md) — version scheme & release automation
 
 Then the component the work touches:
 
