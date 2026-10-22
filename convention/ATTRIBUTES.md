@@ -55,8 +55,8 @@ handler, and a list for each of the protocol's middleware stages.
 
 **Every route attribute takes the handler as an argument, and the argument is
 optional.** The argument is optional because a convenience attribute declares the
-same field. Http, Cli and Queue name that attribute `RouteHandler`, and Grpc
-names it `MethodHandler`. The port reads both spellings into the one field.
+same field, and that attribute is named `RouteHandler`. The port reads both
+spellings into the one field.
 
 ---
 
