@@ -10,11 +10,16 @@ annotation, and Python and TypeScript have a decorator. One term for one thing i
 the rule, so this document writes **attribute** throughout.
 
 Go has no such facility. A Go application declares each route in a provider
-list, which every port supports, and that is a language limit rather than a gap.
-[`HANDLERS.md`](HANDLERS.md) holds the rest of what an attribute is: it is
-metadata, it registers nothing, each of its arguments is a literal, and a
-handler is named rather than inlined. This document holds which arguments the
-attribute takes.
+list, which every port supports. That is a language limit rather than a gap.
+
+[`HANDLERS.md`](HANDLERS.md) holds the rest of what an attribute is:
+
+- It is metadata.
+- It registers nothing.
+- Each of its arguments is a literal.
+- A handler is named rather than inlined.
+
+This document holds which arguments the attribute takes.
 
 ---
 
@@ -31,7 +36,7 @@ Two kinds of field do not map one to one:
 - **A composed field takes one argument for each of its parts.** The Grpc
   route's key is built from the service name and the remote method's name. The
   attribute on the class declares the service name, and the route attribute
-  declares the remote method's name. Rule 3 holds the order the parts join in.
+  declares the remote method's name. Section 3 holds the order the parts join in.
 
 Warning: for every other field, an argument the attribute leaves out makes that
 field undeclarable from the attribute. An application then reaches the field only
