@@ -6,9 +6,9 @@ It applies in every Valkyrja repository, and in every protocol component.
 It holds no code example. Each port's own `README.md` holds the examples.
 
 This document uses one term for the facility. PHP has an attribute, Java has an
-annotation, and Python and TypeScript have a decorator. The source tree names
-the segment that holds them one way already. The segment is `Attribute/` in PHP
-and TypeScript, and `attribute/` in Java. So this document writes **attribute**
+annotation, and Python and TypeScript have a decorator. The segment that holds a
+route attribute carries one name already. The segment is `Attribute/` in PHP and
+TypeScript, and `attribute/` in Java. So this document writes **attribute**
 throughout.
 
 Go has no such facility. A Go application declares each route in a provider
@@ -30,14 +30,13 @@ Two kinds of field do not map one to one:
 
 - **A field the framework derives takes no argument.** Http derives a dynamic
   route's regular expression from the path and the parameters. Grpc derives a
-  route's service and its method name from the method. No attribute declares a
-  derived field, because an argument for one lets an application contradict the
-  framework.
+  route's service and its method name back out of the method. No attribute
+  declares a derived field, because an argument for one lets an application
+  contradict the framework.
 - **A composed field takes one argument for each of its parts.** The Grpc
-  route's method is the service name joined to the remote method's name. The
-  attribute on the class declares the service name as a part, and the route
-  attribute declares the remote method's name as the other part. Rule 3 holds
-  the order the parts join in.
+  route's method is the one composed field. The attribute on the class declares
+  the service name as a part, and the route attribute declares the remote
+  method's name as the other part. Rule 3 holds the order the parts join in.
 
 Warning: for every other field, an argument the attribute leaves out makes that
 field undeclarable from the attribute. An application then reaches the field only
@@ -85,10 +84,14 @@ spellings combine follows the kind of field, and each kind combines one way:
   gives the leading part. A path or a name takes three parts: the class prefix,
   the route attribute's value, then the convenience attribute on the method.
 
-**An attribute on the class reaches every route in the class.** A controller
+**A path and a name on the class reach every route in the class.** A controller
 therefore declares a path prefix and a name prefix once, rather than once for
 each route. An attribute on the class also declares a part of a composed field,
 which is how Grpc declares the service name once for every method of a service.
+
+Warning: middleware and a parameter do not reach the class. A group of routes
+that shares middleware schedules it for each route, or globally in the config
+([`HTTP.md`](../component/HTTP.md)).
 
 **The convenience attribute for middleware declares no stage.** A middleware
 class states its own stages through the contracts that the class implements.
@@ -105,6 +108,7 @@ A port spells an argument list the way its language does.
 | ---------- | ------------------------ |
 | PHP        | named arguments          |
 | Java       | annotation elements      |
+| Kotlin     | annotation elements      |
 | TypeScript | one options object       |
 | Python     | keyword arguments        |
 | Go         | no attribute, a provider |
@@ -114,15 +118,10 @@ names.
 
 **A language that cannot hold the value holds a reference to it.** A Java
 annotation element takes a constant only, so it holds no callable. Java spells
-the handler as the class and the method name. The two go in one element, which
-is named for the route's field and typed as the convenience attribute. An
-attribute that holds an attribute is how Java spells a repeated attribute here
-already.
+the handler as the class and the method name instead.
 
-A Java element is optional only where it carries a default. So the handler
-element defaults to the convenience attribute, with an empty method name and
-`Void` as the sentinel class.
-
-**A language with no null spells an absent value with a sentinel.** Java's Http
-`requestStruct` element names its own contract for that, where PHP passes null.
-A default therefore differs per port, although the argument names do not.
+**A language that cannot hold an absent value marks one with a sentinel.** A
+Java annotation element takes no null, so an optional element carries a default
+that means absent. A default therefore differs per port, although the argument
+names do not. The Java spelling is in
+[`language/java/AGENTS.md`](../language/java/AGENTS.md).
