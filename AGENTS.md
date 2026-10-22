@@ -404,8 +404,9 @@ the route cannot hold. A field the framework derives takes no argument, and a co
 field takes one argument for each of its parts. The handler is one of those arguments, and
 it is optional, because a convenience attribute declares the same field.
 
-A convenience attribute declares one field apart from the route attribute, and the port
-reads both spellings into the one field. A single-valued field takes the convenience
+An attribute is named after the data class it builds, so Http, Cli and Queue each name
+the route attribute `Route`. A convenience attribute declares one field apart from the
+route attribute, and the port reads both spellings into the one field. A single-valued field takes the convenience
 attribute's value. A list field adds that value. A path and a name join three parts, which
 are the class prefix, the route attribute's value, then the method suffix. A port spells
 the argument list its own way, and the argument names stay the route's. **A language that cannot hold the value

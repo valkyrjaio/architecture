@@ -105,3 +105,16 @@ Java annotation element takes no null, so an optional element carries a default
 that means absent. A default therefore differs per port, although the argument
 names do not. The Java spelling is in
 [`language/java/AGENTS.md`](../language/java/AGENTS.md).
+
+---
+
+## 5. An attribute is named after the data class it builds
+
+**A route attribute takes the name of the data class that it builds.** Http, Cli
+and Queue each name the attribute `Route`, because each one builds a `Route`. A
+finer attribute follows the same rule, so an attribute that builds a `Parameter`
+is named `Parameter`.
+
+Warning: an attribute named for the protocol's own vocabulary hides the pair. A
+reader cannot tell which class the attribute declares, and each port then names
+the pair its own way.
