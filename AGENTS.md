@@ -402,8 +402,7 @@ A route attribute declares one argument for each field of the route it builds. T
 data class is the one statement of what a route holds, so the attribute adds no argument
 the route cannot hold. A field the framework derives takes no argument, and a composed
 field takes one argument for each of its parts. The handler is one of those arguments, and
-it is optional, because a convenience attribute declares the same field. An application
-must name the handler on one attribute or the other.
+it is optional, because a convenience attribute declares the same field.
 
 A convenience attribute declares one field apart from the route attribute, and the port
 reads both spellings into the one field. A single-valued field takes the convenience

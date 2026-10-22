@@ -41,9 +41,8 @@ attribute is still valid.
 An argument the attribute adds is worse. The argument accepts a value, and the
 route drops it.
 
-Each protocol's own route holds its own fields, and each component document
-states them. Every protocol's route holds a handler, and a list for each of the
-protocol's middleware stages.
+Each protocol's own route holds its own fields. Every protocol's route holds a
+handler, and a list for each of the protocol's middleware stages.
 
 ---
 
@@ -51,10 +50,7 @@ protocol's middleware stages.
 
 **Every route attribute takes the handler as an argument, and the argument is
 optional.** The argument is optional because the convenience attribute in rule 3
-declares the same field.
-
-An application must name the handler on the route attribute or on the
-convenience attribute. The port reads both spellings into the one field.
+declares the same field. The port reads both spellings into the one field.
 
 ---
 

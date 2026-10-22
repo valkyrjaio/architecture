@@ -54,10 +54,10 @@ Java nuances:
   share behavior via abstract classes or interface `default` methods.
 - **Attributes → annotations.** The attribute marker is a Java annotation
   (`@interface`); annotation types live in an `annotation` package.
-- **A route attribute's handler element is the class and the method name.** An
-  annotation element takes a constant only, so it holds no callable
-  ([`ATTRIBUTES.md`](../../convention/ATTRIBUTES.md)). The element is named for
-  the route's field, and it is typed as the convenience annotation, which is how
+- **A route attribute's handler element is the class and the method name**
+  ([`ATTRIBUTES.md`](../../convention/ATTRIBUTES.md)). An annotation element
+  takes a constant only, so it holds no callable. The element is named for the
+  route's field, and it is typed as the convenience annotation, which is how
   `Middlewares` already holds a `Middleware[]`. It defaults to that annotation
   with an empty method name and `Void.class`, because an element is optional
   only where it carries a default.
