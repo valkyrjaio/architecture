@@ -102,8 +102,9 @@ Each language uses its idiomatic discovery mechanism to populate `Map<key, Route
 
 - An attribute/annotation/decorator marking controllers and their handler methods, plus a
   repeatable middleware attribute dispatched to its stage by the contract type it
-  implements. An attribute takes the name of the data class it builds, and a convenience
-  attribute takes the name of the field it declares ([`ATTRIBUTES.md`](ATTRIBUTES.md)).
+  implements. A route attribute takes the name of the data class it builds, and a
+  convenience attribute takes the name of the field it declares
+  ([`ATTRIBUTES.md`](ATTRIBUTES.md)).
 - A **collector** that reflects (or, where preferred, code-generates) those into `Route`s.
 - A **route-provider contract** (`getControllerClasses()` + `getRoutes()`) that components supply, so
   the collection is built at boot from the aggregated providers.

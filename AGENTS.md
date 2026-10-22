@@ -93,8 +93,8 @@ These hold in **every** language. Do not violate them in a port.
   takes `(ContainerContract, map<string, mixed>)` because a listener has no
   route. The route is also set on the container before the handler runs, so it is
   reachable both ways; the request is reachable from the container only.
-  `#[RouteHandler]` / `@RouteHandler` / `@route_handler` is a **metadata marker
-  only**, never an active registrar. Detail:
+  A handler attribute is a **metadata marker only**, never an active registrar.
+  Detail:
   [`HANDLERS.md`](convention/HANDLERS.md).
 - **`AppConfig` is the build tool entry point.** No `valkyrja.yaml`. The app
   config class already lists the component providers; `sindri` reads it via AST.
@@ -402,11 +402,14 @@ A route attribute declares one argument for each field of the route it builds. T
 data class is the one statement of what a route holds, so the attribute adds no argument
 the route cannot hold. A field the framework derives takes no argument, and a composed
 field takes one argument for each of its parts. The handler is one of those arguments, and
-it is optional, because a convenience attribute declares the same field.
+it is optional, because a convenience attribute declares the same field. An application
+must name the handler on one attribute or the other.
 
-Two rules generate every attribute name. A route attribute takes the name of the data
-class it builds, and a convenience attribute takes the name of the field it declares. A
-port spells the argument list its own way, and the argument names stay the route's.
+Three rules generate every attribute name, so a port chooses no name for itself. An
+attribute that builds a data class takes that class's name, an attribute that declares one
+field takes that field's name, and an attribute that declares a fixed value of a field
+takes that value's name. A port spells the argument list its own way, and the argument
+names stay the route's.
 **A language that cannot hold the value holds a reference to it**, so Java spells a
 handler as the class and the method name.
 
