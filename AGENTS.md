@@ -407,9 +407,9 @@ must name the handler on one attribute or the other.
 
 A convenience attribute declares one field apart from the route attribute, and the port
 reads both spellings into the one field. A single-valued field takes the convenience
-attribute's value, a list field adds it, and a path and a name join the class prefix, the
-route attribute's value and the method suffix. A port spells the argument list its own
-way, and the argument names stay the route's. **A language that cannot hold the value
+attribute's value. A list field adds that value. A path and a name join three parts, which
+are the class prefix, the route attribute's value, then the method suffix. A port spells
+the argument list its own way, and the argument names stay the route's. **A language that cannot hold the value
 holds a reference to it**, so Java spells a handler as the class and the method name.
 
 The rules and the per-language spelling: [`ATTRIBUTES.md`](convention/ATTRIBUTES.md).

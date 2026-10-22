@@ -3,7 +3,7 @@
 The **cross-language** convention for the arguments a route attribute declares.
 It applies in every Valkyrja repository, and in every protocol component.
 
-It holds no code example. Each port's own `README.md` holds the examples.
+It holds no code example.
 
 This document uses one term for the facility. PHP has an attribute, Java has an
 annotation, and Python and TypeScript have a decorator. One term for one thing is
