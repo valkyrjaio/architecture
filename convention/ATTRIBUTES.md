@@ -49,8 +49,9 @@ handler, and a list for each of the protocol's middleware stages.
 ## 2. The handler is one of those arguments, and it is optional
 
 **Every route attribute takes the handler as an argument, and the argument is
-optional.** The argument is optional because the convenience attribute in rule 3
-declares the same field. The port reads both spellings into the one field.
+optional.** The argument is optional because a convenience attribute declares the
+same field. Http, Cli and Queue name that attribute `RouteHandler`, and Grpc
+names it `MethodHandler`. The port reads both spellings into the one field.
 
 ---
 
@@ -88,16 +89,9 @@ attribute.
 
 ## 4. The spelling varies, the argument names do not
 
-A port spells an argument list the way its language does.
-
-| Language   | An argument list is      |
-| ---------- | ------------------------ |
-| PHP        | named arguments          |
-| Java       | annotation elements      |
-| Kotlin     | annotation elements      |
-| TypeScript | one options object       |
-| Python     | keyword arguments        |
-| Go         | no attribute, a provider |
+A port spells an argument list the way its language does, and each
+`language/<name>/AGENTS.md` holds that port's spelling. PHP passes named
+arguments and Java declares annotation elements.
 
 The **names** are the same in every port, because they are the route's own field
 names.
