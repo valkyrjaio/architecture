@@ -7,8 +7,7 @@ Implements
 
 The Jwt component turns a map of claims into a signed token, and a signed token
 back into the claims. The signature is what makes the token worth anything: a
-token whose signature does not verify is rejected before its claims are read,
-which is what the null adapter below gives up.
+token whose signature does not verify is rejected before its claims are read.
 
 An **adapter** is the thing that signs and verifies. Each one implements
 `JwtContract`, and each is registered under its own name.
@@ -70,7 +69,7 @@ decoding.
 ## Configuration
 
 The component reads one config contract of its own, one for the adapter, and one
-per algorithm family.
+per key set.
 
 Your application has one config class. Where it implements one of these
 contracts, the component's provider binds your class. Where it does not, the
@@ -92,25 +91,31 @@ provider binds the component's own default.
 **There is no log adapter here.** A token is the value, so recording what would
 have been signed records the claims and produces nothing a caller can use.
 
-### The algorithm, and a config per family
+### The algorithm, and a config per key set
 
-The adapter's own config names the algorithm, and the algorithm decides which
-family's config the adapter reads its keys from. A shared secret and a key pair
-are not the same settings, so each family holds its keys in a config of its own.
-The algorithm is a value in the component's closed set, and the component ships a
-config for the shared-secret, key-pair and Edwards-curve families.
+A **key set** is the keys that one group of algorithms signs with. The adapter's
+own config names the algorithm, and the algorithm is what selects the key set
+whose config the adapter reads. Each key set holds its keys in a config of its
+own, because a shared secret and a key pair are not the same settings.
 
-| Config                 | Property             | Holds                      | Default             |
-| ---------------------- | -------------------- | -------------------------- | ------------------- |
-| the adapter's own      | `<library>Algorithm` | which algorithm signs      | a shared-secret one |
-| a shared-secret family | `<family>Key`        | the secret both sides hold | a placeholder       |
-| a key-pair family      | `<family>PrivateKey` | the key that signs         | a placeholder       |
-|                        | `<family>PublicKey`  | the key that verifies      | a placeholder       |
+| Config            | Property             | Holds                      | Default             |
+| ----------------- | -------------------- | -------------------------- | ------------------- |
+| the adapter's own | `<library>Algorithm` | which algorithm signs      | a shared-secret one |
+| a shared secret   | `<keyset>Key`        | the secret both sides hold | a placeholder       |
+| a key pair        | `<keyset>PrivateKey` | the key that signs         | a placeholder       |
+|                   | `<keyset>PublicKey`  | the key that verifies      | a placeholder       |
 
-**Name the algorithm as well as the keys.** The algorithm is what selects the
-family, and its default names a shared-secret one. So a config that sets the
+**Name the algorithm as well as the keys.** The algorithm is what selects the key
+set, and its default names a shared-secret one. So a config that sets the
 key-pair keys and leaves the algorithm alone reads the shared-secret config
 instead, and signs with the placeholder secret that config ships.
+
+Warning: this port ships a key set for some of the algorithms, not for all of
+them, and the rows above are the ones it ships. An algorithm with no key set
+signs and verifies with the application config's `key`
+([Application](../application/README.md)), which ships as a placeholder every
+installation carries. So naming such an algorithm and setting no keys signs the
+token with a value an attacker knows, and reports nothing.
 
 ```text
 class Config implements ConfigContract, JwtConfigContract, Jwt<Library>ConfigContract, JwtRsConfigContract {
@@ -123,7 +128,7 @@ class Config implements ConfigContract, JwtConfigContract, Jwt<Library>ConfigCon
 }
 ```
 
-**Choose the family by who verifies.** A shared secret is simpler and means
+**Choose the key set by who verifies.** A shared secret is simpler and means
 anything that can verify can also sign. A key pair lets something verify a token
 without being able to issue one, which is what you want once more than one
 service reads your tokens.
@@ -169,10 +174,10 @@ class AppJwtServiceProvider implements ServiceProviderContract {
 
 ## Service registration
 
-| Binding              | Is                                            |
-| -------------------- | --------------------------------------------- |
-| `JwtContract`        | the adapter the component config names        |
-| each adapter         | bound under its own name, for an explicit ask |
-| the component config | your application's own config class           |
-| the adapter's config | your application's own config class           |
-| each family's config | your application's own config class           |
+| Binding               | Is                                            |
+| --------------------- | --------------------------------------------- |
+| `JwtContract`         | the adapter the component config names        |
+| each adapter          | bound under its own name, for an explicit ask |
+| the component config  | your application's own config class           |
+| the adapter's config  | your application's own config class           |
+| each key set's config | your application's own config class           |
