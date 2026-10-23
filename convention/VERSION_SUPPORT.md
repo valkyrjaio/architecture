@@ -46,21 +46,21 @@ is no longer supported, because version 26 has shipped.
 Each port names the runtime versions that it supports. The runtime is the only
 column that differs between the ports.
 
-| Version | PHP              | Java    | Node (TypeScript) | Go    | Python |
-| :------ | :--------------- | :------ | :---------------- | :---- | :----- |
-| 25 (*)  | 8.4 – 8.6        | —       | —                 | —     | —      |
-| 26      | 8.4.27 – 8.6 (†) | 21 – 25 | 22+               | 1.26+ | 3.14+  |
-| 27      | 8.5 – 8.6        | 23 – 25 | (**)              | (**)  | (**)   |
-| 28      | 8.6+             | 25+     | (**)              | (**)  | (**)   |
+| Version | PHP               | Java    | Node (TypeScript) | Go    | Python |
+| :------ | :---------------- | :------ | :---------------- | :---- | :----- |
+| 25 (*)  | 8.4 – 8.6         | —       | —                 | —     | —      |
+| 26      | 8.4.27 – 8.6 (**) | 21 – 25 | 22+               | 1.26+ | 3.14+  |
+| 27      | 8.5 – 8.6         | 23 – 25 | (***)             | (***) | (***)  |
+| 28      | 8.6+              | 25+     | (***)             | (***) | (***)  |
 
 (*) PHP is the only port with a version 25 line. Every other port starts at
 version 26.
 
-(†) PHP 8.4.27 fixes CVE-2026-109618 and CVE-2026-109619. A Valkyrja 26 PHP
+(**) PHP 8.4.27 fixes CVE-2026-109618 and CVE-2026-109619. A Valkyrja 26 PHP
 package does not install on an earlier 8.4 release.
 
-(**) The port has not declared a runtime range for this version yet. Version 26
-is the first line for TypeScript, Go, and Python, so a later version gets its
+(***) The port has not declared a runtime range for this version yet. Version
+26 is the first line for TypeScript, Go, and Python, so a later version gets its
 range when the port declares one. Do not read the empty cell as "unsupported" —
 read it as "not yet decided".
 
