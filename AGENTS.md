@@ -402,8 +402,10 @@ A route attribute declares one argument for each field of the route it builds. T
 data class is the one statement of what a route holds, so the attribute adds no argument
 the route cannot hold. A field the framework derives takes no argument, and a composed
 field takes one argument for each of its parts. The handler is one of those arguments, and
-it is optional, because a convenience attribute declares the same field. An application
-must name the handler on one attribute or the other.
+it is optional, because a convenience attribute declares the same field. A convenience
+attribute declares one field apart from the route attribute, and the port reads both
+spellings into the one field. An application must name the handler on one attribute or
+the other.
 
 Three rules generate every attribute name, so a port chooses no name for itself. An
 attribute that builds a data class takes that class's name, an attribute that declares one
@@ -919,7 +921,7 @@ Read these in order when starting or extending a port:
 10. [`TESTING_METHODOLOGY.md`](convention/TESTING_METHODOLOGY.md) — testing & 100% coverage
 11. [`PORT_PARITY.md`](convention/PORT_PARITY.md) — the baseline every port reaches
 12. [`METHOD_NAMING.md`](convention/METHOD_NAMING.md) — method name prefixes
-13. [`ATTRIBUTES.md`](convention/ATTRIBUTES.md) — what a route attribute declares
+13. [`ATTRIBUTES.md`](convention/ATTRIBUTES.md) — what a route attribute declares, and what it is named
 14. [`COMMENTS.md`](convention/COMMENTS.md) — what a comment may state
 15. [`DOCUMENTATION_STYLE.md`](convention/DOCUMENTATION_STYLE.md) — the writing rules for documentation prose
 16. [`PACKAGE_NAMING.md`](convention/PACKAGE_NAMING.md) — package, registry, and source namespace names

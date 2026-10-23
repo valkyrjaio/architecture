@@ -81,11 +81,13 @@ one way:
   gives the leading part, and the route attribute gives the next. A convenience
   attribute on the method gives the last, where the field has three parts.
 
-**A convenience attribute for a composed field reaches every route in the
-class.** A controller therefore declares a shared leading part once, rather than
-once for each route.
+**A convenience attribute on the class, for a composed field, reaches every route
+in the class.** A controller therefore declares a shared leading part once,
+rather than once for each route. The same attribute on a method reaches that
+method's routes only.
 
-Warning: a convenience attribute for a list field does not reach the class. A
+Warning: a convenience attribute for a list field or a single-valued field does
+not reach the class. A
 group of routes that shares a list value declares it for each route, or globally
 in the config.
 
