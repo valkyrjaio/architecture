@@ -20,7 +20,9 @@ Two ports are at parity for a component when all of these hold:
 4. The component's tests cover the same behavior the other ports' tests cover.
 5. Coverage is 100%, line and branch
    ([`TESTING_METHODOLOGY.md`](TESTING_METHODOLOGY.md)).
-6. The component has a `README.md` holding that port's examples.
+6. The component's `README.md` is the master at `component/<NAME>/README.md`,
+   copied, with each `text` fence filled with this port's example and a row added
+   for what this port ships alone. Nothing else differs from the master.
 
 Parity is per component, not per repository. A port is "at parity for Http" or it
 is not.
@@ -46,6 +48,35 @@ starts the next one, because a component in a later tier depends on an earlier
 one.
 
 ---
+
+## A port ships no stub
+
+Every operation a component's document names is implemented. A port does not
+ship a method that records what it would do, returns a value it did not compute,
+or raises to say a caller reached it too early.
+
+**An unimplemented operation is worse than an absent component.** A caller reads
+the document, finds the operation, writes the call, and learns at run time that
+this port alone does not answer it. An absent component tells the caller the
+same thing at the first line of code.
+
+So a port has a component in full, or it does not have the component. There is
+no third state, and **The component baseline** above is a list of components to
+finish rather than to begin.
+
+### A declaration that raises is the document's defect, not the port's
+
+A port sometimes cannot declare what a component's document asks for. The
+language has no way to express it, so the port declares the shape and raises
+from it, which is a stub the port did not choose.
+
+Read that as a defect in the document. The document asks every port for a shape
+one language cannot write, so the shape is wrong for a cross-port contract and
+the document names a shape every port can declare.
+
+Warning: a port that leaves the raising declaration in place and moves on turns
+one document's defect into that port's permanent behavior. Report it against the
+document.
 
 ## Status is not recorded here
 

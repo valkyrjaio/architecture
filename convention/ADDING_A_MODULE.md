@@ -7,7 +7,7 @@ existing container, middleware, dispatch, error-handling, and observability mach
 reinventing any of it.
 
 If you are building a concrete module, read this alongside the design doc for that module (e.g.
-[`GRPC.md`](../component/GRPC.md)) and the component document for the closest existing one.
+[`GRPC.md`](../component/grpc/GRPC.md)) and the component document for the closest existing one.
 
 ## What a "module" is
 
@@ -203,4 +203,4 @@ framework with a build-tool composite build, then release the framework, then bu
 - **CLI** — map lookup, no client transport; closest to Queue.
 - **HTTP** — pattern matching, request/response bytes, in-core `Exchange*` server.
 - **gRPC** — map lookup, typed messages, cooperative cancellation, external adapters. See
-  [`GRPC.md`](../component/GRPC.md).
+  [`GRPC.md`](../component/grpc/GRPC.md).
