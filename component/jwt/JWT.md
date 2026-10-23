@@ -116,10 +116,10 @@ selects. An adapter whose config leaves the algorithm unset keeps the adapter's
 default, reads the key set that default belongs to, and signs with that key set's
 default key.
 
-**An algorithm with no key set signs with the application secret.** A port ships a
-key set for some of the algorithms in `Enum/`, not for all of them, so an
-algorithm outside those has no keys of its own to read. It uses the application
-config's `key` for both signing and verifying
+**An algorithm with no key set signs with the application secret.** A port need
+not ship a key set for every algorithm in `Enum/`, and an algorithm it ships none
+for has no keys of its own to read. It uses the application config's `key` for
+both signing and verifying
 ([`APPLICATION.md`](../application/APPLICATION.md)).
 
 Warning: a config that names such an algorithm and sets no keys signs, and
@@ -159,7 +159,7 @@ the rest from a store.
 ### Never accept the algorithm from the token
 
 A token states its own algorithm, and trusting that statement is how a verifier
-is tricked into checking a signature the attacker chose. The configured key set
+is tricked into checking a signature the attacker chose. The configured algorithm
 decides, and the component's adapters are the only place that decision lives.
 
 ### Expect a key rotation to invalidate tokens
