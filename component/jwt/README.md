@@ -110,9 +110,10 @@ set, and its default names a shared-secret one. So a config that sets the
 key-pair keys and leaves the algorithm alone reads the shared-secret config
 instead, and signs with the placeholder secret that config ships.
 
-Warning: this port ships a key set for some of the algorithms, not for all of
-them, and the rows above are the ones it ships. An algorithm with no key set
-signs and verifies with the application config's `key`
+Warning: the port need not ship a key set for every algorithm. A key set's
+property prefix names the algorithms it covers, so an algorithm whose prefix
+carries no properties here has no key set. An algorithm with no key set signs and
+verifies with the application config's `key`
 ([Application](../application/README.md)), which ships as a placeholder every
 installation carries. So naming such an algorithm and setting no keys signs the
 token with a value an attacker knows, and reports nothing.
