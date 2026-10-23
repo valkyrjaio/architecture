@@ -18,7 +18,7 @@ defect — the fact that PHP shipped it first does not make it right.
   namespace is `Sindri\`. Tests: `Valkyrja\Tests\` → `tests/Tests/`.
 - **Source:** `src/Valkyrja/<Module>/<SubComponent>/<Type>/<Class>.php`. Contracts
   in `Contract/` with the `Contract` suffix; shared behavior in `Abstract/`.
-- **PHP version:** `>=8.4`. Every file starts with the license header and
+- **PHP version:** `>=8.4.27`. Every file starts with the license header and
   `declare(strict_types=1);`.
 - **Style:** concrete classes `final`; overrides marked `#[Override]`. A service
   class implements its contract and carries no registration code — a service
