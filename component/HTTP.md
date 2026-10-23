@@ -222,8 +222,10 @@ stream.
 ## Routing
 
 A **route** is an immutable data object. It holds its path, its name, the methods
-it answers, its handler, its parameters, and the middleware scheduled at each
-stage. It holds no policy a caller sets per request.
+it answers, its handler and its parameters. It also holds an optional request
+struct type and an optional response struct type. It holds the middleware
+scheduled at each stage that runs after a route is matched. It holds no policy a
+caller sets per request.
 
 The route pipeline is the same in every port:
 
