@@ -1,6 +1,12 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.30...26.x)
+## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.31...26.x)
+
+## [v26.0.31](https://github.com/valkyrjaio/architecture/compare/v26.0.30...v26.0.31) - 2026-10-23
+
+* [Attribute] docs: State what a route attribute declares by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/248
+* [PHP] docs: Require PHP 8.4.27 for version 26 by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/249
+* [Component] docs: State the route fields each protocol's route holds by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/251
 
 ## [v26.0.30](https://github.com/valkyrjaio/architecture/compare/v26.0.29...v26.0.30) - 2026-10-21
 
