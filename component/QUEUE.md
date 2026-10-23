@@ -71,6 +71,9 @@ declare one on the handler method where the language allows it
 The route's name is the job's `name` field on the wire. It is a plain string, so
 renaming a handler class does not strand a job already in the queue.
 
+A route states that name, its description, its handler, and the middleware
+scheduled at each stage that runs after a route is matched.
+
 ### Write a handler
 
 A handler receives the container and the route, and returns an outcome

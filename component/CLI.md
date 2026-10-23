@@ -64,8 +64,16 @@ language allows it and list the controller classes to scan
 ([`PROVIDERS.md`](../convention/PROVIDERS.md)).
 
 A command states its name, its description, its handler, and the arguments and
-options it accepts. **Group related commands by prefixing the name**, so a
-listing shows them together.
+options it accepts. It also states the middleware scheduled at each stage that
+runs after a command is matched. **Group related commands by prefixing the
+name**, so a listing shows them together.
+
+**A command may also state help text.** The help text is a callable that returns
+a message, so an application styles that block however it wants. The declaration
+names a method rather than holding a function body.
+
+Help text is optional. The help command prints the name, the description, the
+usage, the arguments and the options always. It adds the help text after them.
 
 ### Declare arguments and options
 
@@ -73,7 +81,7 @@ An argument is positional. An option is named, with one long name and any number
 of short names. Each declares whether it is required and the type its value casts
 to, and an option also declares whether it takes a value or takes none.
 
-Give each one a description, because that description is what help text prints.
+Give each one a description, because the help output prints it.
 
 **A declared type is validated before the handler runs, and cast when it is
 read.** The router checks every value against its declaration first, so an
