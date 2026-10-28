@@ -119,7 +119,7 @@ public interface ServiceProviderContract {
 ```
 
 `publishers()` returns a map of `.class` token to static method reference. No
-`@RouteHandler` annotation on publisher methods — build tool reads method bodies
+`@Handler` annotation on publisher methods — build tool reads method bodies
 directly from AST via Trees API.
 
 ### HttpRouteProviderContract / CliRouteProviderContract
@@ -178,10 +178,10 @@ There is no handler contract per concern. The route contract declares
 modifying the route, per
 [`METHOD_NAMING.md`](../../convention/METHOD_NAMING.md).
 
-### @RouteHandler annotation on controller methods
+### @Handler annotation on controller methods
 
 ```java
-@RouteHandler(handlerClass = UserController.class, handlerMethod = "showHandler")
+@Handler(handlerClass = UserController.class, handlerMethod = "showHandler")
 
 @Parameter(name = "id", pattern = "[0-9]+")
 public ResponseContract show(String id) {
@@ -338,7 +338,7 @@ source file via Trees API.
 4. Provider contracts — ComponentProvider, ServiceProvider, RouteProvider,
    ListenerProvider
 5. The handler on the route contract — getHandler / withHandler
-6. @RouteHandler and @Parameter annotations
+6. @Handler and @Parameter annotations
 7. Records for data classes
 8. Annotation processor setup + Trees API declaration extraction
 9. JavaPoet cache data class generation

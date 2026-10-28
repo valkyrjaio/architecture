@@ -453,7 +453,7 @@ _172 files, 84 directories_
 │   │   ├── Route/
 │   │   │   ├── Middleware.php
 │   │   │   ├── Name.php
-│   │   │   └── RouteHandler.php
+│   │   │   └── Handler.php
 │   │   ├── ArgumentParameter.php
 │   │   ├── OptionParameter.php
 │   │   └── Route.php
@@ -1043,7 +1043,7 @@ _300 files, 161 directories_
 │   │   │   ├── RequestMethod.php
 │   │   │   ├── RequestStruct.php
 │   │   │   ├── ResponseStruct.php
-│   │   │   └── RouteHandler.php
+│   │   │   └── Handler.php
 │   │   ├── DynamicRoute.php
 │   │   ├── Parameter.php
 │   │   └── Route.php

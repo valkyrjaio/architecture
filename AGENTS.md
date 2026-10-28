@@ -93,8 +93,8 @@ These hold in **every** language. Do not violate them in a port.
   takes `(ContainerContract, map<string, mixed>)` because a listener has no
   route. The route is also set on the container before the handler runs, so it is
   reachable both ways; the request is reachable from the container only.
-  `#[RouteHandler]` / `@RouteHandler` / `@route_handler` is a **metadata marker
-  only**, never an active registrar. Detail:
+  A handler attribute is a **metadata marker only**, never an active registrar.
+  Detail:
   [`HANDLERS.md`](convention/HANDLERS.md).
 - **`AppConfig` is the build tool entry point.** No `valkyrja.yaml`. The app
   config class already lists the component providers; `sindri` reads it via AST.
@@ -402,17 +402,22 @@ A route attribute declares one argument for each field of the route it builds. T
 data class is the one statement of what a route holds, so the attribute adds no argument
 the route cannot hold. A field the framework derives takes no argument, and a composed
 field takes one argument for each of its parts. The handler is one of those arguments, and
-it is optional, because a convenience attribute declares the same field.
+it is optional, because a convenience attribute declares the same field. A convenience
+attribute declares one field apart from the route attribute, and the port reads both
+spellings into the one field. An application must name the handler on one attribute or
+the other.
 
-An attribute is named after the data class it builds, so Http, Cli and Queue each name
-the route attribute `Route`. A convenience attribute declares one field apart from the
-route attribute, and the port reads both spellings into the one field. A single-valued field takes the convenience
-attribute's value. A list field adds that value. A path and a name join three parts, which
-are the class prefix, the route attribute's value, then the method suffix. A port spells
-the argument list its own way, and the argument names stay the route's. **A language that cannot hold the value
-holds a reference to it**, so Java spells a handler as the class and the method name.
+Three rules generate every attribute name, so a port chooses no name for itself. An
+attribute that builds a data class takes that class's name, an attribute that declares one
+field takes that field's name, and an attribute that declares a fixed value of a field
+takes that value's name. A port spells the argument list its own way, and the argument
+names stay the route's.
+**A language that cannot hold the value holds a reference to it**, so Java spells a
+handler as the class and the method name.
 
-The rules and the per-language spelling: [`ATTRIBUTES.md`](convention/ATTRIBUTES.md).
+The document names no component's own attribute or data class, because a rule that
+carries a real name goes false when that name changes. The rules and the per-language
+spelling: [`ATTRIBUTES.md`](convention/ATTRIBUTES.md).
 
 ### Binding-key constants
 
@@ -916,7 +921,7 @@ Read these in order when starting or extending a port:
 10. [`TESTING_METHODOLOGY.md`](convention/TESTING_METHODOLOGY.md) — testing & 100% coverage
 11. [`PORT_PARITY.md`](convention/PORT_PARITY.md) — the baseline every port reaches
 12. [`METHOD_NAMING.md`](convention/METHOD_NAMING.md) — method name prefixes
-13. [`ATTRIBUTES.md`](convention/ATTRIBUTES.md) — what a route attribute declares
+13. [`ATTRIBUTES.md`](convention/ATTRIBUTES.md) — what a route attribute declares, and what it is named
 14. [`COMMENTS.md`](convention/COMMENTS.md) — what a comment may state
 15. [`DOCUMENTATION_STYLE.md`](convention/DOCUMENTATION_STYLE.md) — the writing rules for documentation prose
 16. [`PACKAGE_NAMING.md`](convention/PACKAGE_NAMING.md) — package, registry, and source namespace names
