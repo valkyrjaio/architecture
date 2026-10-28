@@ -41,27 +41,38 @@ Only the suffix differs for Go. Cross-port legibility is preserved at the stem l
 
 ### The Four Levels
 
-| Level                 | Convention                     | Notes                                                                 |
-| --------------------- | ------------------------------ | --------------------------------------------------------------------- |
-| Framework base        | `Valkyrja*`                    | abstract · extends language root                                      |
-| Component             | `ComponentName*`               | abstract · always present · extends `Valkyrja*`                       |
-| Subcomponent (unique) | `SubComponent*`                | name is unique across the entire framework                            |
-| Subcomponent (shared) | `ParentComponentSubComponent*` | name exists in multiple components (e.g. Routing in Http, Cli, Queue) |
+| Level                 | Convention                     | Notes                                                      |
+| --------------------- | ------------------------------ | ---------------------------------------------------------- |
+| Framework base        | `Valkyrja*`                    | abstract · extends language root                           |
+| Component             | `ComponentName*`               | abstract · always present · extends `Valkyrja*`            |
+| Subcomponent (unique) | `SubComponent*`                | name collides with nothing a caller catches it beside      |
+| Subcomponent (shared) | `ParentComponentSubComponent*` | name collides somewhere (e.g. Routing in Http, Cli, Queue) |
 
 ### The Recursive Rule Applied
 
-At every depth, ask one question: **does this name already exist somewhere else in the framework?**
+At every depth, ask one question: **does this name collide with anything a caller
+sees beside it?**
 
 - **No** → use the name as-is, stop
 - **Yes** → prepend the immediate parent name, ask again
 
-This terminates naturally as soon as the name is unique.
+This terminates naturally as soon as the name collides with nothing.
+
+Judge the collision against every name a caller imports beside the throwable, not
+against the framework alone. A caller catches a throwable next to throwables of
+other components and next to the classes of its own application, and a port that
+flattens a package into one namespace puts those names in one place. A bare name
+that reads as a component of its own therefore takes the parent prefix, even where
+the framework holds that name once.
 
 **Sub-subcomponent examples** (using PHP/Java/Python/TypeScript suffix):
 
 - `Http\Message` — `Message` is shared with gRPC → `HttpMessageRuntimeException`
-- `Http\Message\Request` — `Request` is unique (Cli uses `Input`) → `RequestRuntimeException`
-- `Http\Message\Response` — `Response` is unique (Cli uses `Output`) → `ResponseRuntimeException`
+- `Http\Message\Request` — `Request` reads as a component of its own →
+  `HttpRequestRuntimeException`
+- `Http\Message\Response` — `Response` reads as a component of its own →
+  `HttpResponseRuntimeException`
+- `Http\Message\Uri` — `Uri` names a component elsewhere → `HttpUriRuntimeException`
 - `Http\Message\Stream` — `Stream` is not unique (future filesystem/queue/gRPC) → `HttpStreamRuntimeException`
 - `Http\Message\Header` — `Header` is not unique (email/queue/gRPC) → `HttpHeaderRuntimeException`
 - `Http\Message\File` — renamed to `UploadedFile` (unique, removes ambiguity with filesystem) →
@@ -69,7 +80,8 @@ This terminates naturally as soon as the name is unique.
 - `Http\Routing` — `Routing` is shared with Cli and Queue → `HttpRoutingRuntimeException`
 - `Cli\Routing` — shared, different parent → `CliRoutingRuntimeException`
 
-Go uses `*Error` suffix throughout: `HttpMessageRuntimeError`, `RequestRuntimeError`, `HttpStreamRuntimeError` etc.
+Go uses `*Error` suffix throughout: `HttpMessageRuntimeError`, `HttpRequestRuntimeError`,
+`HttpStreamRuntimeError` etc.
 
 ---
 
@@ -192,7 +204,7 @@ ValkyrjaRuntimeException (abstract)
 
 `Message` is shared with gRPC — prefix required.
 `Stream` and `Header` are not unique — prefix required.
-`Request` and `Response` are unique (Cli uses Input/Output) — stand alone.
+`Request`, `Response` and `Uri` each read as a component of their own — prefix required.
 `File` renamed to `UploadedFile` — unique, disambiguates from filesystem.
 
 ```
@@ -206,11 +218,14 @@ ValkyrjaRuntimeException (abstract)
 └── HttpHeaderRuntimeException (abstract · always present)
     └── HttpHeaderInvalidException (concrete)
 
-└── RequestRuntimeException (abstract · always present)
-    └── RequestInvalidMethodException (concrete)
+└── HttpRequestRuntimeException (abstract · always present)
+    └── HttpRequestInvalidMethodException (concrete)
 
-└── ResponseRuntimeException (abstract · always present)
-    └── ResponseInvalidStatusException (concrete)
+└── HttpResponseRuntimeException (abstract · always present)
+    └── HttpResponseInvalidStatusException (concrete)
+
+└── HttpUriRuntimeException (abstract · always present)
+    └── HttpUriInvalidPortException (concrete)
 
 └── UploadedFileRuntimeException (abstract · always present)
     └── UploadedFileInvalidMimeException (concrete)
@@ -220,7 +235,7 @@ ValkyrjaRuntimeException (abstract)
 
 ## Contributor Decision Tree
 
-1. **Is the subcomponent name shared across multiple components?**
+1. **Does the subcomponent name collide with anything a caller sees beside it?**
    - Yes → `ParentComponentSubComponent*`
    - No → `SubComponent*`
 
