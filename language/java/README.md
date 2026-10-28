@@ -55,8 +55,9 @@ java.lang.IllegalArgumentException   ← Java has no InvalidArgumentException
   `ComponentInvalidArgumentException` even if unused
 - Shared subcomponents: `HttpRoutingRuntimeException`,
   `CliRoutingRuntimeException` etc.
-- Unique subcomponents: `RequestRuntimeException`, `ResponseRuntimeException`
-  etc.
+- Unique subcomponents: `UploadedFileRuntimeException` etc. A name that reads as a
+  component of its own takes the prefix even so, so the Request subcomponent gives
+  `HttpRequestRuntimeException`
 - Spotless will flag same-named exceptions across packages — `ComponentName*`
   prefix resolves this
 

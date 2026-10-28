@@ -32,8 +32,10 @@ Every exception and throwable across every component must be renamed to follow t
 - Component → `ComponentName*` (e.g. `ContainerRuntimeException`, `HttpRuntimeException`)
 - Shared subcomponent → `ParentComponentSubComponent*` (e.g. `HttpRoutingRuntimeException`,
   `CliRoutingRuntimeException`)
-- Unique subcomponent → `SubComponent*` (e.g. `RequestRuntimeException`, `ResponseRuntimeException`)
-- Sub-subcomponent → prepend only as many parent names as needed to make the name unique across the framework
+- Unique subcomponent → `SubComponent*` (e.g. `UploadedFileRuntimeException`); a name that reads as a
+  component of its own takes the prefix even so (e.g. `HttpRequestRuntimeException`)
+- Sub-subcomponent → prepend only as many parent names as the name needs to collide with nothing a
+  caller sees beside it
 
 ### Make all base and categorical exceptions abstract
 
