@@ -4,7 +4,8 @@
 
 ### The Single Rule
 
-> **Prepend only as many parent names as needed to make the class name unique across the entire framework.**
+> **Prepend only as many parent names as the class name needs to collide with nothing a caller sees
+> beside it.**
 
 This rule is recursive and applies at every level of the hierarchy.
 
@@ -415,9 +416,9 @@ the core framework hasn't needed it yet. Pre-building the scaffold prevents brea
 
 The shared subcomponent naming problem arose from Routing, Middleware, and Server being shared across Http, Cli, and the
 future Queue component. `RoutingRuntimeException` alone doesn't tell you if you're in HTTP or CLI routing context. The
-solution — `HttpRoutingRuntimeException` / `CliRoutingRuntimeException` — was reached by applying the same uniqueness
-rule recursively: prepend parent names until the name is unique across the framework.
+solution — `HttpRoutingRuntimeException` / `CliRoutingRuntimeException` — was reached by applying the same collision
+rule recursively: prepend parent names until the name collides with nothing a caller sees beside it.
 
-The recursive uniqueness rule was the final unifying principle that made the entire convention self-consistent at any
-depth. Rather than a lookup table of special cases, every naming decision at every level answers the same single
-question: is this name unique across the framework? If no, prepend the immediate parent and ask again.
+The recursive rule was the final unifying principle that made the entire convention self-consistent at any depth.
+Rather than a lookup table of special cases, every naming decision at every level answers the same single question: does
+this name collide with anything a caller sees beside it? If yes, prepend the immediate parent and ask again.

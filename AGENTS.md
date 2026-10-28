@@ -255,8 +255,10 @@ Then:
 
 ### Throwables / exceptions
 
-Recursive uniqueness rule: `Valkyrja*` → `ComponentName*` → `SubComponent*`, and
-prepend parent names until the name is **unique across the entire framework**.
+Recursive collision rule: `Valkyrja*` → `ComponentName*` → `SubComponent*`, and
+prepend parent names until the name **collides with nothing a caller sees beside
+it**. A name that reads as a component of its own takes the prefix even where the
+framework holds that name once.
 
 - All base and categorical exceptions are **abstract**; only concrete, specific
   exceptions are thrown.
