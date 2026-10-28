@@ -1,6 +1,10 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.33...26.x)
+## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.34...26.x)
+
+## [v26.0.34](https://github.com/valkyrjaio/architecture/compare/v26.0.33...v26.0.34) - 2026-10-28
+
+* [Attribute] docs: Generate every attribute name from what it declares by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/250
 
 ## [v26.0.33](https://github.com/valkyrjaio/architecture/compare/v26.0.32...v26.0.33) - 2026-10-25
 
