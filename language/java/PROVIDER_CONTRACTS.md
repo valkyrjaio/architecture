@@ -150,7 +150,7 @@ public class HttpComponentProvider implements ComponentProviderContract {
 ## ServiceProviderContract
 
 Container bindings provider. `publishers()` returns a map of class token to publisher method reference. The build tool
-reads the map from AST, resolves each method reference, and reads that method body directly — no `@RouteHandler`
+reads the map from AST, resolves each method reference, and reads that method body directly — no `@Handler`
 annotation needed on publisher methods.
 
 ```java
@@ -171,7 +171,7 @@ public interface ServiceProviderContract {
      * The build tool reads the map from AST, resolves each method reference,
      * and reads that method body directly for cache generation.
      *
-     * No @RouteHandler annotation is needed on publisher methods.
+     * No @Handler annotation is needed on publisher methods.
      *
      * Example:
      *   Map.of(
@@ -218,7 +218,7 @@ public class UserServiceProvider implements ServiceProviderContract {
 
     /**
      * Build tool reads this method body from AST for cache generation.
-     * No @RouteHandler annotation needed — method is discovered via publishers() map.
+     * No @Handler annotation needed — method is discovered via publishers() map.
      */
     public static void publishUserRepository(ContainerContract container) {
         container.setSingleton(
@@ -233,7 +233,7 @@ public class UserServiceProvider implements ServiceProviderContract {
 
 ## HttpRouteProviderContract
 
-HTTP route provider. Two sources of routes: annotated controller classes (scanned for `@RouteHandler`) and explicit
+HTTP route provider. Two sources of routes: annotated controller classes (scanned for `@Handler`) and explicit
 route object definitions. Routes are data structures — they carry method, path, middleware, constraints, and the handler
 together. They cannot be expressed as a publisher-style map.
 
@@ -248,7 +248,7 @@ public interface HttpRouteProviderContract {
 
     /**
      * Get a list of attributed controller or action classes.
-     * Build tool scans each class for @RouteHandler annotations.
+     * Build tool scans each class for @Handler annotations.
      * Returns empty list if using explicit routes only.
      * Must be a simple List.of() literal — no conditional logic.
      */
@@ -310,7 +310,7 @@ public class UserHttpRouteProvider implements HttpRouteProviderContract {
 
 ## Annotated Controller — Java
 
-`@RouteHandler` lives on the **implementation method** and carries a callable reference — class + method name. The
+`@Handler` lives on the **implementation method** and carries a callable reference — class + method name. The
 handler may live on the controller, the route provider, or any other class.
 
 **Handler on the same controller:**
@@ -322,22 +322,22 @@ import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.routing.attribute.Parameter;
 import io.valkyrja.http.routing.attribute.Route;
-import io.valkyrja.http.routing.attribute.route.RouteHandler;
+import io.valkyrja.http.routing.attribute.route.Handler;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 
 public class UserController {
 
     // Annotations on the implementation method.
-    // @RouteHandler carries (class, method) — Sindri follows it to wherever the handler lives.
+    // @Handler carries (class, method) — Sindri follows it to wherever the handler lives.
     @Route(method = "GET", path = "/users/{id}")
     @Parameter(name = "id", pattern = "[0-9]+")
-    @RouteHandler(handlerClass = UserController.class, handlerMethod = "showHandler")
+    @Handler(handlerClass = UserController.class, handlerMethod = "showHandler")
     public ResponseContract show(RouteContract route) {
         return userService.findById(route).toResponse();
     }
 
     @Route(method = "POST", path = "/users")
-    @RouteHandler(handlerClass = UserController.class, handlerMethod = "storeHandler")
+    @Handler(handlerClass = UserController.class, handlerMethod = "storeHandler")
     public ResponseContract store(RouteContract route) {
         // actual implementation
     }
@@ -359,10 +359,10 @@ public class UserController {
 ```java
 public class UserController {
 
-    // @RouteHandler points to the route provider — Sindri follows the callable
+    // @Handler points to the route provider — Sindri follows the callable
     @Route(method = "GET", path = "/users/{id}")
     @Parameter(name = "id", pattern = "[0-9]+")
-    @RouteHandler(handlerClass = UserHttpRouteProvider.class, handlerMethod = "showUser")
+    @Handler(handlerClass = UserHttpRouteProvider.class, handlerMethod = "showUser")
     public ResponseContract show(RouteContract route) {
         // actual implementation
     }
@@ -419,7 +419,7 @@ public interface ListenerProviderContract {
 
     /**
      * Get a list of attributed listener classes.
-     * Build tool scans each class for @RouteHandler annotations.
+     * Build tool scans each class for @Handler annotations.
      * Must be a simple List.of() literal — no conditional logic.
      */
     List<Class<?>> getListenerClasses();

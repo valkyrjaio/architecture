@@ -49,7 +49,7 @@ binding that has not finished initializing.
 | Stage-3 `context.metadata` → `Class[Symbol.metadata]`                                       | ✅ round-trips (this is the NestJS mechanism)                                                                              |
 | `tsc` output for a decorated class                                                          | **Lowered to `__esDecorate(...)` calls — NOT stripped.** Production runs them too                                          |
 | Decorator _argument_ evaluation timing                                                      | At class definition, **before** the class exists and without any instantiation                                             |
-| `@RouteHandler([HomeController, 'x'])` _inside_ `HomeController`                            | ❌ `ReferenceError: Cannot access '_HomeController' before initialization`                                                 |
+| `@Handler([HomeController, 'x'])` _inside_ `HomeController`                                 | ❌ `ReferenceError: Cannot access '_HomeController' before initialization`                                                 |
 | Cross-module cycle (controller names provider, provider imports controller)                 | ❌ TDZ **if the provider module evaluates first**; works if the controller does — i.e. order-dependent, therefore unusable |
 | Wrapping the class in a closure _inside_ `getControllerClasses()`                           | ❌ No effect — a method body already defers; the eager dereference is in the decorator                                     |
 | `[() => Class, 'method']` (thunk)                                                           | ✅ Works in **every** case above, including self-reference                                                                 |
@@ -77,7 +77,7 @@ differently — the exact class of problem this effort exists to remove.
 ### ✅ Chosen — thunk the class reference
 
 ```ts
-@RouteHandler([() => HttpRouteProvider, 'versionHandler'])
+@Handler([() => HttpRouteProvider, 'versionHandler'])
 ```
 
 Creating a closure **captures** a binding without dereferencing it; TDZ fires

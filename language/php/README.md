@@ -195,12 +195,12 @@ a map. See [`HANDLERS.md`](../../convention/HANDLERS.md).
 
 ### Add the handler attributes to route/listener data classes
 
-Routes need `#[RouteHandler]` attribute support on controller/action methods, and listeners need `#[ListenerHandler]`.
+Routes need `#[Handler]` attribute support on controller/action methods, and listeners need `#[ListenerHandler]`.
 Each attribute carries a reference to the handler method, not an inline closure — an attribute argument has to be a
 constant expression, so a closure does not compile there:
 
 ```php
-#[RouteHandler([UserController::class, 'showHandler'])]
+#[Handler([UserController::class, 'showHandler'])]
 #[Parameter('id', pattern: '[0-9]+')]
 public function show(int $id): ResponseContract {}
 ```
@@ -357,7 +357,7 @@ method reference.
 1. **Throwable renaming and abstraction** — foundational, everything else builds on stable exception types
 2. **Provider contract interfaces**
 3. **publishers() map migration**
-4. **Handler contracts and #[RouteHandler] attribute**
+4. **Handler contracts and #[Handler] attribute**
 5. **#[Parameter] attribute**
 6. **File generation and `make:*` commands to sindri**
 7. **Retired** — per-component container constants files are not built; see §2

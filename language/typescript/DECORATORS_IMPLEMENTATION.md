@@ -4,7 +4,7 @@
 
 Bring the TypeScript port to parity with PHP/Java: let controllers and CLI
 commands declare routes **declaratively via decorators** (`@Route`,
-`@DynamicRoute`, `@RouteHandler`, request-method decorators, CLI command
+`@DynamicRoute`, `@Handler`, request-method decorators, CLI command
 decorators), which Sindri scans and merges into the generated data caches —
 **in addition to** the existing imperative `getRoutes()` path (already shipped).
 
@@ -34,7 +34,7 @@ generator golden tests — see sindri-ts PR #62).
 ## Current state (verified) — what exists and what doesn't
 
 - The TS framework ships **no routing decorators**. Grep confirms zero
-  `@Route`/`RouteHandler`/`Get`/etc. exports under
+  `@Route`/`Handler`/`Get`/etc. exports under
   `src/Valkyrja/Http/Routing/`. Routes are registered **imperatively**: a route
   provider's `getRoutes()` returns concrete `new Route(...)` / `new DynamicRoute(...)`
   instances (CLI: `new Route(name, description, handler, ...)`).
@@ -45,7 +45,7 @@ generator golden tests — see sindri-ts PR #62).
 - Sindri **already has the AST readers for the decorator path but they are
   half-baked and unwired for real use**:
   - `src/Sindri/Ast/HttpRouteAttributeReader.ts`, `CliRouteAttributeReader.ts`,
-    `ListenerAttributeReader.ts` scan `@Route`/`@DynamicRoute`/`@RouteHandler`
+    `ListenerAttributeReader.ts` scan `@Route`/`@DynamicRoute`/`@Handler`
     (and CLI/listener) decorators on controller classes.
   - `RouteProviderReader.readFile()` reads a provider's `getControllerClasses()`
     method (the list of controllers to scan for decorators).
@@ -66,7 +66,7 @@ requestMethods, ...)`) — it omits `regex` and puts `parameters` where `regex`
 ## The PHP/Java pattern to mirror
 
 - PHP `App\Http\Controller\HomeController` methods carry
-  `#[Route(path, name, requestMethods)]` + `#[RouteHandler([HttpRouteProvider::class, 'handler'])]`
+  `#[Route(path, name, requestMethods)]` + `#[Handler([HttpRouteProvider::class, 'handler'])]`
   (and `#[Middleware(...)]`, `#[Parameter(...)]` for dynamic routes).
 - `App\Http\Provider\HttpRouteProvider::getControllerClasses()` returns
   `[HomeController::class]`, and its `getRoutes()` returns `[]`.
@@ -115,7 +115,7 @@ Key constraints, established during investigation:
 ### 1. Framework — `typescript/valkyrja` (new feature → `master`, `feature/` branch)
 
 - Add a routing decorator module mirroring PHP `Valkyrja\Http\Routing\Attribute\*`:
-  `@Route`, `@DynamicRoute`, `@RouteHandler`, request-method decorators
+  `@Route`, `@DynamicRoute`, `@Handler`, request-method decorators
   (`@Get`/`@Post`/…), `@Middleware`, and the CLI equivalents. Fold parameter
   info into the route decorator per the constraint above.
 - If the spike chooses runtime-executing decorators, add the runtime collector

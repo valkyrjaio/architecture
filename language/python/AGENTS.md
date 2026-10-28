@@ -44,7 +44,7 @@ Python idiom. Authoritative port detail: [`README.md`](README.md),
   `class_()` helper builds an FQN string from a class (needed because `class` is
   reserved).
 - **Data objects:** `@dataclass(frozen=True)` (the readonly-class equivalent).
-- **Handler markers:** `@route_handler` / `@parameter` are **metadata only** — they
+- **Handler markers:** `@handler` / `@parameter` are **metadata only** — they
   attach `_valkyrja_handler` / `_valkyrja_parameters` to the function; the
   framework reads them at bootstrap and skips them when cache is loaded.
 - Every file starts with the license header.
@@ -113,7 +113,7 @@ Python nuances:
 ## Build & CI tools
 
 - **Build tool (`sindri-python`):** stdlib `ast` + `inspect` only (no external AST
-  lib); reads `@route_handler`/`@parameter` metadata and the provider tree, generates
+  lib); reads `@handler`/`@parameter` metadata and the provider tree, generates
   the cache data file of each major component. Dev-only; the framework has zero AST deps.
 - **CI:** `import-linter` (module boundaries) · **Ruff** (lint + format) ·
   **mypy** (`strict`) · **Bandit** (security) · **pytest** (+ coverage).
