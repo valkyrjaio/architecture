@@ -380,7 +380,7 @@ Where `Type` is one of:
 - `CliRoutes` — CLI route definitions
 - `Listeners` — event listener definitions
 
-For shared subcomponents, prepend until unique — same recursive rule as throwables:
+For shared subcomponents, prepend until the name is unique across the framework:
 
 ```
 HttpRouting + HttpRoutes + Provider = HttpRoutingHttpRoutesProvider
