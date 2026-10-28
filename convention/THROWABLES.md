@@ -28,17 +28,18 @@ Go is the only port that uses `*Error`. The Go standard library itself uses no s
 `os.ErrNotExist`) but `*Error` is more conventional for custom framework error types than `*Exception` which is entirely
 foreign to Go.
 
-The **stem** is always identical across all ports — `ContainerNotFound`, `HttpRoutingNotFound`, `RequestInvalidMethod`.
+The **stem** is always identical across all ports — `ContainerNotFound`, `HttpRoutingNotFound`,
+`HttpRequestInvalidMethod`.
 Only the suffix differs for Go. Cross-port legibility is preserved at the stem level which is the meaningful part.
 
 **Examples across ports:**
 
-| PHP / Java / Python / TypeScript | Go                          |
-| -------------------------------- | --------------------------- |
-| `ContainerNotFoundException`     | `ContainerNotFoundError`    |
-| `HttpRoutingNotFoundException`   | `HttpRoutingNotFoundError`  |
-| `RequestInvalidMethodException`  | `RequestInvalidMethodError` |
-| `ValkyrjaRuntimeException`       | `ValkyrjaRuntimeError`      |
+| PHP / Java / Python / TypeScript    | Go                              |
+| ----------------------------------- | ------------------------------- |
+| `ContainerNotFoundException`        | `ContainerNotFoundError`        |
+| `HttpRoutingNotFoundException`      | `HttpRoutingNotFoundError`      |
+| `HttpRequestInvalidMethodException` | `HttpRequestInvalidMethodError` |
+| `ValkyrjaRuntimeException`          | `ValkyrjaRuntimeError`          |
 
 ### The Four Levels
 

@@ -190,7 +190,7 @@ every other port and **`*Error`** in Go. See [`THROWABLES.md`](THROWABLES.md).
 
 ```php
 // Right — PHP reports the failure by throwing.
-public function getParsedPath(string $path): string;   // throws UriInvalidPathException
+public function getParsedPath(string $path): string;   // throws HttpUriInvalidPathException
 ```
 
 ```go
@@ -252,7 +252,7 @@ Validation — `validate` reports a failure, `isValid` returns a boolean:
 
 ```php
 // Right — the prefix says which one the caller gets.
-public function validatePath(string $path): void;   // throws UriInvalidPathException
+public function validatePath(string $path): void;   // throws HttpUriInvalidPathException
 
 public function isValidPath(string $path): bool;    // returns false
 ```
