@@ -74,7 +74,7 @@ the framework holds that name once.
   `HttpRequestRuntimeException`
 - `Http\Message\Response` — `Response` reads as a component of its own →
   `HttpResponseRuntimeException`
-- `Http\Message\Uri` — `Uri` names a component elsewhere → `HttpUriRuntimeException`
+- `Http\Message\Uri` — `Uri` reads as a component of its own → `HttpUriRuntimeException`
 - `Http\Message\Stream` — `Stream` is not unique (future filesystem/queue/gRPC) → `HttpStreamRuntimeException`
 - `Http\Message\Header` — `Header` is not unique (email/queue/gRPC) → `HttpHeaderRuntimeException`
 - `Http\Message\File` — renamed to `UploadedFile` (unique, removes ambiguity with filesystem) →
