@@ -104,8 +104,8 @@ return nil, err
 Every class, interface, and contract needs a string constant:
 
 ```go
-// container_constants.go
-package container
+// <component>/constant/<component>_service_id.go
+package constant
 
 const (
 	ContainerClass      = "valkyrja.container.manager.ContainerContract"
