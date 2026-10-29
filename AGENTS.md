@@ -255,8 +255,10 @@ Then:
 
 ### Throwables / exceptions
 
-Recursive uniqueness rule: `Valkyrja*` → `ComponentName*` → `SubComponent*`, and
-prepend parent names until the name is **unique across the entire framework**.
+Recursive collision rule: `Valkyrja*` → `ComponentName*` → `SubComponent*`, and
+prepend parent names until the name **collides with nothing a caller sees beside
+it**. A name that reads as a component of its own takes the prefix even where the
+framework holds that name once.
 
 - All base and categorical exceptions are **abstract**; only concrete, specific
   exceptions are thrown.
@@ -270,9 +272,10 @@ Detail: [`THROWABLES.md`](convention/THROWABLES.md).
 
 ### Providers
 
-Same recursive uniqueness rule — the forcing function is the single generated
-data-cache file that references providers from many components at once, so
-identical names collide and break compilation.
+The same recursive shape, and the test stays framework-wide uniqueness, which a
+throwable's does not — the forcing function is the single generated data-cache
+file that references providers from many components at once, so identical names
+collide and break compilation.
 
 Pattern: `ComponentName[SubComponent]TypeProvider`, where `Type` is one of
 `Component` (top-level aggregator), `Service` (container bindings), `HttpRoutes`,

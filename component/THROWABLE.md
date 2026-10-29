@@ -113,7 +113,7 @@ occurrence, only a shape, so two reports with one code are the same bug.
 
 A component declares its own root contract and its own abstract bases beneath
 these, then one concrete throwable per distinct failure. The recursive naming
-rule that keeps those names unique across the framework is in
+rule that keeps those names from colliding with what a caller sees beside them is in
 [`THROWABLES.md`](../convention/THROWABLES.md).
 
 ### Throw a concrete throwable, catch an abstract one

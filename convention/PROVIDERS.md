@@ -332,8 +332,9 @@ testable without touching the dispatcher at all.
 ## Naming Convention
 
 All provider implementations — framework and application-defined — must be **uniquely named across the entire framework
-**. The naming rule is identical to the throwable naming rule: prepend parent component (and subcomponent if needed)
-names until the name is unique.
+**. The naming rule has the same recursive shape as the throwable naming rule, and its test is framework-wide
+uniqueness: prepend parent component (and subcomponent if needed) names until the name is unique. A throwable asks a
+wider question, because a caller catches one beside throwables of other components.
 
 ### The Forcing Function
 
@@ -379,7 +380,7 @@ Where `Type` is one of:
 - `CliRoutes` — CLI route definitions
 - `Listeners` — event listener definitions
 
-For shared subcomponents, prepend until unique — same recursive rule as throwables:
+For shared subcomponents, prepend until the name is unique across the framework:
 
 ```
 HttpRouting + HttpRoutes + Provider = HttpRoutingHttpRoutesProvider

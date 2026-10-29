@@ -70,7 +70,9 @@ ValkyrjaRuntimeError
 
 - Shared subcomponents: `HttpRoutingRuntimeError`,
   `CliRoutingRuntimeError`
-- Unique subcomponents: `RequestRuntimeError`, `ResponseRuntimeError`
+- Unique subcomponents: `UploadedFileRuntimeError`. A name that reads as a
+  component of its own takes the prefix even so, so the Request subcomponent gives
+  `HttpRequestRuntimeError`
 - Unexported = abstract equivalent (component categoricals)
 - Exported = concrete (specific errors only)
 

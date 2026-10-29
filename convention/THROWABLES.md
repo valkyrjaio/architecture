@@ -4,7 +4,8 @@
 
 ### The Single Rule
 
-> **Prepend only as many parent names as needed to make the class name unique across the entire framework.**
+> **Prepend only as many parent names as the class name needs to collide with nothing a caller sees
+> beside it.**
 
 This rule is recursive and applies at every level of the hierarchy.
 
@@ -27,41 +28,53 @@ Go is the only port that uses `*Error`. The Go standard library itself uses no s
 `os.ErrNotExist`) but `*Error` is more conventional for custom framework error types than `*Exception` which is entirely
 foreign to Go.
 
-The **stem** is always identical across all ports — `ContainerNotFound`, `HttpRoutingNotFound`, `RequestInvalidMethod`.
+The **stem** is always identical across all ports — `ContainerNotFound`, `HttpRoutingNotFound`,
+`HttpRequestInvalidMethod`.
 Only the suffix differs for Go. Cross-port legibility is preserved at the stem level which is the meaningful part.
 
 **Examples across ports:**
 
-| PHP / Java / Python / TypeScript | Go                          |
-| -------------------------------- | --------------------------- |
-| `ContainerNotFoundException`     | `ContainerNotFoundError`    |
-| `HttpRoutingNotFoundException`   | `HttpRoutingNotFoundError`  |
-| `RequestInvalidMethodException`  | `RequestInvalidMethodError` |
-| `ValkyrjaRuntimeException`       | `ValkyrjaRuntimeError`      |
+| PHP / Java / Python / TypeScript    | Go                              |
+| ----------------------------------- | ------------------------------- |
+| `ContainerNotFoundException`        | `ContainerNotFoundError`        |
+| `HttpRoutingNotFoundException`      | `HttpRoutingNotFoundError`      |
+| `HttpRequestInvalidMethodException` | `HttpRequestInvalidMethodError` |
+| `ValkyrjaRuntimeException`          | `ValkyrjaRuntimeError`          |
 
 ### The Four Levels
 
-| Level                 | Convention                     | Notes                                                                 |
-| --------------------- | ------------------------------ | --------------------------------------------------------------------- |
-| Framework base        | `Valkyrja*`                    | abstract · extends language root                                      |
-| Component             | `ComponentName*`               | abstract · always present · extends `Valkyrja*`                       |
-| Subcomponent (unique) | `SubComponent*`                | name is unique across the entire framework                            |
-| Subcomponent (shared) | `ParentComponentSubComponent*` | name exists in multiple components (e.g. Routing in Http, Cli, Queue) |
+| Level                 | Convention                     | Notes                                                      |
+| --------------------- | ------------------------------ | ---------------------------------------------------------- |
+| Framework base        | `Valkyrja*`                    | abstract · extends language root                           |
+| Component             | `ComponentName*`               | abstract · always present · extends `Valkyrja*`            |
+| Subcomponent (unique) | `SubComponent*`                | name collides with nothing a caller catches it beside      |
+| Subcomponent (shared) | `ParentComponentSubComponent*` | name collides somewhere (e.g. Routing in Http, Cli, Queue) |
 
 ### The Recursive Rule Applied
 
-At every depth, ask one question: **does this name already exist somewhere else in the framework?**
+At every depth, ask one question: **does this name collide with anything a caller
+sees beside it?**
 
 - **No** → use the name as-is, stop
 - **Yes** → prepend the immediate parent name, ask again
 
-This terminates naturally as soon as the name is unique.
+This terminates naturally as soon as the name collides with nothing.
+
+Judge the collision against every name a caller imports beside the throwable, not
+against the framework alone. A caller catches a throwable next to throwables of
+other components and next to the classes of its own application, and a port that
+flattens a package into one namespace puts those names in one place. A bare name
+that reads as a component of its own therefore takes the parent prefix, even where
+the framework holds that name once.
 
 **Sub-subcomponent examples** (using PHP/Java/Python/TypeScript suffix):
 
 - `Http\Message` — `Message` is shared with gRPC → `HttpMessageRuntimeException`
-- `Http\Message\Request` — `Request` is unique (Cli uses `Input`) → `RequestRuntimeException`
-- `Http\Message\Response` — `Response` is unique (Cli uses `Output`) → `ResponseRuntimeException`
+- `Http\Message\Request` — `Request` reads as a component of its own →
+  `HttpRequestRuntimeException`
+- `Http\Message\Response` — `Response` reads as a component of its own →
+  `HttpResponseRuntimeException`
+- `Http\Message\Uri` — `Uri` reads as a component of its own → `HttpUriRuntimeException`
 - `Http\Message\Stream` — `Stream` is not unique (future filesystem/queue/gRPC) → `HttpStreamRuntimeException`
 - `Http\Message\Header` — `Header` is not unique (email/queue/gRPC) → `HttpHeaderRuntimeException`
 - `Http\Message\File` — renamed to `UploadedFile` (unique, removes ambiguity with filesystem) →
@@ -69,7 +82,8 @@ This terminates naturally as soon as the name is unique.
 - `Http\Routing` — `Routing` is shared with Cli and Queue → `HttpRoutingRuntimeException`
 - `Cli\Routing` — shared, different parent → `CliRoutingRuntimeException`
 
-Go uses `*Error` suffix throughout: `HttpMessageRuntimeError`, `RequestRuntimeError`, `HttpStreamRuntimeError` etc.
+Go uses `*Error` suffix throughout: `HttpMessageRuntimeError`, `HttpRequestRuntimeError`,
+`HttpStreamRuntimeError` etc.
 
 ---
 
@@ -192,7 +206,7 @@ ValkyrjaRuntimeException (abstract)
 
 `Message` is shared with gRPC — prefix required.
 `Stream` and `Header` are not unique — prefix required.
-`Request` and `Response` are unique (Cli uses Input/Output) — stand alone.
+`Request`, `Response` and `Uri` each read as a component of their own — prefix required.
 `File` renamed to `UploadedFile` — unique, disambiguates from filesystem.
 
 ```
@@ -206,11 +220,14 @@ ValkyrjaRuntimeException (abstract)
 └── HttpHeaderRuntimeException (abstract · always present)
     └── HttpHeaderInvalidException (concrete)
 
-└── RequestRuntimeException (abstract · always present)
-    └── RequestInvalidMethodException (concrete)
+└── HttpRequestRuntimeException (abstract · always present)
+    └── HttpRequestInvalidMethodException (concrete)
 
-└── ResponseRuntimeException (abstract · always present)
-    └── ResponseInvalidStatusException (concrete)
+└── HttpResponseRuntimeException (abstract · always present)
+    └── HttpResponseInvalidStatusException (concrete)
+
+└── HttpUriRuntimeException (abstract · always present)
+    └── HttpUriInvalidPortException (concrete)
 
 └── UploadedFileRuntimeException (abstract · always present)
     └── UploadedFileInvalidMimeException (concrete)
@@ -220,7 +237,7 @@ ValkyrjaRuntimeException (abstract)
 
 ## Contributor Decision Tree
 
-1. **Is the subcomponent name shared across multiple components?**
+1. **Does the subcomponent name collide with anything a caller sees beside it?**
    - Yes → `ParentComponentSubComponent*`
    - No → `SubComponent*`
 
@@ -400,9 +417,9 @@ the core framework hasn't needed it yet. Pre-building the scaffold prevents brea
 
 The shared subcomponent naming problem arose from Routing, Middleware, and Server being shared across Http, Cli, and the
 future Queue component. `RoutingRuntimeException` alone doesn't tell you if you're in HTTP or CLI routing context. The
-solution — `HttpRoutingRuntimeException` / `CliRoutingRuntimeException` — was reached by applying the same uniqueness
-rule recursively: prepend parent names until the name is unique across the framework.
+solution — `HttpRoutingRuntimeException` / `CliRoutingRuntimeException` — was reached by applying the same collision
+rule recursively: prepend parent names until the name collides with nothing a caller sees beside it.
 
-The recursive uniqueness rule was the final unifying principle that made the entire convention self-consistent at any
-depth. Rather than a lookup table of special cases, every naming decision at every level answers the same single
-question: is this name unique across the framework? If no, prepend the immediate parent and ask again.
+The recursive rule was the final unifying principle that made the entire convention self-consistent at any depth.
+Rather than a lookup table of special cases, every naming decision at every level answers the same single question: does
+this name collide with anything a caller sees beside it? If yes, prepend the immediate parent and ask again.
