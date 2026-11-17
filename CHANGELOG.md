@@ -1,6 +1,10 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.35...26.x)
+## [Unreleased](https://github.com/valkyrjaio/architecture/compare/v26.0.36...26.x)
+
+## [v26.0.36](https://github.com/valkyrjaio/architecture/compare/v26.0.35...v26.0.36) - 2026-11-17
+
+* [Component] docs: Give each component a directory, and a README template beside its contract by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/architecture/pull/243
 
 ## [v26.0.35](https://github.com/valkyrjaio/architecture/compare/v26.0.34...v26.0.35) - 2026-10-29
 
