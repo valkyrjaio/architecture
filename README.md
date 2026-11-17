@@ -14,15 +14,45 @@ How one port spells that rule lives in that port, next to the code.
 
 ## How it is organized
 
-| Directory     | Holds                                                         |
-| ------------- | ------------------------------------------------------------- |
-| `component/`  | one document per component: its hierarchy, names and behavior |
-| `convention/` | a rule that holds across every component and every port       |
-| `language/`   | the per-port deltas, one directory per language               |
+| Directory     | Holds                                                   |
+| ------------- | ------------------------------------------------------- |
+| `component/`  | one lowercase directory per component                   |
+| `convention/` | a rule that holds across every component and every port |
+| `language/`   | the per-port deltas, one directory per language         |
 
-A `component/` document **carries no code example**. An example in one language
-becomes the spelling a port copies, instead of the contract it has to satisfy.
-The examples live in that component's `README.md` in each port.
+Each component's directory holds two files:
+
+| File        | Is                                                                            |
+| ----------- | ----------------------------------------------------------------------------- |
+| `<NAME>.md` | the contract: the hierarchy, the names and the behavior every port implements |
+| `README.md` | the master copy of that component's README, which every port carries          |
+
+A contract **carries no code example**. An example in one language becomes the
+spelling a port copies, instead of the contract it has to satisfy. The examples
+live in each port's own `README.md`, written from the template.
+
+**The master carries the prose, and every port carries the master.** A port
+copies it, fills each `text` fence with that language's example, adds a row for
+what it ships alone, and changes nothing else. So every port's document for one
+component reads alike, and an edit to the prose lands here rather than in one
+port's copy.
+
+A port that needs the prose changed changes it here, and every port takes the
+change. `component/README.md` holds the rules a port follows when it copies
+one.
+
+### A feature reaches the architecture first
+
+A change to what a component **is** lands here before it lands in any port.
+[`AGENTS.md`](AGENTS.md) §1 and §7 state the rest, including the rule that every
+port changes together in one batch.
+
+Warning: a port that changes a component first becomes, in practice, the
+definition every later port inherits. Take these steps in order:
+
+1. Change the contract.
+2. Change the template, when the sections move.
+3. Open one pull request per port, in one batch.
 
 ## Start here
 
@@ -58,57 +88,58 @@ follow when porting.
 
 Two components have no document, and deliberately: a marker facility and a
 reflection facility are shaped by what one language offers, so there is no
-cross-port contract for either to state.
+cross-port contract for either to state. Neither has a template. A port writes
+those two READMEs in its own shape.
 
 **Foundation** — everything depends on these.
 
-| Document                                 | Covers                                      |
-| ---------------------------------------- | ------------------------------------------- |
-| [`THROWABLE.md`](component/THROWABLE.md) | the failure root, and the handler           |
-| [`TYPE.md`](component/TYPE.md)           | typed values, and identifiers               |
-| [`SUPPORT.md`](component/SUPPORT.md)     | the clock, behind something a test controls |
+| Document                                           | Covers                                      |
+| -------------------------------------------------- | ------------------------------------------- |
+| [`THROWABLE.md`](component/throwable/THROWABLE.md) | the failure root, and the handler           |
+| [`TYPE.md`](component/type/TYPE.md)                | typed values, and identifiers               |
+| [`SUPPORT.md`](component/support/SUPPORT.md)       | the clock, behind something a test controls |
 
 **Core** — nothing runs without these.
 
-| Document                                     | Covers                                        |
-| -------------------------------------------- | --------------------------------------------- |
-| [`CONTAINER.md`](component/CONTAINER.md)     | registration, resolution, child scopes        |
-| [`EVENT.md`](component/EVENT.md)             | dispatch, listeners, the event id             |
-| [`APPLICATION.md`](component/APPLICATION.md) | boot, the provider tree, config, entry points |
+| Document                                                 | Covers                                        |
+| -------------------------------------------------------- | --------------------------------------------- |
+| [`CONTAINER.md`](component/container/CONTAINER.md)       | registration, resolution, child scopes        |
+| [`EVENT.md`](component/event/EVENT.md)                   | dispatch, listeners, the event id             |
+| [`APPLICATION.md`](component/application/APPLICATION.md) | boot, the provider tree, config, entry points |
 
 **Protocols** — each runs the pipeline in
 [`LIFECYCLE.md`](convention/LIFECYCLE.md).
 
-| Document                         | Covers                                 |
-| -------------------------------- | -------------------------------------- |
-| [`HTTP.md`](component/HTTP.md)   | requests, responses, routing           |
-| [`CLI.md`](component/CLI.md)     | input, output, commands                |
-| [`GRPC.md`](component/GRPC.md)   | calls, status, streaming, cancellation |
-| [`QUEUE.md`](component/QUEUE.md) | jobs, the wire envelope, outcomes      |
+| Document                               | Covers                                 |
+| -------------------------------------- | -------------------------------------- |
+| [`HTTP.md`](component/http/HTTP.md)    | requests, responses, routing           |
+| [`CLI.md`](component/cli/CLI.md)       | input, output, commands                |
+| [`GRPC.md`](component/grpc/GRPC.md)    | calls, status, streaming, cancellation |
+| [`QUEUE.md`](component/queue/QUEUE.md) | jobs, the wire envelope, outcomes      |
 
 **Services** — one contract, adapters behind it, the application names one.
 
-| Document                                   | Covers                                   |
-| ------------------------------------------ | ---------------------------------------- |
-| [`LOG.md`](component/LOG.md)               | records, by severity                     |
-| [`CACHE.md`](component/CACHE.md)           | keyed values, lifetimes, tags            |
-| [`SESSION.md`](component/SESSION.md)       | per-visitor state, and the forgery token |
-| [`FILESYSTEM.md`](component/FILESYSTEM.md) | files, local or remote                   |
-| [`CRYPT.md`](component/CRYPT.md)           | two-way encryption                       |
-| [`JWT.md`](component/JWT.md)               | signed tokens                            |
-| [`MAIL.md`](component/MAIL.md)             | sending to people                        |
-| [`SMS.md`](component/SMS.md)               | sending to phones                        |
-| [`BROADCAST.md`](component/BROADCAST.md)   | pushing to live listeners                |
-| [`VIEW.md`](component/VIEW.md)             | rendering templates                      |
+| Document                                              | Covers                                   |
+| ----------------------------------------------------- | ---------------------------------------- |
+| [`LOG.md`](component/log/LOG.md)                      | records, by severity                     |
+| [`CACHE.md`](component/cache/CACHE.md)                | keyed values, lifetimes, tags            |
+| [`SESSION.md`](component/session/SESSION.md)          | per-visitor state, and the forgery token |
+| [`FILESYSTEM.md`](component/filesystem/FILESYSTEM.md) | files, local or remote                   |
+| [`CRYPT.md`](component/crypt/CRYPT.md)                | two-way encryption                       |
+| [`JWT.md`](component/jwt/JWT.md)                      | signed tokens                            |
+| [`MAIL.md`](component/mail/MAIL.md)                   | sending to people                        |
+| [`SMS.md`](component/sms/SMS.md)                      | sending to phones                        |
+| [`BROADCAST.md`](component/broadcast/BROADCAST.md)    | pushing to live listeners                |
+| [`VIEW.md`](component/view/VIEW.md)                   | rendering templates                      |
 
 **Application** — the components an application builds on.
 
-| Document                                   | Covers                          |
-| ------------------------------------------ | ------------------------------- |
-| [`AUTH.md`](component/AUTH.md)             | who the caller is               |
-| [`ORM.md`](component/ORM.md)               | records in a relational store   |
-| [`VALIDATION.md`](component/VALIDATION.md) | rules, and what failed          |
-| [`API.md`](component/API.md)               | one envelope for every response |
+| Document                                              | Covers                          |
+| ----------------------------------------------------- | ------------------------------- |
+| [`AUTH.md`](component/auth/AUTH.md)                   | who the caller is               |
+| [`ORM.md`](component/orm/ORM.md)                      | records in a relational store   |
+| [`VALIDATION.md`](component/validation/VALIDATION.md) | rules, and what failed          |
+| [`API.md`](component/api/API.md)                      | one envelope for every response |
 
 ## Conventions
 

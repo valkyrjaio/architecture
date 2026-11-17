@@ -140,6 +140,36 @@ interface MailLogConfigContract
 }
 ```
 
+## The order a config declares its properties
+
+A port declares them in one order, so the same config reads alike in every port.
+
+1. **The default adapter first**, in the component config. `defaultLogger`,
+   `defaultSession`, `defaultStore`.
+2. **A required property before an optional one.** A property the application has
+   to set precedes one that carries a default or takes no value.
+3. **Within either group: what it addresses, where to reach it, what identifies
+   the caller, then what tunes it.**
+
+Rule 3 settles the case the first two leave open, which is a config with several
+properties of the same kind.
+
+```text
+// Right — a store's config, in that order.
+mysqlDb         // what it addresses
+mysqlHost       // where to reach it
+mysqlPort
+mysqlUser       // what identifies the caller
+mysqlPassword
+mysqlCharset    // what tunes it
+mysqlStrict     // optional from here
+mysqlEngine
+mysqlOptions
+```
+
+Warning: a reader uses the order to find a property, so a port that sorts
+alphabetically or by type instead makes every other port's config unfamiliar.
+
 ## The application implements only what it uses
 
 One application config class implements the component contract, and it adds an

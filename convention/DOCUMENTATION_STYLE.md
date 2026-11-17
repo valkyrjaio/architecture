@@ -198,10 +198,11 @@ example shows it. A reader who does not yet know the rule must be able to copy
 the example and be correct.
 
 **A document that states a cross-port contract is the exception, and it carries no
-code example at all.** Every `component/` document is one, and so is a
-`convention/` document whose subject is a contract the ports implement rather than
-a rule about how code is written — the lifecycle, the handlers, the binding keys,
-the generated data, the build tool, and the parity baseline.
+code example at all.** Every component contract, `component/<NAME>/<NAME>.md`, is
+one, and so is a `convention/` document whose subject is a contract the ports
+implement rather than a rule about how code is written — the lifecycle, the
+handlers, the binding keys, the generated data, the build tool, and the parity
+baseline.
 
 `PROVIDERS.md` is the one contract document that still carries per-language code
 blocks. It predates this rule, and stripping them is a change of its own rather

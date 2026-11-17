@@ -300,7 +300,7 @@ framework, and the `application` (Phase 6) depends on the _published_ framework 
 build tool. So the natural order is **framework → build tool → application**. During
 development, don't wait on releases: wire the downstream repo to the local upstream with
 a composite/workspace build (the same pattern the adapters use — see
-[`GRPC.md`](../component/GRPC.md), under "The adapter"), verify it compiles and greens,
+[`GRPC.md`](../component/grpc/GRPC.md), under "The adapter"), verify it compiles and greens,
 then release upstream and bump the pin.
 
 ### Framework repo (`valkyrja-<lang>`)
