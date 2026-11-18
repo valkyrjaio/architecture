@@ -236,13 +236,13 @@ own choice.
 Each service adapter carries the settings that service needs, prefixed with the
 service's name. The Pusher adapter takes these:
 
-| Property        | Holds                       | Default |
-| --------------- | --------------------------- | ------- |
-| `pusherKey`     | the service's app key       | —       |
-| `pusherSecret`  | the app secret              | —       |
-| `pusherId`      | the app id                  | —       |
-| `pusherCluster` | which cluster to connect to | `us1`   |
-| `pusherUseTls`  | whether to connect over TLS | on      |
+| Property        | Holds                       | Default       |
+| --------------- | --------------------------- | ------------- |
+| `pusherKey`     | the service's app key       | a placeholder |
+| `pusherSecret`  | the app secret              | a placeholder |
+| `pusherId`      | the app id                  | a placeholder |
+| `pusherCluster` | which cluster to connect to | `us1`         |
+| `pusherUseTls`  | whether to connect over TLS | on            |
 
 ```text
 class Config implements ConfigContract, BroadcastConfigContract, BroadcastPusherConfigContract {
@@ -255,6 +255,11 @@ class Config implements ConfigContract, BroadcastConfigContract, BroadcastPusher
     pusherUseTls = true
 }
 ```
+
+Warning: each credential carries a placeholder, and nothing raises at boot. A
+placeholder fails every broadcast. `defaultBroadcaster` resolves to a service
+adapter, so an application that names no adapter reaches that adapter and needs
+its credentials set.
 
 A credential belongs in the environment rather than in the class. A port adds a
 subsection for each further service it ships.
