@@ -74,6 +74,10 @@ without reading each other's values.
 A caller never applies the prefix itself. It passes the bare key and the store
 applies it, so a key is spelled one way everywhere.
 
+**Each adapter's prefix is empty until an application sets one.** A shared
+service separates nothing by default. The separation above is the application's
+to configure.
+
 ---
 
 ## Tags
@@ -125,8 +129,13 @@ served.
 ### `Tagger/` is its own surface
 
 A tag groups keys so an application clears a set of them at once. The tagger is
-separate from the component contract, because a store that cannot tag still
-satisfies the contract and simply has no tagger.
+separate from the component contract, because a tagger is a view over a cache
+rather than a capability of a store.
+
+**The component implements tagging, so every adapter has a tagger.** A tagger
+keeps each tag's key list in the cache it wraps. The operation that returns a
+tagger declares a tagger rather than an optional one, so it never answers with
+nothing. A tagger over an adapter that keeps nothing reports an empty set.
 
 ### Order
 

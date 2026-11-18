@@ -129,8 +129,12 @@ cache.putMany({ "a": first, "b": second }, 300)
 
 ### Every key carries a prefix
 
-The adapter prefixes every key it stores, so two applications sharing one store
-do not collide. `getPrefix` returns it, and your keys do not include it.
+The adapter prefixes every key it stores. `getPrefix` returns the prefix, and
+your keys do not include it.
+
+Warning: **every adapter ships an empty prefix.** Two applications sharing one
+store collide until one of them sets its prefix. Set the prefix wherever a store
+is shared.
 
 ## Tags
 
@@ -156,8 +160,13 @@ cache.getTagger("customer.4821").flush()
 A tagger carries the same reading and writing methods as the cache, so code that
 takes a cache takes a tagger.
 
-**An adapter whose store cannot tag has no tagger.** The capability is the
-store's, so a store without it reports that rather than pretending.
+**Every adapter has a tagger.** The component implements tagging rather than
+the store. A tagger keeps each tag's key list in the cache it wraps, and reads
+and writes that list through the operations every store already has.
+
+Warning: a tagger over an adapter that keeps nothing holds nothing. The key list
+goes into the same store, so an adapter that discards a write discards the list.
+Such a tagger reports an empty set rather than failing.
 
 ## Configuration
 
@@ -202,7 +211,7 @@ store's name.
 | --------------- | ------------------------------- | --------------- |
 | `<store>Host`   | where to reach the store        | the local host  |
 | `<store>Port`   | the port to reach it on         | the store's own |
-| `<store>Prefix` | what every key is prefixed with | the application |
+| `<store>Prefix` | what every key is prefixed with | nothing         |
 
 ```text
 class Config implements ConfigContract, CacheConfigContract, CacheRedisConfigContract {
@@ -216,19 +225,25 @@ class Config implements ConfigContract, CacheConfigContract, CacheRedisConfigCon
 
 ### Configuring the log adapter
 
-| Property    | Holds                           | Default            |
-| ----------- | ------------------------------- | ------------------ |
-| `logLogger` | which logger the records go to  | the default logger |
-| `logPrefix` | what every key is prefixed with | the application    |
+| Property         | Holds                           | Default            |
+| ---------------- | ------------------------------- | ------------------ |
+| `cacheLogLogger` | which logger the records go to  | the default logger |
+| `cacheLogPrefix` | what every key is prefixed with | nothing            |
+
+These two properties carry the component's name as well as the adapter's.
+Several components log through this one adapter and would each declare a
+`logLogger`, so each one adds its own name. A contract that adds its name adds
+it to every property
+([`COMPONENT_CONFIG.md`](https://github.com/valkyrjaio/architecture/blob/26.x/convention/COMPONENT_CONFIG.md)).
 
 The log adapter names a logger rather than holding one, so the records go
 wherever that logger goes ([Log](../log/README.md)).
 
 ### Configuring the null adapter
 
-| Property     | Holds                           | Default         |
-| ------------ | ------------------------------- | --------------- |
-| `nullPrefix` | what every key is prefixed with | the application |
+| Property     | Holds                           | Default |
+| ------------ | ------------------------------- | ------- |
+| `nullPrefix` | what every key is prefixed with | nothing |
 
 It stores nothing, so the prefix is all there is to set. Name it as the default
 in a test that should not share state between cases.
@@ -291,8 +306,9 @@ class AppCacheServiceProvider implements ServiceProviderContract {
 }
 ```
 
-A store that cannot tag returns no tagger. Implement the tagger only where the
-store supports it.
+Declare `getTagger` like every other operation, and return the component's
+own tagger from it. The component implements tagging over the operations your
+adapter already has, so you write no tagger class.
 
 ## Service registration
 
