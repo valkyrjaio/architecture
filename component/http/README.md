@@ -102,18 +102,19 @@ class UserRouteProvider implements HttpRouteProviderContract {
 class UserController {
 
     @Route(path: "/users", name: "users.index")
-    @RouteHandler([UserRouteProvider, "indexHandler"])
+    @Handler([UserRouteProvider, "indexHandler"])
     index() { }
 
     @Route(path: "/users", name: "users.store", requestMethods: [RequestMethod.POST])
-    @RouteHandler([UserRouteProvider, "storeHandler"])
+    @Handler([UserRouteProvider, "storeHandler"])
     store() { }
 }
 ```
 
 The marker declares the route. The marker does not make the framework call the
-method it sits on. The route's handler makes that call, and `RouteHandler` names
-the handler. A route with no handler answers with a response that has no body.
+method it sits on. The route's handler makes that call, and `@Handler` names
+the handler. A route that names no handler is rejected where the routes are
+collected, rather than at the first request that reaches it.
 
 The marker repeats, so one method serves several paths. Each marker declares its
 own route with its own name.
@@ -121,7 +122,7 @@ own route with its own name.
 ```text
 @Route(path: "/", name: "home")
 @Route(path: "/welcome", name: "welcome")
-@RouteHandler([HomeRouteProvider, "homeHandler"])
+@Handler([HomeRouteProvider, "homeHandler"])
 home() { }
 ```
 
@@ -281,7 +282,7 @@ it.
 ```text
 @Route(path: "/articles/{slug}", name: "articles.show")
 @Parameter(name: "slug", regex: Regex.SLUG)
-@RouteHandler([ArticleRouteProvider, "showHandler"])
+@Handler([ArticleRouteProvider, "showHandler"])
 show() { }
 ```
 
@@ -293,7 +294,7 @@ more than one segment places one marker per method parameter.
 
 ```text
 @Route(path: "/{year}/{month}", name: "archive.show")
-@RouteHandler([ArchiveRouteProvider, "showHandler"])
+@Handler([ArchiveRouteProvider, "showHandler"])
 show(
     @Parameter(name: "year", regex: Regex.NUM) year,
     @Parameter(name: "month", regex: Regex.NUM) month,
@@ -321,7 +322,7 @@ handler runs**, so the handler reads a typed value and never parses a string.
 ```text
 @Route(path: "/users/{id}", name: "users.show")
 @Parameter(name: "id", regex: Regex.ID, cast: new Cast(CastType.int))
-@RouteHandler([UserRouteProvider, "showHandler"])
+@Handler([UserRouteProvider, "showHandler"])
 show() { }
 ```
 
@@ -346,7 +347,7 @@ the default where the segment is absent.
 ```text
 @Route(path: "/articles/{page?}", name: "articles.list")
 @Parameter(name: "page", regex: Regex.NUM, isOptional: true, default: "1")
-@RouteHandler([ArticleRouteProvider, "listHandler"])
+@Handler([ArticleRouteProvider, "listHandler"])
 list() { }
 ```
 
@@ -510,7 +511,7 @@ Name the struct on the route, and the framework's own middleware enforces it.
 ```text
 @Route(path: "/users", name: "users.store", requestMethods: [RequestMethod.POST])
 @RequestStruct(CreateUserRequestStruct.username)
-@RouteHandler([UserRouteProvider, "storeHandler"])
+@Handler([UserRouteProvider, "storeHandler"])
 store() { }
 ```
 
@@ -544,7 +545,7 @@ struct UserResponseStruct implements ResponseStructContract {
 @Route(path: "/users/{id}", name: "users.show")
 @Parameter(name: "id", regex: Regex.ID)
 @ResponseStruct(UserResponseStruct.id)
-@RouteHandler([UserRouteProvider, "showHandler"])
+@Handler([UserRouteProvider, "showHandler"])
 show() { }
 ```
 
@@ -872,7 +873,7 @@ stage contracts the class implements.
 @Route(path: "/admin", name: "admin.dashboard")
 @Middleware(AuthMiddleware)
 @Middleware(AuditLogMiddleware)
-@RouteHandler([AdminRouteProvider, "dashboardHandler"])
+@Handler([AdminRouteProvider, "dashboardHandler"])
 dashboard() { }
 ```
 
@@ -886,7 +887,7 @@ what a route built as data uses.
     routeMatchedMiddleware: [AuthMiddleware],
     responseSentMiddleware: [AuditLogMiddleware],
 )
-@RouteHandler([AdminRouteProvider, "dashboardHandler"])
+@Handler([AdminRouteProvider, "dashboardHandler"])
 dashboard() { }
 ```
 
@@ -938,7 +939,7 @@ holds.
     name: "account.show",
     sendingResponseMiddleware: [NoCacheResponseMiddleware],
 )
-@RouteHandler([AccountRouteProvider, "accountHandler"])
+@Handler([AccountRouteProvider, "accountHandler"])
 account() { }
 ```
 
@@ -982,13 +983,13 @@ class AdminController {
 
     // The path is /admin/dashboard, and the name is admin.dashboard.
     @Route(path: "/dashboard", name: "dashboard")
-    @RouteHandler([AdminRouteProvider, "dashboardHandler"])
+    @Handler([AdminRouteProvider, "dashboardHandler"])
     dashboard() { }
 
     // The method modifier appends: /admin/reports/export.
     @Path("/export")
     @Route(path: "/reports", name: "admin.reports.export")
-    @RouteHandler([AdminRouteProvider, "exportHandler"])
+    @Handler([AdminRouteProvider, "exportHandler"])
     export() { }
 }
 ```
@@ -1001,7 +1002,7 @@ them. To serve one method only, name `requestMethods` on the declaration.
 @Patch
 @Route(path: "/users/{id}", name: "users.update")
 @Parameter(name: "id", regex: Regex.ID)
-@RouteHandler([UserRouteProvider, "updateHandler"])
+@Handler([UserRouteProvider, "updateHandler"])
 update() { }
 ```
 
@@ -1030,7 +1031,7 @@ class UserController {
 
     @UserRoute(path: "/{id}", name: "show")
     @Parameter(name: "id", regex: Regex.ID)
-    @RouteHandler([UserRouteProvider, "showHandler"])
+    @Handler([UserRouteProvider, "showHandler"])
     show() { }
 }
 ```

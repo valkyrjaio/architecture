@@ -109,7 +109,7 @@ class UserPurgeCommand {
     // Reached as `user:purge` and as `user:prune`.
     @Route(name: "user:purge", description: "Purge deleted users")
     @Route(name: "user:prune", description: "Purge deleted users")
-    @RouteHandler([AppCliRouteProvider, "userPurgeHandler"])
+    @Handler([AppCliRouteProvider, "userPurgeHandler"])
     run() { }
 }
 ```

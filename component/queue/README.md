@@ -37,7 +37,7 @@ reads each class a route provider lists.
 class OrderJobController {
 
     @Route(name: "charge-card", description: "Charge the card for an order")
-    @RouteHandler([self, "chargeCard"])
+    @Handler([self, "chargeCard"])
     static chargeCard(container, route) {
         job = container.getSingleton(JobContract)
 
@@ -56,8 +56,10 @@ class OrderJobController {
 | the middleware  | what runs around this job, per stage             |
 
 **The handler is named rather than taken from the method the marker sits on.**
-The marker records what to register, and `@RouteHandler` names the reference the
-route carries. A route that names none runs nothing and acknowledges the job.
+The marker records what to register, and `@Handler` names the reference the
+route carries. A route that names none is rejected where the routes are
+collected. It is never registered, so no job is taken off the queue and
+discarded unhandled.
 
 **The name is a plain string.** It is the key a consumer matches, so renaming a
 handler class does not strand a job already in the queue.
@@ -406,7 +408,7 @@ that job alone.
 
 ```text
 @Route(name: "charge-card", description: "Charge the card for an order")
-@RouteHandler([self, "chargeCard"])
+@Handler([self, "chargeCard"])
 @Middleware(name: RecordChargeAttemptMiddleware)
 static chargeCard(container, route) {
     // ...
