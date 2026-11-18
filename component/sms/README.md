@@ -217,10 +217,10 @@ own choice.
 Each gateway adapter carries the credentials that gateway needs, prefixed with
 the gateway's name. The Vonage adapter takes these:
 
-| Property       | Holds                 | Default |
-| -------------- | --------------------- | ------- |
-| `vonageKey`    | the gateway's api key | —       |
-| `vonageSecret` | the api secret        | —       |
+| Property       | Holds                 | Default       |
+| -------------- | --------------------- | ------------- |
+| `vonageKey`    | the gateway's api key | a placeholder |
+| `vonageSecret` | the api secret        | a placeholder |
 
 ```text
 class Config implements ConfigContract, SmsConfigContract, SmsVonageConfigContract {
@@ -230,6 +230,11 @@ class Config implements ConfigContract, SmsConfigContract, SmsVonageConfigContra
     vonageSecret = environment("VONAGE_SECRET")
 }
 ```
+
+Warning: both credentials carry a placeholder, and nothing raises at boot. A
+placeholder fails every send. `defaultMessenger` resolves to a gateway adapter,
+so an application that names no adapter reaches that adapter and needs its
+credentials set.
 
 A credential belongs in the environment rather than in the class. A port adds a
 subsection for each further gateway it ships.
