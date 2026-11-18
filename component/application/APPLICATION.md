@@ -230,7 +230,7 @@ Every port declares these on the application, with no addition and no omission:
 | Operation                  | Answers                                          |
 | -------------------------- | ------------------------------------------------ |
 | `getContainer`             | the container this application built             |
-| `getProviders`             | every component provider the config named        |
+| `getProviders`             | every component provider collected from the tree |
 | `getContainerProviders`    | the service providers collected from the tree    |
 | `getEventProviders`        | the listener providers collected from the tree   |
 | `getHttpProviders`         | the HTTP route providers collected from the tree |
