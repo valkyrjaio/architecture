@@ -574,6 +574,7 @@ assembling headers.
 | `TextResponse`     | plain text                | the text content type |
 | `HtmlResponse`     | markup                    | the html content type |
 | `JsonResponse`     | data, encoded             | the json content type |
+| `XmlResponse`      | xml                       | the xml content type  |
 | `RedirectResponse` | no body, and a target uri | a redirect status     |
 
 ```text
@@ -662,8 +663,10 @@ own value: a content type, a location, a referrer and a set-cookie.
 
 ### Build a response through the factory
 
-`ResponseFactoryContract` builds every kind behind one resolvable contract, so a
-service that returns a response does not name a response class.
+`ResponseFactoryContract` builds four kinds behind one resolvable contract:
+the base, the text, the json and the redirect kind. A service that returns one
+of those does not name a response class. The empty, the html and the xml kind
+have no builder, so a caller constructs those directly.
 
 | Method                   | Builds                   | Takes                               |
 | ------------------------ | ------------------------ | ----------------------------------- |
