@@ -214,6 +214,13 @@ A field name is `snake_case` on the wire, and each port maps it to its own
 casing internally. An absolute instant and a duration are both integer
 milliseconds, in a field suffixed `_ms`, and that value is authoritative.
 
+**A port may write a human-readable twin beside an instant, suffixed `_iso`.**
+Nothing reads the twin, so it is there for a person reading a queue. A port that
+writes one spells it `YYYY-MM-DDTHH:mm:ss.sssZ`: always UTC, always three
+fractional digits, and the `Z` suffix rather than a numeric offset. RFC 3339
+allows other spellings of one instant, so without a pinned spelling two ports
+write different bytes for one job.
+
 **No field holds a reference to a class, a type or a function.** A name is a
 string and a body is data, so a consumer in another language reads the same job.
 
