@@ -35,7 +35,7 @@ provider lists.
 @Service(service: "example.Greeter")
 class GreeterController {
 
-    @Method(name: "SayHello")
+    @Route(name: "SayHello")
     @Middleware(name: AppAuthMiddleware)
     sayHello(container, route) {
         call = container.getSingleton(ServiceCallContract)
@@ -50,7 +50,7 @@ class GreeterController {
 | Marker        | On       | States                                           |
 | ------------- | -------- | ------------------------------------------------ |
 | `@Service`    | a class  | the full service name, such as `example.Greeter` |
-| `@Method`     | a method | the remote method's name, and which side streams |
+| `@Route`      | a method | the remote method's name, and which side streams |
 | `@Middleware` | a method | one middleware class of this method              |
 
 `@Middleware` is repeatable, so a method may carry several.
@@ -142,7 +142,7 @@ inbound message first, so `getMessages` returns a fixed sequence, and the handle
 returns its own messages on the response.
 
 ```text
-@Method(name: "ListGreetings", serverStreaming: true)
+@Route(name: "ListGreetings", serverStreaming: true)
 listGreetings(container, route) {
     return ServiceResponse.ok().withMessages(container.getSingleton(GreetingRepository).all())
 }
@@ -153,7 +153,7 @@ calls the handler at once, `getMessages` yields each message as it arrives, and
 the handler replies through `send` rather than by returning its messages.
 
 ```text
-@Method(name: "Chat", clientStreaming: true, serverStreaming: true)
+@Route(name: "Chat", clientStreaming: true, serverStreaming: true)
 chat(container, route) {
     call = container.getSingleton(ServiceCallContract)
 
