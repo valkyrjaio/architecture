@@ -317,9 +317,9 @@ you override, and implementing nothing leaves every default in place.
 
 ### The component config
 
-| Property            | Holds                                        | Default                           |
-| ------------------- | -------------------------------------------- | --------------------------------- |
-| `defaultFilesystem` | the adapter `FilesystemContract` resolves to | the port's own local-disk adapter |
+| Property            | Holds                                        | Default                            |
+| ------------------- | -------------------------------------------- | ---------------------------------- |
+| `defaultFilesystem` | the adapter `FilesystemContract` resolves to | the port's own integration adapter |
 
 ### Changing the default adapter
 
@@ -380,18 +380,20 @@ class Config implements ConfigContract, FilesystemConfigContract, FilesystemLoca
 Each store adapter carries the settings that store needs, prefixed with the
 store's name.
 
-| Property    | Holds                                        | Default    |
-| ----------- | -------------------------------------------- | ---------- |
-| `s3Key`     | the credential that names the application    | none       |
-| `s3Secret`  | the credential that authorizes it            | none       |
-| `s3Region`  | where the bucket is                          | none       |
-| `s3Version` | which version of the service the client uses | the latest |
-| `s3Bucket`  | the bucket every path is written to          | none       |
-| `s3Prefix`  | what every path is prefixed with             | nothing    |
-| `s3Options` | the further settings the client takes        | nothing    |
+| Property    | Holds                                        | Default          |
+| ----------- | -------------------------------------------- | ---------------- |
+| `s3Key`     | the credential that names the application    | a placeholder    |
+| `s3Secret`  | the credential that authorizes it            | a placeholder    |
+| `s3Region`  | where the bucket is                          | one named region |
+| `s3Version` | which version of the service the client uses | the latest       |
+| `s3Bucket`  | the bucket every path is written to          | a placeholder    |
+| `s3Prefix`  | what every path is prefixed with             | nothing          |
+| `s3Options` | the further settings the client takes        | nothing          |
 
-The credentials, the region and the bucket have no default. The application sets
-each one, or the provider raises rather than binding a config nothing can use.
+Warning: the credentials, the region and the bucket all carry a default, and
+**the provider raises for none of them**. A placeholder credential fails every
+call, and so does a region the bucket does not live in. The application sets all
+four. A credential belongs in the environment rather than in the class.
 
 ```text
 class Config implements ConfigContract, FilesystemConfigContract, FilesystemS3ConfigContract {
