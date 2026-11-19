@@ -109,7 +109,7 @@ class UserPurgeCommand {
     // Reached as `user:purge` and as `user:prune`.
     @Route(name: "user:purge", description: "Purge deleted users")
     @Route(name: "user:prune", description: "Purge deleted users")
-    @RouteHandler([AppCliRouteProvider, "userPurgeHandler"])
+    @Handler([AppCliRouteProvider, "userPurgeHandler"])
     run() { }
 }
 ```
@@ -506,8 +506,11 @@ message = new Message(
 )
 ```
 
-The component ships a formatter for each message kind it ships, plus one for a
-highlighted run of text. Extend the base formatter for a style of your own.
+The component ships a formatter for four of the message kinds: the error, the
+question, the success and the warning. It ships one more for a highlighted run
+of text. Every other kind that holds its own text writes that text unstyled
+unless it is given a formatter. A kind that wraps another message keeps the
+wrapped message's style. Extend the base formatter for a style of your own.
 
 A writer handles one kind of message. It answers whether a message is its own,
 and it does the handling for the one it claims. Every output carries the
@@ -610,12 +613,14 @@ a pipeline.
 A run carries three independent flags, and the combination of them decides what
 reaches the person.
 
-| Level           | Means                                                 |
-| --------------- | ----------------------------------------------------- |
-| interactive     | questions are asked, and answers are read             |
-| non-interactive | questions are not asked, and a default answer is used |
-| quiet           | nothing is written for a successful run               |
-| silent          | nothing is written, ever                              |
+| Flag        | Set                                | Clear                                | Default |
+| ----------- | ---------------------------------- | ------------------------------------ | ------- |
+| silent      | no message is written              | the flags below decide               | clear   |
+| quiet       | a successful run writes no message | a successful run writes its messages | clear   |
+| interactive | a question reads an answer         | a question takes its default answer  | set     |
+
+Each row holds where no row above it applies, so silent beats the other two and
+quiet beats interactive.
 
 **Quiet keys on the outcome, not on the message kind.** A run that succeeds
 writes nothing at all, and a run that fails writes everything it would normally

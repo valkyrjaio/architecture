@@ -191,7 +191,10 @@ to a class, a type or a function in the publishing language.
 - **An absolute instant is epoch milliseconds**, in a field suffixed `_ms`, and
   that value is authoritative. A port may write a human-readable twin suffixed
   `_iso` beside it. Code never reads the twin, and the `_ms` value wins on any
-  disagreement.
+  disagreement. A twin is spelled `YYYY-MM-DDTHH:mm:ss.sssZ`: always UTC, always
+  three fractional digits, and the `Z` suffix rather than a numeric offset. RFC
+  3339 allows other spellings of one instant, so without a pinned spelling two
+  ports write different bytes for one job.
 - **A duration is integer milliseconds**, suffixed `_ms`, with no twin.
 - **Every field is always present.** There is no omit-when-default. An empty
   multi-map and an empty payload are written as empty rather than dropped, so

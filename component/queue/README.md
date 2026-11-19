@@ -37,7 +37,7 @@ reads each class a route provider lists.
 class OrderJobController {
 
     @Route(name: "charge-card", description: "Charge the card for an order")
-    @RouteHandler([self, "chargeCard"])
+    @Handler([self, "chargeCard"])
     static chargeCard(container, route) {
         job = container.getSingleton(JobContract)
 
@@ -56,8 +56,10 @@ class OrderJobController {
 | the middleware  | what runs around this job, per stage             |
 
 **The handler is named rather than taken from the method the marker sits on.**
-The marker records what to register, and `@RouteHandler` names the reference the
-route carries. A route that names none runs nothing and acknowledges the job.
+The marker records what to register, and `@Handler` names the reference the
+route carries. A route that names none is rejected where the routes are
+collected. It is never registered, so no job is taken off the queue and
+discarded unhandled.
 
 **The name is a plain string.** It is the key a consumer matches, so renaming a
 handler class does not strand a job already in the queue.
@@ -211,6 +213,13 @@ serialized form is a contract between the ports.
 A field name is `snake_case` on the wire, and each port maps it to its own
 casing internally. An absolute instant and a duration are both integer
 milliseconds, in a field suffixed `_ms`, and that value is authoritative.
+
+**A port may write a human-readable twin beside an instant, suffixed `_iso`.**
+Nothing reads the twin, so it is there for a person reading a queue. A port that
+writes one spells it `YYYY-MM-DDTHH:mm:ss.sssZ`: always UTC, always three
+fractional digits, and the `Z` suffix rather than a numeric offset. RFC 3339
+allows other spellings of one instant, so without a pinned spelling two ports
+write different bytes for one job.
 
 **No field holds a reference to a class, a type or a function.** A name is a
 string and a body is data, so a consumer in another language reads the same job.
@@ -406,7 +415,7 @@ that job alone.
 
 ```text
 @Route(name: "charge-card", description: "Charge the card for an order")
-@RouteHandler([self, "chargeCard"])
+@Handler([self, "chargeCard"])
 @Middleware(name: RecordChargeAttemptMiddleware)
 static chargeCard(container, route) {
     // ...

@@ -240,6 +240,11 @@ A **formatter** carries the style a message renders with. A **format** carries o
 attribute of a style. A message names the formatter it wants; it never writes an
 escape sequence itself.
 
+**The component ships a formatter for four of the kinds**: the error, the
+question, the success and the warning. It ships one more for a highlighted run
+of text. A kind that holds its own text and names no formatter writes that text
+unstyled. A kind that wraps another message keeps the wrapped message's style.
+
 ---
 
 ## The identity header
@@ -292,14 +297,18 @@ that wants a warning to fail returns a failing code itself.
 
 ## Interactivity
 
-A run has a level, and the level decides what reaches the person:
+A run carries three independent flags, and their combination is the level that
+decides what reaches the person:
 
-| Level           | Means                                                 |
-| --------------- | ----------------------------------------------------- |
-| interactive     | questions are asked, and answers are read             |
-| non-interactive | questions are not asked, and a default answer is used |
-| quiet           | nothing is written for a successful run               |
-| silent          | nothing is written, ever                              |
+| Flag        | Set                                | Clear                                | Default |
+| ----------- | ---------------------------------- | ------------------------------------ | ------- |
+| silent      | no message is written              | the flags below decide               | clear   |
+| quiet       | a successful run writes no message | a successful run writes its messages | clear   |
+| interactive | a question reads an answer         | a question takes its default answer  | set     |
+
+Each row holds where no row above it applies. Silent beats the other two, and
+quiet beats interactive, so a quiet run takes a question's default answer even
+where interactive is set.
 
 **Quiet keys on the outcome, not on the message kind.** A run that succeeds writes
 nothing at all, and a run that fails writes everything it would normally write. So
